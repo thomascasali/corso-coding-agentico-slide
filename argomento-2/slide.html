@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 2 · Git come rete di sicurezza · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+const B = 'Argomento 2 — Git come rete di sicurezza · ';
+
+const CODICE_STATUS = String.raw`$ git status
+On branch lavoro-a2
+Changes not staged for commit:
+        modified:   src/logica.js
+        modified:   cli.js
+Untracked files:
+        APPUNTI.md`;
+
+const CODICE_DIFF = String.raw`$ git diff src/formato.js
+@@ -3,3 +3,3 @@ const { etichetta } = require('./util');
+ 
+-const LARGHEZZA_ID = 8;
++const LARGHEZZA_ID = 10;
+ function riga(p) {`;
+
+const CODICE_COMMIT = String.raw`$ git add src/logica.js test/logica.test.js
+$ git diff --staged          # ultima lettura di quello che entra nel commit
+$ git commit -m "Elenco: filtro per laboratorio"
+$ git log --oneline -3`;
+
+const CODICE_RAMO = String.raw`$ git switch -c lavoro-filtro     # nuovo ramo, parte da dove sei
+  ... l'agente lavora, tu leggi e fai commit ...
+$ git switch main              # torni alla versione di partenza, intatta
+$ git branch                   # i rami che esistono`;
+
+const CODICE_PUNTI = String.raw`$ git tag                        # elenca i punti di partenza: partenza-a2, partenza-a5 ...
+$ git status                     # prima: niente modifiche da perdere?
+$ git switch -c lavoro-a2 partenza-a2
+$ git log --oneline              # i commit di questo punto di partenza`;
+
+const CODICE_REMOTE = String.raw`$ git remote -v
+(nessun output: il repository non ha un remote, quindi non si può fare push)`;
+
+const CODICE_PROGETTO = String.raw`$ cd progetto-mio
+$ git init -b main
+$ git config user.name "Nome a scelta"
+$ git config user.email "nome@demo.invalid"
+$ git add README.md .gitignore
+$ git commit -m "Primo commit: scheda del progetto"
+$ git remote -v                # deve restare vuoto`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="2" titolo="Git come rete di sicurezza"
+        sottotitolo="Leggere cosa ha fatto l'agente prima di accettarlo, e saper tornare indietro senza rovinare niente."
+        caso="Un episodio dal racconto: un subagente che, durante un test, ha fatto push sul repository vero."
+        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
+    ),
+    notes: "Apertura. Un agente modifica più file in pochi secondi e riassume a parole quello che ha fatto. Il riassunto non è una prova: git mostra le righe che sono cambiate davvero. L'argomento insegna due abilità: leggere il diff e tornare indietro. Chi usa git ogni giorno può saltare i comandi base, ma tutti fanno l'esercizio sul repository della palestra."
+  },
+  {
+    block: B + 'Perché git',
+    content: () => (
+      <div className="pad">
+        <Tag>Il motivo</Tag>
+        <h2>L'agente cambia più cose di quelle che racconta</h2>
+        <div className="grid">
+          <Card title="Cosa fa l'agente" kind="i">
+            <p>Legge, modifica diversi file, lancia comandi, riprova. Con una richiesta può toccare dieci file.</p>
+          </Card>
+          <Card title="Cosa riferisce" kind="w">
+            <p>Un riassunto di poche righe. Può essere incompleto, o dire «fatto» su una cosa fatta a metà.</p>
+          </Card>
+          <Card title="Cosa vi dà git">
+            <p>L'elenco esatto dei file cambiati, le righe prima e dopo, e un punto a cui tornare.</p>
+          </Card>
+        </div>
+        <Box type="info" title="Regola di lavoro">Prima di accettare un lavoro dell'agente si guarda lo stato del repository, non il suo riassunto. Una modifica che non è in un commit si può perdere; una già committata si recupera quasi sempre.</Box>
+      </div>
+    ),
+    notes: "Il punto è la differenza tra ciò che l'agente dice e ciò che c'è nei file. Git è lo strumento neutro che le confronta. La frase sul commit va detta con calma: un lavoro committato si recupera quasi sempre, uno solo sul disco no. Per questo, prima di ogni richiesta rischiosa, si salva con un commit."
+  },
+  {
+    block: B + 'Le tre zone',
+    content: () => (
+      <div className="pad">
+        <Tag>Come funziona</Tag>
+        <h2>Dove stanno le modifiche</h2>
+        <div role="group" aria-label="Le tre zone di git: cartella di lavoro, area di preparazione, repository">
+          <Flow nodes={[
+            ['Cartella di lavoro', 'i file come sono ora; l\'agente scrive qui', 'w'],
+            ['Area di preparazione', 'quello che entrerà nel prossimo commit (staging)', 'i'],
+            ['Repository', 'i commit: fotografie salvate dello stato dei file', ''],
+          ]} />
+        </div>
+        <DT cols={['Comando', 'Sposta', 'Perché']} rows={[
+          [<code className="nw">git add file</code>, 'dalla cartella all\'area di preparazione', 'scegliete voi cosa entra'],
+          [<code className="nw">git commit -m "..."</code>, 'dall\'area di preparazione al repository', 'crea il punto a cui tornare'],
+        ]} />
+      </div>
+    ),
+    notes: "Tre zone, due comandi. Un commit è una fotografia dei file tracciati, con un messaggio. L'area di preparazione serve a decidere cosa entra: l'agente potrebbe aver cambiato cinque file e voi ne volete committare due. Se la sala usa git ogni giorno, bastano trenta secondi su questa slide."
+  },
+  {
+    block: B + 'git status',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Primo sguardo: git status</h2>
+        <pre aria-label="Esempio di git status">{CODICE_STATUS}</pre>
+        <ul>
+          <li><code>modified</code>: il file esisteva ed è cambiato.</li>
+          <li><code>Untracked</code>: file nuovo che git non conosceva. Se non l'avete chiesto voi, chiedetevi perché c'è.</li>
+          <li>Sapere quali file sono cambiati è già metà del controllo.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato. Mostrare sempre prima git status e poi git diff. La domanda da fare ai partecipanti: tra questi file, quali mi aspettavo? Un file in più, o uno che non c'entra con la richiesta, è il primo campanello. L'output è in inglese perché è quello che stampa git; se un PC lo mostra in italiano cambiano le parole, non il senso."
+  },
+  {
+    block: B + 'git diff',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Poi le righe: git diff</h2>
+        <pre aria-label="Esempio di git diff">{CODICE_DIFF}</pre>
+        <ul>
+          <li>Riga con <code>-</code>: tolta. Riga con <code>+</code>: aggiunta. Le righe senza segno sono contesto.</li>
+          <li><code>@@ ... @@</code> dice dove siamo nel file; un blocco di modifiche si chiama «hunk».</li>
+          <li>Non serve capire tutto: serve chiedersi se ogni riga cambiata ha a che fare con la richiesta.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato. Insistere su una domanda sola per ogni blocco: questa modifica serve a quello che ho chiesto? Se no, è una modifica non richiesta e si annulla. Un diff con un solo numero cambiato è facile da non vedere in un riassunto e facile da vedere qui."
+  },
+  {
+    block: B + 'Le varianti di diff',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Quattro modi di chiedere «cosa è cambiato»</h2>
+        <DT cols={['Comando', 'Confronta', 'Quando']} rows={[
+          [<code className="nw">git diff</code>, 'cartella di lavoro e area di preparazione', 'subito dopo che l\'agente ha lavorato'],
+          [<code className="nw">git diff --staged</code>, 'area di preparazione e ultimo commit', 'prima di fare il commit'],
+          [<code className="nw">git diff main</code>, 'cartella di lavoro e il ramo main', 'quanto ho cambiato dalla partenza'],
+          [<code className="nw">git diff --stat</code>, 'riepilogo per file, senza le righe', 'colpo d\'occhio prima del dettaglio'],
+        ]} />
+        <Box type="warn" title="File nuovi">Un file mai aggiunto a git non compare in <code>git diff</code>: lo trovate con <code>git status</code>.</Box>
+      </div>
+    ),
+    notes: "Le opzioni si combinano (git diff main --stat). Il caso dei file nuovi fa cadere chi si fida solo di git diff: git status li elenca tra gli Untracked. Documentazione: https://git-scm.com/docs/git-diff e https://git-scm.com/docs/git-status."
+  },
+  {
+    block: B + 'Il test verde non basta',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>«I test passano» non vuol dire «ha fatto solo quello che chiedevo»</h2>
+        <div className="grid">
+          <Card title="Cosa vede un test" kind="i"><p>Solo i casi per cui qualcuno lo ha scritto. Il resto del codice può cambiare senza che nulla diventi rosso.</p></Card>
+          <Card title="Cosa vede il diff" kind="i"><p>Ogni riga cambiata, anche quelle senza test.</p></Card>
+          <Card title="Cosa può fare l'agente" kind="w"><p>Adattare i test alle sue modifiche: allora sono verdi per costruzione.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 12 }}>Servono tutti e due i controlli. Nell'esercizio di questo argomento i test sono verdi e ci sono comunque modifiche da annullare.</p>
+      </div>
+    ),
+    notes: "Anticipa l'argomento 5 (test) senza svolgerlo. Passa un messaggio solo: il diff controlla cose che i test non coprono, e i test cambiati dall'agente si leggono come qualunque altra modifica. Nell'esercizio non anticipare cosa c'è da trovare."
+  },
+  {
+    block: B + 'Commit piccoli',
+    content: () => (
+      <div className="pad">
+        <Tag>Salvare</Tag>
+        <h2>Commit piccoli, con i nomi dei file</h2>
+        <pre aria-label="Esempio di commit">{CODICE_COMMIT}</pre>
+        <ul>
+          <li>Un commit per un passo che avete verificato: se il passo dopo va male, tornate lì.</li>
+          <li>I file si aggiungono per nome. <code>git add .</code> e <code>git add -A</code> portano dentro anche quello che non avete guardato.</li>
+          <li>Il messaggio dice cosa è cambiato, in una riga.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Il commit per percorsi espliciti è la stessa disciplina del caso di studio dell'argomento 11. git diff --staged è l'ultima lettura prima di committare. Messaggi: «Elenco: filtro per laboratorio» è meglio di «modifiche». Se l'agente committa da solo, leggere i suoi messaggi e confrontarli con i file. Documentazione: https://git-scm.com/docs/git-commit."
+  },
+  {
+    block: B + 'Il ramo di lavoro',
+    content: () => (
+      <div className="pad">
+        <Tag>Salvare</Tag>
+        <h2>Un ramo per ogni lavoro</h2>
+        <pre aria-label="Creare un ramo di lavoro">{CODICE_RAMO}</pre>
+        <p>Un ramo è una linea di commit separata. Su <code>lavoro-filtro</code> l'agente può sbagliare quanto vuole: <code>main</code> resta com'era.</p>
+        <Box type="tip" title="Abitudine">Prima di dare un lavoro all'agente: <code>git status</code> pulito, ramo nuovo, un commit di partenza. Se il risultato non vi piace tornate a <code>main</code> e il ramo si abbandona.</Box>
+      </div>
+    ),
+    notes: "git switch è il comando per cambiare ramo (git checkout fa lo stesso ma ha troppi usi). L'opzione -c crea il ramo. Non si cancellano rami che non sono vostri. Documentazione: https://git-scm.com/docs/git-switch."
+  },
+  {
+    block: B + 'Tornare indietro',
+    content: () => (
+      <div className="pad">
+        <Tag>Tornare indietro</Tag>
+        <h2>Strumenti diversi per situazioni diverse</h2>
+        <DT cols={['Situazione', 'Comando', 'Cosa succede']} rows={[
+          ['Modifica non committata, su un file', <code className="nw">git restore file</code>, 'il file torna come nell\'ultimo commit'],
+          ['Voglio il file com\'era in un altro punto', <code className="nw">git restore --source=main file</code>, 'il file torna come nel ramo main'],
+          ['Voglio guardare un altro stato senza perdere nulla', <code className="nw">git switch ramo</code>, 'cambiate ramo, i commit restano'],
+          ['Un commit già fatto è sbagliato', <code className="nw">git revert ID</code>, 'nuovo commit che annulla quello vecchio'],
+        ]} />
+        <Box type="warn" title="Anche restore cancella">Le modifiche non committate di quel file spariscono. Leggete prima il <code>git diff</code> e nominate sempre il file: mai un punto per «tutto».</Box>
+      </div>
+    ),
+    notes: "Comandi verificati con git 2.39. git restore e git switch esistono da git 2.23. revert non riscrive la storia: aggiunge un commit che fa l'operazione inversa, quindi è sicuro anche se il commit è stato condiviso. Per annullare solo una parte di un file: git restore -p --source=main file, che chiede blocco per blocco (y per annullare, n per tenere). Documentazione: https://git-scm.com/docs/git-restore e https://git-scm.com/docs/git-revert."
+  },
+  {
+    block: B + 'Cosa non si usa in aula',
+    content: () => (
+      <div className="pad">
+        <Tag>Tornare indietro</Tag>
+        <h2>Due comandi che in aula non si usano</h2>
+        <div className="grid">
+          <Card title="git reset --hard" kind="d"><p>Riporta tutto allo stato di un commit e butta le modifiche non salvate di tutti i file. Non si recuperano.</p></Card>
+          <Card title="git stash" kind="d"><p>Mette da parte tutte le modifiche non salvate, anche quelle che non sono vostre. Poi qualcuno deve ricordarsi di riprenderle.</p></Card>
+        </div>
+        <Box type="danger" title="Il principio dell'argomento 11">Niente operazioni distruttive sul lavoro condiviso. Se la cartella contiene lavoro che non avete creato voi, questi comandi lo toccano senza chiedere. Vale anche per <code>git clean -fd</code>.</Box>
+        <p className="muted">Al loro posto: un ramo nuovo, <code>git restore</code> su un file nominato, <code>git revert</code> su un commit.</p>
+      </div>
+    ),
+    notes: "Non sono comandi vietati in assoluto: il divieto vale in aula e sul lavoro condiviso, dove nessuno sa cosa c'è di non salvato. Vale anche per l'agente: se la richiesta dice «ripulisci» o «torna come prima», può proporre reset --hard; il permesso si nega (argomento 1) e si chiede un git revert o un git restore su file nominati. Documentazione: https://git-scm.com/docs/git-reset e https://git-scm.com/docs/git-stash."
+  },
+  {
+    block: B + 'I punti di partenza',
+    content: () => (
+      <div className="pad">
+        <Tag>La palestra</Tag>
+        <h2>Ripartire da uno stato noto</h2>
+        <pre aria-label="Punti di partenza della palestra">{CODICE_PUNTI}</pre>
+        <ul>
+          <li>Un tag è un nome fisso dato a un commit: <code>partenza-a2</code> è il punto di partenza di questo esercizio.</li>
+          <li><code>-c</code> crea il ramo <code>lavoro-a2</code> (il nome è a scelta); il tag non si sposta.</li>
+          <li>Se un esercizio viene male, si riparte con un altro nome di ramo. Il lavoro vecchio resta dov'è.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Tutti gli esercizi della palestra seguono lo stesso schema, con tag partenza-aN. Il PC è preparato prima e non ha remote. Senza -c, git switch su un tag lascia in «detached HEAD», dove i commit non appartengono a nessun ramo: da evitare. Documentazione: https://git-scm.com/docs/git-tag."
+  },
+  {
+    block: B + 'Un episodio dal racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal racconto</Tag>
+        <h2>Il subagente che ha fatto push sul repository vero</h2>
+        <div className="grid">
+          <Card title="Cos'è successo" kind="w"><p>Durante un test, un subagente ha fatto push sul repository vero invece che su una copia.</p></Card>
+          <Card title="Cosa ne è nato" kind="i"><p>Una regola nel gruppo di agenti: i test che toccano git girano in una sandbox git, obbligatoria.</p></Card>
+        </div>
+        <pre aria-label="Controllo del remote">{CODICE_REMOTE}</pre>
+        <p className="muted">I repository di esercizio del corso sono fatti così: copia nuova, nessun remote, nessun push possibile.</p>
+      </div>
+    ),
+    notes: "Episodio dal racconto di Thomas; i dettagli (quale progetto, quale test) si raccontano a voce. Per il corso conta questo: un comando git eseguito da un agente ha effetti fuori dalla cartella solo se esiste un remote. Per questo esercizi e progetti personali non ne hanno. Invitare i partecipanti a controllare con git remote -v sul proprio repository."
+  },
+  {
+    block: B + 'Git nel CLAUDE.md',
+    content: () => (
+      <div className="pad">
+        <Tag>Dire all'agente come usare git</Tag>
+        <h2>Le regole sull'uso di git vanno scritte</h2>
+        <ul>
+          <li>Prima di una modifica ampia: commit di partenza e ramo nuovo.</li>
+          <li>Commit con i file per nome, mai «aggiungi tutto».</li>
+          <li>Niente <code>git push</code>, <code>git reset --hard</code>, <code>git stash</code>, <code>git clean</code> senza chiedere.</li>
+          <li>Per annullare: <code>git restore</code> su un file nominato, o <code>git revert</code>.</li>
+          <li>A fine lavoro: elenco dei file cambiati, da confrontare con <code>git status</code>.</li>
+        </ul>
+        <ActivityBadge n="2" file="promemoria-git.html" label="Promemoria dei comandi git per l'agente" durata="da tenere accanto all'esercizio" />
+        <p className="muted" style={{ marginTop: 10 }}>Come si scrive un file di istruzioni di progetto: argomento 4.</p>
+      </div>
+    ),
+    notes: "Il foglio è un promemoria da adattare nel file di istruzioni del progetto. Non è una garanzia: un'istruzione scritta può essere ignorata, per questo il permesso resta su «chiedi conferma» (argomento 1). Il controllo vero è leggere il diff."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Trovate le modifiche non richieste</h2>
+        <p>Un agente ha aggiunto il filtro per laboratorio all'elenco delle prenotazioni, come richiesto. Ha fatto anche altro. I test passano.</p>
+        <ol className="timeline">
+          <li><time>1</time>Partite da <code>partenza-a2</code> con un ramo vostro e lanciate i test.</li>
+          <li><time>2</time>Con <code>git show --stat</code> e <code>git diff</code> elencate cosa è cambiato e dividetelo in «richiesto» e «non richiesto».</li>
+          <li><time>3</time>Annullate le modifiche non richieste una per una, un commit ciascuna, senza toccare il filtro.</li>
+          <li><time>4</time>Confrontate con <code>main</code>: devono restare solo le righe del filtro. Poi confrontate l'elenco con quello di un collega.</li>
+        </ol>
+        <ActivityBadge n="2" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" durata="indicativo: 25 min" />
+      </div>
+    ),
+    notes: "Il foglio guida i passi senza dire cosa c'è da trovare. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
+  },
+  {
+    block: B + 'Sul vostro progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il progetto personale</Tag>
+        <h2>La cartella del progetto è un repository</h2>
+        <pre aria-label="Creare il repository del progetto">{CODICE_PROGETTO}</pre>
+        <p className="muted">Nome ed email restano solo in questo repository, sul PC della scuola. Non si collega nessun remote.</p>
+      </div>
+    ),
+    notes: "Tappa del progetto: cartella creata e primo commit. Stessa disciplina dell'esercizio: ramo di lavoro per ogni modifica ampia, git diff prima di accettare. Il file .gitignore tiene fuori dal repository i file generati e qualsiasi cosa che somigli a un segreto. Documentazione: https://git-scm.com/docs/git-init."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>L'agente scrive: «Ho annullato le modifiche non richieste»</h2>
+        <Quiz domanda="Cosa fate prima di crederci?" opzioni={[
+          { t: 'Lancio i test: se passano, è tutto a posto', ok: false, perche: 'I test verdi non dicono nulla sulle modifiche che nessun test copre, né sul fatto che il filtro sia ancora lì.' },
+          { t: 'Guardo git status e git diff main', ok: true, perche: 'Mostrano file e righe diversi dalla partenza. È l\'unico controllo che non dipende dal racconto dell\'agente.' },
+          { t: 'Chiedo all\'agente di ripetere che ha ripulito tutto', ok: false, perche: 'Lo stesso riassunto ripetuto non è una verifica.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione, non il testo dell'esercizio. Si può discutere cosa cambia se l'agente avesse usato git reset --hard: avrebbe cancellato anche il filtro richiesto."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Il riassunto dell\'agente non è una prova: si leggono git status e git diff.',
+          'Ramo e commit di partenza prima di ogni lavoro ampio; commit piccoli, con i file per nome.',
+          'Si torna indietro con git restore su file nominati, git switch e git revert. Non con reset --hard né stash sul lavoro che non è vostro.',
+          'Il repository di esercizio non ha remote: un push per sbaglio non è possibile.',
+        ]}
+        dopo="argomento 3 (dalla richiesta vaga ai requisiti) e argomento 5 (test e debugging con l'agente), dove un commit per passo diventa il modo di lavorare." />
+    ),
+    notes: "Chiusura. Riprendere i tre gesti: leggere, salvare, tornare indietro. Collegamenti: nell'argomento 3 si lavora per passi verificabili, nell'argomento 5 i checkpoint con git servono quando un test fallisce."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

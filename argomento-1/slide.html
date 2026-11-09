@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 1 · Dal chatbot all'agente · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 1 — Dal chatbot all\'agente · ';
+
+/* Riga di fonte con data: ogni affermazione su Claude Code porta la data di consultazione. */
+const Fonte = ({ href, children }) => (
+  <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>{children}</a>, documentazione di Claude Code, consultata a novembre 2026.</p>
+);
+
+const PROMPT = String.raw`Bash command
+  node --test
+  Esegue i test del progetto
+
+  1. Yes
+  2. Yes, and don't ask again for: node --test
+  3. No`;
+
+/* ---------- simulazione del ciclo (propria dell'argomento) ---------- */
+/* Passi inventati ma plausibili sulla palestra. Non e' l'output di un modello vero: serve a vedere il ciclo e a decidere. */
+const PASSI = [
+  { fase: 'Osserva', tool: 'Read', arg: 'cli.js', chiede: false,
+    cosa: 'Legge il file della riga di comando.', esito: 'Vede che il comando elenco accetta già --data, --docente e --tutte.' },
+  { fase: 'Osserva', tool: 'Read', arg: 'src/logica.js', chiede: false,
+    cosa: 'Legge le regole di prenotazione.', esito: 'Trova la funzione che filtra le prenotazioni.' },
+  { fase: 'Pianifica', tool: 'Piano', arg: '', chiede: false,
+    cosa: 'Decide i passi, senza toccare nulla.', esito: 'Nuova opzione --lab, filtro in logica.js, un test.' },
+  { fase: 'Agisce', tool: 'Edit', arg: 'src/logica.js', chiede: true,
+    cosa: 'Vuole modificare questo file.', esito: 'Aggiunto il filtro per laboratorio.' },
+  { fase: 'Agisce', tool: 'Edit', arg: 'cli.js', chiede: true,
+    cosa: 'Vuole modificare questo file.', esito: 'Aggiunta l\'opzione --lab.' },
+  { fase: 'Verifica', tool: 'Bash', arg: 'node --test', chiede: true,
+    cosa: 'Vuole eseguire questo comando.', esito: 'I test passano.' },
+  { fase: 'Verifica', tool: 'Bash', arg: 'node cli.js elenco --lab LAB-INF1', chiede: true,
+    cosa: 'Vuole eseguire questo comando.', esito: 'Nell\'elenco compaiono solo le prenotazioni di LAB-INF1.',
+    esitoSeRifiutate: 'L\'opzione --lab non esiste: il comando dà errore o la ignora.' },
+];
+const FASE_COLORE = { Osserva: 'var(--info)', Pianifica: 'var(--accent-2)', Agisce: 'var(--accent)', Verifica: 'var(--text)' };
+
+function CicloSim() {
+  const [i, setI] = useState(0);
+  const [log, setLog] = useState([]);
+  const fine = i >= PASSI.length;
+  const p = PASSI[i];
+  const rifiutate = log.filter(x => x.esito === 'no').length;
+  const modificheRifiutate = log.some(x => x.esito === 'no' && x.p.tool === 'Edit');
+  const vai = esito => { setLog(l => [...l, { p, esito, modificheRifiutate }]); setI(n => n + 1); };
+  const ricomincia = () => { setI(0); setLog([]); };
+  const testo = x => {
+    if (x.esito === 'no') return 'Rifiutato da te: non eseguito. L\'agente lo riferisce e aspetta.';
+    if (x.p.esitoSeRifiutate && x.modificheRifiutate) return x.p.esitoSeRifiutate;
+    return x.p.esito;
+  };
+  return (
+    <div className="cols" style={{ gridTemplateColumns: '0.9fr 1.3fr' }}>
+      <div>
+        <div className="card i">
+          <h4>{fine ? 'Fine del giro' : 'Prossima azione · ' + p.fase}</h4>
+          {!fine && <>
+            <p><strong>{p.cosa}</strong></p>
+            <p><code>{p.arg ? p.tool + ' ' + p.arg : p.tool}</code></p>
+            {p.chiede ? (
+              <div role="group" aria-label="La tua decisione" style={{ display: 'grid', gap: 8 }}>
+                <button className="opt" onClick={() => vai('ok')}><span className="lt">&#10003;</span><span>Approva</span></button>
+                <button className="opt" onClick={() => vai('no')}><span className="lt">&#10007;</span><span>Rifiuta</span></button>
+              </div>
+            ) : (
+              <button className="opt" onClick={() => vai('auto')}><span className="lt">&rarr;</span><span>Avanti (non chiede)</span></button>
+            )}
+          </>}
+          {fine && <>
+            <p>{rifiutate === 0
+              ? 'Hai approvato tutto: ora il riassunto dell\'agente va letto con il diff in mano.'
+              : 'Hai rifiutato ' + rifiutate + (rifiutate === 1 ? ' azione' : ' azioni') + ': il riassunto finale deve dirlo. Se dice «fatto tutto», non è vero.'}</p>
+            <button className="opt" onClick={ricomincia}><span className="lt">&#8634;</span><span>Ricomincia</span></button>
+          </>}
+        </div>
+      </div>
+      <div>
+        <div className="rowlabel">Traccia delle azioni</div>
+        <ol className="steps" aria-live="polite" style={{ minHeight: 200 }}>
+          {log.length === 0 && <li className="i">Ancora nessuna azione: l'agente aspetta il primo passo.</li>}
+          {log.map((x, k) => (
+            <li key={k} className={x.esito === 'no' ? 'w' : ''}>
+              <b style={{ color: FASE_COLORE[x.p.fase] }}>{x.p.fase}</b> · <code>{x.p.tool}{x.p.arg ? ' ' + x.p.arg : ''}</code> — {testo(x)}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="1" titolo="Dal chatbot all'agente"
+        sottotitolo="Ciclo, contesto e permessi: che cosa fa un agente di programmazione, che cosa vede e che cosa gli lasciamo fare."
+        caso="Il caso: un gruppo di dieci agenti che per mesi sembrava funzionare."
+        prima="nessun argomento: si può partire da qui." />
+    ),
+    notes: "Si parte da una domanda: che differenza c'è tra chiedere codice a un chatbot e dare un compito a un agente nel repository? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente lo sceglie il router del laboratorio: il metodo vale comunque."
+  },
+  {
+    block: B + 'Tre strumenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Chatbot, completamento, agente</Tag>
+        <h2>Tre cose diverse</h2>
+        <DT cols={['', 'Chatbot', 'Completamento nell\'editor', 'Agente']} rows={[
+          ['Cosa vede', 'Solo quello che scrivi, incolli o allegi', 'Il file aperto e i dintorni', 'Il progetto: cerca e legge i file da solo'],
+          ['Cosa produce', 'Testo da leggere e da copiare', 'La riga o il blocco successivo', 'Modifiche a più file e comandi eseguiti'],
+          ['Chi controlla', 'Tu, incollando e provando', 'Tu, mentre scrivi', 'Anche l\'agente (test, errori); la prova finale resta tua'],
+        ]} />
+        <p className="muted">I confini si sfumano: molti chatbot oggi hanno strumenti. Conta che cosa il programma intorno al modello gli permette di fare.</p>
+      </div>
+    ),
+    notes: "Tre colonne, tre ruoli. Il chatbot lavora su ciò che gli porti. Il completamento è dentro l'editor e propone il pezzo successivo. L'agente ha accesso al progetto e a un terminale. La domanda utile non è quale sia più intelligente, ma chi decide quali file entrano nel contesto e chi esegue le prove. Precisare che le categorie sono didattiche: gli strumenti reali le mescolano."
+  },
+  {
+    block: B + 'La stessa richiesta',
+    content: () => (
+      <div className="pad">
+        <Tag>Chatbot, completamento, agente</Tag>
+        <h2>La stessa richiesta, tre esiti</h2>
+        <p>«Aggiungi all'elenco delle prenotazioni un filtro per laboratorio.»</p>
+        <div className="grid">
+          <Card title="Chatbot"><p>Ti scrive una funzione. Non ha visto <code>cli.js</code>: nomi e struttura sono ipotesi da adattare a mano.</p></Card>
+          <Card title="Completamento" kind="i"><p>Suggerisce righe mentre scrivi nel file giusto. Quale file e quali passi li scegli tu.</p></Card>
+          <Card title="Agente" kind="w"><p>Legge <code>cli.js</code> e <code>logica.js</code>, modifica, lancia i test, legge gli errori. Tu leggi il diff.</p></Card>
+        </div>
+        <Box type="info" title="Nell'attività">Più avanti l'agente descrive la palestra: voi controllate se ha ragione.</Box>
+      </div>
+    ),
+    notes: "Esempio sulla palestra, l'app comune del corso. Nell'incontro la demo mette fianco a fianco chatbot e agente sullo stesso repository. Qui basta far notare dove sta il lavoro di adattamento: nel chatbot è tuo, nell'agente passa in parte allo strumento, ma la responsabilità di quello che entra nel repository resta di chi guida."
+  },
+  {
+    block: B + 'Che cos\'è un agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Il ciclo</Tag>
+        <h2>Modello + strumenti + ciclo</h2>
+        <div className="cols">
+          <Card title="Il modello"><p>Ragiona sul compito e decide la mossa successiva. Da solo può solo rispondere con del testo.</p></Card>
+          <Card title="Gli strumenti" kind="i">
+            <ul>
+              <li>File: leggere, modificare, creare</li>
+              <li>Ricerca: per nome e per contenuto</li>
+              <li>Esecuzione: comandi, test, git</li>
+              <li>Web: pagine e documentazione</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). Ogni risultato di uno strumento rientra nel ciclo e guida la mossa dopo.</Box>
+        <Box type="tip" title="In aula">Il modello dietro l'agente lo sceglie il router del laboratorio. Ciclo, contesto e permessi funzionano allo stesso modo.</Box>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Agente come somma di tre pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. Il modello usato in aula lo sceglie il router; non affermare quale sia."
+  },
+  {
+    block: B + 'Il ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il ciclo</Tag>
+        <h2>Il ciclo dell'agente</h2>
+        <div role="group" aria-label="Il ciclo: osserva, pianifica, agisce, verifica, poi si ripete">
+          <Flow nodes={[
+            ['1 Osserva', 'legge file, cerca, guarda l\'output dei comandi'],
+            ['2 Pianifica', 'decide la mossa successiva'],
+            ['3 Agisce', 'modifica un file o esegue un comando', 'w'],
+            ['4 Verifica', 'lancia i test, legge gli errori', 'i'],
+          ]} />
+          <p className="join" aria-hidden="true">&#8634; se qualcosa non torna, si riparte dal punto 1</p>
+        </div>
+        <p className="muted">La documentazione ufficiale lo racconta in tre fasi (raccogliere contesto, agire, verificare); qui separiamo il piano per vederlo meglio. Puoi interromperlo in ogni punto con <code>Esc</code>.</p>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Il ciclo è il cuore dell'argomento. Esempio dalla documentazione: «correggi i test che falliscono» diventa eseguire i test, leggere l'errore, cercare i file, leggerli, modificare, rieseguire. Ogni passo informa il successivo. Quello che distingue un agente da uno script è che la mossa dopo dipende da ciò che è appena successo. La persona è nel ciclo: può fermare con Esc e correggere la rotta."
+  },
+  {
+    block: B + 'Simulazione del ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Simulazione</Tag>
+        <h2>Un giro del ciclo, con le tue decisioni</h2>
+        <CicloSim />
+        <p className="muted">Simulazione didattica sulla palestra: non è l'output di un modello vero.</p>
+      </div>
+    ),
+    notes: "Si può fare in plenaria: la classe decide per ogni richiesta. La lettura è automatica, la modifica e i comandi chiedono. Provare almeno una volta a rifiutare una modifica: nella traccia il passo successivo cambia, e il riassunto finale deve tenerne conto. È il primo assaggio dell'idea che un riassunto va confrontato con la traccia. Non è una registrazione di un modello reale."
+  },
+  {
+    block: B + 'Cosa vede l\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>Cosa vede, cosa non vede</h2>
+        <div className="cols">
+          <Card title="Vede">
+            <ul>
+              <li>I file che legge o che gli indichi</li>
+              <li>L'output dei comandi che esegue</li>
+              <li>Le istruzioni di progetto (<code>CLAUDE.md</code>, oppure <code>AGENTS.md</code>)</li>
+              <li>La conversazione e lo stato di git</li>
+            </ul>
+          </Card>
+          <Card title="Non vede" kind="w">
+            <ul>
+              <li>I file che non ha letto</li>
+              <li>Ciò che hai in mente e non hai scritto</li>
+              <li>Le sessioni precedenti: ognuna parte da zero</li>
+              <li>Ciò che sta fuori dal terminale</li>
+            </ul>
+          </Card>
+        </div>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Il contesto è tutto ciò che il modello ha davanti quando decide. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 4. Sottolineare la colonna di destra: gran parte degli errori degli agenti viene da qualcosa che non vedevano."
+  },
+  {
+    block: B + 'Il contesto può mentire',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>Un'istruzione sbagliata diventa un fatto</h2>
+        <div className="cols">
+          <Card title="Cosa succede" kind="w">
+            <p>Un file di istruzioni dice di lanciare <code>npm run test:all</code>, ma lo script non esiste. L'agente si fida: tenta, legge l'errore, improvvisa. A volte inventa lo script.</p>
+          </Card>
+          <Card title="Cosa fai tu">
+            <ul>
+              <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>git status</code></li>
+              <li>Tieni le istruzioni corte e vere (argomento 4)</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="warn" title="Regola">Per l'agente il testo che legge è un fatto, finché qualcosa non lo smentisce. La verifica è di chi guida.</Box>
+      </div>
+    ),
+    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nell'attività al PC i partecipanti controllano a mano ciò che l'agente dice di aver capito: è la stessa abitudine, applicata."
+  },
+  {
+    block: B + 'Cosa riempie il contesto',
+    content: () => (
+      <div className="pad">
+        <Tag>Finestra di contesto</Tag>
+        <h2>La finestra di contesto si riempie</h2>
+        <DT cols={['Cosa entra', 'Quando', 'Come cresce']} rows={[
+          ['Istruzioni di progetto e memoria', 'All\'avvio', 'Fisso, sempre presente'],
+          ['File letti', 'A ogni lettura', 'Con la dimensione del file'],
+          ['Output dei comandi', 'A ogni comando', 'Un test che stampa molto pesa quanto un file'],
+          ['Conversazione', 'A ogni messaggio', 'A ogni giro del ciclo'],
+        ]} />
+        <Box type="info" title="Finestra di contesto">È la quantità massima di testo (misurata in <em>token</em>, pezzi di parola) che il modello può avere davanti insieme. Oltre il limite non entra altro, e ogni messaggio costa in token (argomento 10).</Box>
+        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
+      </div>
+    ),
+    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 10 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello del router."
+  },
+  {
+    block: B + 'Quando è piena',
+    content: () => (
+      <div className="pad">
+        <Tag>Finestra di contesto</Tag>
+        <h2>Quando il contesto è pieno</h2>
+        <p>Claude Code <strong>compatta</strong> la conversazione in un riassunto. Le richieste e i pezzi di codice chiave restano; i dettagli delle istruzioni date all'inizio possono perdersi.</p>
+        <DT cols={['Comando', 'Che cosa fa']} rows={[
+          [<code>/context</code>, 'Mostra cosa occupa spazio, per categoria'],
+          [<code>/compact</code>, 'Compatta ora; si può dire su cosa concentrarsi'],
+          [<code>/clear</code>, 'Svuota: conviene tra compiti non collegati'],
+        ]} />
+        <Box type="warn" title="Regola">Ciò che deve valere sempre sta nel file di istruzioni di progetto, non nella conversazione: dopo la compattazione viene ricaricato dal disco.</Box>
+        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
+      </div>
+    ),
+    notes: "Secondo la documentazione (novembre 2026) la compattazione è automatica e si può anche chiedere a mano con /compact, eventualmente con un'indicazione su cosa tenere. /context mostra l'occupazione reale. /clear tra compiti diversi: la conversazione vecchia ruba posto e costa token a ogni messaggio. Le istruzioni di progetto vengono ricaricate dal disco dopo la compattazione. Altri dettagli (cosa viene ricaricato) sono nella pagina context-window."
+  },
+  {
+    block: B + 'Domanda 1',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="L'agente conclude: «Ho eseguito i test, passano tutti». Che cosa lo dimostra davvero?" opzioni={[
+          { t: 'La frase stessa, scritta con sicurezza', ok: false, perche: 'È un racconto del modello, non una prova.' },
+          { t: 'Nella traccia, una chiamata che esegue i test con il loro output', ok: true, perche: 'La traccia delle chiamate agli strumenti è ciò che è accaduto davvero. Si legge, o si rilancia il comando.' },
+          { t: 'Il fatto che il codice sembri corretto', ok: false, perche: 'Un codice può sembrare giusto ed essere sbagliato: l\'impressione non sostituisce la prova.' },
+        ]} />
+      </div>
+    ),
+    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Poi, quando il lavoro è su git, nel diff (argomento 2)."
+  },
+  {
+    block: B + 'Permessi',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Che cosa chiede prima di agire</h2>
+        <DT cols={['Tipo di azione', 'Esempio', 'In modalità Manual']} rows={[
+          ['Lettura', 'Read, ricerca nei file', 'Non chiede, dentro la cartella di lavoro'],
+          ['Comandi di shell', 'Bash', 'Chiede, salvo un piccolo insieme di comandi di sola lettura'],
+          ['Modifica di file', 'Edit, Write', 'Chiede'],
+          ['Web', 'Pagine e ricerche', 'Chiede (salvo domini di documentazione già approvati)'],
+        ]} />
+        <Box type="warn" title="«Yes, and don't ask again»">Per i comandi Bash vale <strong>per sempre</strong> in quel repository e per quel comando. Per le modifiche ai file, fino a fine sessione.</Box>
+        <Fonte href="https://code.claude.com/docs/en/permissions">code.claude.com/docs/en/permissions</Fonte>
+      </div>
+    ),
+    notes: "Tabella ripresa dalla documentazione dei permessi (novembre 2026). Il punto pratico: in Manual le letture sono libere e tutto ciò che cambia qualcosa chiede. Il «non chiedere più» ha una durata diversa a seconda dello strumento: per Bash è permanente, per repository e comando. In aula non lo si usa, per non lasciare permessi sui PC condivisi."
+  },
+  {
+    block: B + 'Le modalità',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Le modalità di permesso</h2>
+        <DT cols={['Modalità', 'Va senza chiedere', 'A che serve']} rows={[
+          [<>Manual <code>default</code></>, 'Solo le letture', 'Rivedere ogni azione'],
+          [<code>acceptEdits</code>, 'Letture, modifiche ai file e comandi come mkdir, mv, rm, nella cartella', 'Iterare su codice che rivedi dopo'],
+          [<code>plan</code>, 'Letture: nessuna modifica ai sorgenti', 'Esplorare prima di cambiare'],
+          [<code>auto</code>, 'Quasi tutto, con un controllo automatico di sicurezza', 'Compiti lunghi'],
+          [<code>dontAsk</code>, 'Solo quanto già approvato; il resto è negato', 'Script e CI'],
+          [<code>bypassPermissions</code>, 'Tutto', 'Solo contenitori e VM isolati'],
+        ]} />
+        <p className="muted">In sessione: <code>Shift+Tab</code> fa girare le modalità. All'avvio: <code>claude --permission-mode plan</code>.</p>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Sei modalità, dalla più prudente alla più libera. Nomi esatti come in documentazione (novembre 2026): la modalità chiamata Manual nell'interfaccia è default nei file di configurazione. Le regole di rifiuto valgono in ogni modalità. bypassPermissions solo in ambienti isolati: non lo usiamo. auto richiede disponibilità sul fornitore e sul modello. dontAsk non compare nel giro di Shift+Tab. Attenzione: acceptEdits approva da solo anche i comandi di file più comuni (mkdir, touch, rm, rmdir, mv, cp, sed) dentro la cartella di lavoro."
+  },
+  {
+    block: B + 'Perché Manual',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>In aula si parte da Manual</h2>
+        <div className="grid">
+          <Card title="Vedi ogni azione"><p>Prima che accada. Si impara il ciclo guardandolo passo passo.</p></Card>
+          <Card title="Gli errori costano poco" kind="i"><p>Un comando sbagliato letto prima di approvarlo non fa danni.</p></Card>
+          <Card title="Con un router non è scontato" kind="w"><p>La modalità <code>auto</code> dipende da fornitore e modello: se non c'è, la sessione parte in Manual.</p></Card>
+        </div>
+        <Box type="warn" title="Attenzione al valore predefinito">Per la documentazione di novembre 2026, nel terminale la modalità iniziale predefinita è <code>auto</code> (dalla versione 2.1.283). Per questo la si fissa: <code>claude --permission-mode manual</code>, oppure <code>permissions.defaultMode</code> nei file di configurazione.</Box>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Più avanti si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Il modello dietro l'agente lo sceglie il router del laboratorio."
+  },
+  {
+    block: B + 'Leggere la richiesta',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Leggere la richiesta prima di approvare</h2>
+        <div className="cols">
+          <pre aria-label="Schema di una richiesta di permesso">{PROMPT}</pre>
+          <ol>
+            <li><strong>Cosa fa?</strong> Il comando intero, anche dopo <code>&amp;&amp;</code> e <code>;</code>.</li>
+            <li><strong>Dove?</strong> Quali file, dentro la cartella del progetto.</li>
+            <li><strong>Si annulla?</strong> I file sì (git, checkpoint); rete e dati esterni no.</li>
+          </ol>
+        </div>
+        <p className="muted">Schema indicativo: il testo esatto dipende dalla versione. I checkpoint coprono solo i file, non rete, database o rilasci.</p>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Tre domande da fare ogni volta. Lo schema è indicativo: non vale come riproduzione della schermata. La documentazione (novembre 2026) dice che i checkpoint annullano le modifiche ai file ma non le azioni su sistemi remoti: per quelle conta la modalità di permesso. Nell'attività si approva una volta sola, mai con «non chiedere più»."
+  },
+  {
+    block: B + 'Domanda 2',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una decisione per voi</h2>
+        <Quiz domanda="In modalità Manual arriva la richiesta: rm -rf dati && node cli.js elenco. Che cosa fai?" opzioni={[
+          { t: 'Approvo: il comando che mi interessa è l\'elenco', ok: false, perche: 'Il comando è composto: la prima parte cancella una cartella. Va letto per intero.' },
+          { t: 'Rifiuto e chiedo perché vuole cancellare i dati', ok: true, perche: 'Giusto. Il rifiuto è senza danno: l\'agente riferisce e propone altro, e la decisione resta tua.' },
+          { t: 'Approvo con «non chiedere più», così non mi interrompe', ok: false, perche: 'Per Bash vale per sempre su quel repository e quel comando: è l\'opposto della prudenza.' },
+        ]} />
+      </div>
+    ),
+    notes: "Comando inventato per l'occasione. Il punto è l'abitudine di leggere fino in fondo i comandi composti. Il rifiuto non rompe il lavoro: l'agente riceve l'esito e cambia strada."
+  },
+  {
+    block: B + 'Il piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Piano</Tag>
+        <h2>Il piano è una proposta da approvare</h2>
+        <div role="group" aria-label="Modalità piano: esplora, propone, tu decidi, poi esegue">
+          <Flow nodes={[
+            ['1 Esplora', 'legge, non modifica'],
+            ['2 Propone', 'scrive il piano'],
+            ['3 Decidi tu', 'approvi, correggi o rifiuti', 'w'],
+            ['4 Esegue', 'solo dopo il tuo sì', 'i'],
+          ]} />
+        </div>
+        <ul>
+          <li>Si entra con <code>Shift+Tab</code>, con <code>/plan</code> prima di un messaggio o con <code>claude --permission-mode plan</code>.</li>
+          <li>Scelte: «Yes, and use auto mode», «Yes, manually approve edits», «No, keep planning». <code>Ctrl+G</code> apre il piano in un editor.</li>
+        </ul>
+        <p className="muted">Un piano si legge come un diff: quali file tocca, che cosa non tocca, come verifica.</p>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 3, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nell'attività di oggi si prova a entrare e uscire senza approvare."
+  },
+  {
+    block: B + 'Tu sei nel ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Controllo</Tag>
+        <h2>Tu sei dentro il ciclo</h2>
+        <div className="grid">
+          <Card title="Fermare"><p><code>Esc</code> interrompe subito: l'azione in corso viene annullata e l'agente aspetta.</p></Card>
+          <Card title="Correggere" kind="i"><p>Scrivi la correzione e invia: l'agente la legge appena finite le chiamate in corso.</p></Card>
+          <Card title="Tornare indietro" kind="w"><p><code>Esc</code> due volte riporta i file a uno stato precedente (checkpoint).</p></Card>
+        </div>
+        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono git: li vedremo nell'argomento 2.</Box>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 2 insegna a leggere il diff e a fare commit."
+  },
+  {
+    block: B + 'Il racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il racconto</Tag>
+        <h2>Dieci agenti che «funzionavano»</h2>
+        <ol className="timeline">
+          <li><time>Maggio</time>Prima versione del gruppo di agenti: dieci agenti specializzati, ognuno con un file di istruzioni.</li>
+          <li><time>Mesi</time>Tutto sembra andare: arrivano risposte, il lavoro viene fatto.</li>
+          <li><time>20 luglio</time>Ci si accorge che l'orchestrazione non è mai avvenuta: gli agenti non venivano mai avviati.</li>
+          <li><time>Causa</time>Nell'intestazione dei due agenti principali, una barra rovesciata davanti ai tre trattini (<code className="nw">\---</code> invece di <code className="nw">---</code>); gli specialisti l'intestazione non l'avevano. File non riconosciuti.</li>
+          <li><time>Dopo</time>Correzione e un revisore obbligatorio prima di dichiarare finito un lavoro.</li>
+        </ol>
+        <Box type="tip" title="Lezione">Ciò che l'agente racconta e ciò che ha fatto sono due cose. La traccia degli strumenti è la seconda.</Box>
+      </div>
+    ),
+    notes: "Episodio del racconto di Thomas, solo fatti documentati: nella primavera 2026 nasce un gruppo di dieci agenti; il 20 luglio si scopre che non erano mai partiti, per un carattere di troppo nell'intestazione dei due agenti principali (gli specialisti l'intestazione non l'avevano proprio). Nessun errore visibile: la sessione principale rispondeva comunque. Il legame con l'argomento: un riassunto fluido non dimostra niente, la traccia delle chiamate sì. Dal racconto nasce anche il passaggio obbligato da un revisore. Gli agenti e i subagenti tornano nell'argomento 7."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Primo contatto con Claude Code</h2>
+        <ol className="timeline">
+          <li><time>1</time>Avvia l'agente nella palestra in modalità Manual.</li>
+          <li><time>2</time>Fagli descrivere il progetto e leggi che cosa ha letto.</li>
+          <li><time>3</time>Controlla a mano se ha ragione.</li>
+          <li><time>4</time>Approva un comando, rifiutane uno, prova il piano.</li>
+        </ol>
+        <ActivityBadge n="1" file="primo-giro.html" label="Primo giro: l'agente descrive la palestra" durata="indicativo: 15 min" />
+        <br />
+        <ActivityBadge n="1" file="permessi-in-pratica.html" label="Approvare, rifiutare, pianificare" durata="indicativo: 10 min" />
+      </div>
+    ),
+    notes: "Due schede. Nella prima l'agente descrive la palestra e i partecipanti controllano le sue affermazioni con comandi propri. Nella seconda si approva un comando, se ne rifiuta uno e si prova la modalità piano senza approvare. In entrambe nessuna modifica va conservata: la palestra si riporta allo stato iniziale con git. Il modello usato lo sceglie il router del laboratorio."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Un agente è un modello con strumenti dentro un ciclo: osserva, pianifica, agisce, verifica.',
+          'Vede solo ciò che entra nel contesto: leggi cosa ha letto, e controlla le sue affermazioni.',
+          'Il contesto si riempie: /context, /compact, /clear; le regole fisse stanno nelle istruzioni di progetto.',
+          'In aula si lavora in Manual: leggi ogni richiesta intera prima di approvare.',
+          'Il piano è una proposta, e si approva o si corregge.',
+        ]}
+        dopo="Argomento 2: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 3: dalla richiesta vaga ai requisiti, con la modalità piano." />
+    ),
+    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

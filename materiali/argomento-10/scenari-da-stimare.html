@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tre sessioni da stimare — Materiali argomento 10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 10</a>
+  <a class="dl-btn" href="scenari-da-stimare.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="tre-sessioni-da-stimare">Tre sessioni da stimare</h1>
+<p>Durata indicativa: 20 minuti. Si lavora con la calcolatrice della slide 10 (argomento 10), sulla <strong>palestra</strong>, la piccola app di prenotazione dei laboratori (dati inventati). I numeri delle sessioni sono valori di esempio, non misure.</p>
+<p>Prezzi in dollari per milione di token, dai listini pubblici consultati il 9 novembre 2026. Nella calcolatrice trovi già il listino di Anthropic e di DeepSeek.</p>
+<h2 id="1-le-tre-sessioni">1. Le tre sessioni</h2>
+<p>Ogni sessione è un lavoro sulla palestra con un agente. Un "giro" è una richiesta al modello: ogni volta che l'agente legge un file o lancia un comando, ne parte una.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Sessione</th>
+<th>Il lavoro</th>
+<th>Giri</th>
+<th>Contesto iniziale</th>
+<th>Novità per giro</th>
+<th>Uscita per giro</th>
+<th>Pause oltre 5 min</th>
+<th>Compattazione</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Correggere un difetto in una funzione della palestra</td>
+<td>12</td>
+<td>20.000</td>
+<td>2.000</td>
+<td>400</td>
+<td>0</td>
+<td>mai</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Aggiungere una funzione con i suoi test</td>
+<td>60</td>
+<td>20.000</td>
+<td>2.500</td>
+<td>500</td>
+<td>2</td>
+<td>mai</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Lavorare tutta la giornata sulla stessa sessione</td>
+<td>150</td>
+<td>20.000</td>
+<td>2.500</td>
+<td>500</td>
+<td>6</td>
+<td>oltre 200.000 token</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nella calcolatrice i pulsanti "A", "B" e "C" inseriscono già questi valori.</p>
+<h2 id="2-stima-con-sonnet-55">2. Stima con Sonnet 5.5</h2>
+<p>Scegli il modello <strong>Sonnet 5.5</strong> e compila la tabella, con tre decimali.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Sessione</th>
+<th>Richieste</th>
+<th>Token inviati in ingresso</th>
+<th>Costo con cache</th>
+<th>Costo senza cache</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>B</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>C</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-cambia-una-cosa-alla-volta">3. Cambia una cosa alla volta</h2>
+<p>Parti dalla sessione B e cambia <strong>una sola voce</strong> per volta, poi riportala al valore iniziale. Annota ogni costo.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Cosa cambi</th>
+<th>Costo con cache</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nessuna pausa lunga (pause = 0)</td>
+<td></td>
+</tr>
+<tr>
+<td>Sei pause lunghe (pause = 6)</td>
+<td></td>
+</tr>
+<tr>
+<td>Modello Haiku 5.5</td>
+<td></td>
+</tr>
+<tr>
+<td>Modello Opus 5.5</td>
+<td></td>
+</tr>
+<tr>
+<td>Compattazione oltre 100.000 token</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="4-la-giornata-intera-tre-modi">4. La giornata intera, tre modi</h2>
+<p>Sulla sessione C con Sonnet 5.5 prova le tre opzioni di compattazione e annota il costo e il numero di richieste.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Compattazione</th>
+<th>Richieste</th>
+<th>Costo con cache</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mai</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>oltre 200.000 token</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>oltre 100.000 token</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-confronto-con-la-tua-sessione">5. Confronto con la tua sessione</h2>
+<p>Hai già lavorato con l'agente in questo incontro. Apri la scheda "Listino e contatore della sessione" e segui il confronto con il contatore reale.</p>
+<h2 id="domande-per-il-confronto-a-coppie">Domande per il confronto a coppie</h2>
+<ul>
+<li>Tra A e B il lavoro cresce di cinque volte nei giri. Il costo cresce di cinque volte, di meno o di più? Da cosa dipende?</li>
+<li>Quanta parte dei token inviati in ingresso è materiale nuovo, e quanta è conversazione già inviata?</li>
+<li>Quale delle voci della sezione 3 sposta di più il costo? Quale potresti controllare tu, nel lavoro di ogni giorno?</li>
+<li>Per quale lavoro della palestra userebbe un modello piccolo? Per quale uno grande?</li>
+<li>La sessione C senza compattazione è realistica? Che cosa farebbe Claude Code da solo?</li>
+</ul>
+<p>Le soluzioni le ha il docente.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

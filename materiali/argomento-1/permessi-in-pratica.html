@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Approvare, rifiutare, pianificare — Materiali argomento 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 1</a>
+  <a class="dl-btn" href="permessi-in-pratica.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="approvare-rifiutare-pianificare">Approvare, rifiutare, pianificare</h1>
+<p>Durata indicativa: 10 minuti. Si continua sulla <strong>palestra</strong>, sempre in modalità Manual. Funzioni di Claude Code come da documentazione ufficiale (code.claude.com/docs), novembre 2026.</p>
+<p>Prima di ogni approvazione fai le tre domande: <strong>Cosa fa?</strong> (il comando intero, anche dopo <code>&amp;&amp;</code> e <code>;</code>), <strong>Dove?</strong> (quali file), <strong>Si annulla?</strong> (i file sì con git, rete e dati esterni no).</p>
+<p>Non scegliere mai «Yes, and don't ask again»: per i comandi di shell vale per sempre in quel repository.</p>
+<h2 id="1-approva-un-comando">1. Approva un comando</h2>
+<p>Chiedi:</p>
+<pre><code>Esegui i test e dimmi quanti passano.
+</code></pre>
+<p>Arriva una richiesta di permesso. Leggila per intero, rispondi alle tre domande, poi scegli <strong>Yes</strong> (una volta sola). Confronta quello che dice l'agente con l'output del comando.</p>
+<h2 id="2-rifiuta-una-modifica">2. Rifiuta una modifica</h2>
+<p>Chiedi:</p>
+<pre><code>Crea un file NOTE.txt con l'elenco dei comandi della palestra.
+</code></pre>
+<p>Quando arriva la richiesta di modificare i file, scegli <strong>No</strong>. Che cosa risponde l'agente? Annotalo: ha detto con chiarezza che non ha creato il file?</p>
+<h2 id="3-approva-la-stessa-modifica-e-guarda-cosa-cambia">3. Approva la stessa modifica e guarda cosa cambia</h2>
+<p>Ripeti la richiesta, stavolta approva. Poi, in un altro terminale:</p>
+<pre><code>git status
+</code></pre>
+<p>Quale file compare? Cancellalo con <code>rm NOTE.txt</code> e ricontrolla <code>git status</code>.</p>
+<h2 id="4-prova-la-modalita-piano">4. Prova la modalità piano</h2>
+<p>Premi <code>Shift+Tab</code> finché nell'interfaccia compare la modalità <strong>plan</strong> (oppure scrivi <code>/plan</code> prima della richiesta). Chiedi:</p>
+<pre><code>Come aggiungeresti all'elenco un filtro per laboratorio? Voglio solo il piano.
+</code></pre>
+<p>Leggi il piano e rispondi per iscritto:</p>
+<ul>
+<li>quali file tocca;</li>
+<li>che cosa <strong>non</strong> tocca;</li>
+<li>come verifica che funzioni.</li>
+</ul>
+<p><strong>Non approvare</strong>: il filtro lo faremo in un altro momento. Scegli «No, keep planning» oppure premi <code>Shift+Tab</code> per uscire senza approvare.</p>
+<h2 id="5-riporta-tutto-a-posto">5. Riporta tutto a posto</h2>
+<pre><code>git status
+</code></pre>
+<p>La cartella deve risultare pulita (nessuna modifica, nessun file nuovo). Se non lo è, chiama il docente: la palestra si riporta allo stato iniziale con <code>git restore</code> e, per i file nuovi, <code>rm</code>. Le soluzioni le ha il docente.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

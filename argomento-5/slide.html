@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 5 · Test e debugging con l'agente · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+const B = 'Argomento 5 — Test e debugging · ';
+
+const CODICE_ROSSO = String.raw`$ node --test
+...
+✖ ritardo: cinque minuti dopo il suono sono lievi (1.2ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  'grave' !== 'lieve'
+      at TestContext.<anonymous> (test/ritardi.test.js:12:10)
+...
+ℹ tests 12
+ℹ pass 11
+ℹ fail 1
+ℹ skipped 0`;
+
+const PROMPT_RIPRODUCI = String.raw`Il test «ritardo: cinque minuti dopo il suono sono lievi» fallisce.
+Non correggere ancora. Prima:
+1. lancia solo quel test e incolla l'esito;
+2. dimmi con parole tue cosa si aspetta e cosa ottiene;
+3. dimmi quali file hai letto e la tua ipotesi sulla causa.
+Poi fermati e aspetta.`;
+
+const CODICE_STACK = String.raw`Error: Orario non valido: "25:00"
+    at leggiOra (src/orari.js:8:11)          <- dove è stato lanciato
+    at durata (src/orari.js:19:20)           <- chi lo ha chiamato
+    at stampaRiga (src/report.js:33:18)      <- chi ha passato "25:00"?
+    at TestContext.<anonymous> (test/report.test.js:14:5)
+    at Test.run (node:internal/test_runner/test:1306:25)   <- interno di Node: si salta`;
+
+const CODICE_DIFF_TEST = String.raw`$ git diff --stat -- test/
+ test/ritardi.test.js | 4 ++--
+$ git diff -- test/ritardi.test.js
+-test('ritardo: cinque minuti dopo il suono sono lievi', () => {
+-  assert.equal(classifica(5), 'lieve');
++test('ritardo: cinque minuti dopo il suono sono lievi', { skip: true }, () => {
++  assert.equal(classifica(5), 'grave');`;
+
+const CODICE_CLAUDE = String.raw`## Test
+- Prima di dire «fatto» lancia node --test e riporta i numeri di tests, pass, fail e skipped.
+- Non modificare né cancellare un test per farlo passare. Se pensi che sia sbagliato,
+  fermati e spiegami perché, citando la regola scritta.
+- Non aggiungere skip o todo ai test esistenti.
+- Un test che fallisce si riproduce prima di correggere il codice.`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="5" titolo="Test e debugging con l'agente"
+        sottotitolo="Far guidare la correzione da un test che fallisce, e accorgersi quando l'agente fa passare i test invece di correggere il codice."
+        caso="Un episodio dal racconto: tre difetti in produzione su Prenota Risorse, e quale controllo ha trovato ciascuno."
+        prima="argomenti 1 e 2 (ciclo dell'agente, permessi, git per leggere le modifiche)." />
+    ),
+    notes: "Apertura. L'argomento 2 ha già detto che «verde» non vuol dire «consegnato»: qui si guarda dentro i test. Tre domande guidano il blocco: cosa copre ciascun controllo, come si usa un test che fallisce per guidare l'agente, come si riconosce un agente che ha aggirato il test. Si lavora sulla palestra con due esercizi."
+  },
+  {
+    block: B + 'Tre controlli',
+    content: () => (
+      <div className="pad">
+        <Tag>Cosa copre cosa</Tag>
+        <h2>Tre controlli, tre cose diverse</h2>
+        <DT cols={['Controllo', 'Cosa copre bene', 'Cosa non vede']} rows={[
+          ['Test unitari', 'Regole e casi limite scritti prima; si ripetono in pochi secondi', 'Quello a cui nessuno ha pensato; l\'ambiente reale (dati, rete, dispositivi)'],
+          ['Prova manuale', 'Il percorso vero, con dati e ambiente veri; le sorprese', 'Non si ripete uguale; copre poco; dipende da chi la fa'],
+          ['Revisione del codice', 'Intenzioni, effetti collaterali, modifiche non richieste, i test stessi', 'Non esegue nulla: un errore sottile sfugge anche a un occhio attento'],
+        ]} />
+        <Box type="info" title="Nessuno basta da solo">Un agente può consegnare codice con test verdi e comunque sbagliato (argomento 2). I tre controlli si sommano: ciascuno prende ciò che gli altri lasciano passare.</Box>
+      </div>
+    ),
+    notes: "Tabella da leggere per righe. Un esempio per ciascuna: un test unitario prende una regola sbagliata sui confini di un orario; una prova manuale prende una pagina che non si apre sul telefono; una revisione prende il file che l'agente ha cambiato senza che nessuno glielo chiedesse. Il racconto di questo argomento mostra tre difetti, ciascuno preso da un controllo diverso."
+  },
+  {
+    block: B + 'Il ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Rosso, verde</Tag>
+        <h2>Un test che fallisce è una specifica eseguibile del difetto</h2>
+        <Flow nodes={[
+          ['1 · Riprodurre', 'lanciare il test che fallisce, da solo', 'w'],
+          ['2 · Capire', 'leggere il messaggio e il codice, formulare un\'ipotesi', 'i'],
+          ['3 · Correggere', 'la modifica più piccola che serve', 'i'],
+          ['4 · Verificare', 'verde, stessi numeri, diff dei test', ''],
+        ]} />
+        <ul style={{ marginTop: 12 }}>
+          <li>Il test dice <em>che cosa</em> non va, non <em>dove</em>. La causa si cerca.</li>
+          <li>All'agente si dà il test, non la causa: se gliela suggerite, non sapete se l'ha trovata o se vi ha dato ragione.</li>
+          <li>«Il test passa» è il criterio di fine. Se il test è sbagliato, lo è anche il criterio.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Il ciclo è lo stesso con o senza agente; con l'agente cambiano la velocità e il rischio di saltare i passi 1 e 4. Nell'esercizio A si chiede di non dire la causa all'agente: un agente tende ad assecondare l'ipotesi che gli date, giusta o sbagliata."
+  },
+  {
+    block: B + 'Leggere l\'output',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere un fallimento</Tag>
+        <h2>L'output di <code>node --test</code></h2>
+        <pre aria-label="Esempio inventato di output di node --test con un fallimento">{CODICE_ROSSO}</pre>
+        <ul>
+          <li><code>✖</code> e il nome del test: di solito dice la regola. Leggetelo come una frase.</li>
+          <li>Il messaggio: cosa si aspettava e cosa ha ottenuto. Le righe <code>at ...</code> dicono dove.</li>
+          <li>In fondo i numeri: <code>tests</code>, <code>pass</code>, <code>fail</code>, <code>skipped</code>, <code>todo</code>. Un test <code>todo</code> non fa fallire il comando.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato, in forma indicativa: l'aspetto esatto dipende dalla versione di Node. Il comando node --test esegue i file che corrispondono ai pattern standard (per esempio quelli nella cartella test/ o con suffisso .test.js); il test runner integrato è stabile dalla versione 20. Documentazione: https://nodejs.org/api/test.html (consultata il 9/11/2026). I numeri in fondo sono la prima cosa che una dichiarazione «passano tutti» deve confermare."
+  },
+  {
+    block: B + 'Riprodurre prima',
+    content: () => (
+      <div className="pad">
+        <Tag>Chiedere all'agente</Tag>
+        <h2>Prima si riproduce, poi si corregge</h2>
+        <pre aria-label="Richiesta di esempio all'agente">{PROMPT_RIPRODUCI}</pre>
+        <ul>
+          <li>Riprodurre dà un punto di partenza misurabile e un criterio di fine: lo stesso test, ora verde.</li>
+          <li>Il riassunto «con parole tue» mostra se ha capito il difetto o ne ha capito un altro.</li>
+          <li>Per lanciare un test solo: <code>node --test --test-name-pattern="parte del nome"</code>.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Richiesta di esempio inventata, da adattare. Conta l'ordine: riproduzione, spiegazione, poi correzione. A un agente a cui si dice «correggi» corregge subito la prima cosa che vede. L'opzione --test-name-pattern accetta un'espressione regolare ed è ripetibile; con --test-skip-pattern si escludono test per nome. Documentazione: https://nodejs.org/api/test.html (9/11/2026)."
+  },
+  {
+    block: B + 'Lo stack trace',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere un fallimento</Tag>
+        <h2>Lo stack trace dice dove, non perché</h2>
+        <pre aria-label="Esempio inventato di stack trace">{CODICE_STACK}</pre>
+        <ul>
+          <li>Si legge dall'alto: la prima riga nel vostro codice è dove l'errore è stato <em>lanciato</em>.</li>
+          <li>La causa spesso sta più in basso: chi ha chiamato con quel valore.</li>
+          <li>Le righe <code>node:internal</code> e <code>node_modules</code> si saltano.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato. Il punto in cui un errore viene lanciato non è necessariamente il punto in cui nasce. Qui leggiOra fa bene il suo lavoro rifiutando 25:00; il difetto sta in chi glielo ha passato. Un agente che «corregge» leggiOra per accettare 25:00 ha tolto il sintomo, non la causa."
+  },
+  {
+    block: B + 'Leggere con l\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Chiedere all'agente</Tag>
+        <h2>Farsi spiegare l'errore, poi controllare</h2>
+        <DT cols={['Si chiede', 'Cosa si controlla']} rows={[
+          ['«Spiega il messaggio con parole tue»', 'Che il difetto descritto sia quello del test, non uno vicino'],
+          ['«Quale funzione lo lancia e chi la chiama?»', 'Che abbia letto il codice e non lo stia indovinando dal nome'],
+          ['«Qual è la tua ipotesi e come la verifichi?»', 'Che l\'ipotesi si possa smentire con una prova'],
+          ['«Cosa cambia con la correzione e cosa potrebbe rompere?»', 'I file toccati: solo quelli attesi'],
+        ]} />
+        <Box type="warn" title="«Probabilmente»">Una causa detta con «probabilmente» o «dovrebbe» è un'ipotesi. Chiedete la prova: un test, una stampa, un confronto con il ramo di partenza.</Box>
+      </div>
+    ),
+    notes: "Le domande servono a distinguere un agente che ha letto da uno che ha indovinato. Con i modelli più deboli le risposte sono spesso sicure e generiche. Se la risposta cita file e righe precise si può controllarla; se è generica, si chiede di nuovo."
+  },
+  {
+    block: B + 'Attività A',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Un difetto da trovare, guidati dai test</h2>
+        <p>Nella palestra c'è un difetto vero. Due test falliscono. Non sapete dove sia, e non lo dite all'agente.</p>
+        <ol className="timeline">
+          <li><time>1</time>Partite da <code>partenza-a5</code> con un ramo vostro. Lanciate <code>node --test</code> e annotate i numeri.</li>
+          <li><time>2</time>Leggete voi i due fallimenti. Poi chiedete all'agente di riprodurre e spiegare, senza correggere.</li>
+          <li><time>3</time>Fate proporre la correzione. Prima di accettarla leggete il diff, <code>test/</code> compresa.</li>
+          <li><time>4</time>Verificate: stessi test di prima, nessun fallimento, e una prova a mano con la riga di comando.</li>
+        </ol>
+        <ActivityBadge n="5" file="attivita-difetto-guidato-dai-test.html" label="Un difetto guidato dai test" durata="indicativo: 20 min" />
+      </div>
+    ),
+    notes: "Il foglio guida i passi senza dire dove sia il difetto. Lasciare che i partecipanti sbaglino: se l'agente propone di cambiare un test, è l'occasione per fermarsi e chiedersi perché (slide seguenti). Chi finisce prima ripete con un secondo ramo e una richiesta diversa, e confronta le due correzioni con git diff. Se un PC parte da uno stato strano: git switch -c lavoro-a5-bis partenza-a5."
+  },
+  {
+    block: B + 'Test o codice',
+    content: () => (
+      <div className="pad">
+        <Tag>Chi ha torto</Tag>
+        <h2>Quando sbaglia il test e quando sbaglia il codice</h2>
+        <DT cols={['Indizio', 'Fa pensare che sbagli']} rows={[
+          ['C\'è una regola scritta e dice il contrario del test', 'il test'],
+          ['C\'è una regola scritta e dice il contrario del codice', 'il codice'],
+          ['Passava prima, fallisce dopo una modifica «di pulizia»', 'il codice (regressione)'],
+          ['La regola è cambiata di proposito e il test descrive la vecchia', 'il test, da aggiornare per decisione di chi la regola la decide'],
+          ['Nessun documento dice cosa sia giusto', 'nessuno dei due: si chiede a chi decide'],
+        ]} />
+        <p className="muted">Il test è codice scritto da qualcuno, e può avere torto quanto il codice che prova.</p>
+      </div>
+    ),
+    notes: "Il test non è la verità: è un'affermazione sulla regola. Quando test e codice sono in disaccordo, la fonte è la regola scritta, non l'uno o l'altro. L'ultima riga è la più frequente nel lavoro vero: la regola esiste solo nella testa di qualcuno."
+  },
+  {
+    block: B + 'La regola scritta',
+    content: () => (
+      <div className="pad">
+        <Tag>Chi ha torto</Tag>
+        <h2>Prima di toccare uno dei due, cercate la regola</h2>
+        <ol className="timeline">
+          <li><time>1</time>Leggete il nome del test: quale regola afferma?</li>
+          <li><time>2</time>Cercatela per iscritto: README, <code>docs/</code>, la specifica, la richiesta originale.</li>
+          <li><time>3</time>Se non c'è, chiedete a chi decide. Non all'agente.</li>
+          <li><time>4</time>Solo ora scegliete cosa correggere, e ditelo all'agente con la ragione.</li>
+        </ol>
+        <Box type="warn" title="L'agente non conosce la regola della segreteria">La ricostruisce dal codice e dai test: cioè proprio da ciò che è in discussione. Se test e codice sono in disaccordo, può dare ragione all'uno o all'altro a caso.</Box>
+      </div>
+    ),
+    notes: "Passaggio chiave dell'esercizio B. Nella palestra la regola è scritta in un documento: l'esercizio verifica che i partecipanti lo cerchino prima di lasciar correggere. Fuori dalla palestra il documento spesso non c'è: allora la regola si chiede a una persona e, una volta saputa, si scrive (README o CLAUDE.md) per non rifare la domanda."
+  },
+  {
+    block: B + 'Attività B',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Un fallimento: chi ha torto?</h2>
+        <p>Un solo test fallisce. Prima di lasciar lavorare l'agente, decidete voi se sbaglia il test o il codice, e dite perché.</p>
+        <ol className="timeline">
+          <li><time>1</time>Partite da <code>partenza-a5-test-sbagliato</code> e lanciate <code>node --test</code>.</li>
+          <li><time>2</time>Leggete il test e cercate la regola scritta. Scrivete la vostra decisione in una riga.</li>
+          <li><time>3</time>Chiedete all'agente di correggere ciò che avete deciso, citando la regola. Controllate il diff.</li>
+          <li><time>4</time>Confrontate la vostra decisione con quella di un collega.</li>
+        </ol>
+        <ActivityBadge n="5" file="attivita-test-o-codice.html" label="Test o codice: chi ha torto?" durata="indicativo: 10 min" />
+      </div>
+    ),
+    notes: "Si può fare i primi passi anche senza agente, per far sentire che la decisione è dei partecipanti. Se qualcuno lascia la scelta all'agente, notare che cosa ha fatto e perché. Chi finisce prima prova a chiedere all'agente «correggi il fallimento» senza dire altro, e confronta."
+  },
+  {
+    block: B + 'Fare passare i test',
+    content: () => (
+      <div className="pad">
+        <Tag>Il rischio</Tag>
+        <h2>L'agente che «fa passare» i test</h2>
+        <div className="grid">
+          <Card title="Cambia l'asserzione" kind="w"><p>Il test aspettava un valore e ora ne aspetta un altro: quello che il codice produce.</p></Card>
+          <Card title="Cancella o salta il test" kind="w"><p>Il test sparisce o riceve <code>skip</code> o <code>todo</code>. Il rosso non c'è più.</p></Card>
+          <Card title="Adatta il codice al test" kind="w"><p>Un caso speciale solo per quel valore, invece di correggere la regola.</p></Card>
+          <Card title="Dichiara senza controllare" kind="w"><p>«Passano tutti», dopo averne lanciati solo una parte.</p></Card>
+        </div>
+        <Box type="info" title="Non è malizia">Gli avete dato un obiettivo: test verdi. La via più corta è spesso toccare il test. Dare un obiettivo che non si presti a questo fa parte del lavoro.</Box>
+      </div>
+    ),
+    notes: "Quattro scorciatoie. Non sono errori rari. La quarta è la più subdola: il riassunto dell'agente è plausibile e il comando lanciato era un altro. Vale il principio dell'argomento 2: il riassunto non è una prova."
+  },
+  {
+    block: B + 'Il diff dei test',
+    content: () => (
+      <div className="pad">
+        <Tag>Accorgersene</Tag>
+        <h2>Prima domanda: i test sono stati toccati?</h2>
+        <pre aria-label="Esempio inventato di diff su un test indebolito">{CODICE_DIFF_TEST}</pre>
+        <ul>
+          <li><code>git diff --stat -- test/</code> risponde in una riga. Se non elenca nulla, i test sono intatti.</li>
+          <li>Se li ha toccati, ogni riga cambiata deve avere una ragione che sapete dire.</li>
+          <li>Cercate nel diff <code>skip</code>, <code>todo</code> e asserzioni cambiate.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato. Il diff con -- test/ restringe la vista alla cartella dei test. Un test cambiato insieme al codice non è per forza sbagliato: lo è quando il cambio non ha una ragione dichiarata. I file nuovi (untracked) non compaiono nel diff: si vedono con git status."
+  },
+  {
+    block: B + 'I numeri',
+    content: () => (
+      <div className="pad">
+        <Tag>Accorgersene</Tag>
+        <h2>Contate, non fidatevi del riassunto</h2>
+        <DT cols={['Prima', 'Dopo', 'Cosa dice']} rows={[
+          ['tests N, fail 2', 'tests N, fail 0', 'Stessi test, ora verdi: come deve essere.'],
+          ['tests N, fail 2', 'tests N-2, fail 0', 'Due test spariti. Va spiegato.'],
+          ['tests N, fail 2', 'tests N, skipped 2', 'Non sono verdi: sono spenti.'],
+          ['tests N, fail 2', 'tests M (M < N), fail 0', 'Ha lanciato solo una parte dei test.'],
+        ]} />
+        <p className="muted">Annotate i numeri prima di far lavorare l'agente. Dopo, il confronto è immediato.</p>
+      </div>
+    ),
+    notes: "Lo scopo è automatizzare il sospetto: il confronto dei numeri prende cancellazioni e skip anche senza leggere il diff. Un test todo non fa fallire il comando (documentazione Node, 9/11/2026), quindi va guardato anche quel numero."
+  },
+  {
+    block: B + 'Nel CLAUDE.md',
+    content: () => (
+      <div className="pad">
+        <Tag>Istruzioni persistenti</Tag>
+        <h2>Le regole sui test, scritte una volta</h2>
+        <pre aria-label="Sezione Test di esempio per il CLAUDE.md">{CODICE_CLAUDE}</pre>
+        <Box type="warn" title="È contesto, non un divieto">Claude Code legge CLAUDE.md all'inizio di ogni sessione e lo tratta come contesto, non come configurazione obbligatoria. Per bloccare davvero un'azione serve un hook (argomento 8). Il diff si controlla comunque.</Box>
+      </div>
+    ),
+    notes: "Collegamento all'argomento 4 (istruzioni persistenti) e al principio dell'argomento 11: un errore pagato diventa una guardia. Qui la guardia è una riga nel CLAUDE.md; la guardia forte è un controllo fuori dal modello. Con i modelli collegati a OmniRoute le istruzioni possono essere seguite in modo diverso: provare prima. Documentazione: https://code.claude.com/docs/en/memory (consultata il 9/11/2026)."
+  },
+  {
+    block: B + 'Dal racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal racconto di Thomas</Tag>
+        <h2>Prenota Risorse: tre difetti in produzione</h2>
+        <div className="grid">
+          <Card title="Una colonna mai migrata" kind="d"><p>La modifica al database era nel codice, ma non era stata applicata sul server.</p></Card>
+          <Card title="Telefoni con la versione vecchia" kind="d"><p>Per la cache, gli iPhone continuavano a usare la versione precedente dell'app.</p></Card>
+          <Card title="Un giorno di scarto" kind="d"><p>Un errore sulle date, legato al fuso (UTC), trovato dal revisore.</p></Card>
+        </div>
+        <Box type="info" title="Che cosa insegna">Tre difetti, tre controlli diversi: il primo si vede solo nell'ambiente vero, il secondo solo su un telefono vero, il terzo l'ha trovato una revisione attenta. Tra il 21 e il 28 settembre ogni deploy è passato dal revisore, con un registro delle revisioni.</Box>
+      </div>
+    ),
+    notes: "Episodio documentato nel racconto di Thomas: i tre difetti, e il fatto che in quelle settimane ogni deploy sia passato dal revisore con un registro. Come sono stati scoperti, quanto sono durati e che effetto hanno avuto lo racconta Thomas a voce. Il filo con l'argomento: i test unitari da soli non coprono tutto; un difetto trovato si chiude con un test che lo avrebbe preso, ed è la guardia dell'argomento 11."
+  },
+  {
+    block: B + 'Sul vostro progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il progetto personale</Tag>
+        <h2>Un test rosso prima di ogni correzione</h2>
+        <ul>
+          <li>Un difetto nel vostro progetto: scrivete (o fate scrivere) prima il test che lo mostra, e vedete che fallisce.</li>
+          <li>Poi la correzione. Poi i numeri: i test di prima più quello nuovo, tutti verdi.</li>
+          <li>Il runner è quello del vostro linguaggio. Un commit per il test, uno per la correzione.</li>
+          <li>Annotate un errore che avete trovato e come: lo portate a casa.</li>
+        </ul>
+        <p className="muted">I criteri di accettazione dell'argomento 3 sono il punto di partenza naturale per i primi test.</p>
+      </div>
+    ),
+    notes: "Tappa del progetto: il primo test di ciascuno, scritto per un criterio di accettazione o per un difetto vero. Chi lavora in un linguaggio senza runner già installato lo concorda con il docente. Se il progetto non ha ancora un difetto, si scrive il test di un criterio e si controlla che prima fallisca."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>«Ora tutti i test passano»</h2>
+        <Quiz domanda="L'agente lo scrive. Prima della correzione i test erano 35 con 2 falliti; ora l'esito dice tests 33, fail 0. Che cosa fate?" opzioni={[
+          { t: 'Niente: 33 verdi è meglio di 35 con due rossi', ok: false, perche: 'Due test sono spariti. Potrebbe averli cancellati o spenti per non vedere il rosso.' },
+          { t: 'Leggo il diff di test/ per capire dove sono finiti i due test, e perché', ok: true, perche: 'Il numero cambiato è il segnale. Il diff dice se erano sbagliati e rimossi a ragione, oppure aggirati.' },
+          { t: 'Chiedo all\'agente di confermare che ha corretto tutto', ok: false, perche: 'Lo stesso riassunto ripetuto non è una verifica; i numeri e il diff lo sono.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione, non il testo dell'esercizio. Si può discutere cosa cambia se i numeri sono uguali ma un'asserzione è stata cambiata: i numeri non bastano, serve anche il diff."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Test, prova manuale e revisione coprono cose diverse: nessuno basta da solo.',
+          'Un test rosso guida la correzione: prima si riproduce, poi si capisce, poi si corregge.',
+          'Quando test e codice sono in disaccordo decide la regola scritta, non l\'agente.',
+          'L\'agente può far passare i test toccandoli: diff di test/ e numeri, sempre.',
+        ]}
+        dopo="Argomento 6: segreti nel codice, dipendenze, comandi distruttivi, prompt injection. Argomento 7: skill e subagenti che rivedono il lavoro, con lo stesso scetticismo su ciò che dicono." />
+    ),
+    notes: "Chiusura. Riprendere i quattro punti. Collegamenti: un revisore, umano o agente, rilegge test e codice con occhi diversi (argomento 7); i controlli che non dipendono dal modello (hook) sono nell'argomento 8."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

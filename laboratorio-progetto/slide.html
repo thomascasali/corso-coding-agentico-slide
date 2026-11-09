@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorio-progetto · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+<style>
+/* proprio del laboratorio-progetto: timer (fuori dal blocco comune) */
+  .timer { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 8px auto; max-width: 520px; }
+  .timer-t { font-family: var(--mono); font-weight: 700; font-size: clamp(56px, 8vw + 20px, 120px); line-height: 1; color: var(--text); }
+  .timer-t.fine { color: var(--accent-2); text-decoration: underline; text-underline-offset: 8px; }
+  .timer-bar { width: 100%; height: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .timer-bar span { display: block; height: 100%; background: var(--accent); }
+  .timer-s { margin: 0; font-family: var(--cond); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .timer-b { display: flex; gap: 12px; }
+  .tbtn { font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 22px; min-height: 44px; cursor: pointer; }
+  .tbtn:hover { background: var(--panel-2); }
+  .tbtn:disabled { color: var(--muted); border-color: var(--border); cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- componenti propri del laboratorio-progetto (fuori dai blocchi comuni) ---------- */
+
+/* Come ActivityBadge, ma per la cartella materiali/laboratorio-progetto/ */
+const LabBadge = ({ file, label, durata }) => (
+  <a className="activity" href={'../materiali/laboratorio-progetto/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Foglio</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Timer a conto alla rovescia, un solo effetto in movimento: le cifre che scendono. */
+function Timer({ secondi = 180 }) {
+  const [resto, setResto] = useState(secondi);
+  const [attivo, setAttivo] = useState(false);
+  useEffect(() => {
+    if (!attivo) return;
+    const id = setInterval(() => setResto(r => (r > 0 ? r - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [attivo]);
+  useEffect(() => { if (resto === 0) setAttivo(false); }, [resto]);
+  const mm = String(Math.floor(resto / 60)).padStart(2, '0');
+  const ss = String(resto % 60).padStart(2, '0');
+  const stato = resto === 0 ? 'Tempo scaduto' : resto <= 30 ? 'Ultimi 30 secondi' : attivo ? 'In corso' : resto === secondi ? 'Pronto' : 'In pausa';
+  const perc = Math.round((resto / secondi) * 100);
+  return (
+    <div className="timer" role="group" aria-label="Timer della presentazione">
+      <div className={'timer-t' + (resto <= 30 ? ' fine' : '')} role="timer" aria-label={'Tempo rimasto ' + mm + ' minuti ' + ss + ' secondi'}>{mm}:{ss}</div>
+      <div className="timer-bar" aria-hidden="true"><span style={{ width: perc + '%' }}></span></div>
+      <p className="timer-s" aria-live="polite">{stato}</p>
+      <div className="timer-b">
+        <button className="tbtn" onClick={() => setAttivo(a => !a)} disabled={resto === 0}>{attivo ? 'Pausa' : resto === secondi ? 'Via' : 'Riprendi'}</button>
+        <button className="tbtn" onClick={() => { setAttivo(false); setResto(secondi); }}>Azzera</button>
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo del laboratorio (Apertura del modello dice "Argomento N") */
+const AperturaLab = ({ titolo, sottotitolo, caso }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Incontro 5</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+  </div>
+);
+
+/* ---------- le slide del laboratorio-progetto ---------- */
+/* Intestazione di ogni slide: "Laboratorio-progetto · sezione". */
+const B = 'Laboratorio-progetto · ';
+
+const CICLO = [
+  ['Specifica', 'Il criterio di accettazione si può dire "passa" o "non passa"?'],
+  ['Piano', 'Il piano è stato proposto senza modifiche e l\'avete letto prima di approvarlo?'],
+  ['Sviluppo', 'Un passo alla volta, piccolo abbastanza da leggere il diff.'],
+  ['Test', 'C\'è una prova per ogni criterio, e l\'avete vista fallire prima di vederla passare?'],
+  ['Revisione', 'La skill di revisione sul vostro diff, poi il vostro occhio.'],
+  ['Commit', 'Un commit per passo, con un messaggio che dice cosa è cambiato.'],
+];
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <AperturaLab titolo="Laboratorio-progetto" sottotitolo="Portare il proprio progetto a un risultato che funziona, documentato e revisionato."
+        caso="Da oggi non c'è un esercizio da seguire: il ciclo lo applicate voi, il docente passa tra i banchi." />
+    ),
+    notes: "Ultimo incontro. Non ha argomenti nuovi: è il laboratorio in cui si mette insieme quello che è venuto prima. Il progetto sta sul PC della scuola, nella cartella creata nell'incontro 1, con la skill e l'hook scritti nell'incontro 4. Ricordare che i dati restano inventati e che non c'è nessun remote."
+  },
+  {
+    block: B + 'Obiettivo della giornata',
+    content: () => (
+      <div className="pad">
+        <Tag>Obiettivo</Tag>
+        <h2>Cosa succede oggi</h2>
+        <DT cols={['Blocco', 'Durata', 'Cosa si fa']} rows={[
+          ['Sviluppo', '75 min', 'Il progetto personale, con Claude Code o OpenCode, la skill e l\'hook'],
+          ['Revisione a coppie', '20 min', 'Ciascuno rivede il progetto di un collega con una griglia'],
+          ['Presentazioni', '3 min a testa', 'Cinque punti e una prova dal vivo'],
+          ['Chiusura del racconto', '10 min', 'Dal PC al servizio che la scuola usa ogni giorno'],
+        ]} />
+        <p className="muted" style={{ marginTop: 12 }}>L'obiettivo di ognuno è quello fissato con il docente nell'incontro 4. Lo strumento è a scelta: Claude Code o OpenCode.</p>
+      </div>
+    ),
+    notes: "Le durate sono indicative e servono a dosare il lavoro. La scelta dello strumento è libera: chi ha lavorato meglio con uno dei due continua con quello. Chi ha un obiettivo non raggiunto lo dice subito, così si decide cosa tagliare."
+  },
+  {
+    block: B + 'Il ciclo completo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il metodo</Tag>
+        <h2>Il ciclo, da soli</h2>
+        <ol className="steps">
+          {CICLO.map(([t, d], i) => <li key={i}><b>{i + 1}. {t}.</b> {d}</li>)}
+        </ol>
+        <p className="muted">Nessuno vi dice più quando passare alla fase successiva. Controllate voi.</p>
+      </div>
+    ),
+    notes: "Il ciclo è quello visto negli incontri precedenti, tutto insieme. Prima la specifica con i criteri, poi il piano proposto dall'agente senza modifiche, poi un passo alla volta. Chi si accorge di essere saltato direttamente allo sviluppo torna indietro di una fase: costa meno farlo adesso che al momento della presentazione."
+  },
+  {
+    block: B + 'Restare dentro l\'obiettivo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il metodo</Tag>
+        <h2>Restare dentro l'obiettivo</h2>
+        <div className="grid">
+          <Card title="Il confine"><p>I criteri di accettazione fissati con il docente. Se una cosa non serve a uno di loro, non è per oggi.</p></Card>
+          <Card title="La lista del dopo" kind="i"><p>Ogni idea nuova va su una riga di <code className="nw">DOPO.md</code>. Non si implementa e non si perde.</p></Card>
+          <Card title="Il taglio" kind="w"><p>Se il tempo manca, si toglie una funzione intera, non si fanno tutte a metà.</p></Card>
+        </div>
+        <Box type="warn" title="Attenzione">L'agente propone volentieri qualcosa in più: un'opzione, un controllo, un refactoring. Chiedetevi se rientra nei criteri prima di dire sì.</Box>
+      </div>
+    ),
+    notes: "Il rischio dell'ultima giornata è allargare il progetto. L'agente tende a offrire altro lavoro e un progetto che a tre quarti d'ora dalla fine ha una funzione in più e due criteri che non passano è peggio di uno più piccolo e finito. Il docente aiuta a tagliare, non ad aggiungere."
+  },
+  {
+    block: B + 'Skill e hook',
+    content: () => (
+      <div className="pad">
+        <Tag>Il metodo</Tag>
+        <h2>Skill e hook lavorano per voi</h2>
+        <div className="grid">
+          <Card title="La skill di revisione"><p>Lanciatela sul diff di ogni passo, prima del commit. Distingue problemi confermati, rischi da verificare e aspetti non controllati: leggete tutte e tre le parti.</p></Card>
+          <Card title="L'hook" kind="i"><p>I test partono dopo ogni modifica, oppure un comando pericoloso viene bloccato. Se non scatta, controllate che sia ancora attivo.</p></Card>
+        </div>
+        <Box type="info" title="Il giudizio di un agente non è una prova">Una revisione che dice "va bene" non sostituisce un test che passa. Alla fine contano i test e quello che avete letto voi.</Box>
+      </div>
+    ),
+    notes: "La skill e l'hook sono quelli scritti nell'incontro 4, nel proprio progetto. Se qualcuno non li ha, ha tempo per sistemarli nei primi minuti ma non di più: il progetto viene prima. Ricordare che in OpenCode il lavoro equivalente dell'hook si fa con un plugin."
+  },
+  {
+    block: B + 'Documentare',
+    content: () => (
+      <div className="pad">
+        <Tag>Documentare</Tag>
+        <h2>Decisioni, verifiche, limiti</h2>
+        <DT cols={['Dove', 'Cosa ci va', 'Domanda di controllo']} rows={[
+          ['README', 'A cosa serve, come si avvia, come si lanciano i test, le decisioni importanti', 'Un collega lo avvia senza chiedervi nulla?'],
+          ['Test', 'Una prova per ogni criterio di accettazione', 'Ogni criterio ha il suo test o il suo comando?'],
+          ['Nota sui limiti', 'Cosa fa, cosa non fa, cosa è stato provato e cosa no', 'Ogni riga è un fatto, non una sensazione?'],
+        ]} />
+        <LabBadge file="nota-sui-limiti.html" label="Modello della nota sui limiti" durata="mezza pagina" />
+      </div>
+    ),
+    notes: "Chiedere ai partecipanti di scrivere la nota sui limiti prima della revisione, non dopo: la revisione a coppie serve anche a controllare che sia onesta. Il modello è un punto di partenza, ogni progetto lo adatta. Il README lo può scrivere l'agente, ma le decisioni importanti le scrive chi le ha prese."
+  },
+  {
+    block: B + 'Revisione incrociata',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Rivedere il progetto di un collega</h2>
+        <ol className="timeline">
+          <li><time>1</time>Si formano le coppie e ci si scambia il PC: dieci minuti a testa.</li>
+          <li><time>2</time>Chi rivede parte dai criteri di accettazione e lancia le prove.</li>
+          <li><time>3</time>Poi legge il diff, la sicurezza e il README, come farebbe chi arriva dopo.</li>
+          <li><time>4</time>Chiude con tre osservazioni: una che regge, un rischio, una cosa da sistemare.</li>
+        </ol>
+        <LabBadge file="griglia-revisione.html" label="Griglia di revisione incrociata" durata="indicativo: 20 min" />
+        <p className="muted" style={{ marginTop: 10 }}>Chi rivede non modifica il progetto dell'altro: annota. Le correzioni si fanno nel proprio tempo.</p>
+      </div>
+    ),
+    notes: "Venti minuti in totale per la coppia. Chi rivede può usare la propria skill di revisione sul progetto dell'altro, ma la lettura del diff e le prove a mano sono sue. Il punto è vedere il progetto con occhi nuovi: spesso la prima osservazione è un comando del README che non funziona."
+  },
+  {
+    block: B + 'Le presentazioni',
+    content: () => (
+      <div className="pad">
+        <Tag>Presentazione</Tag>
+        <h2>Tre minuti, cinque punti</h2>
+        <ol className="steps">
+          <li><b>1. Il problema.</b> Che lavoro o che errore, e per chi.</li>
+          <li><b>2. I criteri di accettazione.</b> Quali prove, quante passano oggi.</li>
+          <li className="w"><b>3. Una decisione presa.</b> Una scelta vostra, non dell'agente.</li>
+          <li className="i"><b>4. La prova più convincente.</b> Un comando e il suo risultato, dal vivo.</li>
+          <li><b>5. Un limite noto.</b> Una cosa che non fa o che non avete provato.</li>
+        </ol>
+        <LabBadge file="presentazione-5-punti.html" label="Presentazione in cinque punti" durata="3 min a testa" />
+      </div>
+    ),
+    notes: "Niente slide da preparare: si mostra il progetto sul PC. Chi arriva al limite noto con un progetto perfetto deve cercare meglio: un progetto senza limiti dichiarati è un progetto non guardato. Dopo ogni presentazione al più una domanda dal pubblico."
+  },
+  {
+    block: B + 'Il timer',
+    content: () => (
+      <div className="pad">
+        <Tag>Presentazione</Tag>
+        <h2>Il tempo è di tutti</h2>
+        <Timer secondi={180} />
+        <p className="muted" style={{ textAlign: 'center' }}>Premete Via quando comincia chi presenta. Negli ultimi 30 secondi il numero cambia colore e il testo lo dice.</p>
+      </div>
+    ),
+    notes: "Timer semplice a tre minuti: Via, Pausa, Azzera. Se il numero è troppo piccolo in aula, usare lo schermo intero con il tasto F. Quando scade non succede niente di forzato: chi sta presentando chiude la frase. Le cifre sono l'unica cosa che si muove nella schermata."
+  },
+  {
+    block: B + 'Agente e persona',
+    content: () => (
+      <div className="pad">
+        <Tag>Presentazione</Tag>
+        <h2>Cosa ha fatto l'agente, cosa avete deciso</h2>
+        <DT cols={['L\'ha fatto l\'agente', 'L\'avete deciso voi']} rows={[
+          ['Ha scritto la maggior parte del codice', 'Quali funzioni c\'erano nella prima versione e quali sono state tagliate'],
+          ['Ha proposto il piano e i test', 'Quale piano approvare e cosa cambiare prima di approvarlo'],
+          ['Ha detto "fatto" e riassunto il lavoro', 'Cosa conta come "fatto": i criteri e le prove'],
+          ['Ha suggerito librerie e formati', 'Quali accettare, quali rifiutare, e perché'],
+        ]} />
+        <Box type="tip" title="Per la presentazione">Se la "decisione presa" è difficile da trovare, guardate dove avete detto no all'agente.</Box>
+      </div>
+    ),
+    notes: "Distinguere i due piani è lo scopo del punto 3 della presentazione. Non è una gara a chi ha scritto più codice a mano: è mostrare di aver tenuto il controllo. Chi dice 'ha fatto tutto l'agente' va aiutato a ritrovare le proprie scelte: i tagli, i criteri, i rifiuti."
+  },
+  {
+    block: B + 'Chiusura del racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il racconto</Tag>
+        <h2>Dal PC al servizio di ogni giorno</h2>
+        <div role="group" aria-label="Dal programma che funziona sul PC al servizio usato ogni giorno: sei cose in più">
+          <Flow label="Cosa avete oggi" nodes={[
+            ['Funziona sul PC', 'a voi, con dati inventati'], ['Test e README', 'una prova per criterio'], ['Nota sui limiti', 'cosa non è provato', 'i'],
+          ]} />
+          <p className="join" aria-hidden="true">&darr; per essere usato ogni giorno servono anche</p>
+          <Flow label="Cosa serve alla scuola" nodes={[
+            ['Backup', 'copie che si sanno ripristinare', 'w'], ['Guida', 'per chi lo gestisce dopo di voi'], ['Rete', 'dove sta e chi lo raggiunge'], ['Privacy', 'quali dati contiene davvero'],
+          ]} />
+        </div>
+        <Box type="warn" title="Ancora aperto">Nei portali della scuola il ripristino completo da backup non è stato ancora provato.</Box>
+      </div>
+    ),
+    notes: "Chiusura del racconto, circa dieci minuti. Il primo portale è nato in due giorni sui server personali; la strada fino al server della scuola è stata più lunga: guida di gestione, copie di sicurezza, rete, trattamento dei dati personali. Oggi Prenota Risorse è online e in uso, mentre FSL e Viaggi sono in prova. Dire con onestà cosa manca: il ripristino completo da backup non è ancora stato provato. Nessun dettaglio di rete o di configurazione. Collegare il tutto al loro progetto: la nota sui limiti è la versione piccola di questa lista."
+  },
+  {
+    block: B + 'Cosa si porta a casa',
+    content: () => (
+      <div className="pad">
+        <Tag>Chiusura</Tag>
+        <h2>Cosa portare a casa</h2>
+        <ul>
+          <li>Il vostro progetto sul PC della scuola, con <code className="nw">README</code>, test e una nota sui limiti.</li>
+          <li>Il ciclo specifica, piano, sviluppo, test, revisione, commit: lo avete applicato da soli.</li>
+          <li>Il confine: l'obiettivo fissato, la lista del dopo, il coraggio di tagliare.</li>
+          <li>La distinzione fra ciò che ha fatto l'agente e ciò che avete deciso voi.</li>
+        </ul>
+        <Box type="info" title="Il progetto resta dov'è">Il lavoro rimane sul PC della scuola: niente remote, niente copie su servizi esterni, niente dati reali.</Box>
+      </div>
+    ),
+    notes: "Riprendere i quattro punti e ricordare che nulla esce dalla scuola. Chi vuole continuare a casa con un proprio progetto lo fa con codice e dati propri, fuori dal corso: qui non c'è nessun trasferimento."
+  },
+  {
+    block: B + 'Dove continuare',
+    content: () => (
+      <div className="pad">
+        <Tag>Dopo il corso</Tag>
+        <h2>Dove continuare</h2>
+        <div className="grid">
+          <Card title="Argomento 11"><p>Il rilascio mobile in autopilota: una catena con cancelli di verifica, letta come esempio di agenti e revisione messi insieme.</p></Card>
+          <Card title="Argomento 12" kind="i"><p>L'helpdesk email in autopilota: un agente che lavora su input non fidati. Prompt injection, superficie d'azione stretta, prova a secco.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 12 }}>Sono due approfondimenti fuori dal percorso fisso: l'11 conviene dopo gli argomenti 7-10, il 12 dopo il 6, l'8 e l'11. Ogni argomento ha slide ed esercizi propri.</p>
+        <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+      </div>
+    ),
+    notes: "Gli argomenti 11 e 12 non fanno parte dei cinque incontri: sono casi di studio per chi vuole andare oltre. L'argomento 12 conviene dopo il 6, l'8 e l'11. Costruire agenti da zero con le API o collegarli a sistemi reali della scuola resta fuori da questo corso e può diventare un secondo corso."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

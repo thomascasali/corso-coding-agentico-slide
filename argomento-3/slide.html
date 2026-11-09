@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 3 · Dalla richiesta ai requisiti · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 3 — Dalla richiesta ai requisiti · ';
+
+const CRITERIO = String.raw`Dato:    il 2026-12-24 è un giorno di chiusura (elenco "chiusure" in dati/dati.json)
+Quando:  si prenota LAB-INF1 il 2026-12-24, dalle 09:00 alle 11:00
+Allora:  la richiesta è rifiutata con il codice GIORNO_DI_CHIUSURA
+         e nessuna prenotazione viene aggiunta
+
+$ node cli.js prenota --lab LAB-INF1 --docente d01 --classe 3A-INF --data 2026-12-24 --inizio 09:00 --fine 11:00
+RIFIUTATA (GIORNO_DI_CHIUSURA): Il 2026-12-24 la scuola è chiusa.`;
+
+const PROMPT_ESPLORA = String.raw`Siamo in modalità piano: non modificare nulla.
+Leggi il README, src/logica.js e i test. Poi dimmi:
+1. quali regole di prenotazione esistono già e in quale file stanno;
+2. cosa dovrebbe cambiare per aggiungere le prenotazioni ricorrenti;
+3. cosa non sai e dovrei decidere io.
+Non proporre ancora codice.`;
+
+const PIANO = String.raw`Piano: prenotazioni ricorrenti (esempio scritto per questa slide)
+1. Aggiungere a prenota() un parametro "ricorrenza".
+2. Generare una data a settimana per 52 settimane.
+3. Per ogni data chiamare controllaRichiesta() e salvare.
+4. Se la data cade in un giorno di chiusura, passare alla successiva.
+5. Se una data è occupata, saltarla e continuare.
+6. Aggiungere un test per la serie settimanale.
+7. Aggiornare il README.`;
+
+const PROMPT_IPOTESI = String.raw`Prima di scrivere codice:
+- elenca come IPOTESI ogni regola che stai assumendo e che io non ti ho dato;
+- per ogni ipotesi fai una domanda, con le risposte possibili;
+- non andare avanti finché non ti rispondo.`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="3" titolo="Dalla richiesta ai requisiti"
+        sottotitolo="Prima di far scrivere codice all'agente si decide che cosa deve fare e come si saprà che l'ha fatto."
+        caso="Il caso: un portale costruito in cinque tappe, e una richiesta di due righe."
+        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
+    ),
+    notes: "Si parte da una richiesta di due righe, come ne arrivano davvero a un ufficio tecnico. Un agente la eseguirebbe subito. Il lavoro di questo argomento sta prima: capire che cosa si sta chiedendo e come si controllerà il risultato. Tutto si prova sulla palestra, l'app di prenotazione dei laboratori con dati inventati."
+  },
+  {
+    block: B + 'La richiesta',
+    content: () => (
+      <div className="pad">
+        <Tag>Il punto di partenza</Tag>
+        <h2>Due righe e un grazie</h2>
+        <blockquote style={{ borderLeft: '5px solid var(--accent)', padding: '6px 16px', margin: '8px 0 14px', maxWidth: 'none' }}>
+          <p style={{ maxWidth: 'none' }}>«Buongiorno, i docenti ci chiedono di poter prenotare i laboratori in modo ricorrente, perché ogni settimana ripetono la stessa cosa. Potete aggiungere le prenotazioni ricorrenti? Grazie.»</p>
+          <p className="muted">Messaggio inventato per l'esercizio. Dice tutto quello che la vicepresidenza ha da dire.</p>
+        </blockquote>
+        <div className="grid">
+          <Card title="Che cosa farebbe l'agente" kind="w"><p>Scrive il codice in pochi minuti. Funziona. E decide da solo tutto quello che il messaggio non dice.</p></Card>
+          <Card title="Provate voi" kind="i"><p>Scrivete su un foglio tre domande che fareste alla vicepresidenza prima di toccare il codice.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Lasciare qualche istante perché ognuno scriva le sue tre domande: servono dopo, per il confronto con quello che l'agente chiede o non chiede. Non anticipare le risposte. Il messaggio è inventato, come tutti i dati della palestra."
+  },
+  {
+    block: B + 'Quattro cose diverse',
+    content: () => (
+      <div className="pad">
+        <Tag>Concetti</Tag>
+        <h2>Desideri, requisiti, vincoli, criteri</h2>
+        <DT cols={['Livello', 'A che serve', 'Esempio dalle ricorrenti']} rows={[
+          ['Desiderio', 'Quello che la persona vuole, con le sue parole.', '«Non voglio riscrivere ogni settimana la stessa prenotazione.»'],
+          ['Requisito', 'Che cosa deve fare il sistema, in modo che si possa rispondere sì o no.', 'Una serie crea una prenotazione per ogni data, e ognuna rispetta le regole di sempre.'],
+          ['Vincolo', 'Un limite che viene da fuori e non si discute.', 'Node.js senza dipendenze da installare; i test non scrivono nei dati.'],
+          ['Criterio di accettazione', 'Un caso con dati e un esito che si può eseguire.', 'Lo vediamo tra poco, con un esempio.'],
+        ]} />
+      </div>
+    ),
+    notes: "Quattro livelli che nella richiesta vaga sono mescolati. Il desiderio resta quello di chi chiede; il requisito è la versione controllabile; il vincolo non è negoziabile (si legge nel README della palestra: Node 20, nessuna dipendenza); il criterio permette di dire 'fatto'. L'agente aiuta a sistemarli, ma non sa quali vincoli ha davvero la scuola."
+  },
+  {
+    block: B + 'Dalla domanda al criterio',
+    content: () => (
+      <div className="pad">
+        <Tag>Il percorso</Tag>
+        <h2>Si passa per le domande</h2>
+        <div role="group" aria-label="Quattro passaggi: desiderio, domande, requisiti e vincoli, criteri di accettazione">
+          <Flow nodes={[
+            ['1 Desiderio', 'le parole di chi chiede'],
+            ['2 Domande', 'che cosa manca e a chi chiederlo', 'w'],
+            ['3 Requisiti e vincoli', 'scritti, uno per riga'],
+            ['4 Criteri', 'esempi con un esito', 'i'],
+          ]} />
+        </div>
+        <p className="legend">Giallo: qui decide una persona. Verde: dove l'agente aiuta di più.</p>
+        <Box type="info" title="Chi risponde">L'agente può aiutare a formulare le domande. Le risposte le dà chi conosce la scuola e ha fatto la richiesta.</Box>
+      </div>
+    ),
+    notes: "Il passaggio centrale è il secondo. Si scrive la domanda, si porta alla persona giusta, si annota la risposta nella specifica. Il lavoro che l'agente fa bene è il quarto (trasformare una decisione in esempi con un esito), purché le decisioni siano già prese."
+  },
+  {
+    block: B + 'Un buon criterio',
+    content: () => (
+      <div className="pad">
+        <Tag>Criteri di accettazione</Tag>
+        <h2>Che cosa lo rende buono</h2>
+        <div className="grid">
+          <Card title="Un caso solo"><p>Una situazione per criterio. Se ce ne sono due, sono due criteri.</p></Card>
+          <Card title="Dati concreti"><p>Date, orari, nomi, numeri. Non «un giorno festivo»: il 24 dicembre 2026.</p></Card>
+          <Card title="Esito osservabile" kind="i"><p>Un messaggio, un codice, un conteggio. Qualcosa che si legge, non che si intuisce.</p></Card>
+          <Card title="Si può eseguire" kind="i"><p>Un comando o un test lo verifica, senza una persona che giudica.</p></Card>
+        </div>
+        <div className="grid" style={{ marginTop: 14 }}>
+          <Card title="Da evitare" kind="d"><p>«La serie gestisce bene i giorni di chiusura.»</p></Card>
+          <Card title="Meglio"><p>«Se una data della serie è il 24/12/2026, il sistema risponde GIORNO_DI_CHIUSURA e non crea nulla.»</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Il test pratico: un criterio è buono se due persone diverse, leggendolo, prevedono lo stesso esito. 'Gestisce bene' non lo permette. Il secondo esempio però contiene già una decisione (rifiutare, e rifiutare tutto): è il tipo di scelta che qualcuno deve fare e scrivere."
+  },
+  {
+    block: B + 'Esempio dalla palestra',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempio</Tag>
+        <h2>Un criterio che si può eseguire</h2>
+        <pre aria-label="Criterio di accettazione e comando di prova">{CRITERIO}</pre>
+        <p className="muted">Questa regola esiste già nella palestra per le prenotazioni singole. Scritta così, è anche la prova che una modifica non l'ha rotta.</p>
+        <Box type="tip" title="Dal criterio al test">Dato, quando, allora diventano le tre parti di un test: preparo i dati, eseguo, controllo l'esito. È il tema dell'argomento 5.</Box>
+      </div>
+    ),
+    notes: "Si può eseguire il comando dal vivo: la risposta è RIFIUTATA (GIORNO_DI_CHIUSURA). Il 24 dicembre 2026 è nell'elenco 'chiusure' del file dei dati. Il punto è la forma: tre righe, dati concreti, un esito che si legge nel terminale."
+  },
+  {
+    block: B + 'Modalità piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Claude Code</Tag>
+        <h2>La modalità piano, di nuovo</h2>
+        <div className="grid">
+          <Card title="Dall'argomento 1"><p>Legge, esplora e propone; le modifiche restano bloccate finché non si approva. Si entra con <code className="nw">Shift+Tab</code> o <code className="nw">/plan</code>.</p></Card>
+          <Card title="Oggi: usarla per decidere" kind="i"><p>Non per approvare in fretta: per far emergere ipotesi e domande. Il piano non si approva finché la specifica non risponde.</p></Card>
+          <Card title="Correggere prima" kind="i"><p><code className="nw">Ctrl+G</code> apre il piano in un editor; «No, keep planning» lo rimanda indietro con le vostre correzioni.</p></Card>
+        </div>
+        <Box type="warn" title="Il blocco ha un limite">Se la sessione è avviata con i permessi di bypass disponibili, l'agente è solo istruito a non modificare: i blocchi non sono applicati. Dopo il piano si controlla comunque con <code className="nw">git status</code>.</Box>
+        <p className="muted">Verificato il 9/11/2026 su <a className="text-link" href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>code.claude.com/docs/en/permission-modes</a>. Le funzioni cambiano in fretta: riverificare prima di citarle.</p>
+      </div>
+    ),
+    notes: "Fonti: pagine 'Plan mode' (permission-modes) e 'Plan before editing' (common-workflows) della documentazione di Claude Code, lette il 9 novembre 2026. Per uscire dalla modalità senza approvare si preme di nuovo Shift+Tab. Durante la pianificazione l'agente può anche eseguire comandi di sola lettura per esplorare. Il modello dietro l'agente lo sceglie il router del laboratorio: la modalità piano è una funzione dello strumento, ma la qualità del piano cambia con il modello. Se la demo non rende, c'è un piano registrato."
+  },
+  {
+    block: B + 'Esplorare il repository',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima il codice, poi il piano</Tag>
+        <h2>Far esplorare, senza modificare</h2>
+        <pre aria-label="Esempio di prompt di esplorazione">{PROMPT_ESPLORA}</pre>
+        <div className="grid">
+          <Card title="Nella risposta controllate" kind="i"><p>Quali file ha letto davvero. Se cita il punto del codice dove sta una regola. Se separa quello che sa da quello che suppone.</p></Card>
+          <Card title="Segnale di allarme" kind="w"><p>«Di solito», «in genere», «probabilmente»: sta indovinando una regola, non l'ha letta.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Prompt di esempio per la palestra; per il progetto personale si cambiano i nomi dei file. La terza domanda (cosa non sai) è quella che conta di più: costringe l'agente a separare ciò che ha letto da ciò che sta supponendo. Un esito pulito: git status senza modifiche."
+  },
+  {
+    block: B + 'Un piano controllabile',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere un piano</Tag>
+        <h2>Cosa deve contenere</h2>
+        <div className="grid">
+          <Card title="File che si toccano"><p>Quali, e perché proprio quelli.</p></Card>
+          <Card title="Passi in ordine"><p>Piccoli, ognuno con un risultato.</p></Card>
+          <Card title="Come si verifica" kind="i"><p>Per ogni passo, la prova: un test, un comando.</p></Card>
+          <Card title="Ipotesi dichiarate" kind="w"><p>Ciò che ha assunto senza che glielo si dicesse.</p></Card>
+          <Card title="Domande aperte" kind="w"><p>Ciò che deve decidere una persona.</p></Card>
+          <Card title="Cosa non si fa" kind="d"><p>I confini: file, dati e comportamenti da non toccare.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Un piano senza le ultime quattro voci è una lista di cose da fare, non un piano da approvare.</p>
+      </div>
+    ),
+    notes: "Lista di lettura per le coppie. Le prime due voci le scrive quasi ogni piano; le ultime quattro sono quelle che mancano più spesso, ed è lì che si nascondono le decisioni prese al posto nostro."
+  },
+  {
+    block: B + 'Un piano da leggere',
+    content: () => (
+      <div className="pad">
+        <Tag>Esercizio di lettura</Tag>
+        <h2>Che cosa manca? Chi l'ha deciso?</h2>
+        <pre aria-label="Piano di esempio per le prenotazioni ricorrenti">{PIANO}</pre>
+        <p>Segnate ogni riga che decide qualcosa che nessuno ha chiesto.</p>
+        <p className="muted">Il piano è scritto per la slide, come potrebbe averlo scritto un agente. Non viene da una sessione reale.</p>
+      </div>
+    ),
+    notes: "Lasciare un minuto di lettura silenziosa. Il piano ha un aspetto ordinato e professionale: è proprio per questo che va letto con attenzione. Non anticipare la slide successiva."
+  },
+  {
+    block: B + 'Regole inventate',
+    content: () => (
+      <div className="pad">
+        <Tag>Chi ha deciso?</Tag>
+        <h2>Tre regole che nessuno ha dato</h2>
+        <DT cols={['Riga', 'Che cosa è stato deciso', 'Che cosa andava chiesto']} rows={[
+          ['2', 'Solo una volta a settimana, per un anno intero.', 'Ogni quanto? Fino a quando: un numero di volte o una data?'],
+          ['4', 'Le chiusure si saltano in silenzio.', 'Si avvisa? Si rifiuta tutta la serie?'],
+          ['5', 'I conflitti non fermano la serie.', 'Tutto o niente, oppure si salvano le date libere?'],
+        ]} />
+        <Box type="warn" title="Perché è pericoloso">Ognuna è una scelta ragionevole, scritta con sicurezza, e il test sul percorso felice passa. Chi approva senza leggere ha deciso lo stesso, ma senza saperlo.</Box>
+      </div>
+    ),
+    notes: "Tre esempi, non l'elenco completo: nella richiesta restano altre domande aperte (chi può annullare o modificare la serie, un massimo di date, il testo degli errori) che le coppie trovano da sole nell'attività. Il punto: l'agente riempie i vuoti con la cosa più probabile. Quasi mai è sbagliata in sé; è sbagliata perché nessuno l'ha scelta."
+  },
+  {
+    block: B + 'Far uscire le ipotesi',
+    content: () => (
+      <div className="pad">
+        <Tag>Una richiesta all'agente</Tag>
+        <h2>Chiedere le ipotesi, per iscritto</h2>
+        <pre aria-label="Prompt per far dichiarare le ipotesi">{PROMPT_IPOTESI}</pre>
+        <div className="grid">
+          <Card title="Le risposte vanno nel file" kind="i"><p>Ogni decisione si scrive nella specifica, non solo nella conversazione. Il piano si rigenera dalla specifica.</p></Card>
+          <Card title="Non basta" kind="w"><p>L'elenco non prova di essere completo: un modello non vede le regole che gli sembrano ovvie. Serve una seconda lettura, umana.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Il prompt funziona meglio con i modelli che seguono bene le istruzioni; con altri l'agente scrive comunque il codice. Se succede, è un risultato da raccontare, non un errore dell'esercizio. La seconda lettura è il confronto a coppie dell'attività."
+  },
+  {
+    block: B + 'Passi verificabili',
+    content: () => (
+      <div className="pad">
+        <Tag>Spezzare</Tag>
+        <h2>Una funzionalità, quattro passi</h2>
+        <div role="group" aria-label="Le ricorrenti in quattro passi, ognuno con la sua prova">
+          <Flow nodes={[
+            ['1 Le date', 'prova: partenza, cadenza e numero danno l\'elenco atteso'],
+            ['2 Le regole', 'prova: una data di chiusura dà il rifiuto di sempre'],
+            ['3 Le date occupate', 'decisione vostra; prova su un conflitto', 'w'],
+            ['4 Il comando', 'prova: una riga di terminale, a mano e con un test', 'i'],
+          ]} />
+        </div>
+        <p className="legend">Un commit per passo, come nell'argomento 2: se il passo 3 va storto si torna al 2.</p>
+        <p className="muted">È una divisione possibile, non l'unica: scegliete la vostra.</p>
+      </div>
+    ),
+    notes: "L'ordine conta: ogni passo dipende solo dai precedenti. Il passo 3 è evidenziato perché dipende da una decisione che nella richiesta non c'è. Chi ha già deciso nell'attività può spostarlo."
+  },
+  {
+    block: B + 'Un passo verificabile',
+    content: () => (
+      <div className="pad">
+        <Tag>Spezzare</Tag>
+        <h2>Come si riconosce un buon passo</h2>
+        <DT cols={['Domanda', 'Passo da tenere', 'Passo da spezzare']} rows={[
+          ['Si sa quando è finito?', 'Il test X passa.', '«La serie funziona».'],
+          ['Quanto tocca?', 'Una funzione e il suo test.', '«Riscrivere il modulo».'],
+          ['Da che cosa dipende?', 'Dai passi precedenti.', 'Da una decisione ancora aperta.'],
+          ['Si può annullare?', 'Un commit, un git revert.', 'Modifiche sparse in molti file.'],
+        ]} />
+      </div>
+    ),
+    notes: "Quattro domande rapide da fare a ogni passo del piano. Se la risposta sta nella terza colonna, si spezza oppure si torna alla specifica."
+  },
+  {
+    block: B + 'Dal racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il racconto</Tag>
+        <h2>Un portale in cinque tappe</h2>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          <Stat big="5" label="tappe, da M0 a M4" />
+          <Stat big="2 giorni" label="il 15 e il 16 luglio 2026" />
+          <Stat big="105" label="test verdi al termine delle tappe" />
+        </div>
+        <p style={{ marginTop: 12 }}>Il portale FSL non è stato scritto in un blocco: il lavoro è stato diviso in tappe numerate. La domanda per noi è come si divide una funzionalità in pezzi di cui si può dire «questo funziona».</p>
+        <p className="muted">Fonte: appunti di progetto di Thomas e storia git del portale FSL.</p>
+      </div>
+    ),
+    notes: "Qui Thomas racconta come sono nati i requisiti del portale FSL e che cosa conteneva ciascuna tappa. I numeri (cinque tappe, 15 e 16 luglio 2026, 105 test) vengono dagli appunti di progetto e dalla storia git. Dalla storia git: prima della tappa M0 c'è un commit con l'analisi della documentazione e la specifica completa del portale. Il contenuto delle tappe e il modo in cui sono emersi i requisiti lo dice a voce chi racconta. Nessun dato reale, nessun nome."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Ora tocca a voi</h2>
+        <ol className="timeline">
+          <li><time>1</time>A coppie: riscrivete la specifica delle sovrapposizioni finché un'altra coppia la capisce senza domande (indicativo: 20 min).</li>
+          <li><time>2</time>Dalla richiesta sulle ricorrenti alla specifica con i criteri di accettazione (indicativo: 25 min).</li>
+          <li><time>3</time>Il piano in modalità piano, con <code className="nw">git status</code> pulito (indicativo: 15 min).</li>
+          <li><time>4</time>Confronto a coppie: che cosa manca, che cosa è stato deciso al posto vostro (indicativo: 15 min).</li>
+        </ol>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          <ActivityBadge n="3" file="scheda-attivita.html" label="Scheda dell'attività" durata="indicativo: 75 min" />
+          <ActivityBadge n="3" file="modello-specifica.html" label="Modello di specifica" durata="da compilare" />
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Poi lo stesso percorso sul vostro progetto personale (indicativo: 35 min).</p>
+      </div>
+    ),
+    notes: "Partenza: git switch -c lavoro-a3 partenza-a3. I due file di partenza stanno in docs/. Le durate sono stime degli esercizi. Il confronto a coppie conta quanto la scrittura: scambiarsi le specifiche e i piani e cercare cosa manca."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Nel piano proposto dall'agente c'è scritto: «se una data della serie cade in un giorno di chiusura, la salto». Che cosa conviene fare?" opzioni={[
+          { t: 'Lasciarla: è ragionevole e il piano non modifica ancora nulla.', ok: false, perche: 'Il piano non scrive file, ma se lo approvate la regola entra nel codice. La scelta spetta a chi conosce la scuola.' },
+          { t: 'Segnarla come decisione aperta, chiedere a chi ha fatto la richiesta e scrivere la risposta nella specifica con un criterio.', ok: true, perche: 'La regola diventa la scelta di una persona e un caso che si può eseguire.' },
+          { t: 'Chiedere all\'agente perché l\'ha scelta e fidarsi della spiegazione.', ok: false, perche: 'La spiegazione sarà plausibile qualunque sia la regola: non è una fonte.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione. Il punto non è se saltare o rifiutare: è chi decide e dove resta scritto."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Una richiesta vaga contiene desideri. Requisiti, vincoli e criteri si chiedono e si scrivono.',
+          'Un criterio di accettazione è un caso con dati concreti e un esito che si può eseguire.',
+          'Esplorare e pianificare in modalità piano, poi controllare con git status.',
+          'Ogni regola del piano che nessuno ha dato è una domanda aperta, non un dettaglio.',
+          'Ogni passo del piano si chiude con una prova.',
+        ]}
+        dopo="Argomento 4: le istruzioni persistenti (CLAUDE.md e AGENTS.md), dove restano scritte le regole decise qui. Argomento 5: i criteri di accettazione diventano test che l'agente esegue." />
+    ),
+    notes: "Ripresa dei cinque punti e domande. Le decisioni prese oggi vanno scritte in un file del progetto: è il collegamento con l'argomento 4. I criteri di accettazione sono la materia prima dei test dell'argomento 5."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

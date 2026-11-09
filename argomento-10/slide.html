@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 10 · Costi e contesto · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+
+/* componenti propri dell'argomento 10: diagramma dei giri e calcolatrice (colori del tema, nessuna animazione) */
+  .gr { display: grid; grid-template-columns: 5.2em 1fr 4.6em; gap: 10px; align-items: center; margin-bottom: 6px; }
+  .gl, .gv { font-size: var(--fs-sm); color: var(--muted); }
+  .gv { text-align: right; font-family: var(--mono); font-size: var(--fs-xs); color: var(--text); }
+  .gt { display: flex; height: 22px; border: 1px solid var(--border); background: var(--panel); border-radius: 4px; overflow: hidden; }
+  .gt i { display: block; height: 100%; }
+  .old { background: repeating-linear-gradient(45deg, var(--border) 0 4px, var(--panel) 4px 8px); }
+  .new { background: var(--accent); }
+  .sw { display: inline-block; width: 22px; height: 14px; vertical-align: -2px; margin-right: 6px; border: 1px solid var(--border); }
+  .calc { display: grid; gap: 8px; }
+  .calc-top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .calc-btn { font: inherit; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 2px 12px; cursor: pointer; }
+  .calc-btn:hover { border-color: var(--accent); }
+  .calc-btn[aria-pressed="true"] { background: var(--panel-2); border: 2px solid var(--accent); padding: 1px 11px; }
+  .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; }
+  .ctl { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.2; }
+  .ctl b { color: var(--accent); font-weight: 700; }
+  .ctl input[type=range] { display: block; width: 100%; accent-color: var(--accent); margin-top: 2px; }
+  .ctl select { display: block; width: 100%; font: inherit; font-size: var(--fs-xs); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; margin-top: 2px; }
+  .ctl.chk { display: flex; align-items: center; gap: 8px; color: var(--text); }
+  .ctl.chk input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .cb { display: grid; grid-template-columns: 7em 1fr 7.5em; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--muted); margin-bottom: 4px; }
+  .cb b { color: var(--text); font-family: var(--mono); font-size: var(--fs-xs); text-align: right; }
+  .cbt { display: block; height: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+  .cbt i { display: block; height: 100%; background: var(--accent); }
+  .cbt i.d { background: var(--danger); }
+  .calc .stat b { font-size: var(--fs-lead); }
+  @media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr 1fr; } .cb { grid-template-columns: 5.5em 1fr 6.5em; } }
+  @media (max-width: 600px) { .calc-grid { grid-template-columns: 1fr; } .gr { grid-template-columns: 4.2em 1fr 4.4em; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 10 — Costi e contesto · ';
+
+/* Fonte con data di consultazione: i listini e la documentazione cambiano in fretta */
+const Fonte = ({ href, children, cosa = 'documentazione' }) => (
+  <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>{children}</a>, {cosa}, consultata il 9 novembre 2026.</p>
+);
+
+const eur = n => n.toLocaleString('it-IT');
+
+/* ---------- diagramma: il contesto rimandato a ogni giro ---------- */
+function GiriCresce() {
+  /* [giro, token inviati, di cui gia' inviati nel giro prima]. Valori di esempio: contesto iniziale 20.000,
+     2.000 token di novita' in ingresso e 500 in uscita a ogni giro. */
+  const righe = [[1, 22000, 0], [2, 24500, 22000], [3, 27000, 24500], [4, 29500, 27000], [5, 32000, 29500]];
+  const max = 32000;
+  return (
+    <div role="img" aria-label="Cinque giri di una sessione: la richiesta cresce da 22.000 a 32.000 token e a ogni giro la parte già inviata nel giro precedente viene rimandata per intero">
+      {righe.map(([g, tot, vecchio]) => (
+        <div className="gr" key={g} aria-hidden="true">
+          <span className="gl">Giro {g}</span>
+          <div className="gt">
+            <i className="old" style={{ width: (vecchio / max * 100) + '%' }} />
+            <i className="new" style={{ width: ((tot - vecchio) / max * 100) + '%' }} />
+          </div>
+          <span className="gv">{eur(tot)}</span>
+        </div>
+      ))}
+      <p className="legend" style={{ marginTop: 8 }}>
+        <span className="sw old" aria-hidden="true"></span> già inviato nel giro prima, rimandato per intero
+        <span className="sw new" aria-hidden="true" style={{ marginLeft: 16 }}></span> novità del giro
+      </p>
+    </div>
+  );
+}
+
+/* ---------- calcolatrice del costo di una sessione ---------- */
+/* Prezzi: dollari per milione di token, listini pubblici consultati il 9 novembre 2026.
+   Anthropic: platform.claude.com/docs/en/about-claude/pricing (scrittura in cache = quella da 5 minuti).
+   DeepSeek: api-docs.deepseek.com/quick_start/pricing (la pagina indica solo ingresso con cache e senza, e uscita:
+   qui la "scrittura" vale quanto l'ingresso senza cache). Haiku 5.5 sopra i 100.000 token del prompt ha un listino piu' alto. */
+const PREZZI = [
+  { id: 'haiku', nome: 'Haiku 5.5', i: 0.10, w: 0.125, r: 0.01, o: 0.50, alto: { i: 0.50, w: 0.625, r: 0.05, o: 2.50 } },
+  { id: 'sonnet', nome: 'Sonnet 5.5', i: 2, w: 2.5, r: 0.10, o: 10 },
+  { id: 'opus', nome: 'Opus 5.5', i: 4, w: 5, r: 0.20, o: 20 },
+  { id: 'fable', nome: 'Fable 5.1', i: 10, w: 12.5, r: 0.25, o: 50 },
+  { id: 'dsoff', nome: 'DeepSeek Flash, fuori orario di punta', i: 0.15, w: 0.15, r: 0.003, o: 0.60 },
+  { id: 'dspicco', nome: 'DeepSeek Flash, orario di punta', i: 0.30, w: 0.30, r: 0.006, o: 1.20 },
+];
+const SOGLIA_ALTA = 100000;   /* Haiku 5.5: prompt oltre questa soglia */
+const RIASSUNTO = 5000;       /* token del riassunto prodotto da una compattazione: valore d'esempio */
+
+/* Costo in dollari di una richiesta: ingresso totale, parte gia' in cache, uscita. */
+function costoRichiesta(p, ingresso, inCache, uscita, cache) {
+  const t = (p.alto && ingresso > SOGLIA_ALTA) ? p.alto : p;
+  if (!cache) return (ingresso * t.i + uscita * t.o) / 1e6;
+  const letti = Math.min(inCache, ingresso);
+  return (letti * t.r + (ingresso - letti) * t.w + uscita * t.o) / 1e6;
+}
+
+/* Simula la sessione giro per giro. s = { giri, c0, nuovi, out, pause, tetto }.
+   Ogni giro e' una richiesta con tutta la storia; la cache copre il prefisso gia' inviato (si azzera con una pausa
+   oltre i 5 minuti e dopo una compattazione); se il contesto supera il tetto, prima parte una richiesta di
+   compattazione che produce un riassunto di RIASSUNTO token. */
+function stimaSessione(p, s, cache) {
+  const pause = new Set();
+  for (let k = 0; k < s.pause; k++) pause.add(Math.round((k + 1) * s.giri / (s.pause + 1)));
+  let costo = 0, inCache = 0, storia = s.c0, inviati = 0, nuovi = s.c0, richieste = 0, compattazioni = 0;
+  for (let i = 1; i <= s.giri; i++) {
+    let ing = storia + s.nuovi;
+    if (s.tetto && ing > s.tetto) {
+      costo += costoRichiesta(p, ing, inCache, RIASSUNTO, cache);
+      inviati += ing; richieste++; compattazioni++;
+      storia = s.c0 + RIASSUNTO; inCache = 0; ing = storia + s.nuovi;
+    }
+    if (pause.has(i)) inCache = 0;
+    costo += costoRichiesta(p, ing, inCache, s.out, cache);
+    inviati += ing; richieste++; nuovi += s.nuovi + s.out;
+    inCache = ing; storia = ing + s.out;
+  }
+  return { costo, inviati, nuovi, richieste, compattazioni };
+}
+
+const dollari = n => '$' + n.toLocaleString('it-IT', { minimumFractionDigits: n < 0.1 ? 4 : 3, maximumFractionDigits: n < 0.1 ? 4 : 3 });
+
+const PRESET = {
+  A: { nome: 'A. Correggere un difetto', giri: 12, c0: 20000, nuovi: 2000, out: 400, pause: 0, tetto: 0 },
+  B: { nome: 'B. Nuova funzione con test', giri: 60, c0: 20000, nuovi: 2500, out: 500, pause: 2, tetto: 0 },
+  C: { nome: 'C. Giornata intera', giri: 150, c0: 20000, nuovi: 2500, out: 500, pause: 6, tetto: 200000 },
+};
+
+function Controllo({ etichetta, valore, children }) {
+  return <label className="ctl"><span>{etichetta}: <b>{valore}</b></span>{children}</label>;
+}
+
+function CalcolatriceSessione() {
+  const [s, setS] = useState(PRESET.B);
+  const [modello, setModello] = useState('sonnet');
+  const [cache, setCache] = useState(true);
+  const [preset, setPreset] = useState('B');
+  const p = PREZZI.find(x => x.id === modello);
+  const set = (k, v) => { setS(o => ({ ...o, [k]: v })); setPreset(null); };
+  const r = stimaSessione(p, s, cache);
+  const senza = stimaSessione(p, s, false);
+  const con = stimaSessione(p, s, true);
+  const max = Math.max(r.costo, senza.costo, con.costo, 1e-9);
+  const num = (k, min, max2, step, unit) => (
+    <input type="range" min={min} max={max2} step={step} value={s[k]} onChange={e => set(k, +e.target.value)} />
+  );
+  return (
+    <div className="calc">
+      <div className="calc-top">
+        <span className="muted">Parti da:</span>
+        {Object.entries(PRESET).map(([k, v]) => (
+          <button key={k} className="calc-btn" aria-pressed={preset === k} onClick={() => { setS(v); setPreset(k); }}>{v.nome}</button>
+        ))}
+      </div>
+      <div className="calc-grid">
+        <label className="ctl"><span>Modello</span>
+          <select value={modello} onChange={e => setModello(e.target.value)}>
+            {PREZZI.map(x => <option key={x.id} value={x.id}>{x.nome}</option>)}
+          </select>
+        </label>
+        <Controllo etichetta="Giri (richieste)" valore={s.giri}>{num('giri', 1, 300, 1)}</Controllo>
+        <Controllo etichetta="Contesto iniziale" valore={eur(s.c0) + ' tok'}>{num('c0', 5000, 60000, 1000)}</Controllo>
+        <Controllo etichetta="Novità per giro (ingresso)" valore={eur(s.nuovi) + ' tok'}>{num('nuovi', 200, 8000, 100)}</Controllo>
+        <Controllo etichetta="Uscita per giro" valore={eur(s.out) + ' tok'}>{num('out', 100, 3000, 50)}</Controllo>
+        <Controllo etichetta="Pause oltre i 5 minuti" valore={s.pause}>{num('pause', 0, 10, 1)}</Controllo>
+        <label className="ctl"><span>Compattazione</span>
+          <select value={s.tetto} onChange={e => set('tetto', +e.target.value)}>
+            <option value={0}>mai</option>
+            <option value={200000}>oltre 200.000 token</option>
+            <option value={100000}>oltre 100.000 token</option>
+          </select>
+        </label>
+        <label className="ctl chk"><input type="checkbox" checked={cache} onChange={e => setCache(e.target.checked)} /> <span>Cache dei prompt attiva</span></label>
+      </div>
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }} aria-live="polite">
+        <Stat big={eur(r.richieste)} label={'richieste al modello' + (r.compattazioni ? ' (' + r.compattazioni + ' compattazioni)' : '')} />
+        <Stat big={eur(r.inviati)} label="token inviati in ingresso, in tutto" />
+        <Stat big={eur(r.nuovi)} label="token nuovi (novità e uscita)" />
+        <Stat big={dollari(r.costo)} label={'costo stimato, ' + p.nome} />
+      </div>
+      <div>
+        <div className="cb"><span>Con cache</span><span className="cbt"><i style={{ width: (con.costo / max * 100) + '%' }} /></span><b>{dollari(con.costo)}</b></div>
+        <div className="cb"><span>Senza cache</span><span className="cbt"><i className="d" style={{ width: (senza.costo / max * 100) + '%' }} /></span><b>{dollari(senza.costo)}</b></div>
+      </div>
+      <p className="legend">Valori di esempio, non misurati. Prezzi in dollari dai listini pubblici del 9 novembre 2026. Ragionamento, subagenti e tentativi ripetuti non sono inclusi.</p>
+    </div>
+  );
+}
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="10" titolo="Costi e contesto"
+        sottotitolo="Quanto costa una sessione con un agente, perché cresce più di quanto sembra e come si tiene sotto controllo."
+        caso="Il caso: un bot che tra agosto e settembre 2026 ha speso 1,55 dollari senza che nessuno l'avesse deciso."
+        prima={<>argomento 1 (<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>Dal chatbot all'agente</a>): finestra di contesto, <code>/context</code>, <code>/compact</code>.</>} />
+    ),
+    notes: "Si parte dalla cifra, piccola di proposito: 1,55 dollari. Il problema non fu l'importo ma il meccanismo, che con un altro volume o un altro modello avrebbe prodotto un'altra cifra. L'argomento va in tre mosse: che cosa si paga, come si stima, che cosa è successo. I prezzi vengono dai listini pubblici consultati il 9 novembre 2026 e cambiano spesso; i parametri della calcolatrice sono esempi dichiarati, non misure. Il modello dietro Claude Code in aula lo sceglie il router del laboratorio: il metodo di stima vale lo stesso."
+  },
+  {
+    block: B + 'Cosa si paga',
+    content: () => (
+      <div className="pad">
+        <Tag>Token</Tag>
+        <h2>Si paga a token, in quattro voci</h2>
+        <p>Un token è un pezzo di parola. Il fornitore conta quanti ne entrano nel modello e quanti ne escono, e li fa pagare con prezzi diversi.</p>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))' }}>
+          <Card title="Ingresso"><p>Tutto ciò che il modello legge a ogni richiesta: istruzioni, conversazione, file letti, risultati dei comandi.</p></Card>
+          <Card title="Uscita" kind="w"><p>Ciò che scrive: testo, comandi, e il ragionamento, che si paga come uscita. È la voce più cara.</p></Card>
+          <Card title="Scrittura in cache" kind="i"><p>La prima volta che un blocco di ingresso viene memorizzato: costa un quarto in più dell'ingresso normale.</p></Card>
+          <Card title="Lettura dalla cache"><p>Quando lo stesso blocco ritorna: costa una frazione dell'ingresso (tra un decimo e un cinquantesimo, secondo il modello).</p></Card>
+        </div>
+        <Box type="info" title="Stesso testo, token diversi">Anthropic indica che i modelli dalla 4.7 in poi usano un tokenizzatore che produce circa il 30% di token in più, per lo stesso testo, dei modelli precedenti.</Box>
+        <Fonte href="https://platform.claude.com/docs/en/about-claude/pricing">platform.claude.com, pricing</Fonte>
+      </div>
+    ),
+    notes: "Quattro voci, non due: a una sessione di coding pesano soprattutto la lettura e la scrittura in cache, perché il contesto è grande e si ripete. Il ragionamento esteso si fattura come uscita (documentazione di Claude Code sui costi, novembre 2026). I rapporti sono quelli del listino: scrittura in cache da 5 minuti a 1,25 volte l'ingresso; lettura da 1/10 (Haiku 5.5) a 1/50 (DeepSeek Flash) dell'ingresso. Il tokenizzatore: la nota è nella pagina dei prezzi di Anthropic, e conviene ricordarla quando si confrontano modelli."
+  },
+  {
+    block: B + 'Il listino',
+    content: () => (
+      <div className="pad">
+        <Tag>Listino pubblico</Tag>
+        <h2>Quanto costa un milione di token</h2>
+        <DT cols={['Modello', 'Ingresso', 'Scrittura in cache (5 min)', 'Lettura dalla cache', 'Uscita']} rows={[
+          ['Haiku 5.5 (prompt fino a 100.000 token)', '$0,10', '$0,125', '$0,01', '$0,50'],
+          ['Sonnet 5.5', '$2', '$2,50', '$0,10', '$10'],
+          ['Opus 5.5', '$4', '$5', '$0,20', '$20'],
+          ['Fable 5.1', '$10', '$12,50', '$0,25', '$50'],
+          ['DeepSeek Flash, fuori orario di punta', '$0,15', 'come l\'ingresso', '$0,003', '$0,60'],
+        ]} />
+        <p className="muted">Haiku 5.5 con prompt oltre i 100.000 token passa a $0,50 di ingresso e $2,50 di uscita. DeepSeek raddoppia i prezzi nelle ore di punta (01-04 e 06-10 UTC, giorni feriali).</p>
+        <Fonte href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic, pricing</Fonte>
+        <Fonte href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek, models and pricing</Fonte>
+      </div>
+    ),
+    notes: "Prezzi in dollari per milione di token, dai listini pubblici consultati il 9 novembre 2026. Sono quelli che usa la calcolatrice. Due letture utili: a parità di fornitore Sonnet 5.5 costa 20 volte Haiku 5.5, Opus 5.5 il doppio di Sonnet 5.5 e Fable 5.1 cinque volte; e fra fornitori diversi la differenza arriva a due ordini di grandezza. Il listino DeepSeek indica solo ingresso con cache, ingresso senza cache e uscita: per la scrittura in cache la calcolatrice usa l'ingresso senza cache. Il listino cambia: prima di una stima vera si riapre la pagina del fornitore."
+  },
+  {
+    block: B + 'Il contesto si rimanda',
+    content: () => (
+      <div className="pad">
+        <Tag>Perché cresce</Tag>
+        <h2>A ogni giro il modello rilegge tutto</h2>
+        <div className="cols">
+          <div>
+            <p>Il modello non ricorda nulla fra una richiesta e l'altra. Claude Code rimanda ogni volta il contesto intero: istruzioni, messaggi, file letti, risultati dei comandi. Ogni uso di uno strumento è una nuova richiesta.</p>
+            <p>Per questo una sessione lunga costa più della somma dei messaggi: la coda cambia poco, la testa si ripaga a ogni giro.</p>
+          </div>
+          <GiriCresce />
+        </div>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Il diagramma usa valori di esempio: contesto iniziale di 20.000 token, 2.000 di novità in ingresso e 500 in uscita a ogni giro. Non sono misure di una sessione vera. Secondo la documentazione di Claude Code (novembre 2026) il modello non ricorda nulla fra una richiesta e l'altra e il contesto viene rimandato intero; con la cache la parte invariata si rilegge a prezzo ridotto, ma la si legge comunque. Un'osservazione utile in aula: chi scrive una riga in una sessione aperta da ore paga comunque tutta la conversazione."
+  },
+  {
+    block: B + 'Un esempio a mano',
+    content: () => (
+      <div className="pad">
+        <Tag>Cinque giri</Tag>
+        <h2>135.000 token inviati per 32.000 nuovi</h2>
+        <div className="cols">
+          <DT cols={['Giro', 'Token inviati', 'Novità del giro']} rows={[
+            ['1', '22.000', '22.000'], ['2', '24.500', '2.500'], ['3', '27.000', '2.500'], ['4', '29.500', '2.500'], ['5', '32.000', '2.500'],
+          ]} />
+          <div>
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+              <Stat big="$0,115" label="Sonnet 5.5, con cache" />
+              <Stat big="$0,295" label="Sonnet 5.5, senza cache" />
+            </div>
+            <p className="muted" style={{ marginTop: 10 }}>Con cache: 103.000 token letti a $0,10, 32.000 scritti a $2,50, 2.500 in uscita a $10, tutto per milione. Il primo giro paga la scrittura dell'intero contesto.</p>
+          </div>
+        </div>
+        <Box type="tip" title="Controlla il conto">Con la tabella del listino puoi rifarlo a mano: ingresso inviato, parte letta dalla cache, parte scritta, uscita. La calcolatrice fa lo stesso per tutti i giri.</Box>
+      </div>
+    ),
+    notes: "Valori di esempio: contesto iniziale 20.000, in ogni giro 2.000 di novità in ingresso e 500 in uscita (le 500 del giro prima rientrano come ingresso nel successivo, per questo le novità sono 2.500). Totale inviato 22.000 + 24.500 + 27.000 + 29.500 + 32.000 = 135.000, contro 32.000 di materiale nuovo in ingresso: 4,2 volte. Con cache: letti 103.000 (la somma dei primi quattro giri), scritti 32.000, uscita 2.500: 0,0103 + 0,0800 + 0,0250 = 0,1153 dollari. Senza cache: 135.000 x 2 / 1.000.000 = 0,270 più 0,025 di uscita = 0,295. Fare i conti alla lavagna con la sala."
+  },
+  {
+    block: B + 'La cache dei prompt',
+    content: () => (
+      <div className="pad">
+        <Tag>Cache</Tag>
+        <h2>La cache rende il riletto economico</h2>
+        <div role="group" aria-label="Quattro momenti della cache in una sessione">
+          <Flow nodes={[
+            ['1 Prima richiesta', 'scrive tutto in cache: 1,25 volte l\'ingresso', 'w'],
+            ['2 Richieste seguenti', 'leggono il già visto e scrivono solo la coda'],
+            ['3 Pausa lunga', 'oltre i 5 minuti la cache scade', 'i'],
+            ['4 Dopo la pausa', 'si riscrive tutto, come al primo giro', 'w'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>Claude Code gestisce la cache da solo. La cache riconosce il prefisso identico: se cambia qualcosa all'inizio, si rielabora tutto ciò che segue.</p>
+        <Box type="info" title="Quanto dura">Con una chiave API la cache del dialogo principale dura 5 minuti, con l'abbonamento Claude un'ora. Ogni richiesta che la usa riavvia il conteggio.</Box>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Secondo la documentazione di Claude Code (novembre 2026) la cache riconosce il prefisso della richiesta: una modifica in testa invalida tutto ciò che viene dopo, per questo il contenuto stabile sta all'inizio e la conversazione in coda. I tempi: 5 minuti con chiave API o provider cloud, un'ora per il dialogo principale con abbonamento Claude entro i limiti del piano. In aula si lavora con una chiave del router: quindi 5 minuti, e non è detto che il modello dietro il router faccia cache. Il comando /usage in una versione recente mostra una riga Prompt cache con le richieste, la quota servita dalla cache e se è calda."
+  },
+  {
+    block: B + 'Cosa rompe la cache',
+    content: () => (
+      <div className="pad">
+        <Tag>Cache</Tag>
+        <h2>Quattro modi di buttarla via</h2>
+        <DT cols={['Cosa fai', 'Effetto sulla cache', 'Come evitarlo']} rows={[
+          ['Cambi modello a metà sessione', 'Ogni modello ha la sua cache: il giro dopo rilegge tutto senza sconto', 'Scegli il modello all\'inizio'],
+          ['Fai una pausa lunga', 'La cache scade: il giro dopo riscrive tutto', 'Se resti fermo a lungo, riparti con una sessione nuova'],
+          ['Aggiungi o togli strumenti', 'Le definizioni stanno nel prefisso: cambiano e invalidano', 'Collega gli strumenti prima di cominciare'],
+          ['Compatti', 'La storia diventa un riassunto: nuovo prefisso, cache da rifare', 'Compatta fra un compito e l\'altro, non nel mezzo'],
+        ]} />
+        <Box type="warn" title="Con un router in mezzo">La cache dipende da ciò che il router inoltra al modello. Se non la inoltra, ogni giro si paga al prezzo pieno: la riga "senza cache" della calcolatrice è il caso peggiore.</Box>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Elenco ridotto a quattro voci dalla pagina sulla cache di Claude Code (novembre 2026), che ne contiene altre. Il cambio di modello chiede una conferma se la cache è ancora calda. La documentazione dice anche che con un indirizzo base personalizzato o un gateway la cache vive dove le richieste vengono inoltrate e che funziona solo se il gateway lascia passare i marcatori di cache: da verificare con il router del laboratorio, non da dare per scontato. Questo è il primo punto di contatto con l'argomento 9."
+  },
+  {
+    block: B + 'Il modello per compito',
+    content: () => (
+      <div className="pad">
+        <Tag>Scegliere il modello</Tag>
+        <h2>Il più piccolo che basta</h2>
+        <DT cols={['Compito', 'Livello', 'Perché']} rows={[
+          ['Cercare nel repo, riassumere un log, rinominare, ritoccare un testo', 'Piccolo (Haiku)', 'Il come è deciso e un comando prova che è fatto'],
+          ['Scrivere una funzione con il suo test, correggere un difetto noto', 'Medio (Sonnet)', 'La maggior parte del lavoro di programmazione'],
+          ['Progettare, scegliere fra approcci, trovare una causa sconosciuta', 'Grande (Opus, Fable)', 'Qui il ragionamento è il prodotto'],
+        ]} />
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', marginTop: 10 }}>
+          <Stat big="20x" label="Sonnet 5.5 su Haiku 5.5 (ingresso e uscita)" />
+          <Stat big="2x" label="Opus 5.5 su Sonnet 5.5" />
+          <Stat big="5x" label="Fable 5.1 su Sonnet 5.5" />
+        </div>
+        <p className="muted" style={{ marginTop: 8 }}>Si sale di livello solo per un motivo che si sa dire. Un compito sbagliato e rifatto costa due volte.</p>
+        <Fonte href="https://code.claude.com/docs/en/costs">code.claude.com, manage costs</Fonte>
+      </div>
+    ),
+    notes: "La documentazione sui costi (novembre 2026) dice che Sonnet gestisce bene la maggior parte dei compiti di programmazione e che Opus va riservato a decisioni architetturali e ragionamenti in più passi; per i subagenti semplici si può indicare model: haiku nella loro configurazione. I rapporti fra modelli sono calcolati dal listino del 9 novembre 2026. In aula i modelli non sono Claude: il criterio resta (compito chiuso e verificabile, modello piccolo) ma i nomi cambiano. Il costo di un lavoro rifatto dipende dal caso, e qui non c'è una misura da mostrare."
+  },
+  {
+    block: B + 'Quando ripartire',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>Compattare, azzerare o ripartire</h2>
+        <DT cols={['Situazione', 'Mossa', 'Perché']} rows={[
+          [<>Passi a un compito scollegato</>, <code>/clear</code>, 'Non costa nulla, mentre la vecchia conversazione si pagherebbe a ogni messaggio'],
+          ['Stesso compito, ma la conversazione è piena di vicoli ciechi', <><code>/rewind</code> o <code>/compact</code> con una indicazione</>, 'Si tiene ciò che serve e si butta il resto'],
+          ['Devi leggere molto (log, documentazione)', 'Un subagente', 'Le letture restano nel suo contesto e torna solo il riassunto'],
+          ['Torni a una sessione ferma da ore', 'Meglio una sessione nuova', 'Cache scaduta: compattare costringe a rileggere tutto'],
+        ]} />
+        <Box type="info" title="Richiamo">Il contesto e i comandi <code>/context</code>, <code>/compact</code>, <code>/clear</code> sono nell'argomento 1. Qui si aggiunge il conto: compattare è esso stesso una richiesta grande.</Box>
+        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com, context window</Fonte>
+      </div>
+    ),
+    notes: "Secondo la documentazione (novembre 2026): /clear azzera e non costa nulla; /compact può ricevere un'indicazione su cosa tenere; /rewind torna a un punto precedente già in cache; i subagenti tengono le letture grosse fuori dal contesto principale. Attenzione al costo della compattazione: è una richiesta che rilegge la conversazione da riassumere, a buon mercato se la cache è calda e cara se è scaduta. Per questo conviene compattare fra un compito e l'altro. La compattazione automatica scatta da sola vicino al limite della finestra, che dipende dal modello."
+  },
+  {
+    block: B + 'La calcolatrice',
+    content: () => (
+      <div className="pad">
+        <Tag>Calcolatrice</Tag>
+        <h2>Quanto costa questa sessione?</h2>
+        <CalcolatriceSessione />
+      </div>
+    ),
+    notes: "Provare con la sala, nell'ordine: 1) scenario B con Sonnet 5.5, circa 1,96 dollari; 2) spegnere la cache: circa 13,62; 3) portare le pause a 0: circa 1,44; con 6 pause circa 2,98; 4) cambiare il modello. Lo scenario C con compattazione oltre 200.000 token costa circa 5,09 dollari, senza compattazione 9,04 (la sessione non compattata è irrealistica: Claude Code compatta da solo vicino al limite, ma il confronto fa vedere il peso della storia). Il modello simula il contesto giro per giro: ogni giro rimanda la storia, la cache copre il prefisso già inviato, una pausa lunga o una compattazione la azzerano. Il riassunto di una compattazione vale 5.000 token, il contesto iniziale 20.000: valori d'esempio. Per Haiku 5.5 sopra i 100.000 token di prompt vale il listino alto."
+  },
+  {
+    block: B + 'Limiti della stima',
+    content: () => (
+      <div className="pad">
+        <Tag>Cosa non vede la stima</Tag>
+        <h2>Una stima, non una fattura</h2>
+        <div className="grid">
+          <Card title="Ragionamento" kind="w"><p>Il pensiero esteso si paga come uscita e può valere decine di migliaia di token a richiesta.</p></Card>
+          <Card title="Subagenti" kind="w"><p>Ogni subagente manda richieste sue, con il proprio contesto, oltre a quelle della sessione.</p></Card>
+          <Card title="Richieste nascoste" kind="w"><p>Suggerimenti di prompt, riassunti di sessione e attività pianificate partono anche a sessione ferma.</p></Card>
+          <Card title="Listino e tokenizzatore" kind="i"><p>I prezzi cambiano, e modelli diversi contano token diversi per lo stesso testo.</p></Card>
+        </div>
+        <Box type="info" title="Un ordine di grandezza">Anthropic riporta, per le installazioni aziendali di Claude Code, circa 13 dollari per sviluppatore per giorno attivo, sotto i 30 per il 90% degli utenti. Lo scenario B, su Sonnet 5.5, vale circa 2 dollari: una sessione, non una giornata.</Box>
+        <Fonte href="https://code.claude.com/docs/en/costs">code.claude.com, manage costs</Fonte>
+      </div>
+    ),
+    notes: "La calcolatrice non include ragionamento, subagenti, richieste in background né tentativi ripetuti: tutte voci che la documentazione sui costi (novembre 2026) elenca fra le cause per cui una sessione lunga pesa più di quanto sembri. I 13 dollari al giorno sono una media su distribuzioni di organizzazioni reali, citata da Anthropic: non è una previsione per un singolo. Il contatore della sessione si legge con /usage, la riga Total cost è calcolata in locale a prezzo di listino. Con un router e modelli non Claude quella cifra può non avere senso: in quel caso si confrontano i token, non i dollari."
+  },
+  {
+    block: B + 'Il caso di Argo Briefing',
+    content: () => (
+      <div className="pad">
+        <Tag>Il caso</Tag>
+        <h2>Un bot, una catena di fornitori, una riserva</h2>
+        <p>Argo Briefing è un bot che ogni mattina prepara un briefing e durante la giornata manda avvisi su Telegram. Per il modello usava prima di tutto fornitori gratuiti.</p>
+        <div role="group" aria-label="Come è nato l'incidente, in quattro passi">
+          <Flow nodes={[
+            ['1 Catena gratuita', 'il modello principale e i sostituti rispondono'],
+            ['2 Il fornitore lo ritira', 'il 7 agosto il modello va fuori servizio e i sostituti vanno in timeout', 'w'],
+            ['3 La riserva', 'resta un fornitore a pagamento, in coda alla catena', 'i'],
+            ['4 Nessun errore', 'il bot funziona, e ogni richiesta si paga', 'w'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>Il fornitore a pagamento era stato messo lì come ultima possibilità. Con la catena gratuita ferma ha cominciato a fare tutto il lavoro, senza che nulla lo segnalasse.</p>
+      </div>
+    ),
+    notes: "Il caso è documentato nel registro di lavoro del progetto e negli appunti di progetto di Thomas (4 settembre 2026). Il modello principale era un modello gratuito su una piattaforma di inferenza, che l'ha ritirato il 7 agosto 2026 (risposta HTTP 410); i sostituti con data erano in timeout o in errore. In coda alla catena c'era un fornitore a pagamento, DeepSeek. Con la catena gratuita morta, ogni richiesta ricadeva sul fornitore a pagamento. Raccontarlo senza colpe: la configurazione era ragionevole finché la catena funzionava."
+  },
+  {
+    block: B + 'I numeri e le cause',
+    content: () => (
+      <div className="pad">
+        <Tag>Il caso</Tag>
+        <h2>1,55 dollari e tre cause</h2>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          <Stat big="$1,55" label="credito consumato" />
+          <Stat big="1.140" label="richieste" />
+          <Stat big="79,4 M" label="token in tutto" />
+          <Stat big="~70.000" label="token per richiesta" />
+        </div>
+        <ol className="steps" style={{ marginTop: 12 }}>
+          <li className="w"><b>Riserva silenziosa.</b> Il fornitore a pagamento sostituiva la catena gratuita senza avviso.</li>
+          <li className="w"><b>Storia mai compattata.</b> Contesto di circa 70.000 token a richiesta: la conversazione cresceva, con 21 strumenti descritti nel prompt.</li>
+          <li className="w"><b>Tentativi a raffica.</b> Circa 10 richieste all'ora per 24 ore, anche quando non serviva.</li>
+        </ol>
+        <p className="muted">79,4 milioni diviso 1.140 fa circa 70.000: è la riga "contesto che si rimanda" in versione reale.</p>
+      </div>
+    ),
+    notes: "Numeri dal registro di lavoro (settembre 2026): 1,55 dollari di credito del fornitore, 1.140 richieste, 79,4 milioni di token, circa 70.000 token a richiesta. Il listino del fornitore è cambiato dopo, quindi non conviene rifare il conto dei dollari con i prezzi di oggi: l'importo è piccolo, il meccanismo no. Le tre cause: riserva a pagamento in coda a una catena gratuita ormai morta; storia mai compattata più 21 strumenti nel prompt; tempeste di tentativi (circa 10 all'ora per 24 ore). Il contesto di 70.000 token a richiesta è esattamente il caso dell'argomento: la testa si ripaga a ogni giro. La quota di cache nella spesa non è documentata: non va supposta."
+  },
+  {
+    block: B + 'Le guardie',
+    content: () => (
+      <div className="pad">
+        <Tag>Cosa è cambiato</Tag>
+        <h2>Cinque guardie</h2>
+        <DT cols={['Guardia', 'Cosa evita']} rows={[
+          ['Il fornitore a pagamento solo come scelta esplicita, con ripieghi sempre gratuiti', 'Una riserva che si attiva da sola'],
+          ['Tetto di spesa sulla console del fornitore', 'Una spesa senza limite, qualunque cosa vada storta nel bot'],
+          ['Compattazione e azzeramento giornaliero della sessione', 'Un contesto che cresce senza fine'],
+          ['Undici strumenti disattivati e nessuna skill inclusa di serie: strumenti nel prompt da 26.302 a 7.160 caratteri, skill da 4.080 a 775', 'Un prompt grande ripagato a ogni richiesta'],
+          ['Un solo tentativo per le attività pianificate, controllo periodico vuoto', 'Le raffiche di richieste inutili'],
+        ]} />
+        <p className="muted">Oggi il modello principale è a pagamento per scelta esplicita, con un ripiego gratuito. Sui comandi tipici risponde in 14-16 secondi. Il modello gratuito provvisorio ne impiegava 120-357.</p>
+      </div>
+    ),
+    notes: "Le guardie sono quelle registrate negli appunti di progetto del 4 settembre 2026. Regola scritta allora: provider a pagamento solo come scelta esplicita, ripiego sempre gratuito, tetto di spesa sul portale del fornitore. Le misure sono in caratteri, non in token: 26.302 contro 7.160 per le definizioni degli strumenti (11 disattivati), 4.080 contro 775 per le skill. Sull'ultima riga: un solo tentativo per le attività pianificate e un file del controllo periodico lasciato vuoto. I tempi di 120-357 secondi e 14-16 secondi sono quelli registrati il 3-4 settembre per due modelli diversi, quindi non attribuirli a una sola causa. Il filo conduttore: ogni guardia è un controllo che non dipende dall'attenzione di qualcuno."
+  },
+  {
+    block: B + 'Il router del corso',
+    content: () => (
+      <div className="pad">
+        <Tag>Lo stesso rischio, oggi</Tag>
+        <h2>Cosa significa per il router del laboratorio</h2>
+        <p>Il router che collega gli agenti ai modelli può ripetere l'incidente di Argo Briefing in piccolo. Le scelte fatte per il corso seguono le stesse guardie.</p>
+        <DT cols={['Rischio', 'Scelta nel router']} rows={[
+          ['Deviazione verso un altro fornitore quando il budget finisce', 'Disattivata: il default del programma la attiva, noi la spegniamo'],
+          ['Fornitori non voluti o catene di ripiego globali', 'Solo fornitori in lista bianca, nessuna catena globale'],
+          ['Un PC che consuma per tutti', 'Una chiave per PC, con limite giornaliero in dollari e orario del corso'],
+          ['Cifre di costo ottimistiche', 'Il costo in dashboard è una stima da listino, il tetto vero sta sulla console del fornitore'],
+        ]} />
+        <p className="muted">Configurazione e prove sono nell'argomento 9.</p>
+      </div>
+    ),
+    notes: "Collegamento con l'argomento 9. Il router è OmniRoute, installato e configurato dal docente, una sola istanza con fornitori in lista bianca e nessun costo per i partecipanti. Il comportamento di default da cambiare è la deviazione di emergenza verso un altro fornitore sugli errori di budget: stesso meccanismo del caso di Argo Briefing. Il costo mostrato nella dashboard è una stima da listino e un modello senza prezzo vale zero: non può fare da tetto. Se un partecipante chiede 'ma allora quanto spendiamo?', si risponde con i token registrati e con il limite sulle console dei fornitori. Non mostrare in slide chiavi, indirizzi o nomi dei fornitori collegati."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Stimate tre sessioni sulla palestra</h2>
+        <ol className="timeline">
+          <li><time>1</time>Apri la scheda e inserisci i tre scenari (correggere un difetto, aggiungere una funzione, una giornata intera) nella calcolatrice della slide 10.</li>
+          <li><time>2</time>Annota il costo con e senza cache, e con un altro modello a scelta.</li>
+          <li><time>3</time>Nella tua sessione, esegui <code>/usage</code>: confronta i token letti dal contatore con quelli della stima e scrivi cosa non torna.</li>
+        </ol>
+        <ActivityBadge n="10" file="scenari-da-stimare.html" label="Tre sessioni da stimare" durata="indicativo: 20 min" />
+        <ActivityBadge n="10" file="listino-e-contatore.html" label="Listino e contatore della sessione" durata="indicativo: 10 min" />
+        <p className="muted" style={{ marginTop: 10 }}>Nel laboratorio il contatore potrebbe non mostrare un costo sensato, perché i modelli sono quelli del router: in quel caso confronta i token.</p>
+      </div>
+    ),
+    notes: "Il blocco si chiude al PC. Gli scenari sono tre: A correggere un difetto, B aggiungere una funzione con test, C una giornata intera. Prima si compila la tabella a mano o con la calcolatrice, poi si guarda il contatore reale con /usage: il confronto serve a vedere quanto la stima sbaglia, e per quale voce. Il comando /usage mostra, nella documentazione di novembre 2026, il costo totale calcolato in locale a prezzo di listino e i token per modello; la riga della cache c'è nelle versioni recenti. Con modelli non Claude la cifra in dollari può mancare o non avere senso: si confrontano i token. Le soluzioni le ha il docente."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Una sessione di 60 giri costa molto più della somma dei messaggi scritti. Qual è la ragione principale?" opzioni={[
+          { t: 'A ogni richiesta il modello rilegge tutta la conversazione, e le richieste sono tante.', ok: true, perche: 'Il modello non ricorda fra una richiesta e l\'altra: la cache riduce il prezzo della parte riletta, ma non la cancella.' },
+          { t: 'Dopo il trentesimo giro ogni messaggio costa il doppio.', ok: false, perche: 'Il prezzo per token non dipende dal numero del giro: cambia quanti token si mandano.' },
+          { t: 'La cache fa pagare di più le sessioni lunghe.', ok: false, perche: 'È il contrario: la cache fa pagare la parte riletta molto meno, ma non zero.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione sul punto centrale dell'argomento. La risposta A. Se qualcuno sceglie C, riprendere la slide sulla cache: leggere dalla cache costa da un decimo a un cinquantesimo dell'ingresso, ma una sessione lunga legge molto. Se sceglie B, ricordare che il prezzo per token non cambia con il numero del giro; in Haiku 5.5 il listino sale solo oltre i 100.000 token di prompt, ed è una soglia sul prompt, non sul giro."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Si paga a token e il contesto si rimanda a ogni giro: la sessione lunga costa più dei suoi messaggi.',
+          'La cache abbassa il prezzo di ciò che si rilegge. Una pausa lunga, un cambio di modello o una compattazione la azzerano.',
+          'Il modello più piccolo che basta: si sale solo per un motivo che si sa dire.',
+          'Un tetto di spesa sulla console del fornitore, e nessuna riserva a pagamento che si attivi da sola.',
+        ]}
+        dopo={<>Argomento 11 (<a className="text-link" href="../argomento-11/slide.html" onClick={e => e.stopPropagation()}>il rilascio mobile in autopilota</a>): una catena di agenti letta con costi e ritorno, senza cifre inventate.</>} />
+    ),
+    notes: "Riprendere le quattro idee e lasciare spazio alle domande. Il link porta all'argomento 11, che confronta costo e ritorno di una catena di agenti in termini qualitativi. Ricordare che i prezzi sono del 9 novembre 2026 e cambiano: la stima va rifatta con il listino aperto."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

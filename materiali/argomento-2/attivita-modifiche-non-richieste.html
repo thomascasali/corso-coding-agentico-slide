@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modifiche non richieste: leggere e annullare — Materiali argomento 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 2</a>
+  <a class="dl-btn" href="attivita-modifiche-non-richieste.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="attivita-modifiche-non-richieste-da-leggere-e-annullare">Attività: modifiche non richieste, da leggere e annullare</h1>
+<p>Durata indicativa: 25 minuti. Si lavora sulla palestra (prenotazione dei laboratori, dati inventati), nel repository del vostro PC.</p>
+<h2 id="la-situazione">La situazione</h2>
+<p>Avete chiesto a un agente di aggiungere all'elenco delle prenotazioni un filtro per laboratorio: <code>node cli.js elenco --lab LAB-INF1</code>. L'agente ha fatto il filtro, ha lanciato i test, sono tutti verdi, e ha consegnato. Il suo commit è l'ultimo del ramo.</p>
+<p>Il vostro compito: capire cosa ha cambiato, tenere solo quello che avevate chiesto e annullare il resto, un pezzo alla volta.</p>
+<h2 id="passi">Passi</h2>
+<ol>
+<li>
+<p>Controllate di non avere modifiche da salvare e partite dal punto noto.
+   <code>git status
+   git switch -c lavoro-a2 partenza-a2
+   node --test</code></p>
+</li>
+<li>
+<p>Leggete il commit dell'agente.
+   <code>git log --oneline
+   git show --stat HEAD
+   git diff HEAD~1 HEAD</code>
+   Scrivete un elenco: per ogni file e ogni blocco di righe, "richiesto" oppure "non richiesto". Se un blocco non è chiaro, chiedetelo all'agente: non annullatelo a caso.</p>
+</li>
+<li>
+<p>Provate anche a mano. Ci sono comportamenti che i test non coprono: lanciate qualche comando della palestra e confrontate con quello che ricordate o con il ramo <code>main</code> (<code>git switch main</code>, riprovate, poi tornate con <code>git switch lavoro-a2</code>). Attenzione: <code>prenota</code> scrive in <code>dati/dati.json</code>; dopo una prova riportatelo com'era con <code>git restore dati/dati.json</code>, altrimenti <code>git switch</code> può rifiutarsi di cambiare ramo.</p>
+</li>
+<li>
+<p>Annullate le modifiche non richieste una per una, ognuna in un commit con un messaggio chiaro. Strumenti utili:</p>
+<ul>
+<li><code>git restore --source=main percorso/del/file</code> per riportare un file intero com'è in <code>main</code>;</li>
+<li><code>git restore -p --source=main percorso/del/file</code> per scegliere i blocchi;</li>
+<li><code>git rm percorso/del/file</code> per togliere un file aggiunto;</li>
+<li>modificare a mano una riga, o chiedere all'agente di annullare una sola cosa precisa;</li>
+<li><code>git diff</code> e <code>git status</code> dopo ogni passo.
+   Non usate <code>reset --hard</code> né <code>stash</code>.</li>
+</ul>
+</li>
+<li>
+<p>Verifica finale.
+   <code>git diff main --stat
+   git diff main
+   node --test</code>
+   Devono restare solo le righe del filtro per laboratorio (<code>--lab</code>). Se manca il filtro, o è rimasto qualcos'altro, tornate al punto 4.</p>
+</li>
+<li>
+<p>A coppie: confrontate il vostro elenco con quello del vicino. Avete trovato le stesse cose? Chi ne ha trovate di più, dove le ha viste?</p>
+</li>
+</ol>
+<h2 id="se-qualcosa-va-storto">Se qualcosa va storto</h2>
+<ul>
+<li>Un annullamento ha tolto anche il filtro: <code>git revert &lt;id-del-commit&gt;</code> annulla l'annullamento, oppure ripartite con un altro ramo (<code>git switch -c lavoro-a2-bis partenza-a2</code>). Il lavoro vecchio resta sul ramo di prima.</li>
+<li><code>git status</code> mostra file che non riconoscete: non cancellateli con comandi generali, guardate prima cosa sono.</li>
+</ul>
+<h2 id="sul-vostro-progetto">Sul vostro progetto</h2>
+<p>Se il vostro progetto ha già un repository, fate lo stesso controllo: <code>git status</code>, <code>git diff</code>, poi commit con i file per nome.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

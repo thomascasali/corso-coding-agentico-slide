@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modello: skill di revisione — Materiali argomento 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 7</a>
+  <a class="dl-btn" href="modello-skill-revisione.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="modello-skill-di-revisione">Modello: skill di revisione</h1>
+<p>Un modello da copiare in <code>.claude/skills/revisione-funzione/SKILL.md</code> e completare. Le parti tra <code>&lt;...&gt;</code> le scrivi tu.
+Il file deve cominciare con <code>---</code> alla prima riga, senza spazi né altri caratteri prima.</p>
+<pre><code>---
+name: revisione-funzione
+description: &lt;Che cosa fa la skill e quando usarla. Una o due frasi. Prima il caso principale.&gt;
+---
+
+# &lt;Titolo: revisione di una funzione rispetto alla sua specifica&gt;
+
+## Prima di cominciare
+- &lt;Che cosa devi avere in mano: il codice, la specifica, i test. Se manca la specifica, che cosa fai?&gt;
+
+## Procedura
+1. &lt;Primo passo: che cosa leggi.&gt;
+2. &lt;Secondo passo: come trasformi ogni punto della specifica in qualcosa da controllare.&gt;
+3. &lt;Terzo passo: che cosa esegui. Per ogni controllo, il comando e l'esito.&gt;
+4. &lt;...&gt;
+
+## Come riferire
+Tre elenchi, sempre tutti e tre, anche se uno è vuoto:
+- **Confermati**: &lt;che cosa deve esserci scritto accanto a ogni voce perché valga come confermata&gt;
+- **Da verificare**: &lt;che cosa metti qui, e che cosa proponi di fare per verificarlo&gt;
+- **Non controllati**: &lt;che cosa non hai potuto o voluto controllare, e perché&gt;
+
+Chiudi con un verdetto: &lt;quali parole usi, e quando sono ammesse&gt;.
+
+## Limiti
+- &lt;Che cosa la skill non fa: per esempio non modifica il codice.&gt;
+</code></pre>
+<h2 id="domande-per-la-description">Domande per la <code>description</code></h2>
+<p>La descrizione è l'unica parte che l'agente vede sempre. Rileggila con queste domande.</p>
+<ul>
+<li>Dice che cosa fa la skill, non solo l'argomento di cui si occupa?</li>
+<li>Dice quando usarla, con le parole che un collega userebbe davvero nella richiesta?</li>
+<li>Il caso principale è all'inizio? Oltre una certa lunghezza il testo viene tagliato.</li>
+<li>Se avessi dieci skill, questa si distinguerebbe dalle altre?</li>
+<li>Un compito vicino ma diverso (scrivere codice nuovo, spiegare una funzione) la attiverebbe per sbaglio?</li>
+</ul>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

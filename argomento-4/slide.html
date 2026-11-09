@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 4 · Istruzioni persistenti · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 4 — Istruzioni persistenti · ';
+
+const ESEMPIO = String.raw`# Registro guasti (Node.js, senza dipendenze)
+
+## Comandi
+- Test: npm test
+- Prova a mano: node cli.js elenco
+
+## Dove sono le cose
+- Regole: src/regole.js. Dati: dati/guasti.json.
+
+## Convenzioni
+- Codice e messaggi in italiano.
+- Ogni correzione porta un test che prima falliva.
+
+## Da non fare
+- Non modificare dati/guasti.json a mano.
+- Non aggiungere dipendenze senza chiedere.`;
+
+const SBAGLIATO = String.raw`# CLAUDE.md di un progetto inventato
+- Test: npm run prova
+
+# package.json dello stesso progetto
+"scripts": { "test": "node --test" }
+
+# Cosa fa l'agente
+$ npm run prova
+npm error Missing script: "prova"
+> aggiungo lo script "prova" a package.json`;
+
+const IMPORT = String.raw`# AGENTS.md  (la fonte unica)
+- Test: npm test
+- Dati in dati/guasti.json, non a mano.
+
+# CLAUDE.md  (due righe)
+@AGENTS.md
+- Qui solo ciò che vale per Claude Code.`;
+
+const COMANDI = String.raw`> Quali istruzioni di progetto hai caricato?
+  Citale e dimmi, per ognuna, da quale file vengono.
+
+> Dove stanno i dati e come si lanciano i test?
+  Controlla che i percorsi esistano, prima di rispondere.
+
+/context all   (sotto «Memory files»: i file caricati)
+/memory        (elenca i file di istruzioni e li apre)`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="4" titolo="Istruzioni persistenti" sottotitolo="CLAUDE.md e AGENTS.md: che cosa scrivere perché l'agente lo sappia a ogni sessione, e come accorgersi che non funziona."
+        caso="Da dove nasce: ciò che si impara su un progetto non passa da solo al progetto successivo."
+        prima="argomenti 1 e 3." />
+    ),
+    notes: `Apertura. Ogni sessione dell'agente parte da una finestra di contesto vuota: quello che sa del progetto è ciò che gli diamo noi. Il racconto: le istruzioni di progetto e la base di conoscenza sono nate per non ripetere gli stessi errori da un progetto all'altro. Annunciare l'attività sulla palestra e la tappa del progetto personale. Funzioni verificate sulla documentazione ufficiale il 9 novembre 2026: le date invecchiano.`
+  },
+  {
+    block: B + 'Il contesto utile',
+    content: () => (
+      <div className="pad">
+        <Tag>Il principio</Tag>
+        <h2>Ogni sessione riparte da zero</h2>
+        <div className="grid">
+          <Card title="Senza istruzioni"><p>L'agente ricostruisce il progetto leggendo i file. Spesso indovina, a volte no.</p></Card>
+          <Card title="Con istruzioni" kind="i"><p>Un file nella cartella del progetto viene letto all'avvio e finisce nel contesto, ogni volta.</p></Card>
+          <Card title="Il limite" kind="w"><p>È contesto, non configurazione: l'agente di solito lo segue, ma niente lo costringe.</p></Card>
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li><strong>Il contesto utile è quello pertinente, non il più lungo.</strong> Meno di 200 righe per file, secondo la documentazione di Claude Code.</li>
+          <li>Se due istruzioni si contraddicono, l'agente può sceglierne una a caso.</li>
+          <li>Per i divieti che devono valere sempre serve un controllo automatico: gli hook dell'argomento 8.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Fonte: code.claude.com/docs/en/memory, letta il 9/11/2026. Ogni sessione comincia con una finestra di contesto nuova. La documentazione indica meno di 200 righe per file di CLAUDE.md, avverte che file più lunghi consumano contesto e riducono l'aderenza, che istruzioni in contraddizione possono essere scelte a caso, e che il file è contesto e non configurazione imposta: per bloccare un'azione in ogni caso indica un hook PreToolUse. Gli import con @ organizzano il file ma non ne riducono il costo. Domanda al pubblico: quante righe ha il vostro README, e quante servono a chi deve lavorare sul codice?`
+  },
+  {
+    block: B + 'Cosa metterci',
+    content: () => (
+      <div className="pad">
+        <Tag>Contenuto</Tag>
+        <h2>Che cosa metterci</h2>
+        <div className="grid">
+          <Card title="Comandi"><p>Come si avvia, come si testa, come si controlla lo stile. Quelli esatti, copiabili.</p></Card>
+          <Card title="Dove stanno le cose" kind="i"><p>Cartelle, file dei dati, punto d'ingresso. Solo ciò che l'agente non ricava in pochi secondi.</p></Card>
+          <Card title="Convenzioni"><p>Lingua del codice e dei messaggi, nomi, come si scrive un test, come si fanno i commit.</p></Card>
+          <Card title="Da non fare" kind="d"><p>File da non toccare, dati da non scrivere, dipendenze da non aggiungere senza chiedere.</p></Card>
+        </div>
+        <Box type="tip" title="La regola pratica">Scrivi ciò che hai dovuto spiegare due volte all'agente, o a un collega nuovo.</Box>
+      </div>
+    ),
+    notes: `Quattro famiglie: comandi, posizioni, convenzioni, divieti. La documentazione ufficiale suggerisce esattamente questo tipo di contenuto: comandi di build e test, convenzioni, cose che l'agente non scoprirebbe da solo. Il criterio: se l'agente lo scopre in cinque secondi leggendo il codice, non serve scriverlo; se l'ha sbagliato una volta, sì.`
+  },
+  {
+    block: B + 'Cosa non metterci',
+    content: () => (
+      <div className="pad">
+        <Tag>Contenuto</Tag>
+        <h2>Che cosa lasciare fuori</h2>
+        <div className="grid">
+          <Card title="Segreti" kind="d"><p>Password, token, chiavi, indirizzi interni. Il file finisce nel repository e nel contesto.</p></Card>
+          <Card title="La storia del progetto" kind="w"><p>Il perché di una scelta di tre anni fa. Va nella documentazione, non nelle istruzioni.</p></Card>
+          <Card title="Regole ovvie" kind="w"><p>«Scrivi codice pulito», «gestisci gli errori». Non cambiano nulla e allungano il file.</p></Card>
+          <Card title="Ciò che il codice già dice" kind="w"><p>L'elenco dei file di una cartella piccola. Cambia, e il file resta vecchio.</p></Card>
+        </div>
+        <Box type="danger" title="Segreti">Un'istruzione come «usa la chiave che trovi in .env» è già troppo. Si scrive dove sta la configurazione, mai il suo valore.</Box>
+      </div>
+    ),
+    notes: `Il file di progetto si versiona e si condivide: un segreto lì dentro è un segreto nel repository. Stesso discorso per i dettagli di rete interna. Le regole ovvie sono la tentazione più comune: sembrano prudenza e diluiscono le poche istruzioni che contano.`
+  },
+  {
+    block: B + 'Istruzioni controllabili',
+    content: () => (
+      <div className="pad">
+        <Tag>Scrittura</Tag>
+        <h2>Concreta batte generica</h2>
+        <DT cols={['Vago', 'Concreto']} rows={[
+          ['Testa le modifiche', <>Esegui <code className="nw">npm test</code> prima di dire che hai finito</>],
+          ['Tieni i file in ordine', <>I test stanno in <code className="nw">test/</code>, uno per modulo</>],
+          ['Fai attenzione ai dati', <>Non scrivere in <code className="nw">dati/guasti.json</code>: i test usano una copia</>],
+          ['Usa buoni nomi', 'Nomi di funzioni e variabili in italiano, senza abbreviazioni'],
+        ]} />
+        <p className="muted">Test per ogni riga: si può verificare, a lavoro finito, se l'agente l'ha rispettata?</p>
+      </div>
+    ),
+    notes: `Esempi dalla documentazione di Claude Code (pagina memory): istruzioni abbastanza concrete da poter essere verificate. Il test finale della slide è utile anche per rivedere un file esistente: le righe che non passano il test si riscrivono o si tolgono.`
+  },
+  {
+    block: B + 'Un esempio piccolo',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempio</Tag>
+        <h2>Un file corto che basta</h2>
+        <pre aria-label="Esempio di CLAUDE.md di un progetto inventato">{ESEMPIO}</pre>
+        <p className="muted">Poche righe, quattro sezioni, nessun segreto. Progetto inventato.</p>
+      </div>
+    ),
+    notes: `Esempio inventato di un piccolo progetto. Notare che ogni riga si può verificare e che nessuna riga spiega cose che il codice dice già. Chiedere ai presenti cosa aggiungerebbero e farsi dire perché: è la discussione utile.`
+  },
+  {
+    block: B + 'Un esempio vero',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempio reale</Tag>
+        <h2>Le istruzioni di questo corso</h2>
+        <div className="grid">
+          <Card title="Com'è fatto"><p>Sezioni: formato, regole sulle fonti, privacy e segreti, stile dei testi, processo, stato dei lavori.</p></Card>
+          <Card title="Qualche riga" kind="i">
+            <ul>
+              <li>Dati solo inventati, email su <code className="nw">@demo.invalid</code>.</li>
+              <li>I numeri si riverificano con <code className="nw">git log</code> prima di usarli.</li>
+              <li>Mai commit di segreti.</li>
+            </ul>
+          </Card>
+          <Card title="Il difetto" kind="w"><p>Supera le 200 righe consigliate: lavora a più mestieri, ed è il primo candidato a essere spezzato per cartella.</p></Card>
+        </div>
+        <Box type="info" title="Perché mostrarlo">Un file reale non è mai perfetto. Serve a vedere che cosa ci finisce davvero quando il progetto va avanti.</Box>
+      </div>
+    ),
+    notes: `Il file di istruzioni con cui è stato preparato questo stesso corso, in forma riassunta: le sezioni e tre regole. Ha più di 200 righe, cioè oltre l'indicazione della documentazione; lo dico apertamente. Le regole su dati inventati e segreti sono quelle che l'agente deve avere sempre davanti. Non leggere il file per intero.`
+  },
+  {
+    block: B + 'I livelli',
+    content: () => (
+      <div className="pad">
+        <Tag>Livelli</Tag>
+        <h2>Dove vive il file</h2>
+        <DT cols={['Livello', 'Dove', 'Per chi']} rows={[
+          ['Organizzazione', 'percorso di sistema gestito dall\'IT', 'tutti gli utenti'],
+          ['Utente', <code className="nw">~/.claude/CLAUDE.md</code>, 'solo tu, in ogni progetto'],
+          ['Progetto', <><code className="nw">./CLAUDE.md</code> o <code className="nw">./.claude/CLAUDE.md</code></>, 'chi clona il repository'],
+          ['Locale', <><code className="nw">./CLAUDE.local.md</code> (da mettere in .gitignore)</>, 'solo tu, in quel progetto'],
+          ['Cartella', <code className="nw">sotto/CLAUDE.md</code>, 'caricato quando si lavora lì'],
+        ]} />
+      </div>
+    ),
+    notes: `Elenco dalla pagina memory della documentazione di Claude Code, 9/11/2026. Il livello organizzazione sta in un percorso di sistema (su Windows C:\\Program Files\\ClaudeCode\\CLAUDE.md). Il file di una sottocartella viene caricato quando l'agente lavora su file di quella cartella. Per le preferenze personali che non si condividono: livello utente o file locale.`
+  },
+  {
+    block: B + 'Precedenze',
+    content: () => (
+      <div className="pad">
+        <Tag>Livelli</Tag>
+        <h2>Si sommano, non si sovrascrivono</h2>
+        <div role="group" aria-label="Ordine di lettura, dal più generale al più vicino">
+          <Flow label="Ordine di lettura" nodes={[
+            ['1 Organizzazione', 'regole aziendali'], ['2 Utente', 'le tue preferenze'], ['3 Progetto', 'la radice del repository', 'i'], ['4 Più vicino', 'cartella di lavoro e locale', 'w'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Tutti i file trovati vengono uniti nel contesto; l'ultimo letto è il più vicino a dove lavori.</li>
+          <li>Se si contraddicono, non c'è una regola che vince: l'agente può scegliere a caso. Niente contraddizioni.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Dalla documentazione (9/11/2026): i file di CLAUDE.md nelle cartelle sopra quella di lavoro si caricano all'avvio, concatenati dalla radice del filesystem fino alla cartella corrente, quindi le istruzioni più vicine sono lette per ultime. Quelli delle sottocartelle si caricano su richiesta. Non è un meccanismo di override: la precedenza è di ordine di lettura, non di forza. Per questo conviene evitare le contraddizioni invece di contare su chi vince.`
+  },
+  {
+    block: B + 'Import e comandi',
+    content: () => (
+      <div className="pad">
+        <Tag>Strumenti</Tag>
+        <h2>Import, /init e /memory</h2>
+        <div className="grid">
+          <Card title="Import con @"><p><code className="nw">@percorso/file.md</code> dentro un CLAUDE.md carica quel file insieme. Percorsi relativi al file che importa, fino a quattro livelli.</p></Card>
+          <Card title="/init" kind="i"><p>Esplora il progetto e genera un primo file. Se esiste già, propone miglioramenti senza sovrascrivere.</p></Card>
+          <Card title="/memory" kind="i"><p>Elenca i file di istruzioni (anche quelli non ancora creati) e permette di aprirli. Quelli caricati davvero: <code className="nw">/context all</code>.</p></Card>
+        </div>
+        <Box type="warn" title="Un primo giro, non l'ultimo">Ciò che genera <code className="nw">/init</code> va riletto riga per riga: la bozza dell'agente contiene quello che ha dedotto, non quello che sa solo la squadra.</Box>
+      </div>
+    ),
+    notes: `Import con @: relativo al file che importa, ricorsivo fino a quattro livelli (documentazione, 9/11/2026). L'import non riduce il costo di contesto. /init genera un CLAUDE.md di partenza; se c'è già suggerisce modifiche. /memory elenca i file caricati: lo useremo per verificare. La resa dei comandi può variare con il modello collegato a OmniRoute: provarla prima.`
+  },
+  {
+    block: B + 'CLAUDE.md e AGENTS.md',
+    content: () => (
+      <div className="pad">
+        <Tag>Due nomi</Tag>
+        <h2>CLAUDE.md e AGENTS.md</h2>
+        <DT cols={['', 'Claude Code', 'OpenCode']} rows={[
+          ['Il file proprio', <code className="nw">CLAUDE.md</code>, <code className="nw">AGENTS.md</code>],
+          ['Se manca', <>legge <code className="nw">AGENTS.md</code></>, <>ripiega su <code className="nw">CLAUDE.md</code></>],
+          ['Se ci sono entrambi', <>legge solo <code className="nw">CLAUDE.md</code></>, <>legge <code className="nw">AGENTS.md</code></>],
+          ['Comando iniziale', <code className="nw">/init</code>, <code className="nw">/init</code>],
+        ]} />
+        <p className="muted"><code className="nw">AGENTS.md</code> è un formato aperto, usato da molti strumenti. Il comportamento a coppia è quello predefinito: si può cambiare nelle impostazioni.</p>
+      </div>
+    ),
+    notes: `Fonti, lette il 9/11/2026: agents.md (formato aperto, "README per agenti", supportato da molti strumenti; in un monorepo vale il file più vicino), code.claude.com/docs/en/memory (sezione AGENTS.md: senza CLAUDE.md Claude Code legge AGENTS.md; con entrambi legge solo CLAUDE.md, impostazione predefinita modificabile), docs.opencode.ai/docs/rules (AGENTS.md ha la precedenza, CLAUDE.md come ripiego). Conseguenza pratica: se in un progetto ci sono entrambi i file e non sono allineati, i due strumenti vedono istruzioni diverse. Il ripiego di OpenCode su CLAUDE.md si disattiva con la variabile d'ambiente OPENCODE_DISABLE_CLAUDE_CODE=1. Claude Code legge AGENTS.md da solo dalla versione 2.1.277: con versioni precedenti serve l'import. Verificare sul PC del corso prima di dirlo: le versioni cambiano.`
+  },
+  {
+    block: B + 'Tenerli allineati',
+    content: () => (
+      <div className="pad">
+        <Tag>Due nomi</Tag>
+        <h2>Una fonte, un rimando</h2>
+        <pre aria-label="AGENTS.md come fonte unica e CLAUDE.md che lo importa">{IMPORT}</pre>
+        <ul>
+          <li>Le istruzioni comuni stanno in un solo file; l'altro lo importa o lo rimanda.</li>
+          <li>Due copie scritte a mano divergono dopo il primo ritocco.</li>
+        </ul>
+        <Box type="info" title="Su Windows">Il collegamento simbolico tra i due file richiede privilegi e può rompersi nei cloni. L'import con <code className="nw">@</code> è la strada più semplice.</Box>
+      </div>
+    ),
+    notes: `La documentazione di Claude Code (9/11/2026) suggerisce proprio questa forma: CLAUDE.md con una riga @AGENTS.md e sotto le sole istruzioni specifiche per Claude. Sul PC del laboratorio, con Windows, evitare i collegamenti simbolici. Per OpenCode il rimando con @ non viene interpretato automaticamente: ciò che sta in AGENTS.md è già la fonte, e CLAUDE.md non serve a lui. Un secondo mezzo, per OpenCode, è il campo instructions di opencode.json.`
+  },
+  {
+    block: B + 'Un fatto sbagliato',
+    content: () => (
+      <div className="pad">
+        <Tag>Il rischio</Tag>
+        <h2>Un'istruzione sbagliata diventa un fatto</h2>
+        <pre aria-label="Esempio: un comando dei test che non esiste">{SBAGLIATO}</pre>
+        <p>L'agente si fida del file e ha ragione di farlo. Se il file sbaglia, o rompe il lavoro, o l'agente ripara in silenzio, nel modo sbagliato.</p>
+        <Box type="warn" title="Come nascono">Un percorso rinominato, un comando cambiato, un file spostato. Il codice si aggiorna, le istruzioni no.</Box>
+      </div>
+    ),
+    notes: `Esempio inventato. L'errore non produce quasi mai un messaggio chiaro, e l'agente non ha motivo di dubitare di ciò che gli è stato dato come regola. Collegamento con il racconto: i dieci agenti che per mesi non venivano caricati perché l'intestazione del file era scritta male. Nessun errore, sembrava tutto funzionare. Le istruzioni sbagliate sono dello stesso tipo: silenziose. Per questo una revisione delle istruzioni, quando cambia il progetto, vale quanto una revisione del codice.`
+  },
+  {
+    block: B + 'Verificare',
+    content: () => (
+      <div className="pad">
+        <Tag>Verifica</Tag>
+        <h2>Come si sa che funziona</h2>
+        <ol className="steps">
+          <li><b>1 Chiedi cosa ha capito.</b> Quali istruzioni ha caricato, da quali file, che cosa ne deduce.</li>
+          <li><b>2 Controlla i fatti.</b> Ogni percorso e ogni comando del file esiste davvero?</li>
+          <li className="w"><b>3 Prova un compito, prima e dopo.</b> Stesso compito, sessione nuova, file diverso: cosa cambia?</li>
+        </ol>
+        <pre aria-label="Prompt per verificare le istruzioni caricate">{COMANDI}</pre>
+      </div>
+    ),
+    notes: `Tre controlli. Primo: chiedere all'agente quali istruzioni ha e da dove; se non cita il file, non l'ha letto. Secondo: i fatti si controllano a mano, non con l'agente: ls, node cli.js, npm test. Terzo: la prova pratica con lo stesso compito in una sessione nuova (usare /clear tra le prove) prima e dopo la modifica. Il comando /context all mostra, sotto Memory files, i file caricati; /memory li elenca e li apre. Con modelli diversi dal modello di sviluppo la risposta può cambiare: se la prova non regge, ripeterla.`
+  },
+  {
+    block: B + 'Attività: la palestra',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Sistemare le istruzioni della palestra</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dal punto <code className="nw">partenza-a4</code>: chiedi all'agente un compito, lo stesso che ripeterai dopo.</li>
+          <li><time>2</time>Leggi <code className="nw">CLAUDE.md</code> e <code className="nw">AGENTS.md</code>. Trova gli errori confrontandoli con il repository.</li>
+          <li><time>3</time>Migliorali: comandi, convenzioni, divieti. Un file solo come fonte.</li>
+          <li><time>4</time>Ripeti il compito in una sessione nuova e confronta.</li>
+        </ol>
+        <ActivityBadge n="4" file="istruzioni-palestra.html" label="Scheda: istruzioni della palestra" durata="indicativo: 30 min" />
+        <p className="muted" style={{ marginTop: 10 }}>Una checklist per scrivere un buon file è nella <a className="text-link" href="../materiali/argomento-4/checklist-claude-md.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>pagina dei materiali</a>.</p>
+      </div>
+    ),
+    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a4 (git switch -c lavoro-a4 partenza-a4). Non dire dove sia l'errore: è parte dell'esercizio. Il compito è lo stesso prima e dopo: così si misura l'effetto delle istruzioni. Chi finisce prima prova anche a verificare con OpenCode cosa legge. Le istruzioni sono lette dall'agente come fatti: far ragionare sul perché un errore in un file così corto pesa tanto.`
+  },
+  {
+    block: B + 'Attività: il progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Tappa del progetto</Tag>
+        <h2>Il primo CLAUDE.md del tuo progetto</h2>
+        <ol className="timeline">
+          <li><time>1</time>Parti dalla scheda del progetto e dal piano: comandi, cartelle, divieti.</li>
+          <li><time>2</time>Scrivi tu la bozza. Poi, se vuoi, <code className="nw">/init</code> per confrontare.</li>
+          <li><time>3</time>Passa la checklist: nessun segreto, nessuna regola ovvia, tutto controllabile.</li>
+          <li><time>4</time>Prova con un compito reale e correggi la riga che non ha funzionato.</li>
+        </ol>
+        <ActivityBadge n="4" file="checklist-claude-md.html" label="Checklist: un buon CLAUDE.md" durata="indicativo: 25 min" />
+        <p className="muted" style={{ marginTop: 10 }}>Il file va nella cartella del tuo progetto, mai in quella del corso.</p>
+      </div>
+    ),
+    notes: `Tappa del progetto personale: il primo CLAUDE.md. Il file nasce da quello che il progetto ha già: scheda, requisiti, piano dell'argomento 3. Meglio corto: si allunga solo quando l'agente sbaglia due volte la stessa cosa. Solo dati inventati anche nei progetti personali. Ricordare di non scrivere segreti o indirizzi interni.`
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="In un progetto ci sono sia CLAUDE.md sia AGENTS.md, e non dicono la stessa cosa. Cosa succede con le impostazioni predefinite?" opzioni={[
+          { t: 'Claude Code li legge entrambi e unisce le istruzioni', ok: false, perche: 'Non per impostazione predefinita: se c\'è un CLAUDE.md, l\'AGENTS.md non viene letto da Claude Code.' },
+          { t: 'Claude Code segue CLAUDE.md, OpenCode segue AGENTS.md: i due strumenti vedono istruzioni diverse', ok: true, perche: 'Per questo conviene una fonte unica, con l\'altro file che la importa.' },
+          { t: 'Vince il file modificato per ultimo', ok: false, perche: 'La data del file non conta: conta il nome e lo strumento che lo legge.' },
+        ]} />
+      </div>
+    ),
+    notes: `Domanda sul punto più facile da sbagliare. Se qualcuno risponde A, rimandare alla slide sulle due convenzioni. Il comportamento si può cambiare in /config, impostazione «Project instructions», valore claude-md-and-agents-md; non è il valore predefinito.`
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Il contesto utile è quello pertinente: comandi, posizioni, convenzioni, divieti. Poche righe, tutte controllabili.',
+          'I file si sommano per livello; un\'istruzione che ne contraddice un\'altra può essere scartata a caso.',
+          'Una fonte unica (AGENTS.md) e un rimando (@AGENTS.md) tengono allineati i due strumenti.',
+          'Un\'istruzione sbagliata diventa un fatto: si verifica chiedendo cosa ha capito e ripetendo un compito.',
+        ]}
+        dopo="Argomento 7 (skill e subagenti: le istruzioni che l'agente legge solo quando servono) e argomento 9 (OpenCode, dove AGENTS.md è il file di partenza)." />
+    ),
+    notes: `Riprendere i quattro punti. Lasciare domande. Anticipare che le istruzioni sono il primo strato; le skill sono lo strato che l'agente legge solo quando serve (argomento 7), e in OpenCode lo stesso ruolo lo ha AGENTS.md (argomento 9).`
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

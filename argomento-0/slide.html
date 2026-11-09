@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 0 · Il racconto · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+
+/* ---------- le slide di questo argomento ---------- */
+const B = 'Argomento 0 — Il racconto · ';
+
+/* Un episodio: che cosa è successo, che cosa è cambiato, dove torna nel corso */
+const Episodio = ({ n, titolo, tema, fatti, regola, dove, stat }) => (
+  <div className="pad">
+    <Tag>Episodio {n}</Tag>
+    <h2>{titolo}</h2>
+    <div className="cols">
+      <div>
+        <Card title="Cosa è successo" kind="i">{fatti}</Card>
+        {stat && <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginTop: 12 }}>{stat}</div>}
+      </div>
+      <div>
+        <Card title="Cosa è cambiato">{regola}</Card>
+        <Box type="info" title="Dove torna nel corso">{dove}</Box>
+      </div>
+    </div>
+    <p className="legend" style={{ marginTop: 8 }}>Tema: {tema}</p>
+  </div>
+);
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="0" titolo="Il racconto" sottotitolo="Come sono nati il metodo di lavoro con Claude Code, la base di conoscenza, gli agenti e i portali della scuola."
+        caso="Una storia di sette mesi, con gli errori raccontati quanto i successi. Ogni episodio anticipa un tema del corso." />
+    ),
+    notes: "Apertura lunga del racconto. Chi parla racconta in prima persona come ha lavorato nel 2026, partendo da un problema pratico. Il racconto usa solo episodi documentati nei registri di lavoro, nei repository e nelle note di progetto. Non ci sono dati reali di persone, nomi di colleghi o dettagli della rete della scuola."
+  },
+  {
+    block: B + 'Come si legge',
+    content: () => (
+      <div className="pad">
+        <Tag>Orientamento</Tag>
+        <h2>Nove episodi, nove temi</h2>
+        <p>Il racconto procede per episodi. In ognuno qualcosa è andato storto o è andato in modo diverso dal previsto, e ne è uscita una regola di lavoro.</p>
+        <div className="grid">
+          <Card title="Il metodo"><p>Il problema da cui si parte, la base di conoscenza, il gruppo di agenti.</p></Card>
+          <Card title="Gli errori" kind="w"><p>Agenti mai caricati, un revisore che trova 26 difetti, dati riservati quasi pubblicati.</p></Card>
+          <Card title="I portali" kind="i"><p>Dal prototipo sui server personali al Raspberry Pi portato a scuola.</p></Card>
+          <Card title="Il costo" kind="d"><p>Una spesa di pochi dollari che segnala un difetto di progetto.</p></Card>
+        </div>
+        <Box type="tip" title="Come usarlo">Ogni episodio indica l'argomento del corso in cui il tema viene ripreso e provato sul codice. Qui basta riconoscerlo.</Box>
+      </div>
+    ),
+    notes: "Spiegare la struttura: gli episodi sono anticipazioni, non lezioni. Gli argomenti 8 (hook e MCP) e 9 (OpenCode e OmniRoute) non hanno un episodio narrativo: si dice apertamente e si rimanda ai rispettivi argomenti."
+  },
+  {
+    block: B + 'Perché quei portali',
+    content: () => (
+      <div className="pad">
+        <Tag>Il punto di partenza</Tag>
+        <h2>Perché proprio quei portali</h2>
+        <div className="cols">
+          <div>
+            <p>Il criterio: partire dalle attività che, dal punto di vista di un docente, andavano dematerializzate. Prenotare le risorse dei laboratori, seguire i percorsi di alternanza scuola-lavoro, organizzare i viaggi di istruzione.</p>
+            <p>Sviluppo e prove sono stati fatti sui server personali. Il server della scuola è venuto dopo.</p>
+          </div>
+          <div>
+            <Card title="Tre portali"><ul>
+              <li>Prenota Risorse</li>
+              <li>Alternanza scuola-lavoro (FSL)</li>
+              <li>Viaggi di istruzione</li>
+            </ul></Card>
+          </div>
+        </div>
+      </div>
+    ),
+    notes: "Origine dei portali: digitalizzare per prime le attività che, dal punto di vista di un docente, andavano dematerializzate. Sviluppo e prove sui server personali, poi un Raspberry Pi preparato e portato a scuola. Non servono altri dettagli, e non si entra nella rete della scuola."
+  },
+  {
+    block: B + 'Il problema',
+    content: () => (
+      <div className="pad">
+        <Tag>Episodio 1 · il problema</Tag>
+        <h2>Ciò che impari su un progetto non passa agli altri</h2>
+        <div role="group" aria-label="Tre progetti e un computer nuovo: lo stesso errore si ripete">
+          <Flow label="Un errore, più volte" nodes={[
+            ['Progetto A', 'si paga l\'errore e si scrive una nota', 'w'], ['Progetto B', 'la nota di A non c\'è: lo stesso errore'], ['Progetto C', 'ancora lo stesso errore'], ['Nuovo computer', 'si riparte da zero', 'i'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>La memoria automatica di Claude Code funziona bene, ma vale per un progetto su una macchina.</p>
+        <Box type="info" title="Un esempio concreto">Una cartella condivisa con Docker che sovrascrive i permessi del contenitore: un'ora persa ogni volta che qualcuno la incontra senza trovarla scritta.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Tema: contesto. Torna negli argomenti 1 e 4.</p>
+      </div>
+    ),
+    notes: "Il problema da cui nasce il metodo. La memoria automatica di Claude Code è per progetto e per macchina; su un computer nuovo si riparte da zero (documentazione ufficiale, code.claude.com/docs/en/memory, verificata a novembre 2026). L'esempio della cartella condivisa con Docker è uno dei modelli di errore raccolti nel toolkit."
+  },
+  {
+    block: B + 'La base di conoscenza',
+    content: () => (
+      <div className="pad">
+        <Tag>La risposta</Tag>
+        <h2>Base di conoscenza e LLM Wiki</h2>
+        <div role="group" aria-label="Tre livelli: sessione, wiki, base di conoscenza stabile">
+          <Flow nodes={[
+            ['1 Sessione', 'commit, chat, appunti sparsi: dura quanto la sessione', 'w'], ['2 Wiki', 'l\'agente trasforma le sessioni in pagine collegate'], ['3 Base stabile', 'poche guide: ci entra solo ciò che supera un esame', 'i'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>L'idea della wiki compilata dall'agente è di Karpathy (aprile 2026). Il livello stabile è un'aggiunta.</li>
+          <li>Esame di promozione: usato da due o più progetti, oppure un errore che costa un'ora a chi lo ripete, oppure uno standard dichiarato.</li>
+          <li>La wiki è privata e può contenere dettagli di progetto; la base stabile è ripulita.</li>
+        </ul>
+        <p className="legend">Tema: istruzioni persistenti e contesto. Torna negli argomenti 1 e 4.</p>
+      </div>
+    ),
+    notes: "La wiki è nata nell'aprile 2026 con l'ingest di dodici progetti. Tre livelli: sessione (memoria di lavoro), wiki (memoria episodica), base stabile (memoria semantica). L'esame di promozione è la regola del toolkit dalla versione 0.4: basta una delle tre condizioni, e in ogni caso il modello va verificato in produzione o su un dispositivo reale. Se un'informazione cita un sistema reale, resta in wiki e sale solo dopo essere stata generalizzata."
+  },
+  {
+    block: B + 'Il gruppo di agenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Il toolkit</Tag>
+        <h2>Un lead che delega, un revisore che controlla</h2>
+        <div className="grid">
+          <Card title="Il lead"><p>Pianifica, mostra il piano, delega ai subagenti e mette insieme il risultato. I compiti banali li fa da solo.</p></Card>
+          <Card title="Tre livelli di modello" kind="i"><p>Si parte dal modello più economico e si sale per un motivo che si sa dire: causa sconosciuta, scelta che conta, decisione difficile da annullare.</p></Card>
+          <Card title="Gli specialisti" kind="i"><p>Agenti per backend, mobile, database, sicurezza, infrastruttura. Il lead sceglie leggendo la descrizione di ciascuno.</p></Card>
+          <Card title="Il revisore" kind="w"><p>Niente conta come finito prima che il revisore l'abbia visto. Ogni revisione lascia una riga in un registro.</p></Card>
+        </div>
+        <p className="legend" style={{ marginTop: 10 }}>Tema: subagenti e revisione. Tornano nell'argomento 7.</p>
+      </div>
+    ),
+    notes: "Il toolkit è nato a maggio 2026 (versione 0.1: dieci agenti, ventidue modelli di errore, sei skill) ed è cresciuto; i numeri cambiano a ogni versione, per questo qui non si fissano. Il punto è la divisione dei ruoli: chi pianifica non è chi controlla."
+  },
+  {
+    block: B + 'Gli agenti che non c\'erano',
+    content: () => (
+      <Episodio n="2" titolo="Gli agenti che non c'erano" tema="subagenti, e «sembra funzionare» non vuol dire «funziona»"
+        fatti={<><p>Per mesi i subagenti non sono stati caricati. Nel file di configurazione dei due agenti principali una riga di apertura <code className="nw">\---</code> aveva preso il posto di <code className="nw">---</code>, per colpa di un editor. Gli specialisti non avevano proprio l'intestazione.</p><p>Il lavoro andava avanti lo stesso: il lead improvvisava, senza dire che non stava delegando.</p></>}
+        regola={<><p>La scoperta è del 20 luglio 2026: l'orchestrazione descritta nei documenti non era mai avvenuta.</p><p>Controllo di trenta secondi: chiedere al lead quali subagenti ha a disposizione.</p></>}
+        dove="Argomento 7 (Skill e subagenti revisori): come l'agente vede nome e descrizione di ogni subagente. Argomento 5: verificare che qualcosa funzioni davvero." />
+    ),
+    notes: "Il difetto era nel frontmatter, cioè nell'intestazione dei file degli agenti: un carattere di escape davanti ai trattini, aggiunto da un editor. L'errore è invisibile perché il sistema continua a rispondere. Un secondo caso, il 4 agosto (un ripristino simulato che sembrava riuscito e aveva quattro difetti più uno), ha confermato la regola."
+  },
+  {
+    block: B + 'Il recupero dalle sessioni',
+    content: () => (
+      <Episodio n="3" titolo="Dieci agenti, un'ora, mesi di sessioni" tema="subagenti in parallelo, e il contesto che si perde"
+        fatti={<><p>Per mesi le sessioni di lavoro non erano state passate nella wiki. Il 16 luglio 2026 dieci agenti hanno letto in parallelo le trascrizioni locali delle sessioni.</p><p>Hanno ricostruito lo stato di decine di sessioni in circa un'ora. Cinque progetti non erano nemmeno in elenco.</p></>}
+        regola={<><p>I dettagli (file letti, tentativi, output) restano nei contesti dei subagenti e al lead arriva un riassunto.</p><p>Le trascrizioni sono materiale grezzo: si interrogano con ricerche mirate, non si rileggono per intero.</p></>}
+        dove="Argomento 7: subagenti con contesto proprio. Argomento 1: cosa vede l'agente e cosa no." />
+    ),
+    notes: "Episodio del 16 luglio 2026, dal registro della wiki: dieci agenti di esplorazione sulle trascrizioni locali, cinque progetti nuovi emersi, stato di decine di sessioni ricostruito in circa un'ora. La conclusione utile: ingerire regolarmente costa meno che recuperare dopo."
+  },
+  {
+    block: B + 'Il revisore corregge il lead',
+    content: () => (
+      <Episodio n="4" titolo="Il revisore trova 26 difetti" tema="revisione indipendente"
+        fatti={<><p>Il 20 luglio 2026, riparata l'orchestrazione, il flusso lead, esecutore, revisore, correzione gira per la prima volta davvero.</p><p>Il revisore restituisce 26 osservazioni, 4 bloccanti. Una è un'affermazione sbagliata sulla delega annidata, scritta dal lead in un documento.</p></>}
+        stat={<><Stat big="26" label="osservazioni del revisore" /><Stat big="4" label="bloccanti" /></>}
+        regola={<><p>Chi ha scritto un documento non è il più adatto a trovarne gli errori. Il revisore parte da un contesto pulito e può contraddire il lead.</p><p>Ogni consegna passa dal revisore prima di essere dichiarata finita.</p></>}
+        dove="Argomento 7: subagenti revisori; due agenti che concordano non provano che il codice sia giusto. Argomento 5: revisione e test." />
+    ),
+    notes: "Dato dal registro del 20 luglio 2026 (versione 0.2 del toolkit): ventisei osservazioni, quattro bloccanti. Il caso più istruttivo è l'affermazione errata sulla delega annidata, scritta dal lead e smentita dal revisore."
+  },
+  {
+    block: B + 'I dati prima della pubblicazione',
+    content: () => (
+      <Episodio n="5" titolo="Quarantasette righe prima di andare online" tema="dati riservati nel codice, e controllo prima di pubblicare"
+        fatti={<><p>Il toolkit doveva diventare pubblico. Il 13 agosto 2026 il controllo prima della pubblicazione dà esito negativo: la cartella degli agenti conteneva 47 righe con nomi di clienti e una tabella che li legava ai gateway di pagamento. Erano comparse nella riscrittura della versione 0.2.</p></>}
+        stat={<><Stat big="47" label="righe da togliere" /><Stat big="5 giorni" label="dal controllo alla pubblicazione" /></>}
+        regola={<><p>Si ripulisce, un secondo revisore indipendente dà il via libera, la storia del repository viene ridotta a un solo commit e la pubblicazione avviene il 18 agosto.</p><p>Dalla revisione dei testi pubblici nasce anche una skill per togliere i tic tipici di un testo generato.</p></>}
+        dove="Argomento 6 (Sicurezza): segreti e dati nel codice, e la storia di git che li conserva. Argomento 7: un secondo revisore." />
+    ),
+    notes: "Dal registro del 18 agosto 2026: controllo del 13 agosto con esito negativo, bonifica, nuova verifica con esito positivo, storia ridotta a un commit, pubblicazione il 18 agosto. Si racconta senza nomi: i clienti non vengono citati. La storia di git è parte di ciò che si pubblica."
+  },
+  {
+    block: B + 'Dal portale al server',
+    content: () => (
+      <div className="pad">
+        <Tag>Episodio 6 · dal prototipo alla produzione</Tag>
+        <h2>Dal portale in due giorni al server della scuola</h2>
+        <ol className="timeline">
+          <li><time>5 lug</time>Prima commit del portale dei viaggi, sul server personale.</li>
+          <li><time>15-16 lug</time>Portale dell'alternanza: cinque fasi (M0-M4) in due giorni, 105 test automatici.</li>
+          <li><time>23 ago</time>Inizia il repository del server della scuola: Traefik, backup, monitoraggio, runbook e guida alla messa in produzione.</li>
+          <li><time>26 ago</time>Il server funziona a casa. Prenota Risorse viene riscritta da capo.</li>
+          <li><time>10 set</time>I tre portali vengono installati sul Raspberry Pi 5 a scuola.</li>
+        </ol>
+        <p className="legend">Tema: dai requisiti al lavoro a fasi. Torna nell'argomento 3. Il prototipo è la parte veloce.</p>
+      </div>
+    ),
+    notes: "Le date vengono dai repository (prime commit: Viaggi il 5 luglio, FSL il 15 luglio, server il 23 agosto) e dalle note di progetto (105 test per FSL; server funzionante a casa il 26 agosto; installazione sul Raspberry Pi della scuola il 10 settembre). Il passaggio dal server di casa alla rete della scuola non si racconta nei dettagli: si dice solo che runbook, backup e messa in produzione hanno richiesto più tempo del prototipo."
+  },
+  {
+    block: B + 'Bug in produzione',
+    content: () => (
+      <Episodio n="7" titolo="Tre bug che i test non vedevano" tema="test, revisione e aggiornamenti in produzione"
+        fatti={<ul>
+          <li>Una colonna del database mai creata sul server: il login andava, ma la pagina successiva rimandava indietro.</li>
+          <li>Telefoni con la vecchia versione dell'app nella cache: la richiesta veniva respinta e l'errore non si vedeva. Dieci tentativi falliti in silenzio.</li>
+          <li>Una data sbagliata di un giorno per il fuso orario, trovata dal revisore prima del rilascio.</li>
+        </ul>}
+        regola={<><p>Aggiornamento automatico del database all'avvio, server che accetta anche il formato vecchio, errore mostrato all'utente.</p><p>Da fine settembre ogni rilascio di Prenota Risorse passa dal revisore, con una riga di registro.</p></>}
+        dove="Argomento 5 (Test e debugging): perché i test non bastavano. Argomento 2: tornare indietro in sicurezza." />
+    ),
+    notes: "Dalle note di progetto di Prenota Risorse: la colonna mancante (26 agosto), la cache dei telefoni con il campo assente, l'errore di un giorno trovato dal revisore il 21 settembre prima del rilascio. Il registro delle revisioni di settembre mostra il revisore che chiede correzioni prima di ogni rilascio."
+  },
+  {
+    block: B + 'Il subagente che pusha',
+    content: () => (
+      <Episodio n="8" titolo="Il subagente che ha scritto sul repository vero" tema="permessi, comandi distruttivi, git come rete di sicurezza"
+        fatti={<><p>Durante una prova un subagente ha lanciato git nel repository vero della base di conoscenza, perché una variabile di destinazione era vuota.</p><p>Risultato: commit di file estranei, un push sul ramo principale e un reset che ha cancellato lavoro non salvato. Il danno è stato riparato.</p></>}
+        regola={<><p>Ogni prova che usa git lavora in una cartella temporanea, con un controllo che si ferma se un comando di scrittura punta al repository vero.</p><p>Dopo ogni lavoro delegato si confronta il ramo locale con quello remoto prima di un push.</p></>}
+        dove="Argomento 2 (Git come rete di sicurezza), argomento 1 (permessi) e argomento 6 (comandi distruttivi)." />
+    ),
+    notes: "Dalle note del progetto della base di conoscenza. Si racconta come limite dell'ambiente di prova: mancava l'isolamento. La regola nata è doppia: cartella temporanea obbligatoria per ogni prova con git, e controllo dei commit che non si riconoscono prima di ogni push."
+  },
+  {
+    block: B + 'L\'incidente dei costi',
+    content: () => (
+      <Episodio n="9" titolo="1,55 dollari e 79 milioni di token" tema="costi, contesto che si riempie, fallback silenziosi"
+        fatti={<><p>Il bot Argo Briefing, tra agosto e settembre 2026, ha consumato il credito di un fornitore a pagamento: 1.140 richieste da quasi 70.000 token ciascuna.</p><p>Il fornitore a pagamento era la riserva silenziosa di una catena gratuita ormai spenta. In più: una storia mai compattata, 21 strumenti nel prompt e tentativi ripetuti a raffica.</p></>}
+        stat={<><Stat big="$1,55" label="costo totale" /><Stat big="1.140" label="richieste" /><Stat big="79,4 M" label="token" /></>}
+        regola={<><p>Fornitore a pagamento solo come scelta esplicita, mai come riserva; la riserva è sempre gratuita; tetto di spesa.</p><p>Meno strumenti nel prompt, storia riassunta, un solo tentativo.</p></>}
+        dove="Argomento 10 (Costi e contesto): come si stima il costo di una sessione." />
+    ),
+    notes: "Dal registro di settembre 2026 e dalle note del progetto: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. L'importo è piccolo, ma il numero di token per richiesta mostra un difetto di progetto. Contromisure applicate: strumenti non necessari disattivati, contesto ridotto, azzeramento giornaliero della storia, un solo tentativo."
+  },
+  {
+    block: B + 'Stato dei portali',
+    content: () => (
+      <div className="pad">
+        <Tag>Il risultato</Tag>
+        <h2>Come stanno i tre portali</h2>
+        <div className="grid">
+          <Card title="Prenota Risorse"><p><strong>Online e in uso</strong> alla scuola.</p></Card>
+          <Card title="Alternanza (FSL)" kind="w"><p><strong>In prova.</strong></p></Card>
+          <Card title="Viaggi di istruzione" kind="w"><p><strong>In prova.</strong></p></Card>
+        </div>
+        <Box type="info" title="Per i numeri">I conteggi di commit e di righe di documentazione cambiano a ogni sessione. Nelle slide non si fissano: si leggono dal repository.</Box>
+        <p className="muted" style={{ marginTop: 10 }}>Stato al 21 ottobre 2026.</p>
+      </div>
+    ),
+    notes: "Stato: Prenota Risorse online e in uso; FSL e Viaggi in prova. Se arrivano domande sui numeri, si invita a leggerli dal repository: cambiano a ogni sessione di lavoro."
+  },
+  {
+    block: B + 'Mappa degli episodi',
+    content: () => (
+      <div className="pad">
+        <Tag>Anteprima del corso</Tag>
+        <h2>Dove torna ogni episodio</h2>
+        <DT cols={['Episodio', 'Tema', 'Argomento']} rows={[
+          ['1 Il problema', 'contesto, memoria', '1 e 4'],
+          ['2 Gli agenti che non c\'erano', 'subagenti, verifica', '7 e 5'],
+          ['3 Dieci agenti, un\'ora', 'subagenti in parallelo', '7 e 1'],
+          ['4 Il revisore', 'revisione indipendente', '7 e 5'],
+          ['5 Le 47 righe', 'segreti e dati', '6'],
+          ['6 Dal portale al server', 'requisiti, fasi di lavoro', '3'],
+          ['7 Tre bug in produzione', 'test, aggiornamenti', '5 e 2'],
+          ['8 Il subagente che pusha', 'permessi, git', '2, 1 e 6'],
+          ['9 1,55 dollari', 'costi e contesto', '10'],
+        ]} />
+        <p className="legend">Hook e MCP (argomento 8) e OpenCode (argomento 9) non hanno un episodio: si provano direttamente.</p>
+      </div>
+    ),
+    notes: "Mappa degli episodi sugli argomenti del catalogo. Chi vuole seguire un solo tema trova qui dove. Gli argomenti 8 e 9 non hanno episodi documentati nel racconto."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Per mesi i subagenti non sono stati caricati e il lavoro è andato avanti lo stesso. Quale controllo li avrebbe scoperti subito?" opzioni={[
+          { t: 'Rileggere i documenti di progetto', ok: false, perche: 'I documenti descrivevano il sistema come doveva essere, non come era.' },
+          { t: 'Chiedere al lead quali subagenti ha a disposizione', ok: true, perche: 'È una domanda diretta allo stato reale: bastano trenta secondi.' },
+          { t: 'Controllare che le risposte fossero buone', ok: false, perche: 'Erano buone: il lead improvvisava. Proprio questo ha nascosto il difetto.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione sul secondo episodio. Si controlla lo stato reale, non la qualità apparente del risultato."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Come lavorate: tre cose che rifate ogni volta</h2>
+        <ol className="timeline">
+          <li><time>1</time>Elencate tre cose che nel vostro lavoro rifate da capo o che spiegate più di una volta.</li>
+          <li><time>2</time>Per ognuna: dove sta scritta, chi altro la sa, che cosa succede se non ci siete.</li>
+          <li><time>3</time>Sceglietene una come punto di partenza della scheda del progetto.</li>
+        </ol>
+        <ActivityBadge n="0" file="tre-cose-che-rifate.html" label="Tre cose che rifate ogni volta" durata="indicativo: 15 min" />
+        <br />
+        {/* La scheda sta nei materiali del progetto personale, non in quelli dell'argomento 0: link scritto a mano con lo stesso aspetto di ActivityBadge. */}
+        <a className="activity" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+          <span className="k">Attività al PC</span>
+          <span className="l">Poi: la scheda del progetto personale</span>
+          <span aria-hidden="true">&#8599;</span>
+        </a>
+        <p className="muted" style={{ marginTop: 10 }}>Nessun agente in questa attività: serve a scegliere il progetto con cognizione.</p>
+      </div>
+    ),
+    notes: "Attività al PC che chiude il blocco di racconto. Collega il problema (ciò che si sa non passa ad altri) al lavoro dei partecipanti e prepara la scheda del progetto personale. Si usa un foglio, non l'agente."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={['Ciò che si impara su un progetto non passa da solo agli altri: va scritto e curato.', 'Un sistema che sembra funzionare può non funzionare: si controlla lo stato reale.', 'Chi scrive non è il più adatto a controllare: serve un revisore con un contesto pulito.', 'Costi, permessi e dati riservati si decidono prima di lanciare il lavoro.']}
+        dopo="L'argomento 1 (Chatbot, completamento, agente) parte da che cosa vede l'agente e che cosa no; l'argomento 2 (Git come rete di sicurezza) mostra come leggere ciò che ha fatto prima di accettarlo." />
+    ),
+    notes: "Chiusura: riprendere i quattro punti e lasciare spazio alle domande. Rimando all'argomento 1 per il ciclo dell'agente e all'argomento 2 per git."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

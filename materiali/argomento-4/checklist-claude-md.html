@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist: un buon CLAUDE.md — Materiali argomento 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 4</a>
+  <a class="dl-btn" href="checklist-claude-md.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="checklist-un-buon-claudemd-o-agentsmd">Checklist: un buon CLAUDE.md (o AGENTS.md)</h1>
+<p>Da usare con il file davanti. Ogni voce si chiude con sì o no. Un no si corregge, oppure si cancella la riga.</p>
+<h2 id="contenuto">Contenuto</h2>
+<ul>
+<li>[ ] C'è il comando per avviare il progetto, scritto come si digita.</li>
+<li>[ ] C'è il comando per lanciare i test, scritto come si digita.</li>
+<li>[ ] Dice dove stanno le cose che l'agente non ricava in pochi secondi (file dei dati, punto d'ingresso).</li>
+<li>[ ] Elenca le convenzioni che valgono davvero: lingua del codice e dei messaggi, come si scrive un test.</li>
+<li>[ ] Elenca cosa non si fa: file da non toccare, dati da non scrivere, dipendenze da non aggiungere senza chiedere.</li>
+</ul>
+<h2 id="cosa-deve-restare-fuori">Cosa deve restare fuori</h2>
+<ul>
+<li>[ ] Nessun segreto: password, token, chiavi, indirizzi interni. Si scrive dove sta la configurazione, mai il valore.</li>
+<li>[ ] Nessuna storia del progetto: il perché di una scelta vecchia sta nella documentazione.</li>
+<li>[ ] Nessuna regola ovvia ("scrivi codice pulito").</li>
+<li>[ ] Nessuna lista di file che il codice già mostra e che cambia spesso.</li>
+</ul>
+<h2 id="qualita-delle-righe">Qualità delle righe</h2>
+<ul>
+<li>[ ] Ogni riga è concreta: a lavoro finito si può controllare se è stata rispettata.</li>
+<li>[ ] Nessuna riga ne contraddice un'altra, né dentro il file né in un altro file di istruzioni.</li>
+<li>[ ] Il file è corto: sotto le 200 righe. Se serve di più, si spezza per cartella.</li>
+</ul>
+<h2 id="fatti-controllati">Fatti controllati</h2>
+<ul>
+<li>[ ] Ogni percorso nominato esiste davvero (<code>ls</code>).</li>
+<li>[ ] Ogni comando nominato funziona davvero (provalo).</li>
+<li>[ ] Se il progetto ha sia <code>CLAUDE.md</code> sia <code>AGENTS.md</code>, hanno un'unica fonte: uno importa l'altro con <code>@AGENTS.md</code>.</li>
+</ul>
+<h2 id="prova-finale">Prova finale</h2>
+<ol>
+<li>Apri una sessione nuova e chiedi: «Quali istruzioni di progetto hai caricato? Citale e dimmi da quale file vengono».</li>
+<li>Dai un compito piccolo e vero. L'agente ha lanciato i test? Ha rispettato i divieti?</li>
+<li>La riga che non ha funzionato si riscrive. Una riga che non cambia mai nulla si toglie.</li>
+</ol>
+<p>Fonti: documentazione di Claude Code, pagina «How Claude remembers your project» (code.claude.com/docs/en/memory), e agents.md, lette il 9/11/2026.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

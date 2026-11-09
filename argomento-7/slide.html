@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 7 · Skill e subagenti · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 7 — Skill e subagenti · ';
+
+const ALBERO = String.raw`.claude/
+  skills/
+    note-di-rilascio/
+      SKILL.md        <- obbligatorio
+      esempi.md       <- letto se serve
+      scripts/
+        raggruppa.js  <- eseguito, non letto
+  agents/
+    revisore.md       <- un subagente`;
+
+const SKILLMD = String.raw`---
+name: note-di-rilascio
+description: Prepara le note di rilascio a partire dai commit
+  dall'ultimo tag. Usala quando si chiede changelog o release.
+---
+
+# Note di rilascio
+
+1. Trova l'ultimo tag: git describe --tags --abbrev=0
+2. Leggi i commit da lì: git log <tag>..HEAD --oneline
+3. Raggruppa in Novità, Correzioni, Altro.
+4. Una riga per voce, in italiano, senza hash.
+5. Scrivi NOTE-RILASCIO.md. Non toccare altro.`;
+
+const AGENTMD = String.raw`---
+name: revisore
+description: Rivede codice scritto da altri, dopo
+  una modifica, prima di darla per finita.
+tools: Read, Glob, Grep, Bash
+disallowedTools: Write, Edit
+model: inherit
+---
+
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica, esegui un controllo
+e riporta comando ed esito. Non modificare i file.`;
+
+const AMBIGUA = String.raw`# docs/istruzioni-revisore.md  (versione 1)
+
+Guarda il codice che ti passo. Se i test passano e il
+codice sembra corretto, rispondi APPROVATO.
+Se trovi dei problemi, elencali.`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="7" titolo="Skill e subagenti" sottotitolo="Procedure che l'agente legge solo quando servono, e collaboratori con un contesto tutto loro: come scriverli, e come accorgersi che non stanno facendo ciò che credi."
+        caso="Da dove nasce: dieci subagenti scritti con un frontmatter sbagliato, mai caricati per mesi."
+        prima="argomento 4." />
+    ),
+    notes: `Apertura. Nell'argomento 4 abbiamo visto le istruzioni che l'agente ha sempre davanti. Qui due strumenti che stanno fuori dal contesto finché non servono: le skill (procedure) e i subagenti (collaboratori con contesto proprio). Il filo dell'argomento è uno solo: uno strumento che sembra funzionare non è uno strumento che funziona. Funzioni verificate sulla documentazione ufficiale il 9 novembre 2026: code.claude.com/docs/en/skills e code.claude.com/docs/en/sub-agents. Le date invecchiano. Annunciare l'attività sulla palestra.`
+  },
+  {
+    block: B + 'Quando conviene',
+    content: () => (
+      <div className="pad">
+        <Tag>Il principio</Tag>
+        <h2>Una procedura che spieghi sempre uguale</h2>
+        <DT cols={['Strumento', 'Quando l\'agente lo legge', 'Per che cosa']} rows={[
+          ['CLAUDE.md', 'sempre, a ogni sessione', 'fatti e regole del progetto'],
+          ['Skill', <>la descrizione sempre; il resto <strong>quando serve</strong></>, 'una procedura in più passi, ripetuta'],
+          ['Subagente', 'quando l\'agente gli delega un compito', 'un compito chiuso, con contesto e strumenti propri'],
+          ['Hook', 'a ogni evento previsto, senza chiedere al modello', 'controlli che devono valere sempre (argomento 8)'],
+        ]} />
+        <Box type="tip" title="Il segnale">Hai spiegato la stessa procedura per la terza volta, in più passi, con comandi precisi? È una skill. Una regola che vale sempre, in una riga, resta nel CLAUDE.md.</Box>
+      </div>
+    ),
+    notes: `Quattro strumenti, quattro momenti in cui entrano nel contesto. CLAUDE.md è sempre presente e va tenuto corto. Una skill tiene fuori dal contesto il testo della procedura finché non serve. Il subagente lavora in un contesto separato. L'hook non passa dal modello: è l'argomento 8. Esempi dal lavoro: preparare le note di una release, controllare un registro dei guasti con una procedura fissa, aggiungere una nuova rotta al server con la stessa sequenza di file da toccare. Se la procedura sta in due righe è meglio una riga nel file di istruzioni.`
+  },
+  {
+    block: B + 'Cos\'è una skill',
+    content: () => (
+      <div className="pad">
+        <Tag>Skill</Tag>
+        <h2>Una cartella con un SKILL.md</h2>
+        <div className="cols">
+          <pre aria-label="Struttura di una cartella di skill">{ALBERO}</pre>
+          <ul>
+            <li><strong>SKILL.md</strong>: un frontmatter tra <code className="nw">---</code> e le istruzioni in Markdown.</li>
+            <li>Il frontmatter comincia alla <strong>prima riga</strong> del file.</li>
+            <li><code className="nw">name</code> è il comando <code className="nw">/nome</code>; <code className="nw">description</code> dice quando usarla.</li>
+            <li>Il resto della cartella è opzionale: documenti di dettaglio e script.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+    notes: `Struttura dalla pagina skills della documentazione di Claude Code (9/11/2026). Tutti i campi del frontmatter sono opzionali, ma la description è consigliata: è ciò che l'agente usa per decidere. Un campo sconosciuto viene ignorato senza errori, quindi un nome scritto male non fa rumore. Il frontmatter deve cominciare alla prima riga: un frontmatter YAML non valido fa caricare la skill senza i suoi campi, ed è un errore silenzioso che si vede con claude --debug. Tenere a mente questa frase: torna nel racconto.`
+  },
+  {
+    block: B + 'Cosa vede l\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Caricamento progressivo</Tag>
+        <h2>Che cosa entra nel contesto, e quando</h2>
+        <Flow nodes={[
+          ['Sempre', 'nome e descrizione di ogni skill disponibile', ''],
+          ['Quando serve la skill', 'il corpo di SKILL.md, che poi resta nel contesto', 'i'],
+          ['Quando il testo lo chiede', 'i file di dettaglio della cartella', 'i'],
+          ['Mai come testo', 'gli script: vengono eseguiti', 'w'],
+        ]} />
+        <ul style={{ marginTop: 12 }}>
+          <li>La descrizione è l'unico punto di contatto: se è scritta male, la skill non viene scelta.</li>
+          <li>Per questo il corpo può essere lungo senza costare nulla finché la skill non serve. Meglio sotto le 500 righe, con i dettagli in file a parte.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Dalla documentazione (9/11/2026): nome e descrizione sono nel contesto per decidere se caricare la skill; descrizione e when_to_use insieme vengono troncate a 1.536 caratteri nell'elenco, quindi il caso principale va all'inizio. Il corpo di SKILL.md entra quando la skill viene usata e poi resta nel contesto per i turni successivi; il file non viene riletto. I file di supporto si leggono solo se il SKILL.md dice quando. Gli script vengono eseguiti, non caricati come testo. Dopo una compattazione del contesto l'ultima invocazione di ogni skill viene riallegata, con un tetto per skill. Una skill con disable-model-invocation: true non compare nell'elenco che l'agente vede: la lancia solo l'utente con /nome.`
+  },
+  {
+    block: B + 'Dove stanno',
+    content: () => (
+      <div className="pad">
+        <Tag>Posizioni</Tag>
+        <h2>Dove vive una skill, e come la trovi</h2>
+        <DT cols={['Dove', 'Percorso', 'Chi la vede']} rows={[
+          ['Personale', <code className="nw">~/.claude/skills/nome/SKILL.md</code>, 'tu, in ogni progetto'],
+          ['Progetto', <code className="nw">.claude/skills/nome/SKILL.md</code>, 'chi clona il repository'],
+          ['Plugin', <code className="nw">plugin/skills/nome/SKILL.md</code>, 'dove il plugin è attivo, come /plugin:nome'],
+        ]} />
+        <ul style={{ marginTop: 10 }}>
+          <li>A parità di nome vince la personale su quella di progetto.</li>
+          <li><code className="nw">/skills</code> le elenca; <code className="nw">/context</code> mostra quanto contesto occupano; <code className="nw">/nome</code> la invoca a mano.</li>
+          <li>Le modifiche a un file esistente si vedono in sessione; per una cartella <code className="nw">skills</code> nuova serve <code className="nw">/reload-skills</code>.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Dalla pagina skills della documentazione di Claude Code, 9/11/2026. Esistono anche livello organizzazione (impostazioni gestite) e skill in sottocartelle, che si caricano quando si lavora lì. Per il corso: la skill dell'attività sta nel repository della palestra, in .claude/skills. Una skill di progetto con lo stesso nome di una personale viene ignorata: capita quando si prova una versione nuova senza accorgersi che ce n'è una vecchia nella cartella personale. /skill-doctor, dove disponibile, mostra il costo in contesto e la frequenza d'uso di ogni skill.`
+  },
+  {
+    block: B + 'La descrizione',
+    content: () => (
+      <div className="pad">
+        <Tag>Scrittura</Tag>
+        <h2>La descrizione è l'unica parte che l'agente legge sempre</h2>
+        <DT cols={['Vaga', 'Concreta']} rows={[
+          ['Aiuta con i test', 'Esegue la suite di test e riassume i fallimenti. Usala quando si chiede di lanciare i test o di capire perché falliscono.'],
+          ['Utility per git', 'Prepara le note di rilascio dai commit dall\'ultimo tag. Usala per changelog e release.'],
+          ['Revisione', 'Rivede una funzione rispetto alla sua specifica, eseguendo controlli. Usala dopo una modifica, prima di darla per finita.'],
+        ]} />
+        <ul style={{ marginTop: 10 }}>
+          <li>Due parti: <strong>che cosa fa</strong> e <strong>quando usarla</strong>, con le parole che userebbe un collega nella richiesta.</li>
+          <li>Il caso principale per primo: oltre i 1.536 caratteri il testo viene tagliato.</li>
+        </ul>
+      </div>
+    ),
+    notes: `La descrizione fa da indice: con dieci skill l'agente sceglie leggendo dieci descrizioni. Una descrizione vaga non viene scelta quando serve, o viene scelta quando non serve. Una prova pratica: leggere la descrizione senza vedere il resto e dire in quale richiesta si aspetterebbe di essere attivata. La documentazione suggerisce di includere nella descrizione anche le frasi tipiche con cui si chiede il compito, nel campo when_to_use, che viene accodato alla descrizione. Limite di 1.536 caratteri dalla pagina skills, 9/11/2026.`
+  },
+  {
+    block: B + 'Un esempio',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempio</Tag>
+        <h2>Una skill piccola che basta</h2>
+        <pre aria-label="Esempio di SKILL.md di un progetto inventato">{SKILLMD}</pre>
+        <p className="muted">Passi numerati, comandi esatti, un confine («non toccare altro»). Nessuna spiegazione di cose che l'agente sa già.</p>
+      </div>
+    ),
+    notes: `Esempio inventato. Notare: la descrizione dice che cosa fa e quando; ogni passo è un'azione controllabile; c'è un confine dichiarato. Si può chiedere alla sala quale passo l'agente potrebbe saltare senza che nessuno se ne accorga, e come si farebbe accorgersene (il file NOTE-RILASCIO.md ha le tre sezioni? ci sono hash?). Una skill che si lancia a mano con /note-di-rilascio è più prevedibile di una scelta dal modello.`
+  },
+  {
+    block: B + 'I subagenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Subagenti</Tag>
+        <h2>Un collaboratore con un contesto tutto suo</h2>
+        <Flow nodes={[
+          ['Agente principale', 'la conversazione intera', ''],
+          ['Messaggio di delega', 'tutto ciò che il subagente sa del compito', 'i'],
+          ['Subagente', 'contesto nuovo, strumenti e modello suoi', 'i'],
+          ['Riassunto', 'è l\'unica cosa che torna indietro', 'w'],
+        ]} />
+        <div className="grid" style={{ marginTop: 12 }}>
+          <Card title="Perché serve"><p>Letture, log e prove restano nel suo contesto: quello principale non si riempie.</p></Card>
+          <Card title="Che cosa non ha" kind="i"><p>La cronologia della conversazione e i file già letti. Riceve i CLAUDE.md e le skill che gli indichi.</p></Card>
+          <Card title="Che cosa costa" kind="w"><p>Richieste proprie al modello, che contano negli stessi limiti d'uso.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: `Dalla pagina sub-agents della documentazione (9/11/2026). Ogni subagente parte con una finestra di contesto nuova: non vede la conversazione. Riceve il suo prompt di sistema, il messaggio di delega scritto dall'agente principale, i CLAUDE.md (salvo i subagenti integrati Explore e Plan o chi imposta omitClaudeMd), le skill elencate. Alla fine torna solo il riassunto. Per la sala: ciò che l'agente principale scrive nel messaggio di delega è tutto quello che il subagente saprà. Un compito mal descritto produce una revisione del compito sbagliato. Nella versione attuale il comando /agents stampa un promemoria; nelle versioni fino alla 2.1.197 apriva una procedura guidata. I subagenti si creano chiedendo all'agente, oppure scrivendo il file in .claude/agents.`
+  },
+  {
+    block: B + 'Il file di un subagente',
+    content: () => (
+      <div className="pad">
+        <Tag>Subagenti</Tag>
+        <h2>Un file in .claude/agents</h2>
+        <div className="cols">
+          <pre aria-label="Esempio di file di un subagente revisore">{AGENTMD}</pre>
+          <ul>
+            <li><code className="nw">name</code> e <code className="nw">description</code>: gli unici campi obbligatori. La descrizione dice all'agente <strong>quando delegare</strong>.</li>
+            <li><code className="nw">tools</code> è l'elenco di ciò che può usare; <code className="nw">disallowedTools</code> toglie.</li>
+            <li><code className="nw">model</code>: <code className="nw">inherit</code> usa il modello della conversazione.</li>
+            <li><code className="nw">skills</code>: skill da caricare nel suo contesto.</li>
+          </ul>
+        </div>
+        <p className="muted">Il testo dopo il frontmatter è il suo prompt di sistema.</p>
+      </div>
+    ),
+    notes: `Campi dalla pagina sub-agents, 9/11/2026. Altri campi utili: maxTurns, permissionMode, mcpServers, hooks, memory, isolation: worktree. Un campo sconosciuto viene ignorato in silenzio, quindi anche qui un nome scritto male non genera errori. I subagenti si possono tenere nel repository (.claude/agents, condivisi con chi clona) o nella cartella personale. In un revisore la scelta degli strumenti è parte del progetto: Bash serve per eseguire i test e le prove, ma permette anche di scrivere; Write ed Edit tolti non bastano da soli, la regola di non modificare i file va scritta anche nelle istruzioni. Per invocarlo a mano: @agent-nome, oppure chiedere esplicitamente nella richiesta.`
+  },
+  {
+    block: B + 'Cosa restituiscono',
+    content: () => (
+      <div className="pad">
+        <Tag>Subagenti</Tag>
+        <h2>Il lead legge un riassunto, non il lavoro</h2>
+        <div className="grid">
+          <Card title="Torna il riassunto finale"><p>Il lavoro lungo resta nel contesto del subagente. È il vantaggio, e anche il rischio.</p></Card>
+          <Card title="Il riassunto può omettere" kind="w"><p>Una riga del lavoro integrale può non comparire nel riassunto. Il verdetto «nessun problema» non dice quali controlli sono stati fatti.</p></Card>
+          <Card title="Come leggere tutto" kind="i"><p>Chiedere la risposta integrale del subagente. Le trascrizioni stanno in <code className="nw">~/.claude/projects/…/subagents/</code>.</p></Card>
+        </div>
+        <Box type="info" title="Dal racconto">16 luglio: dieci agenti in parallelo leggono le trascrizioni delle sessioni di quindici progetti. Quindici progetti censiti in circa un'ora. Il parallelismo aiuta quando il compito è chiuso e il risultato si può controllare.</Box>
+      </div>
+    ),
+    notes: `Dalla documentazione (9/11/2026): al lead arriva il report finale del subagente, sotto un'intestazione che lo identifica come output del subagente; non ha l'autorità di un'approvazione dell'utente. Il report viene anche scansionato per avvisare di testo che imita tag di sistema. Fonte dell'episodio: il censimento retroattivo del 16 luglio 2026, dieci agenti che leggono le trascrizioni, quindici progetti in circa un'ora. Racconto a parole di Thomas, senza nomi di colleghi né dati interni. Il punto tecnico: tre cose rendono il parallelismo utile, un compito chiuso, una forma uguale per tutti i risultati, un controllo a campione. Per la sala: chi legge il riassunto di un subagente deve sapere come arrivare al testo integrale.`
+  },
+  {
+    block: B + 'Il revisore',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Un revisore come subagente</h2>
+        <div className="grid">
+          <Card title="Non ha scritto il codice"><p>Parte senza la conversazione in cui il codice è nato: non eredita le giustificazioni di chi l'ha scritto.</p></Card>
+          <Card title="Rivede e non corregge" kind="i"><p>Strumenti di lettura e di esecuzione, niente scrittura. Chi ha chiamato il revisore decide che cosa fare dei rilievi.</p></Card>
+          <Card title="Ha un compito chiuso" kind="i"><p>Riceve codice e specifica, restituisce un rapporto in una forma fissa.</p></Card>
+        </div>
+        <Box type="warn" title="Il limite">Se la specifica non è nel messaggio di delega o in un file, il revisore non la conosce: rivede il codice contro la sua idea del compito.</Box>
+      </div>
+    ),
+    notes: `Perché separare chi scrive e chi controlla: il revisore non vede il percorso fatto per arrivare al codice, quindi non ne eredita le scelte. Ma ciò che sa lo sa dalla delega: se il lead gli passa un riassunto del compito, il revisore rivede il riassunto. Meglio passare i file originali: la specifica, il codice, i test. La decisione finale resta a una persona.`
+  },
+  {
+    block: B + 'Due che concordano',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Due agenti d'accordo non sono una prova</h2>
+        <div className="grid">
+          <Card title="Stesso modello" kind="w"><p>Chi ha scritto il codice e chi lo rivede hanno spesso gli stessi punti ciechi.</p></Card>
+          <Card title="Stessa lettura" kind="w"><p>Se la specifica ha un punto ambiguo, entrambi lo leggono allo stesso modo.</p></Card>
+          <Card title="Stessa fonte" kind="w"><p>Il revisore rivede ciò che il lead gli ha passato, nel modo in cui glielo ha descritto.</p></Card>
+        </div>
+        <Box type="tip" title="Che cosa cambia l'esito">Un accordo è un'opinione condivisa. Una prova è un comando eseguito che poteva fallire. Il revisore utile riporta le seconde.</Box>
+        <Box type="info" title="Dal racconto">Il lavoro del lead sulla versione 0.2 del toolkit passa dal reviewer: 26 errori, 4 bloccanti.</Box>
+      </div>
+    ),
+    notes: `Il punto centrale dell'argomento. Due agenti che dicono la stessa cosa sembrano due conferme; spesso sono una lettura sola ripetuta. Un controllo ha valore se avrebbe potuto dare un altro esito. Per questo i revisori non vanno scelti solo per essere indipendenti: vanno istruiti a produrre prove (comandi, esiti, righe citate). Episodio documentato: nel luglio 2026, dopo la correzione dell'orchestrazione, la versione 0.2 del toolkit passa dal reviewer, che trova 26 errori di cui 4 bloccanti nel lavoro del lead. Raccontarlo con le parole di Thomas; qui solo i numeri documentati.`
+  },
+  {
+    block: B + 'Istruzioni ambigue',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Come si scrive un revisore che approva sempre</h2>
+        <pre aria-label="Istruzioni ambigue per un revisore">{AMBIGUA}</pre>
+        <DT cols={['Nel testo', 'Il problema', 'Più controllabile']} rows={[
+          ['«i test passano»', 'già noto prima di chiamarlo', 'per ogni punto della specifica, un controllo eseguito'],
+          ['«sembra corretto»', 'è un\'impressione, non una verifica', 'comando ed esito per ogni controllo'],
+          ['«APPROVATO»', 'unica uscita positiva', 'confermati, da verificare, non controllati'],
+        ]} />
+      </div>
+    ),
+    notes: `Queste sono le istruzioni che troverete nella palestra, nel punto di partenza dell'attività. Le leggete e vi sembrano ragionevoli: è il punto. Un revisore che le segue ha una via facile: i test sono verdi, il codice sembra a posto, risponde APPROVATO. Nulla lo obbliga a eseguire qualcosa. Le istruzioni migliori trasformano ogni impressione in un'azione di cui resta traccia. La terza colonna non è una soluzione da copiare: è il tipo di riscrittura da cui partire nell'attività. Lo stesso errore, istruzione ambigua letta allo stesso modo da due agenti, si può vedere nella demo del corso sull'organizzazione scolastica.`
+  },
+  {
+    block: B + 'Come si vede',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Come accorgersi che il revisore non rivede</h2>
+        <div className="grid">
+          <Card title="Segnali nella risposta" kind="w">
+            <ul>
+              <li>Nessun comando eseguito citato.</li>
+              <li>Nessuna riga di codice citata.</li>
+              <li>Risponde subito, in poche righe.</li>
+              <li>Stessa forma di risposta per codice diverso.</li>
+            </ul>
+          </Card>
+          <Card title="Prove che puoi fare" kind="i">
+            <ul>
+              <li>Dagli un pezzo con un difetto noto: lo trova?</li>
+              <li>Ripeti la richiesta: l'esito è lo stesso?</li>
+              <li>Chiedi comandi ed esiti, uno per controllo.</li>
+              <li>Rifai a mano un controllo che ha riportato.</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="tip" title="Prima del verdetto">Tre elenchi, sempre: confermato con la prova, da verificare, non controllato. Un «non controllato» onesto vale più di un «approvato» vago.</Box>
+      </div>
+    ),
+    notes: `Un revisore si collauda come qualsiasi strumento: gli si dà un caso di cui si conosce l'esito. Il difetto noto può essere un difetto piantato apposta in un pezzo di codice di prova. Se lo approva, le istruzioni non servono, qualunque sia il modello. Ripetere la richiesta mostra quanto l'esito dipende dal caso. La forma a tre elenchi serve a rendere visibile anche ciò che non è stato guardato, che è la parte che di solito manca nei rapporti.`
+  },
+  {
+    block: B + 'Il racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal racconto</Tag>
+        <h2>Sembrava funzionare</h2>
+        <div className="grid">
+          <Card title="Dieci agenti fantasma" kind="w"><p>Maggio 2026, versione 0.1 del toolkit: dieci agenti. Nel frontmatter c'era <code className="nw">\---</code> al posto di <code className="nw">---</code>. Per mesi i subagenti non sono stati caricati.</p></Card>
+          <Card title="L'orchestrazione mai avvenuta" kind="w"><p>20 luglio: si scopre che l'orchestrazione non era mai avvenuta. Correzione, un reviewer come passaggio obbligato, versione 0.2.</p></Card>
+        </div>
+        <Box type="info" title="Che cosa insegna">Un frontmatter sbagliato non produce un errore chiaro: lo strumento semplicemente non c'è. Si smaschera guardando se è stato caricato e se è stato usato, non leggendo la risposta.</Box>
+      </div>
+    ),
+    notes: `Fonti: il racconto di Thomas (frontmatter con backslash, subagenti mai caricati per mesi; scoperta del 20 luglio, correzione, passaggio dal reviewer, versione 0.2). Raccontare con le parole di Thomas e con gli errori quanto i successi. Il collegamento tecnico: la documentazione dice che un frontmatter YAML non valido fa caricare la skill senza i suoi campi e che un campo sconosciuto viene ignorato senza errori. Le difese: elencare gli strumenti caricati (/skills, /agents o la cartella), usarli a mano una volta, controllare che la delega compaia davvero.`
+  },
+  {
+    block: B + 'Router e modelli',
+    content: () => (
+      <div className="pad">
+        <Tag>Nel nostro ambiente</Tag>
+        <h2>Con un router, un modello può non usarli</h2>
+        <DT cols={['Che cosa verifichi', 'Dove guardi']} rows={[
+          ['La skill è caricata?', <><code className="nw">/skills</code>, <code className="nw">/context</code>; con <code className="nw">claude --debug</code> un frontmatter rotto</>],
+          ['Il subagente è partito?', 'la riga della delega a schermo (la dicitura va vista sul PC del corso)'],
+          ['Il modello li ha scelti?', <>provali a mano: <code className="nw">/nome-skill</code>, <code className="nw">@agent-nome</code></>],
+          ['Ha eseguito davvero?', 'nel riassunto: comandi ed esiti, non solo il verdetto'],
+          ['Gli alias del modello?', <>con un router, <code className="nw">sonnet</code>, <code className="nw">opus</code>, <code className="nw">haiku</code> vanno mappati; <code className="nw">inherit</code> evita il problema</>],
+        ]} />
+        <Box type="warn" title="Il rischio">Un modello può rispondere senza avere usato né la skill né il subagente: la risposta c'è, la verifica no. Se la risposta non mostra prove, è così finché non si dimostra il contrario.</Box>
+      </div>
+    ),
+    notes: `Nel laboratorio Claude Code parla con modelli che non sono Claude, tramite il router. Skill e subagenti dipendono da come il modello usa gli strumenti: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano. Gli hook invece non dipendono dal modello (argomento 8). Il router deve esporre l'endpoint in formato Anthropic; gli alias dei modelli dei subagenti vanno mappati nel router, altrimenti la delega fallisce o ricade su un altro modello: verificare prima dell'incontro.`
+  },
+  {
+    block: B + 'Attività: la palestra',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Una skill e un revisore per prenotaSettimanale</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dal punto <code className="nw">partenza-a7</code>: rivedi a mano la funzione contro la specifica. <em>10 min</em></li>
+          <li><time>2</time>Prova il revisore con le istruzioni del collega e annota che cosa ha eseguito. <em>5 min</em></li>
+          <li><time>3</time>Scrivi la skill di revisione, partendo dal modello. <em>15 min</em></li>
+          <li><time>4</time>Scrivi il subagente revisore: strumenti di lettura, rimando alla skill. <em>10 min</em></li>
+          <li><time>5</time>Fai girare tutto, controlla che sia stato usato, confronta con la revisione a mano. <em>10 min</em></li>
+        </ol>
+        <ActivityBadge n="7" file="scheda-revisione.html" label="Scheda: skill e subagente revisore" durata="indicativo: 50 min" />
+        <p className="muted" style={{ marginTop: 8 }}>Modelli da completare: <a className="text-link" href="../materiali/argomento-7/modello-skill-revisione.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>skill</a> e <a className="text-link" href="../materiali/argomento-7/modello-subagente-revisore.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente</a>.</p>
+      </div>
+    ),
+    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a7 (git switch -c lavoro-a7 partenza-a7). I test sono tutti verdi: la funzione prenotaSettimanale ha un solo test. Non dire se e dove ci siano problemi: è parte dell'esercizio. La revisione a mano viene prima, così c'è un termine di confronto. Il passo 2 è volutamente fatto con le istruzioni ambigue. Alla fine ogni coppia confronta tre colonne: a mano, revisore del collega, il proprio revisore. Le durate sono indicative. Se il modello non usa la skill o il subagente: invocarli a mano, e annotarlo come risultato.`
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Il revisore risponde APPROVATO e anche chi ha scritto il codice è d'accordo. Che cosa dimostra?" opzioni={[
+          { t: 'Che due verifiche indipendenti hanno dato lo stesso esito: il codice è giusto', ok: false, perche: 'Indipendenti fino a un certo punto: stesso modello, stessa specifica, stessa delega. Un accordo non è una prova.' },
+          { t: 'Che condividono la stessa lettura del compito. Vale come prova solo se il revisore ha eseguito controlli che potevano fallire', ok: true, perche: 'Per questo il rapporto deve riportare comandi ed esiti, e dichiarare ciò che non è stato controllato.' },
+          { t: 'Nulla: i revisori automatici sono inutili', ok: false, perche: 'Utili sì, se istruiti a produrre prove. Il difetto è nel fidarsi del verdetto senza guardare che cosa è stato fatto.' },
+        ]} />
+      </div>
+    ),
+    notes: `Se qualcuno risponde A, rimandare alla slide sui due agenti che concordano. Se risponde C, ricordare che il revisore trova cose che chi scrive non vede, quando è istruito bene: la slide sui due agenti che concordano. La risposta B è la più lunga di proposito: la condizione conta più del verdetto.`
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Una skill è una procedura in una cartella: l\'agente vede sempre la descrizione, il resto lo legge quando serve. La descrizione decide se verrà scelta.',
+          'Un subagente ha contesto e strumenti propri e restituisce un riassunto: si legge anche il lavoro, non solo il riassunto.',
+          'Due agenti d\'accordo non dimostrano nulla. Vale il controllo eseguito che poteva fallire.',
+          'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un router e modelli diversi non è scontato.',
+        ]}
+        dopo="Argomento 8 (hook e MCP: controlli che non dipendono dal modello) e argomento 11 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
+    ),
+    notes: `Riprendere i quattro punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 8.`
+  },
+];
+
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

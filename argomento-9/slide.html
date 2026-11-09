@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 9 · OpenCode e OmniRoute · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
+   durata: stima indicativa dell'esercizio, mai un orario. */
+const ActivityBadge = ({ n, file, label, durata }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    {durata && <span className="d">{durata}</span>}
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 9 — OpenCode e OmniRoute · ';
+
+const AGENTE = String.raw`# .opencode/agents/revisore.md
+---
+description: Rilegge un diff e segnala i problemi, senza modificare nulla
+mode: subagent
+permission:
+  edit: deny
+  bash:
+    "*": ask
+    "git diff*": allow
+---
+Sei un revisore. Leggi il diff, separa i problemi
+confermati dai dubbi, non toccare i file.`;
+
+const PLUGIN = String.raw`// .opencode/plugins/proteggi-env.js
+export const ProteggiEnv = async () => {
+  return {
+    "tool.execute.before": async (input, output) => {
+      if (input.tool === "read" &&
+          output.args.filePath.includes(".env")) {
+        throw new Error("Lettura dei file .env non consentita")
+      }
+    },
+  }
+}`;
+
+const CONF = String.raw`{
+  "share": "disabled",
+  "autoupdate": false,
+  "enabled_providers": ["router"],
+  "permission": {
+    "bash": { "*": "ask", "git status*": "allow", "rm *": "deny" },
+    "edit": "ask", "webfetch": "deny", "external_directory": "deny"
+  },
+  "provider": { "router": {
+    "npm": "@ai-sdk/openai-compatible",
+    "options": { "baseURL": "http://<server>/v1",
+                 "apiKey": "{env:CHIAVE_ROUTER}" },
+    "models": { "<id-del-modello>": {} }
+  } }
+}`;
+
+const CLAUDEENV = String.raw`# Claude Code: variabili d'ambiente (o blocco "env" delle impostazioni)
+ANTHROPIC_BASE_URL=http://<server>            # senza /v1
+ANTHROPIC_AUTH_TOKEN=<chiave del PC>
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1    # aggiornamenti, telemetria
+CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1      # se il router rifiuta i campi beta`;
+
+const PROVA = String.raw`# 1. Senza chiave, su una rotta che fa inferenza: deve rispondere 401
+curl -i -X POST http://<server>/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"x","messages":[]}'
+
+# 2. Con la chiave del PC: l'elenco dei modelli
+curl http://<server>/v1/models -H "Authorization: Bearer <chiave del PC>"`;
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="9" titolo="OpenCode e OmniRoute" sottotitolo="Gli stessi concetti in un secondo strumento, e il router che collega gli agenti ai modelli."
+        caso="Da dove nasce: un assistente ha consumato quasi 80 milioni di token perché una riserva a pagamento scattava in silenzio."
+        prima="argomenti 1 e 4." />
+    ),
+    notes: `Apertura. Vedere due strumenti aiuta a separare il metodo dallo strumento: contesto, permessi, agenti e controlli automatici ci sono in tutti e due, con nomi e default diversi. Il secondo tema è il router, cioè il programma che sta fra gli agenti e i modelli e che il laboratorio usa per dare a tutti la stessa configurazione. L'episodio di apertura è l'incidente dei costi di Argo Briefing, che riprendiamo a metà argomento e nell'argomento 10. Funzioni lette sulla documentazione ufficiale il 9 novembre 2026: nomi, comandi e valori predefiniti cambiano in fretta, quindi si riverificano sulla versione che si usa.`
+  },
+  {
+    block: B + 'Gli stessi concetti',
+    content: () => (
+      <div className="pad">
+        <Tag>Il confronto</Tag>
+        <h2>Cambiano i nomi, non il metodo</h2>
+        <DT cols={['Concetto', 'Claude Code', 'OpenCode']} rows={[
+          ['Istruzioni di progetto', <><code className="nw">CLAUDE.md</code></>, <><code className="nw">AGENTS.md</code> (ripiego su CLAUDE.md)</>],
+          ['Permessi', 'chiede per modifiche e comandi; regole allow, ask, deny', 'regole allow, ask, deny; quasi tutto consentito di default'],
+          ['Piano prima di agire', 'modalità piano', 'agente Plan (tasto Tab)'],
+          ['Subagenti', 'sì, anche personalizzati', 'sì: General, Explore e i propri'],
+          ['Controlli automatici', 'hook: comandi di shell su eventi', 'plugin: moduli JavaScript su eventi'],
+          ['Skill e MCP', 'sì', 'sì (legge anche .claude/skills)'],
+        ]} />
+        <p className="muted">Argomenti 7 e 8 per skill, subagenti, hook e MCP.</p>
+      </div>
+    ),
+    notes: `Tabella di partenza. Fonti, lette il 9/11/2026: code.claude.com/docs/en/permissions (in modalità manuale Claude Code chiede prima di modificare file e di eseguire comandi, tranne una serie di comandi di sola lettura); opencode.ai/docs e le pagine rules, agents, permissions, plugins. Nell'argomento 4 abbiamo già visto AGENTS.md contro CLAUDE.md: qui lo richiamiamo soltanto. Il punto da far notare è la riga dei permessi: lo stesso concetto, ma con default opposti. Il resto è questione di sintassi.`
+  },
+  {
+    block: B + 'Agenti e subagenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Agenti</Tag>
+        <h2>Primari e subagenti in OpenCode</h2>
+        <div className="grid">
+          <Card title="Primari"><p><b>Build</b> ha tutti gli strumenti. <b>Plan</b> analizza e non modifica i file del progetto. Si passa dall'uno all'altro con Tab.</p></Card>
+          <Card title="Subagenti" kind="i"><p><b>General</b> per lavori in più passi, <b>Explore</b> in sola lettura. Si chiamano con @ o li lancia l'agente primario.</p></Card>
+        </div>
+        <pre aria-label="Esempio di subagente revisore in OpenCode">{AGENTE}</pre>
+        <p className="muted">Un file Markdown per agente: l'intestazione dà modalità e permessi, il testo è il prompt.</p>
+      </div>
+    ),
+    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il subagente revisore dell'argomento 7, scritto in questo formato. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che gli alias dei modelli dei subagenti vanno mappati nel router.`
+  },
+  {
+    block: B + 'Plugin al posto degli hook',
+    content: () => (
+      <div className="pad">
+        <Tag>Controlli automatici</Tag>
+        <h2>Un plugin fa il lavoro di un hook</h2>
+        <pre aria-label="Esempio di plugin che blocca la lettura dei file .env">{PLUGIN}</pre>
+        <ul>
+          <li>Un hook di Claude Code è un comando di shell che riceve l'evento. Un plugin è codice JavaScript che gira dentro OpenCode.</li>
+          <li>Eventi come <code className="nw">tool.execute.before</code> permettono di guardare, cambiare o fermare una chiamata prima che parta.</li>
+        </ul>
+        <Box type="warn" title="Un plugin è codice che esegue">Si installa solo quello che si è letto. I plugin npm si fissano a una versione.</Box>
+      </div>
+    ),
+    notes: `Fonte: opencode.ai/docs/plugins, 9/11/2026 (l'esempio è adattato da quello della documentazione, che protegge i file .env). I plugin si mettono in .opencode/plugins/ o si indicano per nome nella configurazione. La documentazione elenca gli eventi (tool.execute.before e after, file.edited, session.idle, permission.asked e altri). Sul sito la documentazione della serie 2 descrive anche un'interfaccia diversa, con Plugin.define: vedi la slide sulle due generazioni. La differenza di fondo con gli hook: un hook è un processo separato, un plugin vive nel programma e ne vede lo stato. Più potenza, più fiducia da dare. Si riprende l'idea dell'argomento 8: ciò che deve valere sempre non si scrive in AGENTS.md, si fa controllare da un meccanismo.`
+  },
+  {
+    block: B + 'Due generazioni',
+    content: () => (
+      <div className="pad">
+        <Tag>La versione conta</Tag>
+        <h2>OpenCode ha due serie di rilasci</h2>
+        <DT cols={['', 'Serie 1', 'Serie 2']} rows={[
+          ['Permessi', <><code className="nw">permission</code>: oggetto per strumento</>, <><code className="nw">permissions</code>: elenco di regole azione, risorsa, effetto</>],
+          ['Plugin', <><code className="nw">plugin</code>, funzioni che restituiscono hook</>, <><code className="nw">plugins</code>, moduli con <code className="nw">Plugin.define</code></>],
+          ['Aggiornamenti', <code className="nw">autoupdate</code>, <code className="nw">update</code>],
+          ['Fuori dal progetto', 'chiede prima di uscire dalla cartella', 'nessuna regola predefinita: consentito'],
+        ]} />
+        <Box type="warn" title="Una versione sola">La configurazione si scrive e si prova sulla versione fissata dal laboratorio. Una guida trovata in rete può descrivere l'altra serie.</Box>
+      </div>
+    ),
+    notes: `Rilievo del 9/11/2026. Ultimo rilascio su GitHub: 2.2.6 del 6 novembre 2026 (github.com/anomalyco/opencode/releases), mentre il badge Latest della stessa pagina è su 1.19.5 del 28 ottobre 2026: le due serie escono in parallelo. Le pagine di opencode.ai/docs descrivono la serie 2 (permissions come elenco, plugins, update, riferimento esplicito a OpenCode 1 per le versioni precedenti); la documentazione nel repository descrive la serie 1 (permission come oggetto, autoupdate). Lo schema della configurazione pubblicato accetta entrambe le forme e segna le vecchie come deprecate. Il punto che conta in aula: la riga sul controllo delle cartelle esterne. Nella serie 1 la regola predefinita chiede conferma, nella serie 2 la documentazione dice che nessuna regola predefinita chiede e l'accesso fuori dal progetto passa senza domande. Questo è un motivo in più per fissare la versione e provare la configurazione su quella.`
+  },
+  {
+    block: B + 'I default da cambiare',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>OpenCode parte permissivo</h2>
+        <DT cols={['Default', 'Rischio', 'Cosa fare']} rows={[
+          ['Quasi tutto consentito, senza chiedere', 'comandi e modifiche partono da soli', <>regole <code className="nw">ask</code> e <code className="nw">deny</code> scritte a mano</>],
+          ['Cartelle fuori dal progetto', 'letture e scritture dove non devono', <><code className="nw">external_directory</code> su deny</>],
+          ['Condivisione della sessione', 'un link con il contenuto della conversazione', <><code className="nw">share</code> su disabled</>],
+          ['Controllo aggiornamenti', 'versione che cambia, traffico verso l\'esterno', <><code className="nw">autoupdate</code> su false</>],
+          ['Fornitori caricati da sé', 'modelli e chiavi che non hai scelto tu', <><code className="nw">enabled_providers</code>: solo il router</>],
+        ]} />
+        <p className="muted">I file .env sono l'eccezione: la lettura chiede conferma.</p>
+      </div>
+    ),
+    notes: `Fonti, 9/11/2026: documentazione della serie 1 nel repository, pagina permissions (nella serie 1: la maggior parte dei permessi è allow; external_directory e doom_loop chiedono; i file .env chiedono) e lo schema pubblicato opencode.ai/config.json (contiene share con valori manual, auto e disabled; enabled_providers e disabled_providers; autoupdate). Rispetto agli appunti di ottobre è cambiato un punto: la documentazione attuale dice che gli aggiornamenti non vengono mai installati da soli, OpenCode avvisa e basta; autoupdate su false spegne anche il controllo. Nella serie 2 esiste il valore auto per update: non va usato. Sulla condivisione: la pagina dedicata non era raggiungibile durante la verifica; la descrizione si basa sullo schema e va riverificata sulla versione fissata. Le chiavi dei fornitori OpenCode le salva in un file auth.json nella cartella dei dati dell'utente: in laboratorio si passa la chiave del router con una variabile d'ambiente.`
+  },
+  {
+    block: B + 'Una configurazione per il laboratorio',
+    content: () => (
+      <div className="pad">
+        <Tag>Configurazione</Tag>
+        <h2>opencode.json con i default corretti</h2>
+        <pre aria-label="Esempio di opencode.json per il laboratorio">{CONF}</pre>
+        <p className="muted">Sintassi della serie 1. Indirizzo e chiave sono segnaposto: la chiave sta in una variabile d'ambiente, mai nel file.</p>
+      </div>
+    ),
+    notes: `Esempio inventato di configurazione di progetto, sintassi della serie 1 (permission come oggetto). Mostra: condivisione spenta, controllo aggiornamenti spento, un solo fornitore ammesso (il router), comandi di shell che chiedono tranne pochi sicuri e rm vietato, modifiche che chiedono, accesso al web e alle cartelle esterne negati. Il fornitore compatibile OpenAI si dichiara con il pacchetto @ai-sdk/openai-compatible, baseURL e chiave (opencode.ai/docs/providers, 9/11/2026); l'identificativo del modello deve coincidere con quello che il router elenca su /v1/models. Con la serie 2 la parte dei permessi diventa un elenco di regole con azione, risorsa ed effetto (per esempio azione shell, risorsa git push con asterisco, effetto deny). Il file di progetto si versiona: nessuna chiave dentro. In laboratorio la configurazione la prepara il docente.`
+  },
+  {
+    block: B + 'Il router',
+    content: () => (
+      <div className="pad">
+        <Tag>Il router</Tag>
+        <h2>Un centralino fra gli agenti e i modelli</h2>
+        <div role="group" aria-label="Schema: gli agenti parlano con il router, che parla con i fornitori dei modelli">
+          <Flow label="Un'unica strada" nodes={[
+            ['1 Agenti', 'Claude Code (formato Anthropic) e OpenCode (formato OpenAI)'], ['2 Router', 'chiave, limiti, scelta del fornitore', 'w'], ['3 Fornitori', 'solo quelli in lista bianca', 'i'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Gli agenti conoscono un indirizzo e una chiave. Il fornitore del modello lo decide il router.</li>
+          <li>OmniRoute è un router open source (licenza MIT): espone sia il formato Anthropic, che serve a Claude Code, sia quello OpenAI.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Fonti: github.com/diegosouzapw/OmniRoute (README, ultimo rilascio 3.8.53 del 6 novembre 2026 secondo la pagina dei rilasci, letta il 9/11/2026) e code.claude.com/docs/en/llm-gateway. Un router o gateway sta fra il client e i fornitori: la chiave del fornitore resta lato server, i client hanno una chiave del router, l'uso si attribuisce per chiave, i limiti e le registrazioni stanno in un posto solo. Claude Code richiede che il gateway esponga il formato Anthropic (rotta /v1/messages); la documentazione di Claude Code aggiunge che Anthropic non approva né mantiene i gateway di terzi. Il progetto cambia quasi ogni giorno: la versione si fissa anche qui.`
+  },
+  {
+    block: B + 'Perché il laboratorio lo usa',
+    content: () => (
+      <div className="pad">
+        <Tag>Il motivo</Tag>
+        <h2>Perché un router in laboratorio</h2>
+        <div className="grid">
+          <Card title="Una configurazione"><p>I PC puntano allo stesso indirizzo. Cambiare modello o fornitore è una modifica sul router, non su ogni PC.</p></Card>
+          <Card title="Lista bianca" kind="i"><p>Si collegano solo i fornitori scelti, con i loro termini letti prima. Il resto non esiste.</p></Card>
+          <Card title="Nessun costo per i partecipanti"><p>Nessun account personale. Una chiave per PC, con limite giornaliero e orario del corso.</p></Card>
+          <Card title="Il prezzo da pagare" kind="w"><p>È un servizio in più da tenere acceso, aggiornare e proteggere. Se si ferma, si fermano tutti gli agenti.</p></Card>
+        </div>
+        <Box type="info" title="I modelli">I modelli li sceglie la configurazione del laboratorio.</Box>
+      </div>
+    ),
+    notes: `Perché non un account personale per ciascuno: costi non controllabili, chiavi sui PC della scuola, dati che escono verso fornitori non scelti. Con il router c'è un punto solo da configurare e da guardare. Una chiave per PC si può limitare (modelli ammessi, tetto giornaliero in dollari, orario di validità, scadenza). Attenzione: il costo mostrato dal pannello è una stima da listino, e un modello senza prezzo conta zero; il tetto vero va messo anche sulla console di ogni fornitore (guida di OmniRoute, 9/11/2026). Il prezzo da pagare è quello che la documentazione di Claude Code chiama infrastruttura da gestire: il gateway va tenuto aggiornato e deve inoltrare le funzioni nuove dei client. Non dire quali modelli si usano: dipende dalla configurazione del laboratorio.`
+  },
+  {
+    block: B + 'Collegare gli agenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Collegamento</Tag>
+        <h2>Due agenti, un solo router</h2>
+        <pre aria-label="Variabili d'ambiente per collegare Claude Code a un router">{CLAUDEENV}</pre>
+        <ul>
+          <li>Claude Code: indirizzo senza <code className="nw">/v1</code>, chiave come token. Con <code className="nw">/status</code> si legge a quale indirizzo parla.</li>
+          <li>OpenCode: l'indirizzo <b>con</b> <code className="nw">/v1</code>, nel blocco del fornitore (slide precedente).</li>
+          <li>La chiave non va in un file versionato: variabile d'ambiente o impostazioni dell'utente.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Fonti: code.claude.com/docs/en/llm-gateway-connect (9/11/2026): ANTHROPIC_BASE_URL e ANTHROPIC_AUTH_TOKEN, con /status che mostra la riga Anthropic base URL; la chiave non va nel file settings.json di progetto, che si versiona. CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 spegne aggiornamenti e telemetria; CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1 serve se il router rifiuta i campi sperimentali. Sui PC del laboratorio queste impostazioni le distribuisce il docente. Un errore classico: mettere /v1 dove non va, o dimenticarlo dove serve. Il segnaposto server e chiave del PC è voluto: nelle slide non compaiono indirizzi reali.`
+  },
+  {
+    block: B + 'Tre default pericolosi',
+    content: () => (
+      <div className="pad">
+        <Tag>OmniRoute</Tag>
+        <h2>Tre default da cambiare</h2>
+        <DT cols={['Impostazione', 'Default', 'Cosa succede', 'Cosa mettere']} rows={[
+          [<code className="nw">REQUIRE_API_KEY</code>, <code className="nw">false</code>, 'le rotte /v1 rispondono a chiunque raggiunga la porta', <code className="nw">true</code>],
+          [<code className="nw">OMNIROUTE_EMERGENCY_FALLBACK</code>, 'attivo', 'a un errore di budget la richiesta passa a un altro modello, senza che il client lo chieda', <code className="nw">false</code>],
+          [<>modelli <code className="nw">auto/*</code></>, 'consentiti', 'il router sceglie fra tutti i fornitori collegati', <><code className="nw">allowAutoCombos</code> false sulle chiavi</>],
+        ]} />
+        <p className="muted">In più: la password iniziale del pannello è un valore noto a tutti. Si cambia prima del primo avvio.</p>
+      </div>
+    ),
+    notes: `Fonti, 9/11/2026: github.com/diegosouzapw/OmniRoute, file .env.example e docs/reference/ENVIRONMENT.md (REQUIRE_API_KEY=false di default, accetta true, 1 o yes; la riserva di emergenza è attiva se la variabile non è impostata e devia gli errori 402 di budget verso un modello gratuito prestabilito di un fornitore esterno; le richieste con strumenti sono escluse), docs/security/INFERENCE_AUTH_POSTURE.md (con la chiave non richiesta una richiesta anonima passa, e anche un token non valido è trattato come anonimo), API_REFERENCE.md (allowAutoCombos false rifiuta i modelli auto/* per quella chiave; chi non lo imposta li ottiene). Il README elenca i modelli auto/coding, auto/fast, auto/cheap e altri. Rispetto agli appunti di ottobre i tre default sono confermati; cambia solo il numero di versione. Rete: le variabili di bind sono 0.0.0.0 di default per il comando serve, quindi chi è nella stessa rete raggiunge il router. Il secondo default è il più insidioso: nessun messaggio, un'altra spesa. Ne parliamo subito.`
+  },
+  {
+    block: B + 'Il caso',
+    content: () => (
+      <div className="pad">
+        <Tag>Il caso</Tag>
+        <h2>Argo Briefing: la riserva silenziosa</h2>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          <Stat big="1.140" label="richieste in un periodo" />
+          <Stat big="79,4 M" label="token consumati" />
+          <Stat big="$1,55" label="il costo totale" />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Un assistente usava una catena di modelli gratuiti. Quando la catena ha smesso di rispondere, un fornitore a pagamento ha fatto da riserva, senza avvisare.</li>
+          <li>La conversazione non veniva mai compattata, e i tentativi ripetuti rimandavano ogni volta tutta la storia.</li>
+        </ul>
+        <Box type="warn" title="Stesso tipo di meccanismo">Un fallback d'emergenza attivo di default fa la stessa cosa: a un errore la richiesta va a un fornitore che nessuno ha scelto, e nessuno lo vede.</Box>
+      </div>
+    ),
+    notes: `Incidente di Argo Briefing, agosto-settembre 2026: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. La cifra in dollari è bassa; il problema era il meccanismo. Un fornitore a pagamento faceva da riserva silenziosa a una catena di modelli gratuiti che non rispondeva più, la storia della conversazione non veniva compattata e i tentativi ripetuti la rimandavano per intero. Il caso è raccontabile in pubblico (autorizzazione di Thomas del 21/10/2026). Non dico che Argo Briefing usasse OmniRoute: dico che il fallback d'emergenza di OmniRoute, attivo per impostazione predefinita, è una riserva silenziosa dello stesso tipo. Lì la riserva costava; qui, secondo .env.example e emergencyFallback.ts (9/11/2026), devia gli errori di budget verso un modello gratuito di un fornitore esterno prestabilito: il conto non sale, ma i dati vanno a un fornitore fuori dalla lista bianca. La lezione: ogni riserva automatica va resa visibile o spenta, e un tetto di spesa vale più di una buona intenzione. Contesto, token e costi sono l'argomento 10.`
+  },
+  {
+    block: B + 'Come si verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Verifica</Tag>
+        <h2>Il router è chiuso davvero?</h2>
+        <pre aria-label="Due prove con curl: una rotta di inferenza senza chiave, poi l'elenco dei modelli con la chiave">{PROVA}</pre>
+        <ul>
+          <li>Un 401 sulla prima prova dice che la chiave è richiesta. Una risposta tipo «modello non trovato» dice il contrario: la richiesta ha superato l'accesso.</li>
+          <li>Un 401 su <code className="nw">/v1/models</code> non prova niente: quella rotta segue un'altra regola.</li>
+        </ul>
+      </div>
+    ),
+    notes: `Dalla guida alla sicurezza di OmniRoute (9/11/2026): GET /v1/models segue il controllo di accesso del pannello e non REQUIRE_API_KEY. Un operatore è stato ingannato proprio così: /v1/models rispondeva 401 mentre richieste anonime a un'altra rotta consumavano la quota. Si prova una rotta che fa inferenza. Non usare un token inventato come prova, perché con la chiave non obbligatoria un token non valido è trattato come anonimo. Con il comando curl.exe su Windows e le virgolette singole può servire adattare la riga alla shell; sui PC del laboratorio la prova la fa il docente. Segnaposto al posto di indirizzo e chiave.`
+  },
+  {
+    block: B + 'Rischi dei collegamenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi e rischi</Tag>
+        <h2>Ogni collegamento esterno ha un conto</h2>
+        <DT cols={['Collegamento', 'Cosa esce o cosa entra', 'Cosa si controlla']} rows={[
+          ['Router', 'prompt e file letti, verso i fornitori', 'chiave per PC, limiti, dati solo inventati'],
+          ['Fornitori dietro il router', 'gli stessi contenuti, con i loro termini', 'lista bianca; addestramento sui dati e uso tramite proxy'],
+          ['MCP e plugin', 'codice eseguito sul PC', 'solo ciò che si è letto, versione fissata'],
+          ['Web e link di condivisione', 'testo da fuori entra nel contesto; la sessione esce', 'webfetch su ask o deny, share disabilitato'],
+          ['Aggiornamenti e telemetria', 'richieste verso l\'esterno', 'autoupdate false, traffico non essenziale spento'],
+        ]} />
+      </div>
+    ),
+    notes: `Riepilogo dei permessi e dei rischi. Sui fornitori: nelle guide di OmniRoute si legge che alcuni piani gratuiti usano i dati per l'addestramento salvo rinuncia, e che molti fornitori vietano l'accesso di terzi tramite un proxy: i termini si leggono prima di aprire l'accesso a un gruppo di persone, e per questo in laboratorio solo dati inventati. Sul web: ciò che una pagina scrive entra nel contesto dell'agente e può contenere istruzioni; l'argomento 12 ne fa il tema. Sui plugin: la documentazione di OpenCode dice che i pacchetti npm non fissati a una versione vengono controllati all'avvio. Per Claude Code le impostazioni gestite dell'amministratore possono imporre un solo indirizzo di destinazione (code.claude.com/docs/en/llm-gateway, 9/11/2026).`
+  },
+  {
+    block: B + 'Quando il modello cambia',
+    content: () => (
+      <div className="pad">
+        <Tag>Il modello</Tag>
+        <h2>Lo strumento non è pensato per questo modello</h2>
+        <div className="grid">
+          <Card title="Può cambiare" kind="w">
+            <ul>
+              <li>Come il modello usa gli strumenti, quindi skill e subagenti.</li>
+              <li>I campi che il router o il modello rifiutano: errori 400.</li>
+              <li>La finestra di contesto che lo strumento suppone.</li>
+              <li>Quale modello fa i lavori di sfondo e i subagenti.</li>
+            </ul>
+          </Card>
+          <Card title="Non cambia" kind="i">
+            <ul>
+              <li>I file di istruzioni caricati.</li>
+              <li>I permessi e gli hook: li applica lo strumento.</li>
+              <li>Il tuo compito di leggere il diff.</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="warn" title="Nessun supporto ufficiale">Anthropic non supporta Claude Code su modelli non Claude tramite un gateway.</Box>
+      </div>
+    ),
+    notes: `Fonte: code.claude.com/docs/en/llm-gateway e llm-gateway-connect, 9/11/2026. Dichiarazione esplicita: Anthropic non supporta l'instradamento di Claude Code verso modelli non Claude attraverso un gateway. Sintomi noti nella tabella degli errori: 400 su campi sperimentali (CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1), contesto superato che lo strumento non riconosce (si usa /compact e CLAUDE_CODE_AUTO_COMPACT_WINDOW), alias dei modelli (ANTHROPIC_DEFAULT_OPUS_MODEL, _SONNET_ e _HAIKU_ si mappano sui modelli del router). In OpenCode il problema è speculare: la documentazione dei fornitori consiglia modelli con buone chiamate agli strumenti. Per questo ogni dimostrazione su skill e subagenti ha un piano B registrato; gli hook e i permessi invece non dipendono dal modello. Non dire quali modelli si usano: li sceglie la configurazione del laboratorio.`
+  },
+  {
+    block: B + 'Attività: due strumenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Lo stesso compito, due agenti</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dalla palestra, punto <code className="nw">partenza-a9</code>: stesse istruzioni per tutti e due gli agenti.</li>
+          <li><time>2</time>Lo stesso compito a Claude Code, in una sessione nuova. Annota cosa chiede, cosa fa da solo.</li>
+          <li><time>3</time>Scarta le modifiche e ripeti con OpenCode, con i permessi del laboratorio.</li>
+          <li><time>4</time>Confronta: richieste di conferma, comandi lanciati, file toccati, configurazione letta.</li>
+        </ol>
+        <ActivityBadge n="9" file="confronto-claude-code-opencode.html" label="Scheda: il confronto fra i due strumenti" durata="indicativo: 30 min" />
+      </div>
+    ),
+    notes: `Attività sulla palestra, a coppie. Il compito è quello dell'incontro 1: aggiungere all'elenco delle prenotazioni il filtro per laboratorio, con un test. Perché il confronto valga, i due agenti devono vedere le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 4. Il modello dietro il router è lo stesso per tutti e due, quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
+  },
+  {
+    block: B + 'Attività: trova l\'errore',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Una configurazione con i default sbagliati</h2>
+        <ol className="timeline">
+          <li><time>1</time>Leggi il file di OpenCode e le impostazioni del router, inventati.</li>
+          <li><time>2</time>Segna ogni riga pericolosa e scrivi cosa rischia chi lavora con quel PC.</li>
+          <li><time>3</time>Scrivi la versione corretta e l'ordine dei controlli prima di aprire l'agente.</li>
+        </ol>
+        <ActivityBadge n="9" file="trova-l-errore-configurazione.html" label="Scheda: trova l'errore nella configurazione" durata="indicativo: 15 min" />
+        <p className="muted" style={{ marginTop: 10 }}>Indirizzi, chiavi e nomi nella scheda sono tutti inventati.</p>
+      </div>
+    ),
+    notes: `Scheda con una configurazione inventata di OpenCode e le impostazioni di un router, con più righe sbagliate: permessi aperti, condivisione attiva, aggiornamenti automatici, fornitori non limitati, chiave scritta nel file, router senza obbligo di chiave e riserva di emergenza attiva. Una delle righe non produce nessun errore, ed è la più difficile da vedere. Le risposte attese sono del docente. Per chi finisce prima: scrivere i quattro controlli, in ordine, da fare sul proprio PC prima di cominciare.`
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Chiami l'elenco dei modelli di un router senza chiave e ricevi 401. Cosa puoi concludere?" opzioni={[
+          { t: 'Il router è chiuso: senza chiave non si usa nulla', ok: false, perche: 'Quella rotta segue un\'altra regola. Intanto le richieste di inferenza potrebbero passare senza chiave.' },
+          { t: 'Non molto: va provata una rotta di inferenza, per esempio chat/completions', ok: true, perche: 'Solo un 401 su una rotta che fa inferenza dice che la chiave è obbligatoria.' },
+          { t: 'Il router è aperto, perché il 401 è un errore', ok: false, perche: 'Il 401 non dice che sia aperto. Dice soltanto che quella prova non basta.' },
+        ]} />
+      </div>
+    ),
+    notes: `Domanda sul punto più facile da sbagliare, preso da un caso documentato dal progetto stesso. Se qualcuno risponde A, rimandare alla slide sulla verifica.`
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Contesto, agenti, permessi e controlli automatici ci sono in entrambi gli strumenti. Cambiano nomi, sintassi e soprattutto i default.',
+          'OpenCode parte permissivo: permessi, condivisione, aggiornamenti e fornitori si configurano a mano, sulla versione fissata.',
+          'Il router dà una configurazione sola, ma ha i suoi default pericolosi: chiave non obbligatoria, riserva di emergenza attiva, modelli auto.',
+          'Ogni collegamento esterno ha un conto. Con un modello diverso da quello previsto, l\'agente può comportarsi in modo diverso.',
+        ]}
+        dopo="Argomento 10 (costi e contesto: l'incidente di Argo Briefing in dettaglio, con i listini)." />
+    ),
+    notes: `Riprendere i quattro punti. Collegare con l'argomento 10: lì si vede cosa succede ai token quando il contesto si riempie e come si stima il costo di una sessione. Lasciare spazio alle domande.`
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

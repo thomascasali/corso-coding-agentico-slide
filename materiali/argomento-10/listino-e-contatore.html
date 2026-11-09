@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listino e contatore della sessione — Materiali argomento 10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 10</a>
+  <a class="dl-btn" href="listino-e-contatore.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="listino-e-contatore-della-sessione">Listino e contatore della sessione</h1>
+<p>Durata indicativa: 10 minuti. Si confronta il conto fatto a mano con quello del contatore di Claude Code.</p>
+<p>Funzioni di Claude Code citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026. Il modello dietro l'agente lo sceglie il router del laboratorio.</p>
+<h2 id="1-il-listino">1. Il listino</h2>
+<p>Dollari per milione di token, listino pubblico di Anthropic consultato il 9 novembre 2026 (platform.claude.com/docs/en/about-claude/pricing) e di DeepSeek (api-docs.deepseek.com/quick_start/pricing).</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Modello</th>
+<th>Ingresso</th>
+<th>Scrittura in cache (5 min)</th>
+<th>Lettura dalla cache</th>
+<th>Uscita</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Haiku 5.5 (prompt fino a 100.000 token)</td>
+<td>0,10</td>
+<td>0,125</td>
+<td>0,01</td>
+<td>0,50</td>
+</tr>
+<tr>
+<td>Haiku 5.5 (prompt oltre 100.000 token)</td>
+<td>0,50</td>
+<td>0,625</td>
+<td>0,05</td>
+<td>2,50</td>
+</tr>
+<tr>
+<td>Sonnet 5.5</td>
+<td>2</td>
+<td>2,50</td>
+<td>0,10</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Opus 5.5</td>
+<td>4</td>
+<td>5</td>
+<td>0,20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Fable 5.1</td>
+<td>10</td>
+<td>12,50</td>
+<td>0,25</td>
+<td>50</td>
+</tr>
+<tr>
+<td>Sonnet 4.6 (modello precedente)</td>
+<td>3</td>
+<td>3,75</td>
+<td>0,30</td>
+<td>15</td>
+</tr>
+<tr>
+<td>DeepSeek Flash, fuori orario di punta</td>
+<td>0,15</td>
+<td>come l'ingresso</td>
+<td>0,003</td>
+<td>0,60</td>
+</tr>
+<tr>
+<td>DeepSeek Flash, orario di punta</td>
+<td>0,30</td>
+<td>come l'ingresso</td>
+<td>0,006</td>
+<td>1,20</td>
+</tr>
+</tbody>
+</table></div>
+<p>Il listino cambia: prima di una stima vera, riapri la pagina del fornitore.</p>
+<h2 id="2-la-formula">2. La formula</h2>
+<p>Per una sessione, con i token letti dal contatore:</p>
+<pre><code>costo = ( ingresso senza cache  x prezzo ingresso
+        + scritti in cache      x prezzo scrittura
+        + letti dalla cache     x prezzo lettura
+        + uscita                x prezzo uscita ) / 1.000.000
+</code></pre>
+<h2 id="3-rifai-il-conto-di-un-esempio">3. Rifai il conto di un esempio</h2>
+<p>La documentazione di Claude Code mostra questo estratto del contatore (comando <code>/usage</code>, blocco "Session"):</p>
+<pre><code>Total cost:            $0.55
+Usage by model:
+   claude-sonnet-4-6:  1.2k input, 5.3k output, 940.0k cache read, 50.0k cache write ($0.55)
+</code></pre>
+<p>Con i prezzi di Sonnet 4.6 della sezione 1, calcola il costo di ciascuna voce e il totale.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Voce</th>
+<th>Token</th>
+<th>Prezzo per milione</th>
+<th>Costo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ingresso</td>
+<td>1.200</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Uscita</td>
+<td>5.300</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Letti dalla cache</td>
+<td>940.000</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Scritti in cache</td>
+<td>50.000</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Totale</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Il totale torna con i 0,55 dollari del contatore? Quale voce pesa di più? Quale ha il prezzo più alto per token?</p>
+<h2 id="4-il-tuo-contatore">4. Il tuo contatore</h2>
+<p>Nella sessione che hai usato in questo incontro, scrivi <code>/usage</code> e leggi il blocco "Session". Annota:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Dato</th>
+<th>Valore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modello (come compare nel contatore)</td>
+<td></td>
+</tr>
+<tr>
+<td>Token in ingresso</td>
+<td></td>
+</tr>
+<tr>
+<td>Token in uscita</td>
+<td></td>
+</tr>
+<tr>
+<td>Token letti dalla cache</td>
+<td></td>
+</tr>
+<tr>
+<td>Token scritti in cache</td>
+<td></td>
+</tr>
+<tr>
+<td>Costo totale mostrato</td>
+<td></td>
+</tr>
+<tr>
+<td>Riga "Prompt cache" (se c'è): quota servita dalla cache</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Se una voce non compare, scrivilo: è un'informazione. In particolare, con i modelli del router il costo potrebbe mancare o non avere senso, perché il contatore lo calcola in locale dai token con i prezzi che conosce.</p>
+<h2 id="5-stima-e-contatore">5. Stima e contatore</h2>
+<ul>
+<li>Scegli nella calcolatrice il modello più vicino al tuo e prova a ricostruire la tua sessione: quanti giri ha avuto (le richieste), quanti token nuovi a giro?</li>
+<li>Confronta i token inviati in ingresso della calcolatrice con la somma di ingresso, lettura e scrittura del contatore. Di quanto differiscono?</li>
+<li>Cosa non è nella stima e potrebbe spiegare la differenza? Ragiona su ragionamento, subagenti, richieste in background, tentativi ripetuti.</li>
+<li>Se il contatore non mostra la cache: che cosa implica per il costo, e per chi dovrebbe verificarlo (il router, il fornitore)?</li>
+</ul>
+<p>Le soluzioni le ha il docente.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

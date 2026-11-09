@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promemoria: eventi, formato, comandi MCP — Materiali argomento 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 8</a>
+  <a class="dl-btn" href="promemoria-hook-mcp.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="promemoria-hook-di-claude-code-e-mcp">Promemoria: hook di Claude Code e MCP</h1>
+<p>Da tenere accanto durante l'attività. Letto sulla documentazione ufficiale il 9/11/2026; nomi e dettagli cambiano in fretta, ricontrollali.
+Fonti: https://code.claude.com/docs/en/hooks , https://code.claude.com/docs/en/hooks-guide , https://code.claude.com/docs/en/mcp , https://modelcontextprotocol.io</p>
+<h2 id="gli-eventi-piu-usati">Gli eventi più usati</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Evento</th>
+<th>Quando scatta</th>
+<th>Può bloccare?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code></td>
+<td>prima che l'agente usi uno strumento</td>
+<td>sì (uscita 2)</td>
+</tr>
+<tr>
+<td><code>PostToolUse</code></td>
+<td>dopo che lo strumento ha girato</td>
+<td>no: l'azione è già avvenuta, l'agente legge il messaggio</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>quando invii un messaggio</td>
+<td>sì</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>quando l'agente finisce di rispondere</td>
+<td>sì: lo fa continuare</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>all'avvio o alla ripresa della sessione</td>
+<td>no: aggiunge solo contesto</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>quando l'agente aspetta te</td>
+<td>no</td>
+</tr>
+</tbody>
+</table></div>
+<p>Gli eventi sono molti di più: l'elenco completo è nel riferimento.</p>
+<h2 id="cosa-riceve-lo-hook-standard-input-json">Cosa riceve lo hook (standard input, JSON)</h2>
+<pre><code class="language-json">{
+  &quot;hook_event_name&quot;: &quot;PreToolUse&quot;,
+  &quot;session_id&quot;: &quot;abc123&quot;,
+  &quot;cwd&quot;: &quot;C:\\palestra&quot;,
+  &quot;tool_name&quot;: &quot;Bash&quot;,
+  &quot;tool_input&quot;: { &quot;command&quot;: &quot;git status&quot; }
+}
+</code></pre>
+<p>L'evento vero ha altri campi. Per Bash c'è <code>tool_input.command</code>; per Edit e Write c'è <code>tool_input.file_path</code>.</p>
+<h2 id="come-risponde-lo-hook-pretooluse">Come risponde lo hook (PreToolUse)</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Uscita</th>
+<th>Effetto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>nessuna obiezione: il comando segue il normale percorso dei permessi</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>bloccato; quello che scrivi sullo standard error arriva all'agente</td>
+</tr>
+<tr>
+<td>qualsiasi altro, anche <code>1</code></td>
+<td>errore che <strong>non</strong> blocca: il comando parte</td>
+</tr>
+</tbody>
+</table></div>
+<p>Il motivo del blocco va sullo <strong>standard error</strong> (<code>console.error</code>), non sullo standard output.</p>
+<h2 id="configurazione-claudesettingsjson">Configurazione (<code>.claude/settings.json</code>)</h2>
+<pre><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Bash&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/blocca-comandi.js\&quot;&quot; }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<ul>
+<li>Tre livelli: evento, gruppo con <code>matcher</code>, gestori.</li>
+<li><code>matcher</code> distingue maiuscole e minuscole: <code>Bash</code>, <code>Edit|Write</code>, <code>mcp__server__.*</code>.</li>
+<li><code>$CLAUDE_PROJECT_DIR</code> è la radice del progetto.</li>
+<li>Il JSON non ammette virgole finali né commenti.</li>
+</ul>
+<h2 id="provare-uno-hook">Provare uno hook</h2>
+<p>A mano, senza agente:</p>
+<pre><code>echo '{&quot;tool_name&quot;:&quot;Bash&quot;,&quot;tool_input&quot;:{&quot;command&quot;:&quot;ls&quot;}}' | node .claude/hooks/blocca-comandi.js
+echo $?
+</code></pre>
+<p>In PowerShell il codice di uscita si legge con <code>$LASTEXITCODE</code>. Dentro Claude Code: <code>/hooks</code> mostra gli hook attivi, <code>Ctrl+O</code> la trascrizione, <code>claude --debug</code> i dettagli.</p>
+<h2 id="mcp-in-breve">MCP in breve</h2>
+<ul>
+<li><strong>Host</strong> (Claude Code) → un <strong>client</strong> per ogni <strong>server</strong> → il sistema esterno.</li>
+<li>Un server offre <strong>strumenti</strong>, <strong>risorse</strong>, <strong>prompt</strong>. Si collega con <strong>stdio</strong> (programma locale) o <strong>HTTP</strong> (servizio remoto).</li>
+<li>Ambiti in Claude Code: <code>local</code> (solo tu, questo progetto), <code>project</code> (file <code>.mcp.json</code>, condiviso con git), <code>user</code> (tutti i tuoi progetti).</li>
+</ul>
+<p>Server di file in sola lettura su una cartella di prova (richiede Node.js 24 o più recente):</p>
+<pre><code>claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova
+</code></pre>
+<p>Comandi utili: <code>claude mcp list</code>, <code>claude mcp get documenti</code>, <code>claude mcp remove documenti</code>; dentro la sessione <code>/mcp</code>.
+I permessi di uno strumento MCP si scrivono con il nome <code>mcp__server__strumento</code>.</p>
+<h2 id="prima-di-collegare-un-server">Prima di collegare un server</h2>
+<ul>
+<li>Lo conosci e ti fidi di chi lo ha scritto?</li>
+<li>Che cosa può leggere? Che cosa può scrivere? Basta la sola lettura?</li>
+<li>Il testo che restituisce può venire da altri (pagine, segnalazioni)? Allora è un input non fidato.</li>
+<li>Token e chiavi stanno nelle variabili d'ambiente, mai dentro <code>.mcp.json</code>.</li>
+</ul>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

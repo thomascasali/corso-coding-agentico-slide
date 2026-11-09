@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primo giro: l'agente descrive la palestra — Materiali argomento 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 1</a>
+  <a class="dl-btn" href="primo-giro.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="primo-giro-lagente-descrive-la-palestra">Primo giro: l'agente descrive la palestra</h1>
+<p>Durata indicativa: 15 minuti. Si lavora sulla <strong>palestra</strong>, la piccola app di prenotazione dei laboratori (dati inventati). Non si modifica nulla.</p>
+<p>Funzioni di Claude Code citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026. Il modello dietro l'agente lo sceglie il router del laboratorio.</p>
+<h2 id="1-avvia-lagente-in-modalita-manual">1. Avvia l'agente in modalità Manual</h2>
+<p>Apri il terminale nella cartella della palestra (quella già pronta sul PC; se non la trovi, chiedi). Poi:</p>
+<pre><code>claude --permission-mode manual
+</code></pre>
+<p>In modalità Manual l'agente chiede prima di modificare un file o di eseguire un comando. Fanno eccezione le letture e un piccolo insieme di comandi di sola lettura (per esempio <code>ls</code> o <code>git status</code>), che vanno senza chiedere. Se lo vedi modificare un file o eseguire un altro comando <strong>senza chiedere</strong>, premi <code>Esc</code> e chiama il docente.</p>
+<h2 id="2-fagli-descrivere-il-progetto">2. Fagli descrivere il progetto</h2>
+<p>Scrivi questa richiesta così com'è:</p>
+<pre><code>Spiegami a cosa serve questo progetto e come è organizzato.
+Non modificare nulla e non eseguire comandi.
+</code></pre>
+<p>Mentre lavora, guarda la <strong>traccia</strong>: le righe in cui compare lo strumento usato (per esempio una lettura di file) e il file a cui si riferisce.</p>
+<h2 id="3-leggi-cosa-ha-letto">3. Leggi cosa ha letto</h2>
+<p>Compila la tabella, anche a penna:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>File che ha letto</th>
+<th>Che cosa ne ha ricavato</th>
+<th>Avrebbe dovuto leggerne altri?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="4-controlla-se-ha-ragione">4. Controlla se ha ragione</h2>
+<p>Scegli <strong>tre affermazioni</strong> dell'agente (dove stanno i dati, come si avvia, quali comandi esistono, come si lanciano i test) e verificale tu, con comandi tuoi. In un secondo terminale, o dopo aver chiuso l'agente con <code>/exit</code>:</p>
+<pre><code>ls
+ls dati
+node cli.js laboratori
+cat package.json
+</code></pre>
+<p>Per ogni affermazione scrivi: <strong>confermata</strong>, <strong>sbagliata</strong> o <strong>non verificabile</strong>, e con quale comando l'hai deciso.</p>
+<h2 id="5-una-domanda-finale">5. Una domanda finale</h2>
+<p>Torna all'agente e chiedi:</p>
+<pre><code>Quali file di istruzioni hai letto all'avvio, e da dove ricavi che i dati stanno dove hai detto?
+</code></pre>
+<p>Rileggi la risposta con la tabella del punto 3 accanto: ha detto qualcosa che non ha letto da nessuna parte?</p>
+<h2 id="6-uno-sguardo-al-contesto">6. Uno sguardo al contesto</h2>
+<p>Digita <code>/context</code>: mostra che cosa occupa la finestra di contesto, per categoria. Annota quale categoria pesa di più dopo questo breve giro.</p>
+<h2 id="per-finire">Per finire</h2>
+<p>Non devi aver salvato nulla. Se <code>git status</code> mostra modifiche, dillo al docente: non erano previste in questa scheda. Le soluzioni le ha il docente.</p>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>

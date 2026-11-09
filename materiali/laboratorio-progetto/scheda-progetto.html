@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda del progetto personale — Materiali progetto personale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali del progetto personale</a>
+  <a class="dl-btn" href="scheda-progetto.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="scheda-del-progetto-personale">Scheda del progetto personale</h1>
+<p>Corso "Coding agentico" · ITTS "Belluzzi-Da Vinci"</p>
+<p>Compilatela nell'incontro 1 e fatela approvare da Thomas. Il progetto deve chiudersi in cinque pomeriggi: meglio piccolo e finito che grande e a metà. Una riga per campo basta, due se serve.</p>
+<p>Nome e cognome: ______________________  Nome del progetto: ______________________</p>
+<h2 id="1-il-problema">1. Il problema</h2>
+<p>Quale lavoro ripetitivo, errore frequente o cosa che manca vi dà fastidio nel vostro lavoro a scuola? Descrivetelo come lo raccontereste a un collega, con un esempio recente.</p>
+<hr />
+<h2 id="2-chi-lo-usa">2. Chi lo usa</h2>
+<p>Voi? Un collega? Gli studenti di una classe? Una persona della segreteria? Cosa sa fare questa persona al computer?</p>
+<hr />
+<h2 id="3-cosa-fa-la-prima-versione">3. Cosa fa la prima versione</h2>
+<p>Tre o quattro cose al massimo, ciascuna con un verbo ("legge un file CSV e segnala le righe sbagliate"). Se non ci stanno in cinque pomeriggi, si tagliano ora.</p>
+<ol>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+</ol>
+<h2 id="4-criteri-di-accettazione">4. Criteri di accettazione</h2>
+<p>Come si capisce, da fuori, che funziona? Scrivete due o tre prove concrete, con un dato di ingresso e il risultato atteso. Esempio: "con il file <code>prenotazioni-prova.csv</code> il programma stampa 3 righe errate, con il numero di riga".</p>
+<ol>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+<li>
+<hr />
+</li>
+</ol>
+<h2 id="5-linguaggio-e-strumenti">5. Linguaggio e strumenti</h2>
+<p>Linguaggio scelto: ______________  È già installato sul PC del laboratorio? sì / no / non so</p>
+<p>Se manca qualcosa (un linguaggio, una libreria), scrivetelo: lo installiamo prima del secondo incontro.</p>
+<h2 id="6-dati">6. Dati</h2>
+<p>Quali dati servono? Devono essere <strong>inventati</strong>: li create voi, a mano o con uno script. Descrivete che forma hanno (campi, quante righe).</p>
+<hr />
+<p>Conferma: non uso dati di studenti, famiglie o colleghi, né documenti della scuola. sì</p>
+<h2 id="7-cosa-resta-fuori">7. Cosa resta fuori</h2>
+<p>Almeno due cose che il progetto non farà, per non allargarlo strada facendo.</p>
+<hr />
+<h2 id="8-rischi">8. Rischi</h2>
+<p>Cosa potrebbe andare storto o rubarvi tempo? (un formato di file complicato, una libreria che non conoscete, una parte che dipende da un servizio esterno...)</p>
+<hr />
+<h2 id="approvazione">Approvazione</h2>
+<p>Approvata da Thomas: sì / con modifiche / da rivedere  Data: ____________</p>
+<p>Note: ______________________________________________</p>
+<hr />
+<h2 id="esempi-di-progetti-adatti">Esempi di progetti adatti</h2>
+<ul>
+<li>Un validatore di file CSV: controlla un file di orari o di elenchi inventati e segnala le righe sbagliate.</li>
+<li>Un generatore di esercizi da tracce inventate (per esempio esercizi di rete con indirizzi diversi per ogni studente immaginario).</li>
+<li>Uno script che controlla che l'elenco dei PC di un laboratorio (inventato) sia completo e senza duplicati.</li>
+<li>Un calcolatore di sottoreti con spiegazione passo per passo.</li>
+<li>Un piccolo servizio interno con dati inventati: prestito di cavi e adattatori, registro delle prove di laboratorio.</li>
+<li>Uno strumento per la segreteria con dati inventati: convertire un elenco in un altro formato, controllare le date di scadenza di una lista di documenti.</li>
+<li>Una presentazione interattiva per una lezione.</li>
+</ul>
+<h2 id="esempi-di-progetti-non-adatti">Esempi di progetti non adatti</h2>
+<ul>
+<li>Qualsiasi cosa che si colleghi a registro elettronico, account istituzionali, posta o altri sistemi reali della scuola.</li>
+<li>Qualsiasi cosa che usi dati reali di studenti, famiglie o personale, anche "solo per provare".</li>
+<li>Un correttore che esegue il codice consegnato dagli studenti: richiede un isolamento che va oltre il corso.</li>
+<li>Un sito o un'app con login pubblico, pagamenti o dati personali.</li>
+<li>Un progetto così grande che già ora non sapete dire cosa fa la prima versione.</li>
+<li>Uno strumento che deve funzionare in rete tra più PC: nel corso si lavora su un solo PC.</li>
+</ul>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+</body>
+</html>
