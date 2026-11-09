@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 11 · Rilascio mobile in autopilota · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+  /* Tema della locandina. Contrasti calcolati su --bg, --panel e --panel-2:
+     testo >= 6,7:1 (--danger 6,8:1 sul pannello piu' chiaro), accento 10,3:1, bordo --border >= 3,8:1. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866; /* solo avvisi */
+    --danger: #ff8a8a;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  /* diagramma a livelli: riquadri HTML, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  @media (max-width: 768px) {
+    .pad { padding: 12px 12px; }
+    .top-bar { padding: 0 10px !important; }
+    .bottom-bar { padding: 0 12px !important; }
+    td:first-child { white-space: normal; }
+    .terms { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+  }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ---------- componenti di supporto ---------- */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+const Box = ({ title, children }) => (
+  <div className="box"><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Una slide per principio: regola, caso, dove si vede */
+function Principio({ n, titolo, regola, caso, segno }) {
+  return (
+    <div className="pad">
+      <Tag>Principio {n} di 7</Tag>
+      <h2>{titolo}</h2>
+      <div className="grid" style={{ marginTop: 6 }}>
+        <Card title="La regola"><p>{regola}</p></Card>
+        <Card title="Nel rilascio 2.1.9" kind="i"><p>{caso}</p></Card>
+        <Card title="Dove si vede" kind="w"><p>{segno}</p></Card>
+      </div>
+    </div>
+  );
+}
+
+/* Diagramma a livelli: due righe di riquadri, impilati su schermi stretti */
+function Livelli() {
+  const N = ({ t, s, k = '' }) => <div className={'node ' + k}><b>{t}</b><span>{s}</span></div>;
+  return (
+    <div role="group" aria-label="Livelli del rilascio: persona, sessione lead, agente specialista, tag git; poi CI, API degli store, verifica, report alla persona">
+      <div className="rowlabel">Decisione e preparazione</div>
+      <div className="flow">
+        <N t="1 Persona" s="decide se e quando rilasciare" k="w" />
+        <N t="2 Sessione lead" s="pianifica, delega, verifica" />
+        <N t="3 Agente" s="specialista: pre-volo, note, commit, tag" />
+        <N t="4 Tag git" s="mobile-vX.Y.Z: versione e partenza" k="i" />
+      </div>
+      <p className="join" aria-hidden="true">&darr; il tag fa partire la CI</p>
+      <div className="rowlabel">Esecuzione e verifica</div>
+      <div className="flow">
+        <N t="5 CI" s="test, build, firma, consegna ai tester" k="i" />
+        <N t="6 API degli store" s="Play e App Store Connect" k="i" />
+        <N t="7 Verifica" s="cancelli: legge lo stato reale" />
+        <N t="Report" s="in italiano, 10 righe, alla persona" k="w" />
+      </div>
+    </div>
+  );
+}
+
+const GUARDIA = [
+  "const notes = fs.readFileSync(notesFile, 'utf8').trim();",
+  "// 9/11/2026: la 2.1.9 e' andata in produzione con note vuote.",
+  "if (notes.length < 20)  fail('note assenti o troppo corte');",
+  "if (notes.length > 500) fail('oltre il limite di Google Play');",
+].join('\n');
+
+/* ---------- le slide ---------- */
+
+const slides = [
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Apertura',
+    content: () => (
+      <div className="center">
+        <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento 11</p>
+        <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>Dalla frase allo store<span className="cursor" aria-hidden="true"></span></h1>
+        <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>Il rilascio di un'app mobile guidato da agenti, senza un clic umano.</p>
+        <p className="muted" style={{ marginTop: 14 }}>Caso vero di novembre 2026, su un progetto esterno alla scuola: non è un sistema dell'ITTS "Belluzzi-Da Vinci".</p>
+        <p className="muted">Prima di questo argomento conviene aver visto: argomenti 7, 8, 9 e 10 (skill e subagenti, hook, router, costi).</p>
+      </div>
+    ),
+    notes: "Apertura. Il caso è un rilascio reale (versione 2.1.9 di un'app Flutter, 8-9 novembre 2026) su un progetto di Thomas esterno alla scuola. Serve a vedere insieme i principi del corso (decisione umana, permessi, segreti, verifica, test) in una catena che deve funzionare di notte e senza supervisione. Non è una lezione su Flutter: la tecnologia dell'app è irrilevante. Richiami dagli argomenti precedenti: skill e subagenti (7), hook (8), router (9), costi (10)."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Il risultato',
+    content: () => (
+      <div className="pad">
+        <Tag>Il risultato</Tag>
+        <h2>Sei parole, due store</h2>
+        <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)', margin: '2px 0 8px' }}>
+          <span aria-hidden="true" style={{ color: 'var(--accent)' }}>&gt; </span>«procediamo con il rilascio della App»
+        </p>
+        <p>È tutto ciò che ha scritto il responsabile del progetto, l'8 novembre alle 22:02. Il resto lo ha fatto la catena: pre-volo, note, commit, tag, build, firma, tester, promozione su Android, revisione su iOS, verifica.</p>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          <Stat big="0" label="clic umani dal tag agli store" />
+          <Stat big="16 min" label="dal tag alla CI completa (15 min 56 s)" />
+          <Stat big="2 su 2" label="Android in produzione, iOS in revisione" />
+          <Stat big="1" label="errore, corretto subito e poi blindato" />
+        </div>
+        <Box title="Una deviazione dalla regola">La frase non nomina la versione. L'agente ha rilasciato la 2.1.9 senza fermarsi: la versione era chiara dal contesto della sessione. La regola però chiede che sia scritta; la forma corretta è «rilascia la 2.1.9».</Box>
+      </div>
+    ),
+    notes: "Numeri verificati sul repository il 9/11/2026: tag mobile-v2.1.9 spinto alle 23:16 dell'8/11, CI conclusa alle 23:32 (15 minuti e 56 secondi per controllo di qualità, build Android, build iOS e mail di esito). 'Zero clic' vale dal tag agli store: la decisione di rilasciare e la prova dell'app prima del tag restano della persona. La frase è quella vera, scritta alle 22:02 dell'8/11. La guida di processo dice che, se il messaggio non nomina la versione, l'agente si ferma alla build valida e chiede; qui è andato avanti perché la versione si capiva dalla sessione. Raccontarlo come una deviazione, non come un modello: tornerà nel principio 1 e nelle domande."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Le parole',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima di cominciare</Tag>
+        <h2>Otto parole per leggere il caso</h2>
+        <dl className="terms">
+          <div><dt>CI</dt><dd>Integrazione continua: un servizio che a ogni tag esegue da solo test, build e consegna.</dd></div>
+          <div><dt>Tag</dt><dd>Etichetta git su un commit. Qui il nome del tag è anche la versione e il segnale di partenza.</dd></div>
+          <div><dt>Pre-volo</dt><dd>I controlli fatti prima di creare il tag.</dd></div>
+          <div><dt>Test golden</dt><dd>Test che confrontano un'immagine generata con una di riferimento.</dd></div>
+          <div><dt>Baseline</dt><dd>Lo stato di partenza con cui si confronta: qui, i test rossi sul tag precedente.</dd></div>
+          <div><dt>Worktree</dt><dd>Seconda cartella di lavoro dello stesso repository, su un altro commit. Si usa e si cancella.</dd></div>
+          <div><dt>Stash</dt><dd>Mette da parte le modifiche non salvate della cartella: anche quelle di altri.</dd></div>
+          <div><dt>Prova a secco</dt><dd>Esecuzione che fa tutto tranne l'ultimo passo: valida e annulla.</dd></div>
+        </dl>
+      </div>
+    ),
+    notes: "Per un pubblico tecnico quasi tutto è noto: fermarsi solo su golden, baseline e prova a secco. Il tag è la versione anche in senso letterale: il nome mobile-vX.Y.Z fissa il numero di versione su entrambi gli store. Lo stash è spiegato bene al principio 7."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Il risultato',
+    content: () => (
+      <div className="pad">
+        <Tag>Il risultato</Tag>
+        <h2>Non è un esperimento isolato</h2>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+          <Stat big="66" label="tag di rilascio dal 5 settembre 2026" />
+          <Stat big="5" label="rilasci in 4 giorni: dalla 2.1.5 (5/11) alla 2.1.9 (8/11)" />
+          <Stat big="15-18 min" label="durata della CI in quei cinque rilasci" />
+          <Stat big="24" label="file toccati dalla 2.1.8 alla 2.1.9 (+950, -172 righe)" />
+        </div>
+        <Box title="Il confronto, con un limite">
+          La guida interna conta, per un rilascio a mano, una dozzina di operazioni in cinque console (Git, GitHub, Mac, Play Console, App Store Connect). Ognuna ha già fatto perdere ore a qualcuno: un numero di build riusato, una bozza che nessuno vede, note vuote, una versione ferma cinque giorni. Il tempo di un rilascio manuale equivalente non è stato misurato.
+        </Box>
+      </div>
+    ),
+    notes: "Tutti i numeri vengono da git (tag e commit) e dalla cronologia delle esecuzioni della CI. Nei cinque rilasci dal 5 all'8 novembre ogni CI è durata tra 15 e 18 minuti. Non dichiariamo un tempo 'risparmiato': non è stato misurato un rilascio manuale equivalente. Si può dire quanti passaggi e quante console sparivano, e quali errori erano già stati pagati."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · La giornata',
+    content: () => (
+      <div className="pad">
+        <Tag>La giornata dell'8 novembre</Tag>
+        <h2>Prima del rilascio: un bug vero</h2>
+        <p>Un telefono rileggeva torneo e iscritti due volte al secondo: la scheda ripartiva a ogni ritorno in primo piano, anche senza essere mai usciti dall'app.</p>
+        <ul className="timeline">
+          <li><time>16:00</time>Correzione del bug, con il test nello stesso commit: ora conta solo il ritorno dal background dopo qualche secondo.</li>
+          <li><time>21:37-22:02</time>Altre correzioni, pulizia dei log di debug, una ottimizzazione.</li>
+          <li><time>22:02</time>Il responsabile scrive la frase: «procediamo con il rilascio della App».</li>
+          <li><time>23:16</time>Note di rilascio nel repository, commit, tag.</li>
+          <li><time>23:32</time>CI completa: build Android e iOS consegnate ai tester.</li>
+          <li><time>9/11</time>Android in produzione, iOS in revisione con rilascio automatico, tutto verificato sulle API degli store.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Orari dai commit e dalla CI del repository (fuso orario italiano); la frase delle 22:02 viene dalla sessione di lavoro. La parte di ingegneria è normale: causa trovata, correzione, test. Nel commit delle 16:00 c'è anche il test che copre il caso. Il rilascio automatico comincia dopo, ma si regge su questo lavoro: l'automazione moltiplica la qualità che c'è già, non la crea."
+  },
+
+  /* --- architettura --- */
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Architettura',
+    content: () => (
+      <div className="pad">
+        <Tag>Architettura a livelli</Tag>
+        <h2>Chi decide, chi esegue, chi verifica</h2>
+        <Livelli />
+        <p className="muted" style={{ marginTop: 8 }}>Dopo la CI, l'agente torna: promuove e invia in revisione tramite le API degli store (livello 6) e ne legge lo stato reale (livello 7).</p>
+      </div>
+    ),
+    notes: "Il diagramma va letto a riquadri, prima riga poi seconda. Livello 1: la persona decide se e quando. Livello 2: la sessione principale (il lead) pianifica e non esegue di persona. Livello 3: un agente specialista di CI e rilascio fa il pre-volo e prepara note, commit e tag. Livello 4: il tag git è insieme la versione e il grilletto. Livello 5: la CI costruisce e consegna ai tester. Livello 6 sono le API di Play e App Store Connect, che l'agente usa dopo la CI per promuovere e inviare in revisione. Livello 7: le letture che dicono cosa è successo davvero; il report torna alla persona. La CI non promuove mai: lo fa un passo separato, dopo la richiesta esplicita."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Architettura',
+    content: () => (
+      <div className="pad">
+        <Tag>Ruoli</Tag>
+        <h2>Ognuno fa una cosa sola</h2>
+        <div className="tablewrap">
+          <table>
+            <thead><tr><th>Chi</th><th>Fa</th><th>Non fa</th></tr></thead>
+            <tbody>
+              <tr><td>Persona</td><td>decide se e quando; prova l'app prima; credenziali e account</td><td>nessun passaggio tecnico del rilascio</td></tr>
+              <tr><td>Sessione lead</td><td>riceve la richiesta, delega, sintetizza il report</td><td>non esegue il rilascio di persona</td></tr>
+              <tr><td>Agente specialista</td><td>pre-volo, note, commit, tag, promozione, verifiche</td><td>non cambia la CI di nascosto, non stampa segreti, non rilancia a occhi chiusi</td></tr>
+              <tr><td>CI</td><td>test, build, firma, consegna ai tester</td><td>non promuove, non invia in revisione</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <Box title="Cosa l'autopilota non fa mai">
+          Creare account, accettare contratti, inserire password, firmare lettere, rispondere ai revisori, scegliere di rilasciare. Sono atti della persona.
+        </Box>
+      </div>
+    ),
+    notes: "Collegare ai permessi e ai subagenti visti nel corso: il confine tra i livelli è un confine di responsabilità, non solo tecnico. Il lead non esegue per due motivi: tiene pulito il proprio contesto e può controllare il lavoro come un secondo paio d'occhi. Chiedere ai colleghi quale riga di questa tabella, nella loro scuola, sarebbe la più difficile da far rispettare."
+  },
+
+  /* --- principi --- */
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 1',
+    content: () => (
+      <Principio n="1" titolo="La decisione è dell'umano, l'esecuzione dell'agente"
+        regola="L'agente non decide se rilasciare. Una richiesta esplicita per una versione precisa vale come decisione solo per quella versione. Se il messaggio non nomina la versione, l'agente si ferma alla build valida e chiede."
+        caso="La frase del responsabile è stata l'unico input umano, ma non nominava la versione. La 2.1.9 era chiara dal contesto della sessione e l'agente è andato avanti: una deviazione. La forma corretta era «rilascia la 2.1.9»."
+        segno="Nella guida di processo, sezione sui ruoli. «Dal contesto» è proprio ciò che un agente può leggere male: per questo la regola vuole la versione scritta, e il lead ne ricava l'ordine di partire, non altro." />
+    ),
+    notes: "Il principio è l'autonomia graduata: più l'azione è irreversibile e visibile fuori, più serve una decisione umana esplicita, legata a un oggetto preciso. 'Rilascia la 2.1.9' autorizza la 2.1.9, non la 2.1.10. Nel caso reale la frase era «procediamo con il rilascio della App»: la versione si capiva, ma non era scritta, e la regola chiedeva di fermarsi e chiedere. Non è andata male, ed è proprio per questo che conviene dirlo: una regola che si salta quando 'tanto è chiaro' non è più una regola. Domanda per la sala: nel vostro lavoro, quale azione irreversibile parte oggi senza una decisione esplicita?"
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 2',
+    content: () => (
+      <Principio n="2" titolo="Verde non vuol dire consegnato"
+        regola="Un job verde può non aver consegnato nulla, e uno rosso può nascondere una consegna riuscita. Ogni passaggio finisce con una lettura dello stato reale, fatta con le API dello store e non con il colore della CI."
+        caso="Dopo la CI l'agente legge Google Play su entrambi i canali di test (stesso numero di versione, nome 2.1.9, stato completato) e verifica che la build iOS sia valida, non ancora in elaborazione. Dopo la promozione rilegge la produzione."
+        segno="Nei cancelli di verifica (slide dedicata). Origine: il 12 settembre due build valide e nulla su Play, per un passaggio di salvataggio file bloccante, un controllo «if [ -n ... ]» su un secret multi-riga e un numero di versione troppo basso." />
+    ),
+    notes: "Collegare al corso: il test che passa non è l'obiettivo, è un indizio. L'obiettivo si controlla nel posto dove vive, qui lo store. Il 12 settembre l'esito della CI era scollegato dalla realtà: da lì i cancelli leggono sempre la fonte di verità. Stesso principio per chi fa una migrazione di dati: non basta 'script terminato', serve contare le righe a destinazione."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 3',
+    content: () => (
+      <Principio n="3" titolo="Prove a secco prima di scrivere"
+        regola="Ogni script che scrive su un sistema esterno ha una modalità che fa tutto tranne l'ultimo passo: crea, valida, annulla. Si lancia sempre quella prima, poi si lancia la vera."
+        caso="La promozione su Android si fa due volte: la prima senza il flag di scrittura (crea la modifica sullo store, la valida, la elimina), la seconda con il flag. Per ogni script nuovo, prima l'aiuto e la prova a secco."
+        segno="Nei comandi della procedura: il flag di scrittura è esplicito, mai di default. Un errore di parametri si scopre quando costa zero." />
+    ),
+    notes: "La prova a secco serve a due livelli: valida i parametri e rende visibile all'agente (e a chi rilegge il log) cosa sta per succedere. Il flag di scrittura esplicito fa sì che 'dimenticarsi' non possa produrre un effetto. Nel laboratorio di informatica lo stesso schema vale per uno script di reset delle password o di cancellazione dei profili."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 4',
+    content: () => (
+      <Principio n="4" titolo="I segreti non entrano nel contesto del modello"
+        regola="Chiavi, password e certificati non si incollano nel prompt, non si stampano, non si leggono per intero. Esistono in un posto fuori dal repository e si usano solo attraverso script che le leggono da sé."
+        caso="Chiave API dello store, account di servizio, keystore e certificati stanno in una cartella fuori da git e nei secret della CI. L'agente lancia script con un file di configurazione che contiene percorsi, non valori. Le credenziali nei moduli le inserisce la persona."
+        segno="Nella tabella dei prerequisiti: «dove stanno», mai «quali sono». Tutto ciò che entra nel contesto finisce nei log e nelle trascrizioni, e da lì non esce più." />
+    ),
+    notes: "Il contesto del modello è un posto che si registra, si copia, a volte si invia a un servizio esterno. Un segreto che ci entra va considerato compromesso. La soluzione non è 'fidarsi dell'agente': è togliergli la necessità di vedere il valore. Lo script lo legge, lo usa e non lo restituisce. Richiamare i permessi dell'agente e la gestione delle variabili d'ambiente visti nel corso."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 5',
+    content: () => (
+      <div className="pad">
+        <Tag>Principio 5 di 7</Tag>
+        <h2>Ogni errore pagato diventa una guardia</h2>
+        <p>L'errore del 9 novembre: la prima promozione è partita con le note di rilascio <strong>vuote</strong>, perché lo script le accettava.</p>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          <Card title="1 · Correzione" kind="w"><p>Promozione rilanciata subito con le note.</p></Card>
+          <Card title="2 · Guardia nel codice" kind="i"><p>Lo script rifiuta note sotto i 20 caratteri, oltre al tetto di 500. Prima di scrivere resta il controllo con <code>wc -c</code>.</p></Card>
+          <Card title="3 · Riga di guida"><p>Errore, data e regola nella guida: la prossima sessione la legge prima di partire.</p></Card>
+        </div>
+        <pre aria-label="Codice della guardia (versione semplificata)">{GUARDIA}</pre>
+      </div>
+    ),
+    notes: "Il caso centrale della lezione. Tre livelli: si ripara l'errore, si impedisce che si ripeta nel punto in cui è nato (il codice), si scrive la regola dove la leggerà chi non c'era (la guida). La guardia nel codice vale più della raccomandazione: una frase 'ricordati di controllare' dipende dall'attenzione, un controllo che termina con errore no. Il codice a schermo è una versione semplificata della guardia reale. Esercizio collegato: scrivetene una voi."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 6',
+    content: () => (
+      <Principio n="6" titolo="Il confronto con la baseline"
+        regola="Un test rosso non è per forza una regressione. Prima di fermarsi o di ignorarlo, si controlla se falliva già prima: se sì, è rumore di ambiente; se era verde, blocca."
+        caso="I test golden confrontano immagini: quelle generate su Windows differiscono di pochi pixel da quelle su macOS, e la CI li esclude. Sul PC alcuni risultavano rossi. L'agente ha rieseguito gli stessi test sul tag precedente: stessi rossi, nessuno nuovo, si procede."
+        segno="Nel pre-volo: il confronto è un risultato scritto (elenco dei rossi prima e dopo), non una sensazione. Un golden che era verde e ora è rosso blocca il tag." />
+    ),
+    notes: "Il metodo è una versione povera di un esperimento controllato: si cambia una sola cosa (il codice) e si guarda se cambia l'esito. Senza baseline un agente ha due strade sbagliate: ignorare i rossi 'perché sono noti' o fermarsi su ogni rosso. Con la baseline la decisione si basa su un dato. Nella tabella dei cancelli è il pre-volo."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 7',
+    content: () => (
+      <Principio n="7" titolo="Niente operazioni distruttive sul workspace condiviso"
+        regola="La cartella di lavoro contiene anche il lavoro non ancora salvato di altre sessioni e di altre persone. Nessun comando che lo sposti o lo travolga: per confrontare con il passato si crea una copia isolata."
+        caso="Per provare il tag precedente l'agente ha usato un worktree separato e poi lo ha cancellato; mai lo stash, che avrebbe spostato modifiche non sue. Il commit ha usato percorsi espliciti, non «aggiungi tutto». Prima del push, controllo dei commit in uscita."
+        segno="Nella procedura: «git add» con file nominati, elenco dei commit non ancora spinti, un commit sconosciuto è un allarme." />
+    ),
+    notes: "Pericolo concreto: l'agente lavora in una cartella condivisa e non sa cosa ci sia di non salvato. Il worktree è una seconda copia di lavoro dello stesso repository: il confronto non tocca l'originale e si butta via. Mostrare i comandi se la sala non li conosce: git worktree add, lavoro, git worktree remove. Stesso criterio per rm -r, git reset --hard e git clean: mai sul lavoro che non si è creato."
+  },
+
+  /* --- cancelli e checklist --- */
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Cancelli',
+    content: () => (
+      <div className="pad">
+        <Tag>Cancelli di verifica</Tag>
+        <h2>Cosa vuol dire «consegnato davvero»</h2>
+        <div className="tablewrap">
+          <table>
+            <thead><tr><th>Cancello</th><th>Come si verifica</th><th>Atteso</th></tr></thead>
+            <tbody>
+              <tr><td>Pre-volo</td><td>worktree sul tag precedente</td><td>stessi test rossi, nessuno nuovo</td></tr>
+              <tr><td>Android consegnato</td><td>lettura Play, entrambi i canali di test</td><td>versione nuova, nome giusto, completato</td></tr>
+              <tr><td>iOS consegnato</td><td>lettura App Store Connect</td><td>build valida (non in elaborazione)</td></tr>
+              <tr><td>Android in produzione</td><td>lettura Play dopo la scrittura</td><td>versione nuova e note presenti</td></tr>
+              <tr><td>iOS in coda</td><td>stato della versione</td><td>in attesa di revisione, rilascio dopo l'approvazione</td></tr>
+              <tr><td>Coda Apple</td><td>elenco delle versioni</td><td>nessuna precedente ancora in revisione, o segnalata</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="muted" style={{ marginTop: 6 }}><strong>Regola:</strong> un cancello non superato non si dichiara superato, si riporta com'è nel report.</p>
+      </div>
+    ),
+    notes: "Ogni riga è una domanda a cui risponde una fonte esterna, non l'agente. L'ultima riga illustra il 'dire quello che si vede': se la versione precedente è ancora in revisione, la nuova si accoda; l'agente non cancella niente, lo segnala. Il rilascio automatico dopo l'approvazione ha un'origine pratica: una versione già approvata restò cinque giorni ferma in rilascio manuale, con utenti su una versione difettosa."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
+    content: () => (
+      <div className="pad">
+        <Tag>Cosa serve per replicarlo</Tag>
+        <h2>Prerequisiti, una volta sola</h2>
+        <div className="grid">
+          <Card title="Infrastruttura">
+            <ul>
+              <li>Un computer sempre acceso per le build (qui un Mac mini collegato al repository)</li>
+              <li>CI attivata dal tag, con controllo di qualità prima delle build</li>
+              <li>Versione dello strumento uguale su PC, build e CI</li>
+            </ul>
+          </Card>
+          <Card title="Accessi" kind="w">
+            <ul>
+              <li>Account sviluppatore per i due store, record dell'app creati dal titolare</li>
+              <li>Chiave API di App Store Connect e account di servizio di Play con permesso di produzione</li>
+              <li>Certificati, keystore e secret della CI, fuori dal repository</li>
+            </ul>
+          </Card>
+          <Card title="Strumenti e testi" kind="i">
+            <ul>
+              <li>Script di lettura e promozione, ciascuno con aiuto e prova a secco</li>
+              <li>Testi dello store e file delle note di ogni versione, nel repository</li>
+              <li>Una guida con i cancelli e gli errori già pagati</li>
+            </ul>
+          </Card>
+        </div>
+        <Box title="Regola d'oro">L'autopilota parte solo dopo che la prima release è passata a mano su entrambi gli store. Prima non c'è nulla da cui capire se un errore è nuovo.</Box>
+      </div>
+    ),
+    notes: "L'elenco non cita valori né percorsi: solo categorie. Per un'app scolastica o interna molte voci cadono (niente store pubblici, magari un solo canale di distribuzione), ma restano valide la CI da tag, i cancelli e la guida degli errori. La regola d'oro è la più contro-intuitiva: l'automazione non salta il lavoro manuale, lo presuppone."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
+    content: () => (
+      <div className="pad">
+        <Tag>Investimento e ritorno</Tag>
+        <h2>Cosa costa e cosa rende</h2>
+        <div className="grid">
+          <Card title="Il costo iniziale" kind="w">
+            <ul>
+              <li>Prima release a mano su entrambi gli store, con i controlli delle console</li>
+              <li>Su Play con account personale: 12 tester per 14 giorni, un'attesa che non si comprime</li>
+              <li>Costruire script di lettura, prove a secco, CI e guida</li>
+              <li>Ogni errore di avvio paga la sua riga di guida</li>
+            </ul>
+          </Card>
+          <Card title="Il ritorno">
+            <ul>
+              <li>Un rilascio diventa una frase con la versione e una verifica</li>
+              <li>Cinque rilasci in quattro giorni, ciascuno verificato sugli store</li>
+              <li>Gli errori non si ripetono: restano nel codice e nella guida</li>
+              <li>Chi arriva dopo, persona o agente, parte da un manuale scritto</li>
+            </ul>
+          </Card>
+        </div>
+        <Box title="Cosa non sappiamo">Tempi e ore non sono stati misurati, né per costruire la catena né per un rilascio a mano equivalente. Per il costo in token di un agente che lavora a lungo, vedi la stima dell'argomento 10.</Box>
+        <Box title="Quando non conviene">Se rilasci due volte l'anno, o se non esiste una macchina per le build, l'automatismo non si ripaga.</Box>
+      </div>
+    ),
+    notes: "Non c'è una cifra di ore da mostrare: il costo non è stato misurato come tale, e dichiararne una sarebbe inventare. Si può dire cosa ha richiesto: la prima release manuale, l'attesa dei tester, la costruzione degli script. Sul ritorno si può dire solo che cinque rilasci in quattro giorni ci sono stati e che ciascuno ha avuto i suoi cancelli; non che il rischio sia stato azzerato. Chiedere alla sala: quanto rilasciate? La risposta decide se serve. Un iOS a mano con la CI solo per Android è una scelta sensata."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
+    content: () => (
+      <div className="pad">
+        <Tag>A ogni rilascio</Tag>
+        <h2>Lista di controllo</h2>
+        <ul>
+          <li>Richiesta della persona con il numero di versione scritto</li>
+          <li>Pre-volo: test rossi confrontati con il tag precedente in una copia isolata</li>
+          <li>Note di rilascio nel repository, commit con file nominati, commit in uscita controllati, tag</li>
+          <li>Cancelli di consegna: Android sui due canali, iOS con build valida</li>
+          <li>Android in produzione: note non vuote, prova a secco, scrittura, rilettura</li>
+          <li>iOS: rilascio dopo l'approvazione, in attesa di revisione, coda controllata</li>
+          <li>Report in italiano, massimo 10 righe, con errori trovati e corretti</li>
+          <li>Un errore nuovo diventa una riga di guida e, se serve, un controllo nel codice</li>
+        </ul>
+      </div>
+    ),
+    notes: "Questa slide può restare proiettata durante l'attività. È la versione corta della guida interna di processo. Se la sala sta pensando a un proprio caso (aggiornamento del sito della scuola, rilascio di un servizio interno) chiedere di sostituire 'store' con 'ambiente di produzione' e vedere quante righe reggono."
+  },
+
+  /* --- attività --- */
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Attività',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 45 minuti</Tag>
+        <h2>Progettate l'autopilota della palestra</h2>
+        <p className="muted">App di esempio: la palestra comune del corso, la piccola app di prenotazione dei laboratori in Node.js. Dati inventati, nessun repository della scuola.</p>
+        <div className="grid">
+          <Card title="A · Il documento (15 min)">
+            <p>Scrivete una pagina <code>rilascio.md</code>: chi decide, chi esegue, almeno quattro cancelli con la fonte che li verifica, tre cose che l'agente non deve mai fare.</p>
+          </Card>
+          <Card title="B · La guardia (20 min)" kind="i">
+            <p>Chiedete all'agente uno script <code>controlla-note.js</code> che rifiuta note vuote o più lunghe di 500 caratteri, con tre test: vuote, giuste, troppo lunghe. Prima il test che fallisce, poi lo script.</p>
+          </Card>
+          <Card title="C · Il confronto (10 min)" kind="w">
+            <p>Scambiate il documento con un collega: trovate il cancello che manca e la regola che si può aggirare. Aggiornate la pagina.</p>
+          </Card>
+        </div>
+        <Box title="Per chi finisce prima">Aggiungete la prova a secco: lo script scrive solo con un flag esplicito, altrimenti stampa cosa farebbe.</Box>
+      </div>
+    ),
+    notes: "Durata complessiva indicativa 45 minuti, divisibile: A e C anche senza PC. Si lavora sulla palestra comune, con dati inventati: si progetta il processo, non si tocca un sistema vero. Alla parte B osservare se l'agente scrive prima il test e se il test fallisce davvero prima dello script: è lo stesso ordine dei casi ben fatti. A fine attività chiedere a due persone quale cancello avevano dimenticato."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Domande di verifica</Tag>
+        <h2>Per capire se il caso è passato</h2>
+        <ol>
+          <li>Perché la CI consegna ai tester ma non promuove in produzione?</li>
+          <li>Il job è verde, ma sullo store non c'è nulla. Cosa leggi, e dove?</li>
+          <li>Sul PC due test golden sono rossi. Tagghi o no? Come decidi?</li>
+          <li>Perché un worktree e non uno stash per tornare al tag precedente?</li>
+          <li>Dove stanno le chiavi e che cosa ne vede il modello?</li>
+          <li>Le note sono andate vuote: quali sono le tre correzioni, e quale vale di più?</li>
+          <li>«Procediamo con il rilascio della App»: basta come decisione? Come va riscritta?</li>
+          <li>Quale parte della catena non automatizzeresti a scuola, e perché?</li>
+        </ol>
+      </div>
+    ),
+    notes: "Otto domande, da usare a voce o come scheda. Le risposte attese sono riservate al docente e non sono pubblicate. La 7 riprende la frase vera del caso: la versione era chiara dalla sessione ma non scritta. La 8 non ha una risposta giusta: serve a collegare il caso al lavoro dei presenti."
+  },
+  {
+    block: 'Argomento 11 — Rilascio mobile in autopilota · Chiusura',
+    content: () => (
+      <div className="pad">
+        <Tag>Chiusura</Tag>
+        <h2>Cosa portare a casa</h2>
+        <ul>
+          <li>L'agente esegue, la persona decide: il confine è scritto, e la versione pure.</li>
+          <li>Ci si fida dello store, non della CI: ogni passaggio finisce con una lettura reale.</li>
+          <li>Prima a secco, poi sul serio.</li>
+          <li>I segreti si usano senza vederli.</li>
+          <li>Un errore pagato non si paga due volte: guardia nel codice e riga di guida.</li>
+        </ul>
+        <Box title="Dopo questo argomento">L'argomento 12 prende lo stesso schema e lo applica a un agente che gira da solo su input non fidati: l'helpdesk email in autopilota.</Box>
+        <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+      </div>
+    ),
+    notes: "Ultima slide. Riprendere i cinque punti e lasciare spazio alle domande. Il caso non è una ricetta per tutti: è un modo di guardare un processo e chiedersi quali cancelli ha, e chi li legge. L'argomento 12 sposta la domanda: qui l'input è una persona fidata, là sono email di sconosciuti. Ricordare che i dati dell'app usata negli esercizi sono inventati."
+  },
+];
+
+/* ---------- icone ---------- */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+/* ---------- app ---------- */
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="top-bar" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 58, background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 22px', zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0, flex: '1 1 auto' }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap', flexShrink: 0 }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)', flexShrink: 0 }} aria-hidden="true">|</span>
+          <span title={slide.block} style={{ color: 'var(--accent)', fontFamily: 'var(--cond)', fontWeight: 600, letterSpacing: '0.04em', fontSize: 'var(--fs-sm)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+          <span style={{ color: 'var(--muted)', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 110, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 58, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 66, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bottom-bar" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, minHeight: 60, background: 'var(--bg)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 22px', zIndex: 100 }}>
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
