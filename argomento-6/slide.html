@@ -379,7 +379,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/permissions">code.claude.com/docs/en/permissions</Fonte>
       </div>
     ),
-    notes: "OWASP mette la divulgazione di informazioni sensibili al secondo posto dei rischi per le applicazioni con LLM (LLM02:2025). Il quarto punto è quello nuovo per chi viene dallo sviluppo tradizionale: ciò che l'agente legge entra nel contesto e viene mandato al modello, in aula attraverso il router. La regola Read(./.env) nella documentazione di novembre 2026 blocca i file tool dell'agente e i comandi di lettura che riconosce, come cat; non blocca un programma che apre il file da solo, per esempio uno script Node. Per quello serve la sandbox, più avanti."
+    notes: "OWASP mette la divulgazione di informazioni sensibili al secondo posto dei rischi per le applicazioni con LLM (LLM02:2025). Il quarto punto è quello nuovo per chi viene dallo sviluppo tradizionale: ciò che l'agente legge entra nel contesto e viene mandato al modello, in aula attraverso il proxy del laboratorio. La regola Read(./.env) nella documentazione di novembre 2026 blocca i file tool dell'agente e i comandi di lettura che riconosce, come cat; non blocca un programma che apre il file da solo, per esempio uno script Node. Per quello serve la sandbox, più avanti."
   },
   {
     block: B + 'Segreti',
@@ -608,7 +608,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/security">code.claude.com/docs/en/security</Fonte>
       </div>
     ),
-    notes: "Il comando /security-review compare tra le risorse della pagina sulla sicurezza (consultata il 9 novembre 2026). In aula il modello passa dal router e non è Claude: la qualità della revisione cambia, e va provata prima. Il limite più sottile è l'ultimo della carta: chi fa la revisione legge tutto, quindi anche il file con l'istruzione nascosta. Una revisione automatica è un primo passaggio utile; la checklist a mano serve a vedere che cosa è rimasto fuori. Due agenti che concordano non provano niente: è il tema dell'argomento 7."
+    notes: "Il comando /security-review compare tra le risorse della pagina sulla sicurezza (consultata il 9 novembre 2026). In aula il modello è un Claude che passa dal proxy del laboratorio: la qualità della revisione cambia con il modello, e va provata prima. Il limite più sottile è l'ultimo della carta: chi fa la revisione legge tutto, quindi anche il file con l'istruzione nascosta. Una revisione automatica è un primo passaggio utile; la checklist a mano serve a vedere che cosa è rimasto fuori. Due agenti che concordano non provano niente: è il tema dell'argomento 7."
   },
   {
     block: B + 'Attività al PC',

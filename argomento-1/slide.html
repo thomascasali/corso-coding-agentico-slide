@@ -383,7 +383,7 @@ const slides = [
         caso="Il caso: un gruppo di dieci agenti che per mesi sembrava funzionare."
         prima="nessun argomento: si può partire da qui." />
     ),
-    notes: "Si parte da una domanda: che differenza c'è tra chiedere codice a un chatbot e dare un compito a un agente nel repository? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente lo sceglie il router del laboratorio: il metodo vale comunque."
+    notes: "Si parte da una domanda: che differenza c'è tra chiedere codice a un chatbot e dare un compito a un agente nel repository? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale comunque."
   },
   {
     block: B + 'Tre strumenti',
@@ -436,11 +436,11 @@ const slides = [
           </Card>
         </div>
         <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). Ogni risultato di uno strumento rientra nel ciclo e guida la mossa dopo.</Box>
-        <Box type="tip" title="In aula">Il modello dietro l'agente lo sceglie il router del laboratorio. Ciclo, contesto e permessi funzionano allo stesso modo.</Box>
+        <Box type="tip" title="In aula">In aula il modello è un Claude, scelto dalla configurazione del laboratorio. Ciclo, contesto e permessi funzionano allo stesso modo con qualunque modello.</Box>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Agente come somma di tre pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. Il modello usato in aula lo sceglie il router; non affermare quale sia."
+    notes: "Agente come somma di tre pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. Il modello usato in aula lo sceglie la configurazione del laboratorio (un Claude); non affermare quale versione."
   },
   {
     block: B + 'Il ciclo',
@@ -542,7 +542,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
       </div>
     ),
-    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 10 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello del router."
+    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 10 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello usato."
   },
   {
     block: B + 'Quando è piena',
@@ -624,13 +624,13 @@ const slides = [
         <div className="grid">
           <Card title="Vedi ogni azione"><p>Prima che accada. Si impara il ciclo guardandolo passo passo.</p></Card>
           <Card title="Gli errori costano poco" kind="i"><p>Un comando sbagliato letto prima di approvarlo non fa danni.</p></Card>
-          <Card title="Con un router non è scontato" kind="w"><p>La modalità <code>auto</code> dipende da fornitore e modello: se non c'è, la sessione parte in Manual.</p></Card>
+          <Card title="Sul PC del laboratorio è imposta" kind="w"><p>Un file di impostazioni gestite fa partire la sessione in Manual. A casa, o su un PC non preparato, la partenza va fissata da sé.</p></Card>
         </div>
         <Box type="warn" title="Attenzione al valore predefinito">Per la documentazione di novembre 2026, nel terminale la modalità iniziale predefinita è <code>auto</code> (dalla versione 2.1.283). Per questo la si fissa: <code>claude --permission-mode manual</code>, oppure <code>permissions.defaultMode</code> nei file di configurazione.</Box>
         <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
       </div>
     ),
-    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Più avanti si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Il modello dietro l'agente lo sceglie il router del laboratorio."
+    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Più avanti si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite dell'amministratore (permissions.defaultMode, code.claude.com/docs/en/managed-settings, 11 novembre 2026)."
   },
   {
     block: B + 'Leggere la richiesta',
@@ -743,7 +743,7 @@ const slides = [
         <ActivityBadge n="1" file="permessi-in-pratica.html" label="Approvare, rifiutare, pianificare" durata="indicativo: 10 min" />
       </div>
     ),
-    notes: "Due schede. Nella prima l'agente descrive la palestra e i partecipanti controllano le sue affermazioni con comandi propri. Nella seconda si approva un comando, se ne rifiuta uno e si prova la modalità piano senza approvare. In entrambe nessuna modifica va conservata: la palestra si riporta allo stato iniziale con git. Il modello usato lo sceglie il router del laboratorio."
+    notes: "Due schede. Nella prima l'agente descrive la palestra e i partecipanti controllano le sue affermazioni con comandi propri. Nella seconda si approva un comando, se ne rifiuta uno e si prova la modalità piano senza approvare. In entrambe nessuna modifica va conservata: la palestra si riporta allo stato iniziale con git. Il modello usato lo sceglie la configurazione del laboratorio."
   },
   {
     block: B + 'Chiusura',

@@ -474,7 +474,7 @@ const slides = [
         caso="Il caso: un bot che tra agosto e settembre 2026 ha speso 1,55 dollari senza che nessuno l'avesse deciso."
         prima={<>argomento 1 (<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>Dal chatbot all'agente</a>): finestra di contesto, <code>/context</code>, <code>/compact</code>.</>} />
     ),
-    notes: "Si parte dalla cifra, piccola di proposito: 1,55 dollari. Il problema non fu l'importo ma il meccanismo, che con un altro volume o un altro modello avrebbe prodotto un'altra cifra. L'argomento va in tre mosse: che cosa si paga, come si stima, che cosa è successo. I prezzi vengono dai listini pubblici consultati il 9 novembre 2026 e cambiano spesso; i parametri della calcolatrice sono esempi dichiarati, non misure. Il modello dietro Claude Code in aula lo sceglie il router del laboratorio: il metodo di stima vale lo stesso."
+    notes: "Si parte dalla cifra, piccola di proposito: 1,55 dollari. Il problema non fu l'importo ma il meccanismo, che con un altro volume o un altro modello avrebbe prodotto un'altra cifra. L'argomento va in tre mosse: che cosa si paga, come si stima, che cosa è successo. I prezzi vengono dai listini pubblici consultati il 9 novembre 2026 e cambiano spesso; i parametri della calcolatrice sono esempi dichiarati, non misure. In aula Claude Code usa modelli Claude attraverso un proxy del laboratorio: i prezzi sono quelli dei listini e il metodo di stima vale lo stesso."
   },
   {
     block: B + 'Cosa si paga',
@@ -575,7 +575,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
       </div>
     ),
-    notes: "Secondo la documentazione di Claude Code (novembre 2026) la cache riconosce il prefisso della richiesta: una modifica in testa invalida tutto ciò che viene dopo, per questo il contenuto stabile sta all'inizio e la conversazione in coda. I tempi: 5 minuti con chiave API o provider cloud, un'ora per il dialogo principale con abbonamento Claude entro i limiti del piano. In aula si lavora con una chiave del router: quindi 5 minuti, e non è detto che il modello dietro il router faccia cache. Il comando /usage in una versione recente mostra una riga Prompt cache con le richieste, la quota servita dalla cache e se è calda."
+    notes: "Secondo la documentazione di Claude Code (novembre 2026) la cache riconosce il prefisso della richiesta: una modifica in testa invalida tutto ciò che viene dopo, per questo il contenuto stabile sta all'inizio e la conversazione in coda. I tempi: 5 minuti con chiave API o provider cloud, un'ora per il dialogo principale con abbonamento Claude entro i limiti del piano. In aula si lavora con una chiave virtuale che il proxy trasforma in una chiave API: quindi 5 minuti, da verificare nella prova. LiteLLM restituisce i campi di cache nel conteggio dei token (docs.litellm.ai/docs/anthropic_unified, 11/11/2026), ma resta da vedere che la cache arrivi davvero al modello. Il comando /usage in una versione recente mostra una riga Prompt cache con le richieste, la quota servita dalla cache e se è calda."
   },
   {
     block: B + 'Cosa rompe la cache',
@@ -589,11 +589,11 @@ const slides = [
           ['Aggiungi o togli strumenti', 'Le definizioni stanno nel prefisso: cambiano e invalidano', 'Collega gli strumenti prima di cominciare'],
           ['Compatti', 'La storia diventa un riassunto: nuovo prefisso, cache da rifare', 'Compatta fra un compito e l\'altro, non nel mezzo'],
         ]} />
-        <Box type="warn" title="Con un router in mezzo">La cache dipende da ciò che il router inoltra al modello. Se non la inoltra, ogni giro si paga al prezzo pieno: la riga "senza cache" della calcolatrice è il caso peggiore.</Box>
+        <Box type="warn" title="Con un proxy in mezzo">La cache dipende da ciò che il proxy inoltra al modello. Se non la inoltra, ogni giro si paga al prezzo pieno: la riga "senza cache" della calcolatrice è il caso peggiore.</Box>
         <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
       </div>
     ),
-    notes: "Elenco ridotto a quattro voci dalla pagina sulla cache di Claude Code (novembre 2026), che ne contiene altre. Il cambio di modello chiede una conferma se la cache è ancora calda. La documentazione dice anche che con un indirizzo base personalizzato o un gateway la cache vive dove le richieste vengono inoltrate e che funziona solo se il gateway lascia passare i marcatori di cache: da verificare con il router del laboratorio, non da dare per scontato. Questo è il primo punto di contatto con l'argomento 9."
+    notes: "Elenco ridotto a quattro voci dalla pagina sulla cache di Claude Code (novembre 2026), che ne contiene altre. Il cambio di modello chiede una conferma se la cache è ancora calda. La documentazione dice anche che con un indirizzo base personalizzato o un gateway la cache vive dove le richieste vengono inoltrate e che funziona solo se il gateway lascia passare i marcatori di cache: da verificare con il proxy del laboratorio, non da dare per scontato (code.claude.com/docs/en/llm-gateway-protocol, 11/11/2026: cache vuota con token in ingresso alti è il segno di una cache non inoltrata). Questo è il primo punto di contatto con l'argomento 9."
   },
   {
     block: B + 'Il modello per compito',
@@ -662,7 +662,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/costs">code.claude.com, manage costs</Fonte>
       </div>
     ),
-    notes: "La calcolatrice non include ragionamento, subagenti, richieste in background né tentativi ripetuti: tutte voci che la documentazione sui costi (novembre 2026) elenca fra le cause per cui una sessione lunga pesa più di quanto sembri. I 13 dollari al giorno sono una media su distribuzioni di organizzazioni reali, citata da Anthropic: non è una previsione per un singolo. Il contatore della sessione si legge con /usage, la riga Total cost è calcolata in locale a prezzo di listino. Con un router e modelli non Claude quella cifra può non avere senso: in quel caso si confrontano i token, non i dollari."
+    notes: "La calcolatrice non include ragionamento, subagenti, richieste in background né tentativi ripetuti: tutte voci che la documentazione sui costi (novembre 2026) elenca fra le cause per cui una sessione lunga pesa più di quanto sembri. I 13 dollari al giorno sono una media su distribuzioni di organizzazioni reali, citata da Anthropic: non è una previsione per un singolo. Il contatore della sessione si legge con /usage, la riga Total cost è calcolata in locale a prezzo di listino. Con modelli Claude attraverso il proxy la cifra ha senso, ma resta una stima locale: si confronta con la spesa che il proxy registra per la chiave del PC (da verificare nella prova)."
   },
   {
     block: B + 'Il caso di Argo Briefing',
@@ -725,22 +725,22 @@ const slides = [
     notes: "Le guardie sono quelle registrate negli appunti di progetto del 4 settembre 2026. Regola scritta allora: provider a pagamento solo come scelta esplicita, ripiego sempre gratuito, tetto di spesa sul portale del fornitore. Le misure sono in caratteri, non in token: 26.302 contro 7.160 per le definizioni degli strumenti (11 disattivati), 4.080 contro 775 per le skill. Sull'ultima riga: un solo tentativo per le attività pianificate e un file del controllo periodico lasciato vuoto. I tempi di 120-357 secondi e 14-16 secondi sono quelli registrati il 3-4 settembre per due modelli diversi, quindi non attribuirli a una sola causa. Il filo conduttore: ogni guardia è un controllo che non dipende dall'attenzione di qualcuno."
   },
   {
-    block: B + 'Il router del corso',
+    block: B + 'Il proxy del corso',
     content: () => (
       <div className="pad">
         <Tag>Lo stesso rischio, oggi</Tag>
-        <h2>Cosa significa per il router del laboratorio</h2>
-        <p>Il router che collega gli agenti ai modelli può ripetere l'incidente di Argo Briefing in piccolo. Le scelte fatte per il corso seguono le stesse guardie.</p>
-        <DT cols={['Rischio', 'Scelta nel router']} rows={[
-          ['Deviazione verso un altro fornitore quando il budget finisce', 'Disattivata: il default del programma la attiva, noi la spegniamo'],
-          ['Fornitori non voluti o catene di ripiego globali', 'Solo fornitori in lista bianca, nessuna catena globale'],
-          ['Un PC che consuma per tutti', 'Una chiave per PC, con limite giornaliero in dollari e orario del corso'],
-          ['Cifre di costo ottimistiche', 'Il costo in dashboard è una stima da listino, il tetto vero sta sulla console del fornitore'],
+        <h2>Cosa significa per il proxy del laboratorio</h2>
+        <p>Il proxy che collega gli agenti ai modelli può ripetere l'incidente di Argo Briefing in piccolo. Le scelte fatte per il corso seguono le stesse guardie.</p>
+        <DT cols={['Rischio', 'Scelta nel proxy']} rows={[
+          ['Ripiego verso un altro modello quando qualcosa fallisce', 'Nessun ripiego nel file, e disable_fallbacks su ogni chiave'],
+          ['Modelli non voluti o più costosi del necessario', 'Solo i modelli del corso, elencati su ogni chiave'],
+          ['Un PC che consuma per tutti', 'Una chiave per PC, con budget in dollari e scadenza'],
+          ['Cifre di costo ottimistiche', 'La spesa è calcolata dal listino incluso nella versione fissata; il tetto vero sta anche sulla console del fornitore'],
         ]} />
         <p className="muted">Configurazione e prove sono nell'argomento 9.</p>
       </div>
     ),
-    notes: "Collegamento con l'argomento 9. Il router è OmniRoute, installato e configurato dal docente, una sola istanza con fornitori in lista bianca e nessun costo per i partecipanti. Il comportamento di default da cambiare è la deviazione di emergenza verso un altro fornitore sugli errori di budget: stesso meccanismo del caso di Argo Briefing. Il costo mostrato nella dashboard è una stima da listino e un modello senza prezzo vale zero: non può fare da tetto. Se un partecipante chiede 'ma allora quanto spendiamo?', si risponde con i token registrati e con il limite sulle console dei fornitori. Non mostrare in slide chiavi, indirizzi o nomi dei fornitori collegati."
+    notes: "Collegamento con l'argomento 9. Il proxy è LiteLLM, installato e configurato dal docente su un PC dedicato, con la vera chiave del fornitore solo lì, una chiave virtuale per ogni PC e nessun costo per i partecipanti (docs.litellm.ai/docs/proxy/virtual_keys e /proxy/reliability, 11/11/2026). I ripieghi verso altri modelli non ci sono: sarebbero lo stesso meccanismo del caso di Argo Briefing. Il costo che il proxy registra è calcolato da un listino: un modello che mancasse dal listino varrebbe zero e il budget non scatterebbe, quindi non può fare da tetto unico. Se un partecipante chiede 'ma allora quanto spendiamo?', si risponde con la spesa registrata per chiave e con il limite sulla console del fornitore. Non mostrare in slide chiavi, indirizzi o nomi di rete."
   },
   {
     block: B + 'Attività al PC',
@@ -755,10 +755,10 @@ const slides = [
         </ol>
         <ActivityBadge n="10" file="scenari-da-stimare.html" label="Tre sessioni da stimare" durata="indicativo: 20 min" />
         <ActivityBadge n="10" file="listino-e-contatore.html" label="Listino e contatore della sessione" durata="indicativo: 10 min" />
-        <p className="muted" style={{ marginTop: 10 }}>Nel laboratorio il contatore potrebbe non mostrare un costo sensato, perché i modelli sono quelli del router: in quel caso confronta i token.</p>
+        <p className="muted" style={{ marginTop: 10 }}>Nel laboratorio i modelli sono Claude, quindi il contatore dovrebbe mostrare un costo sensato: se le cifre non tornano, confronta anche i token.</p>
       </div>
     ),
-    notes: "Il blocco si chiude al PC. Gli scenari sono tre: A correggere un difetto, B aggiungere una funzione con test, C una giornata intera. Prima si compila la tabella a mano o con la calcolatrice, poi si guarda il contatore reale con /usage: il confronto serve a vedere quanto la stima sbaglia, e per quale voce. Il comando /usage mostra, nella documentazione di novembre 2026, il costo totale calcolato in locale a prezzo di listino e i token per modello; la riga della cache c'è nelle versioni recenti. Con modelli non Claude la cifra in dollari può mancare o non avere senso: si confrontano i token. Le soluzioni le ha il docente."
+    notes: "Il blocco si chiude al PC. Gli scenari sono tre: A correggere un difetto, B aggiungere una funzione con test, C una giornata intera. Prima si compila la tabella a mano o con la calcolatrice, poi si guarda il contatore reale con /usage: il confronto serve a vedere quanto la stima sbaglia, e per quale voce. Il comando /usage mostra, nella documentazione di novembre 2026, il costo totale calcolato in locale a prezzo di listino e i token per modello; la riga della cache c'è nelle versioni recenti. Con i modelli Claude del laboratorio la cifra in dollari è significativa; se mancasse la riga della cache o le cifre fossero strane, si confrontano i token. Le soluzioni le ha il docente."
   },
   {
     block: B + 'Domanda di verifica',

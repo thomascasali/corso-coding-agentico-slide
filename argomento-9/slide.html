@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 9 · OpenCode e OmniRoute · Coding agentico</title>
+<title>Argomento 9 · OpenCode e LiteLLM · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -284,7 +284,7 @@ const Chiusura = ({ punti, dopo }) => (
 
 /* ---------- le slide di questo argomento ---------- */
 /* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
-const B = 'Argomento 9 — OpenCode e OmniRoute · ';
+const B = 'Argomento 9 — OpenCode e LiteLLM · ';
 
 const AGENTE = String.raw`# .opencode/agents/revisore.md
 ---
@@ -314,42 +314,43 @@ export const ProteggiEnv = async () => {
 const CONF = String.raw`{
   "share": "disabled",
   "autoupdate": false,
-  "enabled_providers": ["router"],
+  "enabled_providers": ["anthropic"],
   "permission": {
     "bash": { "*": "ask", "git status*": "allow", "rm *": "deny" },
     "edit": "ask", "webfetch": "deny", "external_directory": "deny"
   },
-  "provider": { "router": {
-    "npm": "@ai-sdk/openai-compatible",
-    "options": { "baseURL": "http://<server>/v1",
-                 "apiKey": "{env:CHIAVE_ROUTER}" },
-    "models": { "<id-del-modello>": {} }
+  "provider": { "anthropic": {
+    "options": { "baseURL": "http://<pc-proxy>:<porta>/v1",
+                 "apiKey": "{env:ANTHROPIC_AUTH_TOKEN}" },
+    "whitelist": ["claude-sonnet-5-5", "claude-haiku-5-5"]
   } }
 }`;
 
-const CLAUDEENV = String.raw`# Claude Code: variabili d'ambiente (o blocco "env" delle impostazioni)
-ANTHROPIC_BASE_URL=http://<server>            # senza /v1
-ANTHROPIC_AUTH_TOKEN=<chiave del PC>
-CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1    # aggiornamenti, telemetria
-CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1      # se il router rifiuta i campi beta`;
+const CLAUDEENV = String.raw`# Claude Code: variabili d'ambiente (o blocco "env" delle impostazioni gestite)
+ANTHROPIC_BASE_URL=http://<pc-proxy>:<porta>   # senza /v1
+ANTHROPIC_AUTH_TOKEN=<chiave virtuale del PC>  # variabile di sistema, mai nel repo
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1     # aggiornamenti, telemetria`;
 
 const PROVA = String.raw`# 1. Senza chiave, su una rotta che fa inferenza: deve rispondere 401
-curl -i -X POST http://<server>/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"x","messages":[]}'
+curl.exe -i -X POST http://<pc-proxy>:<porta>/v1/messages \
+  -H "content-type: application/json" -H "anthropic-version: 2023-06-01" \
+  -d '{"model":"claude-haiku-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}'
 
-# 2. Con la chiave del PC: l'elenco dei modelli
-curl http://<server>/v1/models -H "Authorization: Bearer <chiave del PC>"`;
+# 2. Con la chiave del PC e un modello che non è tra i suoi: deve essere rifiutato
+curl.exe -X POST http://<pc-proxy>:<porta>/v1/messages \
+  -H "Authorization: Bearer <chiave virtuale del PC>" \
+  -H "content-type: application/json" -H "anthropic-version: 2023-06-01" \
+  -d '{"model":"claude-opus-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}'`;
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="9" titolo="OpenCode e OmniRoute" sottotitolo="Gli stessi concetti in un secondo strumento, e il router che collega gli agenti ai modelli."
+      <Apertura n="9" titolo="OpenCode e LiteLLM" sottotitolo="Gli stessi concetti in un secondo strumento, e il proxy che collega gli agenti ai modelli."
         caso="Da dove nasce: un assistente ha consumato quasi 80 milioni di token perché una riserva a pagamento scattava in silenzio."
         prima="argomenti 1 e 4." />
     ),
-    notes: `Apertura. Vedere due strumenti aiuta a separare il metodo dallo strumento: contesto, permessi, agenti e controlli automatici ci sono in tutti e due, con nomi e default diversi. Il secondo tema è il router, cioè il programma che sta fra gli agenti e i modelli e che il laboratorio usa per dare a tutti la stessa configurazione. L'episodio di apertura è l'incidente dei costi di Argo Briefing, che riprendiamo a metà argomento e nell'argomento 10. Funzioni lette sulla documentazione ufficiale il 9 novembre 2026: nomi, comandi e valori predefiniti cambiano in fretta, quindi si riverificano sulla versione che si usa.`
+    notes: `Apertura. Vedere due strumenti aiuta a separare il metodo dallo strumento: contesto, permessi, agenti e controlli automatici ci sono in tutti e due, con nomi e default diversi. Il secondo tema è il proxy, cioè il programma che sta fra gli agenti e il fornitore dei modelli: nel laboratorio è LiteLLM, su un PC dedicato, e dà a tutti la stessa configurazione senza mettere la vera chiave del fornitore sui PC dei partecipanti. L'episodio di apertura è l'incidente dei costi di Argo Briefing, che riprendiamo a metà argomento e nell'argomento 10. Funzioni lette sulla documentazione ufficiale tra il 9 e l'11 novembre 2026: nomi, comandi e valori predefiniti cambiano in fretta, quindi si riverificano sulla versione che si usa.`
   },
   {
     block: B + 'Gli stessi concetti',
@@ -384,7 +385,7 @@ const slides = [
         <p className="muted">Un file Markdown per agente: l'intestazione dà modalità e permessi, il testo è il prompt.</p>
       </div>
     ),
-    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il subagente revisore dell'argomento 7, scritto in questo formato. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che gli alias dei modelli dei subagenti vanno mappati nel router.`
+    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il subagente revisore dell'argomento 7, scritto in questo formato. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che con Claude Code gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno mappati nel file di configurazione del proxy.`
   },
   {
     block: B + 'Plugin al posto degli hook',
@@ -417,7 +418,7 @@ const slides = [
         <Box type="warn" title="Una versione sola">La configurazione si scrive e si prova sulla versione fissata dal laboratorio. Una guida trovata in rete può descrivere l'altra serie.</Box>
       </div>
     ),
-    notes: `Rilievo del 9/11/2026. Ultimo rilascio su GitHub: 2.2.6 del 6 novembre 2026 (github.com/anomalyco/opencode/releases), mentre il badge Latest della stessa pagina è su 1.19.5 del 28 ottobre 2026: le due serie escono in parallelo. Le pagine di opencode.ai/docs descrivono la serie 2 (permissions come elenco, plugins, update, riferimento esplicito a OpenCode 1 per le versioni precedenti); la documentazione nel repository descrive la serie 1 (permission come oggetto, autoupdate). Lo schema della configurazione pubblicato accetta entrambe le forme e segna le vecchie come deprecate. Il punto che conta in aula: la riga sul controllo delle cartelle esterne. Nella serie 1 la regola predefinita chiede conferma, nella serie 2 la documentazione dice che nessuna regola predefinita chiede e l'accesso fuori dal progetto passa senza domande. Questo è un motivo in più per fissare la versione e provare la configurazione su quella.`
+    notes: `Rilievo dell'11/11/2026. Ultimo rilascio su GitHub: 2.2.7 del 10 novembre 2026 (github.com/anomalyco/opencode/releases), mentre il badge Latest della stessa pagina è su 1.19.5 del 28 ottobre 2026: le due serie escono in parallelo. Quale delle due si installa sui PC si decide dopo una prova; questa slide mostra la serie 1 e lo dichiara. Le pagine di opencode.ai/docs descrivono la serie 2 (permissions come elenco, plugins, update, riferimento esplicito a OpenCode 1 per le versioni precedenti); la documentazione nel repository descrive la serie 1 (permission come oggetto, autoupdate). Lo schema della configurazione pubblicato accetta entrambe le forme e segna le vecchie come deprecate. Il punto che conta in aula: la riga sul controllo delle cartelle esterne. Nella serie 1 la regola predefinita chiede conferma, nella serie 2 la documentazione dice che nessuna regola predefinita chiede e l'accesso fuori dal progetto passa senza domande. Questo è un motivo in più per fissare la versione e provare la configurazione su quella.`
   },
   {
     block: B + 'I default da cambiare',
@@ -430,12 +431,12 @@ const slides = [
           ['Cartelle fuori dal progetto', 'letture e scritture dove non devono', <><code className="nw">external_directory</code> su deny</>],
           ['Condivisione della sessione', 'un link con il contenuto della conversazione', <><code className="nw">share</code> su disabled</>],
           ['Controllo aggiornamenti', 'versione che cambia, traffico verso l\'esterno', <><code className="nw">autoupdate</code> su false</>],
-          ['Fornitori caricati da sé', 'modelli e chiavi che non hai scelto tu', <><code className="nw">enabled_providers</code>: solo il router</>],
+          ['Fornitori caricati da sé', 'modelli e chiavi che non hai scelto tu', <><code className="nw">enabled_providers</code>: solo il fornitore del proxy</>],
         ]} />
         <p className="muted">I file .env sono l'eccezione: la lettura chiede conferma.</p>
       </div>
     ),
-    notes: `Fonti, 9/11/2026: documentazione della serie 1 nel repository, pagina permissions (nella serie 1: la maggior parte dei permessi è allow; external_directory e doom_loop chiedono; i file .env chiedono) e lo schema pubblicato opencode.ai/config.json (contiene share con valori manual, auto e disabled; enabled_providers e disabled_providers; autoupdate). Rispetto agli appunti di ottobre è cambiato un punto: la documentazione attuale dice che gli aggiornamenti non vengono mai installati da soli, OpenCode avvisa e basta; autoupdate su false spegne anche il controllo. Nella serie 2 esiste il valore auto per update: non va usato. Sulla condivisione: la pagina dedicata non era raggiungibile durante la verifica; la descrizione si basa sullo schema e va riverificata sulla versione fissata. Le chiavi dei fornitori OpenCode le salva in un file auth.json nella cartella dei dati dell'utente: in laboratorio si passa la chiave del router con una variabile d'ambiente.`
+    notes: `Fonti, 9/11/2026: documentazione della serie 1 nel repository, pagina permissions (nella serie 1: la maggior parte dei permessi è allow; external_directory e doom_loop chiedono; i file .env chiedono) e lo schema pubblicato opencode.ai/config.json (contiene share con valori manual, auto e disabled; enabled_providers e disabled_providers; autoupdate). Rispetto agli appunti di ottobre è cambiato un punto: la documentazione attuale dice che gli aggiornamenti non vengono mai installati da soli, OpenCode avvisa e basta; autoupdate su false spegne anche il controllo. Nella serie 2 esiste il valore auto per update: non va usato. Sulla condivisione: la pagina dedicata non era raggiungibile durante la verifica; la descrizione si basa sullo schema e va riverificata sulla versione fissata. Le chiavi dei fornitori OpenCode le salva in un file auth.json nella cartella dei dati dell'utente: in laboratorio la chiave virtuale del PC passa da una variabile d'ambiente.`
   },
   {
     block: B + 'Una configurazione per il laboratorio',
@@ -447,51 +448,51 @@ const slides = [
         <p className="muted">Sintassi della serie 1. Indirizzo e chiave sono segnaposto: la chiave sta in una variabile d'ambiente, mai nel file.</p>
       </div>
     ),
-    notes: `Esempio inventato di configurazione di progetto, sintassi della serie 1 (permission come oggetto). Mostra: condivisione spenta, controllo aggiornamenti spento, un solo fornitore ammesso (il router), comandi di shell che chiedono tranne pochi sicuri e rm vietato, modifiche che chiedono, accesso al web e alle cartelle esterne negati. Il fornitore compatibile OpenAI si dichiara con il pacchetto @ai-sdk/openai-compatible, baseURL e chiave (opencode.ai/docs/providers, 9/11/2026); l'identificativo del modello deve coincidere con quello che il router elenca su /v1/models. Con la serie 2 la parte dei permessi diventa un elenco di regole con azione, risorsa ed effetto (per esempio azione shell, risorsa git push con asterisco, effetto deny). Il file di progetto si versiona: nessuna chiave dentro. In laboratorio la configurazione la prepara il docente.`
+    notes: `Esempio inventato di configurazione di progetto, sintassi della serie 1 (permission come oggetto). Mostra: condivisione spenta, controllo aggiornamenti spento, un solo fornitore ammesso, comandi di shell che chiedono tranne pochi sicuri e rm vietato, modifiche che chiedono, accesso al web e alle cartelle esterne negati. Il fornitore è quello anthropic già incluso in OpenCode, con baseURL verso il proxy (che parla il formato Anthropic su /v1/messages), così passano anche la cache e i dati dei modelli; la chiave arriva dalla variabile d'ambiente. Gli identificativi dei modelli devono coincidere con quelli del file di configurazione del proxy. Fonti: opencode.ai/docs/providers e documentazione della serie 1 nel repository, 11/11/2026. Se il fornitore anthropic non regge sul proxy, il ripiego è il pacchetto @ai-sdk/openai-compatible sulla rotta /v1/chat/completions. Il punto di accesso <pc-proxy> è un segnaposto. Con la serie 2 la parte dei permessi diventa un elenco di regole con azione, risorsa ed effetto (per esempio azione shell, risorsa git push con asterisco, effetto deny). Il file di progetto si versiona: nessuna chiave dentro. In laboratorio la configurazione la prepara il docente.`
   },
   {
-    block: B + 'Il router',
+    block: B + 'Il proxy',
     content: () => (
       <div className="pad">
-        <Tag>Il router</Tag>
-        <h2>Un centralino fra gli agenti e i modelli</h2>
-        <div role="group" aria-label="Schema: gli agenti parlano con il router, che parla con i fornitori dei modelli">
+        <Tag>Il proxy</Tag>
+        <h2>Un centralino fra gli agenti e il modello</h2>
+        <div role="group" aria-label="Schema: gli agenti parlano con il proxy, che parla con il fornitore del modello">
           <Flow label="Un'unica strada" nodes={[
-            ['1 Agenti', 'Claude Code (formato Anthropic) e OpenCode (formato OpenAI)'], ['2 Router', 'chiave, limiti, scelta del fornitore', 'w'], ['3 Fornitori', 'solo quelli in lista bianca', 'i'],
+            ['1 Agenti', 'Claude Code (formato Anthropic) e OpenCode, con la chiave virtuale del PC'], ['2 Proxy LiteLLM', 'chiave, budget, modelli ammessi', 'w'], ['3 Fornitore', 'la vera chiave sta solo qui', 'i'],
           ]} />
         </div>
         <ul style={{ marginTop: 12 }}>
-          <li>Gli agenti conoscono un indirizzo e una chiave. Il fornitore del modello lo decide il router.</li>
-          <li>OmniRoute è un router open source (licenza MIT): espone sia il formato Anthropic, che serve a Claude Code, sia quello OpenAI.</li>
+          <li>Gli agenti conoscono un indirizzo e una chiave del proprio PC. La vera chiave del fornitore sta solo sul PC proxy.</li>
+          <li>LiteLLM è un proxy open source: espone il formato Anthropic che serve a Claude Code, con chiavi virtuali, budget e registro della spesa.</li>
         </ul>
       </div>
     ),
-    notes: `Fonti: github.com/diegosouzapw/OmniRoute (README, ultimo rilascio 3.8.53 del 6 novembre 2026 secondo la pagina dei rilasci, letta il 9/11/2026) e code.claude.com/docs/en/llm-gateway. Un router o gateway sta fra il client e i fornitori: la chiave del fornitore resta lato server, i client hanno una chiave del router, l'uso si attribuisce per chiave, i limiti e le registrazioni stanno in un posto solo. Claude Code richiede che il gateway esponga il formato Anthropic (rotta /v1/messages); la documentazione di Claude Code aggiunge che Anthropic non approva né mantiene i gateway di terzi. Il progetto cambia quasi ogni giorno: la versione si fissa anche qui.`
+    notes: `Fonti, lette l'11/11/2026: docs.litellm.ai/docs/proxy/virtual_keys (chiavi virtuali, budget, scadenza, modelli ammessi, richiedono un database), docs.litellm.ai/docs/anthropic_unified (rotta /v1/messages in formato Anthropic, con streaming e campi di cache) e code.claude.com/docs/en/llm-gateway (come collegare Claude Code a un gateway; Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli). Un proxy o gateway sta fra il client e il fornitore: la chiave vera resta lato server, i client hanno una chiave virtuale, l'uso si attribuisce per chiave, limiti e registrazioni stanno in un posto solo. Il progetto cambia in fretta: la versione si fissa (una LTS) e si aggiorna solo dopo una prova. Il PC proxy sta nella rete del laboratorio e non è raggiungibile da fuori; indirizzo e porta non compaiono in queste slide.`
   },
   {
     block: B + 'Perché il laboratorio lo usa',
     content: () => (
       <div className="pad">
         <Tag>Il motivo</Tag>
-        <h2>Perché un router in laboratorio</h2>
+        <h2>Perché un proxy in laboratorio</h2>
         <div className="grid">
-          <Card title="Una configurazione"><p>I PC puntano allo stesso indirizzo. Cambiare modello o fornitore è una modifica sul router, non su ogni PC.</p></Card>
-          <Card title="Lista bianca" kind="i"><p>Si collegano solo i fornitori scelti, con i loro termini letti prima. Il resto non esiste.</p></Card>
-          <Card title="Nessun costo per i partecipanti"><p>Nessun account personale. Una chiave per PC, con limite giornaliero e orario del corso.</p></Card>
+          <Card title="La chiave vera resta lì"><p>Sui PC dei partecipanti non c'è la chiave del fornitore: c'è una chiave virtuale, revocabile in un attimo.</p></Card>
+          <Card title="Un tetto per ogni PC" kind="i"><p>Ogni chiave ha un budget di pochi dollari, una scadenza e un elenco di modelli ammessi. Finito il budget, la chiave smette di funzionare.</p></Card>
+          <Card title="Nessun account personale"><p>I partecipanti non si registrano e non pagano. Una configurazione sola per tutti i PC.</p></Card>
           <Card title="Il prezzo da pagare" kind="w"><p>È un servizio in più da tenere acceso, aggiornare e proteggere. Se si ferma, si fermano tutti gli agenti.</p></Card>
         </div>
-        <Box type="info" title="I modelli">I modelli li sceglie la configurazione del laboratorio.</Box>
+        <Box type="info" title="I modelli">Sono modelli Claude, scelti dalla configurazione del proxy.</Box>
       </div>
     ),
-    notes: `Perché non un account personale per ciascuno: costi non controllabili, chiavi sui PC della scuola, dati che escono verso fornitori non scelti. Con il router c'è un punto solo da configurare e da guardare. Una chiave per PC si può limitare (modelli ammessi, tetto giornaliero in dollari, orario di validità, scadenza). Attenzione: il costo mostrato dal pannello è una stima da listino, e un modello senza prezzo conta zero; il tetto vero va messo anche sulla console di ogni fornitore (guida di OmniRoute, 9/11/2026). Il prezzo da pagare è quello che la documentazione di Claude Code chiama infrastruttura da gestire: il gateway va tenuto aggiornato e deve inoltrare le funzioni nuove dei client. Non dire quali modelli si usano: dipende dalla configurazione del laboratorio.`
+    notes: `Perché non un account personale per ciascuno: costi non controllabili, chiavi sui PC della scuola, dati che escono verso servizi non scelti. Con il proxy c'è un punto solo da configurare e da guardare. Una chiave virtuale si limita per modelli ammessi, budget (in dollari, tetto totale), scadenza e numero di richieste (docs.litellm.ai/docs/proxy/virtual_keys, 11/11/2026). Attenzione: il costo che il proxy registra è calcolato da un listino; se un modello mancasse dal listino conterebbe zero e il budget non scatterebbe mai. Il tetto vero si mette anche sulla console del fornitore, sul workspace del corso. Il prezzo da pagare è quello che la documentazione di Claude Code chiama infrastruttura da gestire: il gateway va tenuto aggiornato e deve inoltrare le funzioni nuove dei client (code.claude.com/docs/en/llm-gateway-rollout). Con modelli Claude non c'è più il problema di uno strumento pensato per un modello e usato con un altro.`
   },
   {
     block: B + 'Collegare gli agenti',
     content: () => (
       <div className="pad">
         <Tag>Collegamento</Tag>
-        <h2>Due agenti, un solo router</h2>
-        <pre aria-label="Variabili d'ambiente per collegare Claude Code a un router">{CLAUDEENV}</pre>
+        <h2>Due agenti, un solo proxy</h2>
+        <pre aria-label="Variabili d'ambiente per collegare Claude Code a un proxy">{CLAUDEENV}</pre>
         <ul>
           <li>Claude Code: indirizzo senza <code className="nw">/v1</code>, chiave come token. Con <code className="nw">/status</code> si legge a quale indirizzo parla.</li>
           <li>OpenCode: l'indirizzo <b>con</b> <code className="nw">/v1</code>, nel blocco del fornitore (slide precedente).</li>
@@ -499,23 +500,41 @@ const slides = [
         </ul>
       </div>
     ),
-    notes: `Fonti: code.claude.com/docs/en/llm-gateway-connect (9/11/2026): ANTHROPIC_BASE_URL e ANTHROPIC_AUTH_TOKEN, con /status che mostra la riga Anthropic base URL; la chiave non va nel file settings.json di progetto, che si versiona. CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 spegne aggiornamenti e telemetria; CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1 serve se il router rifiuta i campi sperimentali. Sui PC del laboratorio queste impostazioni le distribuisce il docente. Un errore classico: mettere /v1 dove non va, o dimenticarlo dove serve. Il segnaposto server e chiave del PC è voluto: nelle slide non compaiono indirizzi reali.`
+    notes: `Fonti: code.claude.com/docs/en/llm-gateway-rollout e env-vars (11/11/2026): ANTHROPIC_BASE_URL e ANTHROPIC_AUTH_TOKEN, con /status che mostra la riga Anthropic base URL. Con la credenziale del gateway attiva, Claude Code non mostra la schermata di accesso e non serve un account personale. La chiave non va nel file settings.json di progetto, che si versiona. CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 spegne aggiornamenti e telemetria. Sui PC del laboratorio queste impostazioni le distribuisce il docente in un file di impostazioni gestite, che impone anche la partenza in modalità con conferma e rifiuta sessioni puntate altrove. Un errore classico: mettere /v1 dove non va, o dimenticarlo dove serve. I segnaposto <pc-proxy> e <porta> sono voluti: nelle slide non compaiono indirizzi reali.`
   },
   {
-    block: B + 'Tre default pericolosi',
+    block: B + 'Il proxy: master key e registri',
     content: () => (
       <div className="pad">
-        <Tag>OmniRoute</Tag>
-        <h2>Tre default da cambiare</h2>
-        <DT cols={['Impostazione', 'Default', 'Cosa succede', 'Cosa mettere']} rows={[
-          [<code className="nw">REQUIRE_API_KEY</code>, <code className="nw">false</code>, 'le rotte /v1 rispondono a chiunque raggiunga la porta', <code className="nw">true</code>],
-          [<code className="nw">OMNIROUTE_EMERGENCY_FALLBACK</code>, 'attivo', 'a un errore di budget la richiesta passa a un altro modello, senza che il client lo chieda', <code className="nw">false</code>],
-          [<>modelli <code className="nw">auto/*</code></>, 'consentiti', 'il router sceglie fra tutti i fornitori collegati', <><code className="nw">allowAutoCombos</code> false sulle chiavi</>],
+        <Tag>LiteLLM</Tag>
+        <h2>Quattro impostazioni da controllare</h2>
+        <DT cols={['Impostazione', 'Rischio se la lasci', 'Cosa mettere']} rows={[
+          ['Master key', 'chi la ha è amministratore: crea chiavi, legge la spesa', <>lunga e casuale, solo sul PC proxy, mai sui PC dei partecipanti</>],
+          ['Interfaccia di amministrazione', 'accesa; senza una password propria vale la master key', <><code className="nw">DISABLE_ADMIN_UI</code> a true</>],
+          ['Documentazione API (Swagger)', 'pubblica sulla pagina principale del proxy', <><code className="nw">NO_DOCS</code> e <code className="nw">NO_REDOC</code></>],
+          ['Testi delle richieste nei registri', 'prompt e file letti finiscono nel database', <><code className="nw">store_prompts_in_spend_logs</code> false, e non cambiarlo dall'interfaccia</>],
         ]} />
-        <p className="muted">In più: la password iniziale del pannello è un valore noto a tutti. Si cambia prima del primo avvio.</p>
+        <p className="muted">La chiave del fornitore e la master key stanno nel file .env del PC proxy, mai nel repository.</p>
       </div>
     ),
-    notes: `Fonti, 9/11/2026: github.com/diegosouzapw/OmniRoute, file .env.example e docs/reference/ENVIRONMENT.md (REQUIRE_API_KEY=false di default, accetta true, 1 o yes; la riserva di emergenza è attiva se la variabile non è impostata e devia gli errori 402 di budget verso un modello gratuito prestabilito di un fornitore esterno; le richieste con strumenti sono escluse), docs/security/INFERENCE_AUTH_POSTURE.md (con la chiave non richiesta una richiesta anonima passa, e anche un token non valido è trattato come anonimo), API_REFERENCE.md (allowAutoCombos false rifiuta i modelli auto/* per quella chiave; chi non lo imposta li ottiene). Il README elenca i modelli auto/coding, auto/fast, auto/cheap e altri. Rispetto agli appunti di ottobre i tre default sono confermati; cambia solo il numero di versione. Rete: le variabili di bind sono 0.0.0.0 di default per il comando serve, quindi chi è nella stessa rete raggiunge il router. Il secondo default è il più insidioso: nessun messaggio, un'altra spesa. Ne parliamo subito.`
+    notes: `Fonti, lette l'11/11/2026: docs.litellm.ai/docs/proxy/config_settings (la master key deve iniziare con sk-; DISABLE_ADMIN_UI, NO_DOCS e NO_REDOC; UI_PASSWORD, in mancanza della quale la password dell'interfaccia è la master key) e docs.litellm.ai/docs/proxy/ui_spend_log_settings (i testi delle richieste nei registri sono spenti di default, ma l'interfaccia può accenderli e il valore dell'interfaccia vince su quello del file). La master key serve solo a chi amministra: le chiavi dei partecipanti sono virtuali. Il progetto ha avuto avvisi di sicurezza critici nel 2026 (pagina security del repository): per questo la versione è fissata, la rete è chiusa e si aggiorna solo a una versione successiva già provata. Altri registri da spegnere nel file di configurazione: indirizzo di chi chiede, messaggi di errore, conservazione limitata della spesa.`
+  },
+  {
+    block: B + 'Il proxy: ripieghi e chiavi',
+    content: () => (
+      <div className="pad">
+        <Tag>LiteLLM</Tag>
+        <h2>Nessuna riserva silenziosa, chiavi con un tetto</h2>
+        <DT cols={['Impostazione', 'Cosa succede', 'Cosa mettere']} rows={[
+          [<>ripieghi (<code className="nw">fallbacks</code>)</>, 'a un errore la richiesta passa a un altro modello, che nessuno ha scelto', <>nessun ripiego nel file; <code className="nw">disable_fallbacks</code> nei metadati di ogni chiave</>],
+          ['Tentativi del proxy', 'si sommano a quelli di Claude Code, che già ripete da solo', <><code className="nw">num_retries</code> a 0</>],
+          ['Modelli ammessi', 'una chiave senza elenco chiama anche il modello più costoso', <>solo i modelli del corso, con <code className="nw">models</code> sulla chiave</>],
+          ['Budget e scadenza', 'una chiave senza tetto spende finché qualcuno se ne accorge', <><code className="nw">max_budget</code> e <code className="nw">duration</code> su ogni chiave</>],
+        ]} />
+        <p className="muted">Il budget è in dollari ed è un tetto totale. Una chiave per PC.</p>
+      </div>
+    ),
+    notes: `Fonti, 11/11/2026: docs.litellm.ai/docs/proxy/reliability (fallbacks, default_fallbacks, context_window_fallbacks; disable_fallbacks nei metadati della chiave spegne i ripieghi per quella chiave; num_retries) e docs.litellm.ai/docs/proxy/virtual_keys (models, max_budget, budget_duration, duration, upperbound_key_generate_params: oltre il tetto la richiesta è rifiutata, non ridotta). Claude Code ripete fino a dieci volte con attesa crescente (code.claude.com/docs/en/llm-gateway-rollout), quindi il proxy non ne aggiunge. La riga dei ripieghi è la più insidiosa: nessun messaggio, un altro modello, un'altra spesa. È la stessa lezione del caso che segue. Il budget conta se il listino del proxy conosce il prezzo del modello: si controlla con una prova.`
   },
   {
     block: B + 'Il caso',
@@ -532,25 +551,25 @@ const slides = [
           <li>Un assistente usava una catena di modelli gratuiti. Quando la catena ha smesso di rispondere, un fornitore a pagamento ha fatto da riserva, senza avvisare.</li>
           <li>La conversazione non veniva mai compattata, e i tentativi ripetuti rimandavano ogni volta tutta la storia.</li>
         </ul>
-        <Box type="warn" title="Stesso tipo di meccanismo">Un fallback d'emergenza attivo di default fa la stessa cosa: a un errore la richiesta va a un fornitore che nessuno ha scelto, e nessuno lo vede.</Box>
+        <Box type="warn" title="Stesso tipo di meccanismo">Un ripiego configurato nel proxy fa la stessa cosa: a un errore la richiesta va a un modello che nessuno ha scelto, e nessuno lo vede.</Box>
       </div>
     ),
-    notes: `Incidente di Argo Briefing, agosto-settembre 2026: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. La cifra in dollari è bassa; il problema era il meccanismo. Un fornitore a pagamento faceva da riserva silenziosa a una catena di modelli gratuiti che non rispondeva più, la storia della conversazione non veniva compattata e i tentativi ripetuti la rimandavano per intero. Il caso è raccontabile in pubblico (autorizzazione di Thomas del 21/10/2026). Non dico che Argo Briefing usasse OmniRoute: dico che il fallback d'emergenza di OmniRoute, attivo per impostazione predefinita, è una riserva silenziosa dello stesso tipo. Lì la riserva costava; qui, secondo .env.example e emergencyFallback.ts (9/11/2026), devia gli errori di budget verso un modello gratuito di un fornitore esterno prestabilito: il conto non sale, ma i dati vanno a un fornitore fuori dalla lista bianca. La lezione: ogni riserva automatica va resa visibile o spenta, e un tetto di spesa vale più di una buona intenzione. Contesto, token e costi sono l'argomento 10.`
+    notes: `Incidente di Argo Briefing, agosto-settembre 2026: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. La cifra in dollari è bassa; il problema era il meccanismo. Un fornitore a pagamento faceva da riserva silenziosa a una catena di modelli gratuiti che non rispondeva più, la storia della conversazione non veniva compattata e i tentativi ripetuti la rimandavano per intero. Il caso è raccontabile in pubblico (autorizzazione di Thomas del 21/10/2026). Non dico che Argo Briefing usasse LiteLLM: dico che un ripiego configurato nel proxy (fallbacks, default_fallbacks) è una riserva silenziosa dello stesso tipo, e che per questo nel laboratorio non ce ne sono e ogni chiave porta anche disable_fallbacks. Lì la riserva costava; qui il rischio sarebbe una richiesta che passa a un modello più caro o a un fornitore non previsto. La lezione: ogni riserva automatica va resa visibile o spenta, e un tetto di spesa vale più di una buona intenzione. Contesto, token e costi sono l'argomento 10.`
   },
   {
     block: B + 'Come si verifica',
     content: () => (
       <div className="pad">
         <Tag>Verifica</Tag>
-        <h2>Il router è chiuso davvero?</h2>
-        <pre aria-label="Due prove con curl: una rotta di inferenza senza chiave, poi l'elenco dei modelli con la chiave">{PROVA}</pre>
+        <h2>Il proxy è chiuso davvero?</h2>
+        <pre aria-label="Due prove con curl: una richiesta senza chiave, poi una con la chiave del PC e un modello non ammesso">{PROVA}</pre>
         <ul>
-          <li>Un 401 sulla prima prova dice che la chiave è richiesta. Una risposta tipo «modello non trovato» dice il contrario: la richiesta ha superato l'accesso.</li>
-          <li>Un 401 su <code className="nw">/v1/models</code> non prova niente: quella rotta segue un'altra regola.</li>
+          <li>Un 401 sulla prima prova dice che la chiave è richiesta. Una risposta del modello dice il contrario.</li>
+          <li>Sulla seconda prova deve arrivare un errore, non una risposta: la chiave non può chiamare altro che i suoi modelli.</li>
         </ul>
       </div>
     ),
-    notes: `Dalla guida alla sicurezza di OmniRoute (9/11/2026): GET /v1/models segue il controllo di accesso del pannello e non REQUIRE_API_KEY. Un operatore è stato ingannato proprio così: /v1/models rispondeva 401 mentre richieste anonime a un'altra rotta consumavano la quota. Si prova una rotta che fa inferenza. Non usare un token inventato come prova, perché con la chiave non obbligatoria un token non valido è trattato come anonimo. Con il comando curl.exe su Windows e le virgolette singole può servire adattare la riga alla shell; sui PC del laboratorio la prova la fa il docente. Segnaposto al posto di indirizzo e chiave.`
+    notes: `Le prove sono quelle della preparazione dei PC (il docente le fa il giorno prima). Si prova una rotta che fa inferenza, /v1/messages, perché è quella che costa. Non si prova mai la master key dai PC dei partecipanti: non esce dal PC proxy. Per il budget c'è una terza prova: una chiave di prova con un tetto minimo deve essere rifiutata dopo la prima o la seconda richiesta, senza passare ad altri modelli. Su Windows va usato curl.exe, non l'alias di PowerShell. Codici e messaggi esatti si annotano durante la prova. Fonti: docs.litellm.ai/docs/anthropic_unified e docs.litellm.ai/docs/proxy/virtual_keys, 11/11/2026. Segnaposto al posto di indirizzo e chiave.`
   },
   {
     block: B + 'Rischi dei collegamenti',
@@ -559,29 +578,29 @@ const slides = [
         <Tag>Permessi e rischi</Tag>
         <h2>Ogni collegamento esterno ha un conto</h2>
         <DT cols={['Collegamento', 'Cosa esce o cosa entra', 'Cosa si controlla']} rows={[
-          ['Router', 'prompt e file letti, verso i fornitori', 'chiave per PC, limiti, dati solo inventati'],
-          ['Fornitori dietro il router', 'gli stessi contenuti, con i loro termini', 'lista bianca; addestramento sui dati e uso tramite proxy'],
+          ['Proxy', 'prompt e file letti, verso il fornitore', 'chiave per PC, budget, scadenza, dati solo inventati'],
+          ['Fornitore dietro il proxy', 'gli stessi contenuti, con i suoi termini', 'termini d\'uso e conservazione dei dati letti prima'],
           ['MCP e plugin', 'codice eseguito sul PC', 'solo ciò che si è letto, versione fissata'],
           ['Web e link di condivisione', 'testo da fuori entra nel contesto; la sessione esce', 'webfetch su ask o deny, share disabilitato'],
           ['Aggiornamenti e telemetria', 'richieste verso l\'esterno', 'autoupdate false, traffico non essenziale spento'],
         ]} />
       </div>
     ),
-    notes: `Riepilogo dei permessi e dei rischi. Sui fornitori: nelle guide di OmniRoute si legge che alcuni piani gratuiti usano i dati per l'addestramento salvo rinuncia, e che molti fornitori vietano l'accesso di terzi tramite un proxy: i termini si leggono prima di aprire l'accesso a un gruppo di persone, e per questo in laboratorio solo dati inventati. Sul web: ciò che una pagina scrive entra nel contesto dell'agente e può contenere istruzioni; l'argomento 12 ne fa il tema. Sui plugin: la documentazione di OpenCode dice che i pacchetti npm non fissati a una versione vengono controllati all'avvio. Per Claude Code le impostazioni gestite dell'amministratore possono imporre un solo indirizzo di destinazione (code.claude.com/docs/en/llm-gateway, 9/11/2026).`
+    notes: `Riepilogo dei permessi e dei rischi. Sul fornitore: prompt e file letti dall'agente arrivano al fornitore dei modelli attraverso il proxy; i termini d'uso si leggono prima di aprire l'accesso a un gruppo di persone, e per questo in laboratorio solo dati inventati. Sul web: ciò che una pagina scrive entra nel contesto dell'agente e può contenere istruzioni; l'argomento 6 ne parla. Sui plugin: la documentazione di OpenCode dice che i pacchetti npm non fissati a una versione vengono controllati all'avvio. Per Claude Code le impostazioni gestite dell'amministratore possono imporre un solo indirizzo di destinazione (allowedProviders con ANTHROPIC_BASE_URL, code.claude.com/docs/en/llm-gateway, 11/11/2026).`
   },
   {
-    block: B + 'Quando il modello cambia',
+    block: B + 'Il gateway cambia qualcosa',
     content: () => (
       <div className="pad">
-        <Tag>Il modello</Tag>
-        <h2>Lo strumento non è pensato per questo modello</h2>
+        <Tag>Il collegamento</Tag>
+        <h2>Anche con modelli Claude il proxy conta</h2>
         <div className="grid">
-          <Card title="Può cambiare" kind="w">
+          <Card title="Può andare storto" kind="w">
             <ul>
-              <li>Come il modello usa gli strumenti, quindi skill e subagenti.</li>
-              <li>I campi che il router o il modello rifiutano: errori 400.</li>
-              <li>La finestra di contesto che lo strumento suppone.</li>
-              <li>Quale modello fa i lavori di sfondo e i subagenti.</li>
+              <li>Campi sperimentali che il proxy non inoltra: errori 400.</li>
+              <li>Alias dei modelli (haiku, sonnet, opus) non mappati sui nomi del proxy.</li>
+              <li>Richieste in background con un modello che la chiave non ha.</li>
+              <li>Cache non inoltrata: i token costano di più.</li>
             </ul>
           </Card>
           <Card title="Non cambia" kind="i">
@@ -592,10 +611,10 @@ const slides = [
             </ul>
           </Card>
         </div>
-        <Box type="warn" title="Nessun supporto ufficiale">Anthropic non supporta Claude Code su modelli non Claude tramite un gateway.</Box>
+        <Box type="warn" title="Supporto">Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli.</Box>
       </div>
     ),
-    notes: `Fonte: code.claude.com/docs/en/llm-gateway e llm-gateway-connect, 9/11/2026. Dichiarazione esplicita: Anthropic non supporta l'instradamento di Claude Code verso modelli non Claude attraverso un gateway. Sintomi noti nella tabella degli errori: 400 su campi sperimentali (CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1), contesto superato che lo strumento non riconosce (si usa /compact e CLAUDE_CODE_AUTO_COMPACT_WINDOW), alias dei modelli (ANTHROPIC_DEFAULT_OPUS_MODEL, _SONNET_ e _HAIKU_ si mappano sui modelli del router). In OpenCode il problema è speculare: la documentazione dei fornitori consiglia modelli con buone chiamate agli strumenti. Per questo ogni dimostrazione su skill e subagenti ha un piano B registrato; gli hook e i permessi invece non dipendono dal modello. Non dire quali modelli si usano: li sceglie la configurazione del laboratorio.`
+    notes: `Fonti: code.claude.com/docs/en/llm-gateway, llm-gateway-rollout e llm-gateway-protocol, 11/11/2026. Dichiarazione della documentazione: Anthropic non sostiene né verifica i gateway di terzi. Sintomi noti: errori 400 su campi sperimentali o intestazioni beta che il gateway non inoltra (CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1 come ripiego), alias dei modelli (ANTHROPIC_DEFAULT_SONNET_MODEL, _HAIKU_ e _OPUS_ si mappano sui nomi del proxy; per i partecipanti il nome opus punta a Sonnet perché la loro chiave non ha Opus), richieste in background che chiedono un ID predefinito qualunque sia la mappatura, cache non inoltrata (si vede dai token letti dalla cache sempre a zero). Rispetto a un proxy con modelli di altri fornitori, qui i modelli sono quelli per cui lo strumento è pensato, quindi skill, subagenti e uso degli strumenti non dipendono più dal modello. Resta il lavoro di prova prima del corso.`
   },
   {
     block: B + 'Attività: due strumenti',
@@ -612,7 +631,7 @@ const slides = [
         <ActivityBadge n="9" file="confronto-claude-code-opencode.html" label="Scheda: il confronto fra i due strumenti" durata="indicativo: 30 min" />
       </div>
     ),
-    notes: `Attività sulla palestra, a coppie. Il compito è quello dell'incontro 1: aggiungere all'elenco delle prenotazioni il filtro per laboratorio, con un test. Perché il confronto valga, i due agenti devono vedere le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 4. Il modello dietro il router è lo stesso per tutti e due, quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
+    notes: `Attività sulla palestra, a coppie. Il compito è quello dell'incontro 1: aggiungere all'elenco delle prenotazioni il filtro per laboratorio, con un test. Perché il confronto valga, i due agenti devono vedere le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 4. Il modello dietro il proxy è lo stesso per tutti e due (Claude), quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
   },
   {
     block: B + 'Attività: trova l\'errore',
@@ -621,7 +640,7 @@ const slides = [
         <Tag>Attività</Tag>
         <h2>Una configurazione con i default sbagliati</h2>
         <ol className="timeline">
-          <li><time>1</time>Leggi il file di OpenCode e le impostazioni del router, inventati.</li>
+          <li><time>1</time>Leggi il file di OpenCode e la configurazione del proxy LiteLLM, inventati.</li>
           <li><time>2</time>Segna ogni riga pericolosa e scrivi cosa rischia chi lavora con quel PC.</li>
           <li><time>3</time>Scrivi la versione corretta e l'ordine dei controlli prima di aprire l'agente.</li>
         </ol>
@@ -629,7 +648,7 @@ const slides = [
         <p className="muted" style={{ marginTop: 10 }}>Indirizzi, chiavi e nomi nella scheda sono tutti inventati.</p>
       </div>
     ),
-    notes: `Scheda con una configurazione inventata di OpenCode e le impostazioni di un router, con più righe sbagliate: permessi aperti, condivisione attiva, aggiornamenti automatici, fornitori non limitati, chiave scritta nel file, router senza obbligo di chiave e riserva di emergenza attiva. Una delle righe non produce nessun errore, ed è la più difficile da vedere. Le risposte attese sono del docente. Per chi finisce prima: scrivere i quattro controlli, in ordine, da fare sul proprio PC prima di cominciare.`
+    notes: `Scheda con una configurazione inventata di OpenCode e di un proxy LiteLLM, con più righe sbagliate: permessi aperti, condivisione attiva, plugin non fissato, chiave scritta nel file, tutti i modelli ammessi, ripiego verso un modello più caro, testi delle richieste nei registri, una sola chiave per tutti senza tetto, interfaccia di amministrazione lasciata accesa. Una delle righe non produce nessun errore, ed è la più difficile da vedere. Le risposte attese sono del docente. Per chi finisce prima: scrivere i quattro controlli, in ordine, da fare sul proprio PC prima di cominciare.`
   },
   {
     block: B + 'Domanda di verifica',
@@ -637,14 +656,14 @@ const slides = [
       <div className="pad">
         <Tag>Quiz</Tag>
         <h2>Una domanda per voi</h2>
-        <Quiz domanda="Chiami l'elenco dei modelli di un router senza chiave e ricevi 401. Cosa puoi concludere?" opzioni={[
-          { t: 'Il router è chiuso: senza chiave non si usa nulla', ok: false, perche: 'Quella rotta segue un\'altra regola. Intanto le richieste di inferenza potrebbero passare senza chiave.' },
-          { t: 'Non molto: va provata una rotta di inferenza, per esempio chat/completions', ok: true, perche: 'Solo un 401 su una rotta che fa inferenza dice che la chiave è obbligatoria.' },
-          { t: 'Il router è aperto, perché il 401 è un errore', ok: false, perche: 'Il 401 non dice che sia aperto. Dice soltanto che quella prova non basta.' },
+        <Quiz domanda="La chiave di un PC non ha Opus tra i modelli ammessi, e Claude Code chiede Opus. Cosa deve fare il proxy?" opzioni={[
+          { t: 'Rifiutare la richiesta con un errore', ok: true, perche: 'Così il limite si vede. La chiave chiama solo i suoi modelli e nessuno spende senza saperlo.' },
+          { t: 'Passare a Sonnet senza dire nulla, così il lavoro continua', ok: false, perche: 'È un ripiego silenzioso: funziona oggi e domani nessuno sa quale modello ha risposto. È la stessa famiglia dell\'incidente di Argo Briefing.' },
+          { t: 'Passare a Opus con la master key, per non bloccare chi lavora', ok: false, perche: 'La master key non esce dal PC proxy, e un tetto che si scavalca da solo non è un tetto.' },
         ]} />
       </div>
     ),
-    notes: `Domanda sul punto più facile da sbagliare, preso da un caso documentato dal progetto stesso. Se qualcuno risponde A, rimandare alla slide sulla verifica.`
+    notes: `Domanda sul punto più facile da sbagliare: la comodità di un ripiego automatico contro la visibilità di un errore. Se qualcuno risponde B, rimandare alla slide sui ripieghi e al caso di Argo Briefing. Nei PC del laboratorio il nome opus è mappato su Sonnet in modo esplicito: la scelta è scritta e visibile nella configurazione, non decisa in silenzio dal proxy.`
   },
   {
     block: B + 'Chiusura',
@@ -653,8 +672,8 @@ const slides = [
         punti={[
           'Contesto, agenti, permessi e controlli automatici ci sono in entrambi gli strumenti. Cambiano nomi, sintassi e soprattutto i default.',
           'OpenCode parte permissivo: permessi, condivisione, aggiornamenti e fornitori si configurano a mano, sulla versione fissata.',
-          'Il router dà una configurazione sola, ma ha i suoi default pericolosi: chiave non obbligatoria, riserva di emergenza attiva, modelli auto.',
-          'Ogni collegamento esterno ha un conto. Con un modello diverso da quello previsto, l\'agente può comportarsi in modo diverso.',
+          'Il proxy dà una configurazione sola e tiene la chiave vera lontana dai PC, ma va configurato: master key, interfaccia, registri, nessun ripiego, chiavi con budget e scadenza.',
+          'Ogni collegamento esterno ha un conto. Anche con modelli Claude, il gateway va provato: alias, campi inoltrati, cache.',
         ]}
         dopo="Argomento 10 (costi e contesto: l'incidente di Argo Briefing in dettaglio, con i listini)." />
     ),

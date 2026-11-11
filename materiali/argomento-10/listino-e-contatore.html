@@ -96,7 +96,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <main class="wrap">
 <h1 id="listino-e-contatore-della-sessione">Listino e contatore della sessione</h1>
 <p>Durata indicativa: 10 minuti. Si confronta il conto fatto a mano con quello del contatore di Claude Code.</p>
-<p>Funzioni di Claude Code citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026. Il modello dietro l'agente lo sceglie il router del laboratorio.</p>
+<p>Funzioni di Claude Code citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026. Il modello dietro l'agente è un Claude, scelto dalla configurazione del proxy del laboratorio.</p>
 <h2 id="1-il-listino">1. Il listino</h2>
 <p>Dollari per milione di token, listino pubblico di Anthropic consultato il 9 novembre 2026 (platform.claude.com/docs/en/about-claude/pricing) e di DeepSeek (api-docs.deepseek.com/quick_start/pricing).</p>
 <div class="table-scroll"><table>
@@ -266,13 +266,13 @@ Usage by model:
 </tr>
 </tbody>
 </table></div>
-<p>Se una voce non compare, scrivilo: è un'informazione. In particolare, con i modelli del router il costo potrebbe mancare o non avere senso, perché il contatore lo calcola in locale dai token con i prezzi che conosce.</p>
+<p>Se una voce non compare, scrivilo: è un'informazione. In particolare, il costo che vedi è una stima: il contatore lo calcola in locale dai token con i prezzi che conosce, e potrebbe non coincidere con la spesa che il proxy registra per la tua chiave.</p>
 <h2 id="5-stima-e-contatore">5. Stima e contatore</h2>
 <ul>
 <li>Scegli nella calcolatrice il modello più vicino al tuo e prova a ricostruire la tua sessione: quanti giri ha avuto (le richieste), quanti token nuovi a giro?</li>
 <li>Confronta i token inviati in ingresso della calcolatrice con la somma di ingresso, lettura e scrittura del contatore. Di quanto differiscono?</li>
 <li>Cosa non è nella stima e potrebbe spiegare la differenza? Ragiona su ragionamento, subagenti, richieste in background, tentativi ripetuti.</li>
-<li>Se il contatore non mostra la cache: che cosa implica per il costo, e per chi dovrebbe verificarlo (il router, il fornitore)?</li>
+<li>Se il contatore non mostra la cache: che cosa implica per il costo, e per chi dovrebbe verificarlo (il proxy, il fornitore)?</li>
 </ul>
 <p>Le soluzioni le ha il docente.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>

@@ -597,22 +597,22 @@ const slides = [
     notes: `Fonti: il racconto di Thomas (frontmatter con backslash, subagenti mai caricati per mesi; scoperta del 20 luglio, correzione, passaggio dal reviewer, versione 0.2). Raccontare con le parole di Thomas e con gli errori quanto i successi. Il collegamento tecnico: la documentazione dice che un frontmatter YAML non valido fa caricare la skill senza i suoi campi e che un campo sconosciuto viene ignorato senza errori. Le difese: elencare gli strumenti caricati (/skills, /agents o la cartella), usarli a mano una volta, controllare che la delega compaia davvero.`
   },
   {
-    block: B + 'Router e modelli',
+    block: B + 'Proxy e modelli',
     content: () => (
       <div className="pad">
         <Tag>Nel nostro ambiente</Tag>
-        <h2>Con un router, un modello può non usarli</h2>
+        <h2>Un modello può non usarli, un alias può non esistere</h2>
         <DT cols={['Che cosa verifichi', 'Dove guardi']} rows={[
           ['La skill è caricata?', <><code className="nw">/skills</code>, <code className="nw">/context</code>; con <code className="nw">claude --debug</code> un frontmatter rotto</>],
           ['Il subagente è partito?', 'la riga della delega a schermo (la dicitura va vista sul PC del corso)'],
           ['Il modello li ha scelti?', <>provali a mano: <code className="nw">/nome-skill</code>, <code className="nw">@agent-nome</code></>],
           ['Ha eseguito davvero?', 'nel riassunto: comandi ed esiti, non solo il verdetto'],
-          ['Gli alias del modello?', <>con un router, <code className="nw">sonnet</code>, <code className="nw">opus</code>, <code className="nw">haiku</code> vanno mappati; <code className="nw">inherit</code> evita il problema</>],
+          ['Gli alias del modello?', <>con un proxy davanti, <code className="nw">sonnet</code>, <code className="nw">opus</code>, <code className="nw">haiku</code> vanno mappati sui nomi del proxy; <code className="nw">inherit</code> evita il problema</>],
         ]} />
         <Box type="warn" title="Il rischio">Un modello può rispondere senza avere usato né la skill né il subagente: la risposta c'è, la verifica no. Se la risposta non mostra prove, è così finché non si dimostra il contrario.</Box>
       </div>
     ),
-    notes: `Nel laboratorio Claude Code parla con modelli che non sono Claude, tramite il router. Skill e subagenti dipendono da come il modello usa gli strumenti: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano. Gli hook invece non dipendono dal modello (argomento 8). Il router deve esporre l'endpoint in formato Anthropic; gli alias dei modelli dei subagenti vanno mappati nel router, altrimenti la delega fallisce o ricade su un altro modello: verificare prima dell'incontro.`
+    notes: `Nel laboratorio Claude Code parla con modelli Claude attraverso il proxy LiteLLM, quindi il rischio che il modello usi male gli strumenti è molto ridotto rispetto a un modello di un altro fornitore; resta il principio. Skill e subagenti dipendono da come il modello li sceglie: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano; il piano B serve anche per un guasto di rete o del proxy. Gli hook invece non dipendono dal modello (argomento 8). Il proxy espone l'endpoint in formato Anthropic (docs.litellm.ai/docs/anthropic_unified, 11/11/2026); gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno comunque mappati nel file config.yaml del proxy e nelle variabili ANTHROPIC_DEFAULT_*_MODEL del file gestito, altrimenti la delega fallisce o è rifiutata (la chiave dei partecipanti non ha Opus): verificare prima dell'incontro (code.claude.com/docs/en/llm-gateway-rollout).`
   },
   {
     block: B + 'Attività: la palestra',
@@ -656,7 +656,7 @@ const slides = [
           'Una skill è una procedura in una cartella: l\'agente vede sempre la descrizione, il resto lo legge quando serve. La descrizione decide se verrà scelta.',
           'Un subagente ha contesto e strumenti propri e restituisce un riassunto: si legge anche il lavoro, non solo il riassunto.',
           'Due agenti d\'accordo non dimostrano nulla. Vale il controllo eseguito che poteva fallire.',
-          'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un router e modelli diversi non è scontato.',
+          'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un proxy in mezzo, e alias da mappare, non è scontato.',
         ]}
         dopo="Argomento 8 (hook e MCP: controlli che non dipendono dal modello) e argomento 11 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
     ),

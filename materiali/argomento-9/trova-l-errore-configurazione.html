@@ -95,9 +95,9 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </div>
 <main class="wrap">
 <h1 id="trova-lerrore-una-configurazione-con-i-default-sbagliati">Trova l'errore: una configurazione con i default sbagliati</h1>
-<p>Un collega ha preparato il suo PC per lavorare con OpenCode e con un router (OmniRoute) installato
-sul suo computer. Ti manda i due file di configurazione. Tutti i nomi, gli indirizzi e i valori sono
-inventati. Durata indicativa: 15 minuti.</p>
+<p>Un collega ha preparato il suo PC per lavorare con OpenCode e con un proxy (LiteLLM) installato su un
+altro computer della sua rete. Ti manda i due file di configurazione e un riassunto di come li usa.
+Tutti i nomi, gli indirizzi e i valori sono inventati. Durata indicativa: 15 minuti.</p>
 <h2 id="1-opencodejson-del-progetto-versionato-nel-repository">1. <code>opencode.json</code> del progetto (versionato nel repository)</h2>
 <pre><code class="language-json">{
   &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
@@ -105,38 +105,48 @@ inventati. Durata indicativa: 15 minuti.</p>
   &quot;share&quot;: &quot;auto&quot;,
   &quot;plugin&quot;: [&quot;opencode-helper-demo&quot;],
   &quot;provider&quot;: {
-    &quot;router&quot;: {
-      &quot;npm&quot;: &quot;@ai-sdk/openai-compatible&quot;,
-      &quot;name&quot;: &quot;Router di casa&quot;,
+    &quot;anthropic&quot;: {
       &quot;options&quot;: {
-        &quot;baseURL&quot;: &quot;http://router.demo.invalid/v1&quot;,
+        &quot;baseURL&quot;: &quot;http://proxy.demo.invalid/v1&quot;,
         &quot;apiKey&quot;: &quot;chiave-scritta-qui-nel-file&quot;
-      },
-      &quot;models&quot;: { &quot;auto/coding&quot;: { &quot;name&quot;: &quot;Automatico&quot; } }
+      }
     }
   }
 }
 </code></pre>
-<h2 id="2-impostazioni-del-router-file-env-del-collega">2. Impostazioni del router (file <code>.env</code> del collega)</h2>
-<pre><code>INITIAL_PASSWORD=CHANGEME
-REQUIRE_API_KEY=false
+<h2 id="2-configyaml-del-proxy-parte">2. <code>config.yaml</code> del proxy (parte)</h2>
+<pre><code class="language-yaml">model_list:
+  - model_name: &quot;*&quot;
+    litellm_params:
+      model: &quot;anthropic/*&quot;
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+router_settings:
+  fallbacks: [{&quot;claude-sonnet-5-5&quot;: [&quot;claude-opus-5-5&quot;]}]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  store_prompts_in_spend_logs: true
 </code></pre>
-<p>Il collega ha collegato al router tre fornitori, di cui uno a pagamento con una carta, e ha creato una
-sola chiave, usata da tutti i suoi programmi, senza limiti di spesa né di orario.</p>
+<h2 id="3-come-lo-usa-il-collega">3. Come lo usa il collega</h2>
+<p>Il collega ha messo la master key nella variabile <code>ANTHROPIC_AUTH_TOKEN</code> di tutti i suoi PC, per non
+dover creare altre chiavi. Non ha impostato né un budget né una scadenza. Per guardare la spesa apre
+l'interfaccia di amministrazione dal browser. Nel file <code>.env</code> del proxy c'è solo la chiave del
+fornitore, la master key e la salt key.</p>
 <h2 id="le-domande">Le domande</h2>
 <ol>
 <li>In <code>opencode.json</code> ci sono quattro cose che non vanno. Trovale e scrivi come le correggeresti.</li>
 <li>
-<p>Nelle impostazioni del router ci sono tre cose che non vanno, più una che non è scritta da
-   nessuna parte. Trovale tutte.</p>
+<p>In <code>config.yaml</code> ci sono tre righe che non vanno. Trovale. Nel riassunto del punto 3 ce n'è una
+   quarta, e una quinta non è scritta da nessuna parte. Trovale tutte.</p>
 </li>
 <li>
 <p>Una di queste righe non produce alcun errore e nessun avviso, e può costare dei soldi senza che
    nessuno se ne accorga. Quale? Perché è la più difficile da vedere?</p>
 </li>
 <li>
-<p>Il collega prova <code>GET /v1/models</code> senza chiave e ottiene 401. Dice: «Allora il router è
-   protetto». Che prova gli faresti fare, e che risposta ti aspetti?</p>
+<p>Il collega prova una richiesta con la master key e riceve la risposta del modello. Dice: «Allora il
+   proxy funziona e i PC sono a posto». Che prove gli faresti fare, e che risposte ti aspetti?</p>
 </li>
 <li>
 <p>Scrivi, nell'ordine giusto, i controlli che farai prima di aprire OpenCode la prossima volta.</p>
