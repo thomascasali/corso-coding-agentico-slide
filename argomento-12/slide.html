@@ -516,6 +516,7 @@ const slides = [
           ['3 · bozza', 'bozza in Gmail con il connettore, mai un invio'],
           ['4 · riepilogo e handoff', 'riepilogo in una cartella locale privata, mai nel repository; un file di handoff per ogni caso che il giro non può chiudere'],
           ['5-6 · chiusura', 'etichetta «Gestita» (e «Da fare» sui casi con handoff), segna come lette, avviso su Telegram con i casi aperti'],
+          ['7 · notify', 'notifica con i soli numeri di ciò che il giro ha elaborato'],
         ]} />
       </div>
     ),
@@ -611,7 +612,8 @@ const slides = [
         <h2>Raggiungere la persona dove guarda</h2>
         <div className="cols">
           <Card title="Avviso · informa" kind="i"><ul>
-            <li>Un messaggio su Telegram con i casi aperti, senza bottoni.</li>
+            <li>Un messaggio su Telegram solo per i casi aperti, quelli che chiedono una decisione; senza bottoni.</li>
+            <li>A ogni giro, a parte, <code>notify</code> manda i soli numeri di ciò che è stato elaborato.</li>
             <li>Il comando accetta solo il nome di un file di handoff nel formato fisso, e ne legge la sola sezione «Telegram».</li>
             <li>Destinatario e canale sono nel codice: l'agente non li sceglie.</li>
             <li>Codici fiscali mascherati, testo tagliato.</li>
@@ -731,10 +733,10 @@ const slides = [
           <Card title="Apply e rilettura" kind="i"><p>Con la prova pulita si applica, poi si rifà la lettura e si confronta con l'esito atteso.</p></Card>
           <Card title="Tracce" kind="w"><p>Registro locale di ogni esito, undo scritto prima di una chiusura, scritture atomiche.</p></Card>
         </div>
-        <Box title="Dopo un rifiuto">L'agente non insiste e non cerca strade alternative: il caso va nel riepilogo, per la persona.</Box>
+        <Box title="Dopo un rifiuto">L'agente non insiste e non cerca strade alternative: il caso diventa un handoff, con il file e l'avviso, e lo chiude la sessione principale.</Box>
       </div>
     ),
-    notes: "Gli output a schermo sono inventati ma fedeli nella forma. Apply è l'opzione che fa scrivere davvero; senza, è sempre una prova. La regola più importante è l'ultima: dopo un rifiuto, un agente brillante potrebbe provare un altro modo per ottenere lo stesso effetto. È esattamente ciò che una guardia non deve permettere, quindi il prompt lo vieta e il caso diventa una proposta. Il registro contiene identificativi e numeri, mai testi di mail. Le scritture atomiche evitano la corsa tra letture e modifiche."
+    notes: "Gli output a schermo sono inventati ma fedeli nella forma. Apply è l'opzione che fa scrivere davvero; senza, è sempre una prova. La regola più importante è l'ultima: dopo un rifiuto, un agente brillante potrebbe provare un altro modo per ottenere lo stesso effetto. È esattamente ciò che una guardia non deve permettere, quindi il prompt lo vieta e il caso diventa un handoff. Il registro contiene identificativi e numeri, mai testi di mail. Le scritture atomiche evitano la corsa tra letture e modifiche."
   },
   {
     block: B + 'Sicurezza',
@@ -995,7 +997,7 @@ const slides = [
         <ul>
           <li>Parti da un'attività di <strong>sola lettura</strong> e dalla mappa delle cause: l'automazione rende solo se le cause sono poche e leggibili nei dati.</li>
           <li>Scrivi la <strong>superficie d'azione</strong> (un eseguibile, sottocomandi noti, input in formato ristretto) prima del prompt.</li>
-          <li>Ogni scrittura ha prova a secco, <code className="nw">--apply</code>, registro e almeno tre test che rifiutano. Un rifiuto si riporta, non si aggira.</li>
+          <li>Ogni scrittura ha prova a secco, <code className="nw">--apply</code>, registro e almeno tre test che rifiutano. Un rifiuto diventa un handoff, non si aggira.</li>
           <li>L'agente prepara, la persona decide e invia; ciò che non può chiudere lo consegna, con un file e un avviso. Minori e dati personali: l'agente vede il minimo.</li>
           <li>Per la prompt injection in generale, torna all'argomento 6.</li>
         </ul>
