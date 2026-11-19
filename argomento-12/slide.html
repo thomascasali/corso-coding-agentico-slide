@@ -287,11 +287,11 @@ const STEPS = [
   ['1 Casella', 'richieste di assistenza', 'w'],
   ['2 Etichetta', 'filtro lato Gmail: solo le richieste', 'i'],
   ['3 Attività', 'programmata: un giro ogni 3 ore', ''],
-  ['4 Diagnosi', 'SOLA LETTURA sui dati reali', ''],
+  ['4 Diagnosi', 'SOLA LETTURA sui dati reali, allegati compresi', ''],
   ['5 Correzione', 'solo con guardie: prova a secco, poi apply (scrive davvero)', ''],
   ['6 Bozza', 'in Gmail, mai un invio', ''],
-  ['7 Persona', 'rilegge, sceglie il mittente, INVIA', 'w'],
-  ['8 Report', 'riepilogo su disco e notifica con numeri', 'i'],
+  ['7 Handoff', 'il caso che il giro non chiude: un file e un avviso su Telegram', ''],
+  ['8 Persona', 'rilegge, sceglie il mittente, INVIA; con la sessione principale chiude i casi consegnati', 'w'],
 ];
 function Pipeline() {
   const col = { w: 'var(--accent-2)', i: 'var(--muted)', '': 'var(--accent)' };
@@ -306,23 +306,23 @@ function Pipeline() {
   return (
     <div>
       <div className="svgwrap only-desk">
-        <svg viewBox="0 0 1000 312" role="img" aria-label="Pipeline dell'helpdesk: casella, etichetta, attività programmata, diagnosi in sola lettura; poi correzione con guardie, bozza, persona che invia, report">
+        <svg viewBox="0 0 1000 312" role="img" aria-label="Pipeline dell'helpdesk: casella, etichetta, attività programmata, diagnosi in sola lettura; poi correzione con guardie, bozza, handoff dei casi aperti, persona che invia">
           <defs><marker id="hd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" style={{ fill: 'var(--muted)' }} /></marker></defs>
           <text className="svt" x="8" y="22" fontSize="18" style={{ fill: 'var(--muted)' }}>INGRESSO E LETTURA</text>
           {box(10, 34, 215, 98, '1 Casella', ['richieste di', 'assistenza'], 'w')}
           {box(262, 34, 215, 98, '2 Etichetta', ['filtro lato Gmail:', 'solo le richieste'], 'i')}
           {box(514, 34, 215, 98, '3 Attività', ['programmata: un giro', 'ogni 3 ore'], '')}
-          {box(766, 34, 224, 98, '4 Diagnosi', ['SOLA LETTURA', 'sui dati reali'], '')}
+          {box(766, 34, 224, 98, '4 Diagnosi', ['SOLA LETTURA,', 'allegati compresi'], '')}
           {arrow(225, 83, 258, 83)}{arrow(477, 83, 510, 83)}{arrow(729, 83, 762, 83)}
           <path d="M878 132 L878 164 L118 164 L118 198" fill="none" style={{ stroke: 'var(--muted)', strokeWidth: 2 }} markerEnd="url(#hd)" />
           <text className="svt" x="140" y="190" fontSize="18" style={{ fill: 'var(--muted)' }}>AZIONE, BOZZA, DECISIONE</text>
           {box(10, 202, 215, 98, '5 Correzione', ['prova a secco,', 'poi apply: scrive'], '')}
           {box(262, 202, 215, 98, '6 Bozza', ['in Gmail,', 'mai un invio'], '')}
-          {box(514, 202, 215, 98, '7 Persona', ['rilegge, sceglie', 'il mittente, INVIA'], 'w')}
-          {box(766, 202, 224, 98, '8 Report', ['riepilogo su disco', 'e notifica con numeri'], 'i')}
+          {box(514, 202, 215, 98, '7 Handoff', ['caso aperto: un file', 'e un avviso Telegram'], '')}
+          {box(766, 202, 224, 98, '8 Persona', ['rilegge, INVIA,', 'decide i casi aperti'], 'w')}
           {arrow(225, 251, 258, 251)}{arrow(477, 251, 510, 251)}{arrow(729, 251, 762, 251)}
         </svg>
-        <p className="legend">Giallo: dove c'è una persona. Verde: lavoro dell'agente. Grigio chiaro: infrastruttura.</p>
+        <p className="legend">Giallo: dove c'è una persona. Verde: lavoro dell'agente. Grigio chiaro: infrastruttura. A fine giro il riepilogo va su disco, in una cartella locale privata.</p>
       </div>
       <ol className="steps only-mob" aria-label="Pipeline dell'helpdesk">
         {STEPS.map(([t, s, k]) => <li key={t} className={k}><b>{t}</b>: {s}</li>)}
@@ -351,7 +351,11 @@ allow:
   Bash(diagnosi logs <testo validato>)
   Bash(diagnosi fix <op> <valore validato>)
   Bash(diagnosi notify <1-999>)
+  Bash(diagnosi alert <nome file handoff>)
+  Bash(diagnosi allegati <id conversazione>)
   lettura e creazione di bozze, etichette
+  lettura e scrittura solo nella cartella
+  dei riepiloghi e degli handoff
 deny:
   accesso diretto al server, curl, rm, deploy,
   PowerShell, subagent, lettura di .env,
@@ -378,7 +382,27 @@ APPLICATA: 1 campo aggiornato, registro aggiornato
 
 $ diagnosi fix merge <id>
 RIFIUTATA: l'account da chiudere ha iscrizioni
--> non insistere, non cercare altre strade: va nel riepilogo`;
+-> non insistere, non cercare altre strade: si consegna (handoff)`;
+
+const HANDOFF = String.raw`# AAAA-MM-GG_HHMM_storico-da-collegare.md
+## Telegram
+Storico da collegare, società demo.
+Serve una scelta.
+## Thread
+<id della conversazione>
+## Problema
+Non vede i punti dell'anno scorso.
+## Diagnosi
+Storico presente con un'altra email.
+L'allegato (elenco tessere) conferma.
+La guardia di link ha rifiutato.
+## Da fare
+prova di link, backup, --apply, rilettura
+## Decisione per il responsabile
+Quale profilo tenere? A) il più vecchio
+B) quello con le iscrizioni
+## Bozza dopo la correzione
+Ciao <Nome>, ...`;
 
 const B = 'Argomento 12 — Helpdesk email in autopilota · ';
 
@@ -406,13 +430,13 @@ const slides = [
         <h2>Molte richieste, poche cause</h2>
         <p>Un'associazione con molti iscritti, in parte minorenni, riceve ogni giorno richieste di assistenza per email. Quasi tutte ricadono in poche cause ricorrenti, leggibili nei dati. Le risposte però arrivavano tardi, con diagnosi superficiali, e la correzione dei dati veniva <strong>dopo</strong> la risposta.</p>
         <div className="grid" style={{ marginTop: 8 }}>
-          <Card title="La soluzione"><p>Un giro automatico ogni 3 ore, dalle 8 alle 20.</p></Card>
+          <Card title="La soluzione"><p>Un giro automatico ogni 3 ore, dalle 8 alle 20. Regola d'oro: nessun caso resta senza seguito.</p></Card>
           <Card title="Cosa fa il giro" kind="i">
             <ol>
               <li>smista le richieste nuove</li>
               <li>trova la causa, in sola lettura</li>
               <li>corregge i casi ammessi</li>
-              <li>prepara la bozza</li>
+              <li>prepara la bozza, oppure consegna il caso a una persona</li>
               <li>lascia l'invio alla persona</li>
             </ol>
           </Card>
@@ -437,7 +461,7 @@ const slides = [
           <Stat big="0" label="mail inviate dall'agente" />
         </div>
         <Box title="Ordini di grandezza">
-          Le cifre vengono dai riepiloghi dei giri e dal registro delle correzioni: non sono una contabilità. Le righe RIFIUTATA contano anche lo stesso caso rilanciato. L'attività si è fermata due volte per un permesso senza risposta (circa 34 e 13 ore): ne parliamo tra le lezioni pagate.
+          Le cifre vengono dai riepiloghi dei giri e dal registro delle correzioni: non sono una contabilità. I numeri coprono nove giorni di inizio novembre, prima delle aggiunte raccontate più avanti. Le righe RIFIUTATA contano anche lo stesso caso rilanciato. L'attività si è fermata due volte per un permesso senza risposta (circa 34 e 13 ore): ne parliamo tra le lezioni pagate.
         </Box>
       </div>
     ),
@@ -475,26 +499,27 @@ const slides = [
         <Pipeline />
       </div>
     ),
-    notes: "Leggere il diagramma a serpentina. Casella di assistenza, inoltro a una casella personale dove un filtro applica un'etichetta. L'attività programmata parte ogni 3 ore, lavora in una cartella isolata e fa la diagnosi con uno strumento a riga di comando in sola lettura (accesso in sola lettura ai dati del servizio). Se serve, la correzione passa da un comando guardato: prima una prova a secco (non scrive), poi l'opzione --apply (scrive davvero). Poi la bozza (mai l'invio), il riepilogo su disco fuori dal repository, l'etichetta «Gestita» per non rileggere, la notifica con soli numeri. La persona rilegge la bozza, sceglie il mittente e invia. Sola lettura all'inizio, scrittura solo attraverso comandi con guardie, decisione finale a una persona."
+    notes: "Leggere il diagramma a serpentina. Casella di assistenza, inoltro a una casella personale dove un filtro applica un'etichetta. L'attività programmata parte ogni 3 ore, lavora in una cartella isolata e fa la diagnosi con uno strumento a riga di comando in sola lettura (accesso in sola lettura ai dati del servizio). Se serve, la correzione passa da un comando guardato: prima una prova a secco (non scrive), poi l'opzione --apply (scrive davvero). Poi la bozza (mai l'invio), il riepilogo su disco fuori dal repository, l'etichetta «Gestita» per non rileggere, e per i casi che il giro non può chiudere un file di handoff con un avviso su Telegram. La persona rilegge la bozza, sceglie il mittente e invia; con la sessione principale chiude i casi consegnati (slide sull'handoff). Sola lettura all'inizio, scrittura solo attraverso comandi con guardie, decisione finale a una persona."
   },
   {
     block: B + 'Architettura',
     content: () => (
       <div className="pad">
         <Tag>Il giro, passo per passo</Tag>
-        <h2>Sette passi, il primo costa quasi niente</h2>
+        <h2>Il primo passo costa quasi niente</h2>
         <DT cols={['Passo', 'Cosa fa']} rows={[
           ['0 · now', "ora italiana e flag di controllo errori; se non c'è nulla da fare, esce"],
           ['1 · raccolta', 'richieste con etichetta, non ancora gestite, ultimi 5 giorni; classe A (risolvibile dai dati), B (pratica di segreteria), C (rumore)'],
+          ['1-bis · allegati', 'copia locale validata di immagini e PDF della conversazione: l\'agente li guarda da solo'],
           ['2 · diagnosi', 'lettura in sola lettura, valori validati'],
           ['2-bis · correzione', <>comando guardato: prova a secco, poi <code className="nw">--apply</code> (applica davvero)</>],
           ['3 · bozza', 'bozza in Gmail con il connettore, mai un invio'],
-          ['4 · riepilogo', 'file in una cartella locale privata, mai nel repository'],
-          ['5-6 · chiusura', 'etichetta «Gestita», segna come lette, notifica con soli numeri'],
+          ['4 · riepilogo e handoff', 'riepilogo in una cartella locale privata, mai nel repository; un file di handoff per ogni caso che il giro non può chiudere'],
+          ['5-6 · chiusura', 'etichetta «Gestita» (e «Da fare» sui casi con handoff), segna come lette, avviso su Telegram con i casi aperti'],
         ]} />
       </div>
     ),
-    notes: "Il passo zero è un'ottimizzazione di costo: un giro a vuoto deve costare poco. La classificazione A/B/C evita di sprecare diagnosi sul rumore e di tentare di risolvere con i dati ciò che è una pratica amministrativa. La classe C alta è un segnale: la query pesca rumore. Le bozze si creano con il connettore Gmail di Claude, funzione create_draft (novembre 2026): il connettore non permette di scegliere il mittente, per questo lo sceglie la persona prima di inviare."
+    notes: "Il passo zero è un'ottimizzazione di costo: un giro a vuoto deve costare poco. La classificazione A/B/C evita di sprecare diagnosi sul rumore e di tentare di risolvere con i dati ciò che è una pratica amministrativa. La classe C alta è un segnale: la query pesca rumore. Gli allegati arrivano da una pipeline esterna all'agente (slide dedicata). L'handoff e l'avviso sono aggiunte del novembre 2026 (slide dedicate). Le bozze si creano con il connettore Gmail di Claude, funzione create_draft (novembre 2026): il connettore non permette di scegliere il mittente, per questo lo sceglie la persona prima di inviare."
   },
   {
     block: B + 'Il ciclo di miglioramento',
@@ -523,18 +548,18 @@ const slides = [
     content: () => (
       <div className="pad">
         <Tag>Livelli di autonomia</Tag>
-        <h2>Cosa fa da solo, cosa propone, cosa decide l'umano</h2>
+        <h2>Cosa fa da solo, cosa consegna, cosa decide l'umano</h2>
         <DT cols={['Livello', 'Cosa', 'Chi']} rows={[
-          ['Fa da solo', 'smista, diagnostica, prepara la bozza, etichetta, riepiloga, notifica con numeri', 'agente'],
+          ['Fa da solo', 'smista, diagnostica, prepara la bozza, etichetta, riepiloga, notifica con numeri, avvisa sui casi aperti', 'agente'],
           ['Da solo, con un comando guardato', 'correzioni di anagrafica, tesseramento, classifica, accesso, entro le guardie', 'agente, via fix'],
-          ['Propone', 'ciò che le guardie rifiutano o è fuori perimetro, descritto per essere eseguito subito', 'agente, poi sessione principale'],
+          ['Consegna (handoff)', 'ciò che le guardie rifiutano o è fuori perimetro: un file per caso, l\'etichetta «Da fare» e un avviso, così la sessione principale lo chiude subito', 'agente, poi sessione principale'],
           ['Decide solo l\'umano', 'invio delle risposte; iscrizioni alle gare, risultati, pagamenti; minori; account doppi con storico; togliere una guardia; deploy', 'responsabile'],
         ]} />
         <p className="muted">Sessione principale: la sessione di Claude Code in cui lavora la persona, distinta dal giro automatico.</p>
         <Box title="Il criterio">Come nell'argomento 11: più un'azione è irreversibile, più serve una decisione esplicita. Qui si automatizza ciò che è reversibile, verificabile con una seconda lettura e dimostrabile dai dati. Soldi, gare e minori no.</Box>
       </div>
     ),
-    notes: "Il perimetro è una decisione del responsabile presa a inizio novembre: i problemi di anagrafica, tesseramento, classifica e accesso si correggono prima di rispondere; la gestione delle gare resta una proposta. Collegare al principio visto nell'argomento 11: più un'azione è irreversibile e visibile fuori, più serve una decisione esplicita, senza rispiegarlo. Chiedere ai presenti di classificare nei quattro livelli tre azioni del loro lavoro, per esempio sbloccare un account, resettare una password, cancellare un profilo."
+    notes: "Il perimetro è una decisione del responsabile presa a inizio novembre: i problemi di anagrafica, tesseramento, classifica e accesso si correggono prima di rispondere; la gestione delle gare resta alla persona, e il giro la consegna con un handoff invece di lasciarla scritta nel riepilogo (come si faceva all'inizio: vedi il secondo caso di studio). Collegare al principio visto nell'argomento 11: più un'azione è irreversibile e visibile fuori, più serve una decisione esplicita, senza rispiegarlo. Il livello «Consegna» è il più giovane: prima si chiamava «propone» e non aveva un canale. Chiedere ai presenti di classificare nei quattro livelli tre azioni del loro lavoro, per esempio sbloccare un account, resettare una password, cancellare un profilo."
   },
   {
     block: B + 'Autonomia',
@@ -553,7 +578,57 @@ const slides = [
         <p className="muted">Guardie incrociate: nome e data di nascita li modifica chiunque dal proprio profilo, quindi non provano l'identità. Si incrocia con un dato che l'utente non cambia da solo: la tessera emessa da un ente terzo.</p>
       </div>
     ),
-    notes: "Qui si parla delle operazioni di fix, cioè dei casi di correzione guardata; i sottocomandi dello strumento sono altri e stanno nella slide sulla sicurezza (now, lookup, errors, logs, fix, notify). Leggere una riga alla volta e chiedere: quale guardia ferma un'impersonazione? Il punto tecnico è l'incrocio con una fonte che l'utente non controlla. Regola di processo: dopo una review, un'operazione nuova entra solo con la sua batteria di guardie, e se un caso si ripete si aggiunge un'operazione invece di correggere a mano ogni volta."
+    notes: "Qui si parla delle operazioni di fix, cioè dei casi di correzione guardata; i sottocomandi dello strumento sono altri e stanno nella slide sulla sicurezza (now, lookup, errors, logs, fix, notify, alert, allegati). Leggere una riga alla volta e chiedere: quale guardia ferma un'impersonazione? Il punto tecnico è l'incrocio con una fonte che l'utente non controlla. Regola di processo: dopo una review, un'operazione nuova entra solo con la sua batteria di guardie, e se un caso si ripete si aggiunge un'operazione invece di correggere a mano ogni volta."
+  },
+
+  {
+    block: B + 'Handoff',
+    content: () => (
+      <div className="pad">
+        <Tag>Handoff · il caso non si perde</Tag>
+        <h2>Cosa scrive l'agente quando passa la mano</h2>
+        <div className="cols">
+          <pre aria-label="Esempio inventato di file di handoff">{HANDOFF}</pre>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <Card title="Quando consegna" kind="w"><ul>
+              <li>una guardia ha rifiutato la correzione</li>
+              <li>il caso è fuori perimetro: gare, minori, account doppi con storico</li>
+              <li>serve una decisione che spetta al responsabile</li>
+            </ul></Card>
+            <Card title="Dove sta" kind="i"><p>Un file per caso, in una cartella locale privata. A lavoro chiuso passa da «aperti» a «fatti» con una sezione Esito: è anche lo storico per le metriche.</p></Card>
+            <Card title="Cosa chiude"><p>La sessione principale rilegge, ricontrolla i dati, pone le decisioni in una sola domanda, corregge con prova e backup, scrive la bozza.</p></Card>
+          </div>
+        </div>
+      </div>
+    ),
+    notes: "Il file è un esempio inventato, nel formato descritto dalla guida (novembre 2026): sette sezioni, una per caso. Il nome è data, ora e un'etichetta breve. Due regole: la sezione per l'avviso non contiene nomi, email o codici fiscali, solo categoria e società; la decisione per il responsabile è una domanda chiusa, con le opzioni, oppure «nessuna». Il punto di progetto: chi consegna deve mettere tutto ciò che serve per chiudere il caso in pochi minuti, compresa la bozza pronta per quando il lavoro è fatto. Un file per caso, non un riepilogo unico: un riepilogo lungo non si apre, un caso con un nome sì. Il comando che li chiude è un comando della sessione principale (un comando personalizzato di Claude Code, novembre 2026): https://code.claude.com/docs/en/slash-commands"
+  },
+  {
+    block: B + 'Avvisi e approvazioni',
+    content: () => (
+      <div className="pad">
+        <Tag>Avvisi e approvazioni</Tag>
+        <h2>Raggiungere la persona dove guarda</h2>
+        <div className="cols">
+          <Card title="Avviso · informa" kind="i"><ul>
+            <li>Un messaggio su Telegram con i casi aperti, senza bottoni.</li>
+            <li>Il comando accetta solo il nome di un file di handoff nel formato fisso, e ne legge la sola sezione «Telegram».</li>
+            <li>Destinatario e canale sono nel codice: l'agente non li sceglie.</li>
+            <li>Codici fiscali mascherati, testo tagliato.</li>
+          </ul></Card>
+          <Card title="Approvazione · decide" kind="w"><ul>
+            <li>Per un'azione difficile da annullare di un agente non presidiato.</li>
+            <li>L'agente prepara, chiede l'ok con un messaggio Approva/Annulla e si ferma.</li>
+            <li>Riprende solo con «approvato», sul testo esatto che la persona ha visto, entro un tempo limite.</li>
+            <li>Senza risposta la richiesta scade.</li>
+          </ul></Card>
+        </div>
+        <Box title="Dove sta il limite">
+          Nell'helpdesk i casi aperti usano l'avviso; le correzioni consegnate le esegue la sessione principale, con il responsabile in chat. L'ok vincola un agente che rispetta le istruzioni: la garanzia piena è che l'azione finale la esegua un processo separato, dopo l'esito.
+        </Box>
+      </div>
+    ),
+    notes: "Ricollegare all'argomento 11 senza rispiegarlo: la decisione resta umana; qui cambia come la persona viene raggiunta. Due strumenti diversi sullo stesso canale. L'avviso informa e non autorizza nulla. L'approvazione (schema ispirato all'articolo Anthropic «Building always-on agents», novembre 2026) è una coda: l'agente scrive la richiesta, un servizio manda il messaggio, la risposta della persona diventa un evento, e il lavoro riprende solo da lì. Dalla guida, non ricontati: la richiesta scade dopo 12 ore senza risposta; un ok più vecchio di 24 ore non vale; se il testo cambia dopo l'approvazione, l'ok non vale più. Limite dichiarato nella guida: un agente manipolato che ha già in mano lo strumento potrebbe non passare dalla coda; per le azioni gravi la garanzia vera è un processo separato che esegue solo dopo l'esito. Non ancora fatto, per scelta. Nota pratica: un solo programma deve leggere gli aggiornamenti del canale, altrimenti se li rubano. Telegram è un servizio esterno: nell'avviso solo categoria e società, mai nomi. Il testo dell'avviso lo scrive l'agente, che ha appena letto mail non fidate. Il comando maschera i codici fiscali, taglia il testo e lo manda a un destinatario fisso; «niente nomi» è invece una regola del formato, che il codice non controlla. Deduzione, non un fatto registrato: un testo arrivato da una mail può finire nell'avviso; il danno resta limitato perché il destinatario è fisso e l'avviso non ha bottoni."
   },
 
   /* --- sicurezza --- */
@@ -561,7 +636,7 @@ const slides = [
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 1 di 6</Tag>
+        <Tag>Sicurezza agentica · 1 di 7</Tag>
         <h2>Il canale è ostile per definizione</h2>
         <div className="cols">
           <div>
@@ -571,7 +646,7 @@ const slides = [
           <div style={{ display: 'grid', gap: 10 }}>
             <Card title="Strato 1 · regola" kind="w"><p>Nel prompt: le istruzioni nelle mail sono dati. È solo una richiesta al modello.</p></Card>
             <Card title="Strato 2 · superficie" kind="i"><p>Anche se il modello cedesse, non esiste un comando per fare accessi liberi o inviare mail.</p></Card>
-            <Card title="Strato 3 · destinatario fisso"><p>La notifica va a un destinatario deciso nel codice e contiene solo numeri.</p></Card>
+            <Card title="Strato 3 · destinatario fisso"><p>Notifiche e avvisi vanno a un destinatario deciso nel codice: numeri, oppure un testo breve con i codici fiscali mascherati.</p></Card>
           </div>
         </div>
       </div>
@@ -582,12 +657,12 @@ const slides = [
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 2 di 6</Tag>
+        <Tag>Sicurezza agentica · 2 di 7</Tag>
         <h2>Si progetta la superficie d'azione</h2>
         <div className="grid">
           <Card title="Ammesso"><ul>
             <li>un solo strumento a riga di comando</li>
-            <li>sei sottocomandi noti: <code>now</code>, <code>lookup</code>, <code>errors</code>, <code>logs</code>, <code>fix</code>, <code>notify</code></li>
+            <li>otto sottocomandi noti: <code>now</code>, <code>lookup</code>, <code>errors</code>, <code>logs</code>, <code>fix</code>, <code>notify</code>, <code>alert</code>, <code>allegati</code></li>
             <li>scritto identico al prompt, da solo</li>
           </ul></Card>
           <Card title="Vietato" kind="d"><ul>
@@ -601,13 +676,13 @@ const slides = [
         </Box>
       </div>
     ),
-    notes: "La superficie d'azione è l'insieme di tutto ciò che l'agente può fare. Restringerla significa passare da «ha una shell e gli diciamo di non fare danni» a «può lanciare sei comandi». Le composizioni sono vietate perché un permesso su un comando semplice non copre un comando composto: nella documentazione di Claude Code ogni parte del comando composto deve essere permessa (novembre 2026): https://code.claude.com/docs/en/permissions . Nella pratica un comando composto fa partire una richiesta di permesso: in un giro senza persona davanti il giro si ferma. Collegare alla prima riga della slide «Lezioni pagate»."
+    notes: "La superficie d'azione è l'insieme di tutto ciò che l'agente può fare. Restringerla significa passare da «ha una shell e gli diciamo di non fare danni» a «può lanciare otto comandi». Gli ultimi due, alert e allegati, sono arrivati con le aggiunte di novembre. Le composizioni sono vietate perché un permesso su un comando semplice non copre un comando composto: nella documentazione di Claude Code ogni parte del comando composto deve essere permessa (novembre 2026): https://code.claude.com/docs/en/permissions . Nella pratica un comando composto fa partire una richiesta di permesso: in un giro senza persona davanti il giro si ferma. Collegare alla prima riga della slide «Lezioni pagate»."
   },
   {
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 3 di 6</Tag>
+        <Tag>Sicurezza agentica · 3 di 7</Tag>
         <h2>Permessi: allow, deny e un hook</h2>
         <div className="cols">
           <pre aria-label="Schema semplificato dei permessi">{PERMESSI}</pre>
@@ -615,18 +690,18 @@ const slides = [
             <Box title="Una barriera in più">
               Allow e deny sono regole. In più si può mettere un hook PreToolUse (argomento 8) che ammette solo lo strumento di diagnosi e respinge tutto il resto: una barriera deterministica, che non dipende da cosa decide il modello.
             </Box>
-            <p className="muted" style={{ marginTop: 10 }}>I sei sottocomandi della slide precedente compaiono tutti nell'elenco allow, con il formato del valore ammesso.</p>
+            <p className="muted" style={{ marginTop: 10 }}>Gli otto sottocomandi della slide precedente compaiono tutti nell'elenco allow, con il formato del valore ammesso.</p>
           </div>
         </div>
       </div>
     ),
-    notes: "Lo schema a schermo è semplificato e inventato, non la configurazione reale: lo strumento qui si chiama «diagnosi». Gli hook sono controlli deterministici agganciati agli eventi di Claude Code (argomento 8): un hook PreToolUse può ammettere o negare una chiamata di strumento prima che parta (novembre 2026): https://code.claude.com/docs/en/hooks . Nel caso reale i controlli sono allow/deny e comandi fissi; l'hook è l'aggiunta che si può fare per avere un controllo che gira sempre, comunque risponda il modello."
+    notes: "Lo schema a schermo è semplificato e inventato, non la configurazione reale: lo strumento qui si chiama «diagnosi». Gli hook sono controlli deterministici agganciati agli eventi di Claude Code (argomento 8): un hook PreToolUse può ammettere o negare una chiamata di strumento prima che parta (novembre 2026): https://code.claude.com/docs/en/hooks . Il file delle impostazioni sta nella cartella isolata dell'attività. Nel caso reale i controlli sono allow/deny e comandi fissi; l'hook è l'aggiunta che si può fare per avere un controllo che gira sempre, comunque risponda il modello."
   },
   {
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 4 di 6</Tag>
+        <Tag>Sicurezza agentica · 4 di 7</Tag>
         <h2>Input validato con un formato ristretto</h2>
         <div className="cols">
           <div>
@@ -636,19 +711,19 @@ const slides = [
           <ul>
             <li>Identificativi: esattamente 24 caratteri esadecimali.</li>
             <li>Testo da cercare nei log: lettere, cifre, spazi e pochi simboli, 3-80 caratteri.</li>
-            <li><code>notify</code> accetta solo interi di 1-3 cifre: il testo lo compone il comando.</li>
+            <li><code>notify</code> accetta solo interi di 1-3 cifre: il testo lo compone il comando. <code>alert</code> accetta solo il nome di un file di handoff nel formato fisso; <code>allegati</code> solo un identificativo esadecimale.</li>
             <li>Il codice delle correzioni non lo scrive l'agente: il comando legge un file fisso e lo esegue sul servizio. I parametri viaggiano come JSON in una variabile d'ambiente, mai dentro una shell.</li>
           </ul>
         </div>
       </div>
     ),
-    notes: "Il codice a schermo è una versione semplificata e inventata. Il principio: elenco di ciò che è ammesso (formato ristretto), non elenco di ciò che è vietato. Un blocco di caratteri vietati si dimentica sempre qualcosa. Il comando notify mostra la forma estrema: l'agente passa un numero e il testo del messaggio non è controllato da chi scrive la mail. Un valore ostile viene respinto e non corretto: la correzione automatica di un input ostile è un'altra superficie d'attacco."
+    notes: "Il codice a schermo è una versione semplificata e inventata. Il principio: elenco di ciò che è ammesso (formato ristretto), non elenco di ciò che è vietato. Un blocco di caratteri vietati si dimentica sempre qualcosa. Il comando notify mostra la forma estrema: l'agente passa un numero e il testo del messaggio non è controllato da chi scrive la mail. Alert e allegati seguono lo stesso principio: un nome di file in formato fisso, un identificativo esadecimale. Un valore ostile viene respinto e non corretto: la correzione automatica di un input ostile è un'altra superficie d'attacco."
   },
   {
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 5 di 6</Tag>
+        <Tag>Sicurezza agentica · 5 di 7</Tag>
         <h2>Guardie, prova a secco, apply, registro</h2>
         <pre aria-label="Esempio di esiti inventati dei comandi di correzione">{PROVA}</pre>
         <div className="grid">
@@ -665,7 +740,7 @@ const slides = [
     block: B + 'Sicurezza',
     content: () => (
       <div className="pad">
-        <Tag>Sicurezza agentica · 6 di 6</Tag>
+        <Tag>Sicurezza agentica · 6 di 7</Tag>
         <h2>Segreti, isolamento, ciò che non si fida</h2>
         <div className="grid g2">
           <Card title="Segreti fuori dal contesto"><p>Il prompt vieta di leggere i file di contesto e le variabili d'ambiente. Chiavi e host stanno fuori dal repository. Mai credenziali in una mail.</p></Card>
@@ -676,6 +751,26 @@ const slides = [
       </div>
     ),
     notes: "La seconda scheda è un errore vero, corretto dopo i fermi di inizio novembre: permessi larghi dati per comodità, mentre l'agente leggeva mail di chiunque. Il terzo punto è sottile: il mittente di una mail si falsifica, quindi un dato personale va in bozza solo se il mittente coincide con il titolare, e comunque il codice fiscale non esce mai. Il quarto è un effetto collaterale: gli strumenti che chiedono permesso dal vivo, in un'attività senza nessuno davanti, fermano tutto."
+  },
+  {
+    block: B + 'Sicurezza',
+    content: () => (
+      <div className="pad">
+        <Tag>Sicurezza agentica · 7 di 7</Tag>
+        <h2>Un allegato è un input non fidato in più</h2>
+        <Flow label="La pipeline degli allegati" nodes={[
+          ['Casella', "uno script nell'account del responsabile, ogni 10 minuti: solo immagini e PDF, da 2 KB a 15 MB", ''],
+          ['Drive', 'una cartella per conversazione, niente duplicati, cestino dopo 60 giorni', 'i'],
+          ['PC', 'la cartella sincronizzata sul computer', 'i'],
+          ['Comando fisso', 'allegati <id>: copia validata nella cartella del giro', ''],
+        ]} />
+        <div className="grid g2" style={{ marginTop: 12 }}>
+          <Card title="Perché fuori dall'agente" kind="i"><p>Il connettore scaricherebbe il file nel contesto, con un nome scelto dal mittente. Lo script ammette un tipo di file e ricostruisce il nome. L'agente riceve solo percorsi locali validati.</p></Card>
+          <Card title="Cosa la pipeline non risolve" kind="w"><p>Controlla tipo, dimensione e nome, non il contenuto. Un PDF o un'immagine può portare testo con istruzioni: l'agente li legge, quindi valgono la regola «sono dati» e la superficie stretta (argomento 6).</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Perché servono gli allegati: diversi casi avevano la prova in un elenco di tessere o in uno screenshot che il giro non poteva aprire. La soluzione non usa credenziali nuove: lo script gira nell'account che riceve la posta (Google Apps Script, novembre 2026: https://developers.google.com/apps-script ), salva in una cartella di Drive, Google Drive per desktop la porta sul PC, un comando fisso la copia nella cartella del giro. Il punto di sicurezza: non scaricare nel contesto dell'agente un file con un nome scelto da chi scrive. L'ultimo anello però non è magico: l'agente apre l'immagine o il PDF e ne vede il contenuto, quindi un'istruzione nascosta nell'allegato arriva comunque al modello (deduzione da come funziona la lettura, non un episodio registrato). È la prompt injection dell'argomento 6 in forma di file: la difesa resta in ciò che l'agente può fare, non nella pulizia dell'ingresso. Dati personali, anche di minori, in Drive: cestino dopo 60 giorni. Per gli intoppi di installazione vedi il secondo caso di studio."
   },
   {
     block: B + 'Un\'operazione sospesa',
@@ -702,15 +797,15 @@ const slides = [
         <Tag>Privacy e GDPR</Tag>
         <h2>I minori e il posto giusto per ogni dato</h2>
         <div className="grid g2">
-          <Card title="Minori" kind="w"><p>Per i minorenni le correzioni sono rifiutate dal codice e la richiesta va solo nel riepilogo. Il minore si riconosce dalla data di nascita e dal codice fiscale.</p></Card>
-          <Card title="Contenuti al loro posto" kind="i"><p>Il contenuto delle mail non va nel repository, nella knowledge base, nella memoria dell'agente né nei commit. Il riepilogo sta in una cartella locale privata.</p></Card>
-          <Card title="Minimizzazione"><p>La lettura restituisce solo i campi utili; il codice fiscale non esce mai; la notifica ha numeri; il registro ha identificativi, non testi.</p></Card>
-          <Card title="Terze parti"><p>Se il modello è ospitato da un fornitore, i dati letti passano da lì: informativa e accordo vanno valutati prima di estendere il sistema.</p></Card>
+          <Card title="Minori" kind="w"><p>Per i minorenni le correzioni sono rifiutate dal codice e il caso passa a una persona. Il minore si riconosce dalla data di nascita e dal codice fiscale.</p></Card>
+          <Card title="Contenuti al loro posto" kind="i"><p>Il contenuto delle mail non va nel repository, nella knowledge base, nella memoria dell'agente né nei commit. Riepiloghi e handoff stanno in una cartella locale privata.</p></Card>
+          <Card title="Minimizzazione"><p>La lettura restituisce solo i campi utili; il codice fiscale non esce mai; la notifica ha numeri; l'avviso ha categoria e società, mai nomi (regola del formato; i codici fiscali li maschera il comando); il registro ha identificativi, non testi.</p></Card>
+          <Card title="Terze parti"><p>Se il modello è ospitato da un fornitore, i dati letti passano da lì; vale anche per il canale degli avvisi e per la cartella degli allegati. Informativa e accordo vanno valutati prima di estendere il sistema.</p></Card>
         </div>
         <Box title="A scuola vale di più">Dati di alunni e famiglie non vanno in strumenti non approvati dall'istituto. L'agente vede il minimo e propone, non decide.</Box>
       </div>
     ),
-    notes: "Questa lezione stessa segue la regola: nessuna mail, nessun nome, nessun identificativo, solo schemi e numeri aggregati, esempi inventati. Il punto sulle terze parti è importante per una scuola: prima di usare un servizio esterno con dati di minori serve il passaggio con il responsabile della protezione dei dati."
+    notes: "Questa lezione stessa segue la regola: nessuna mail, nessun nome, nessun identificativo, solo schemi e numeri aggregati, esempi inventati. Anche gli allegati portano dati personali: vanno nel cestino dopo 60 giorni. Il punto sulle terze parti è importante per una scuola: prima di usare un servizio esterno con dati di minori serve il passaggio con il responsabile della protezione dei dati."
   },
 
   /* --- lezioni pagate --- */
@@ -738,21 +833,21 @@ const slides = [
         <h2>L'ordine delle operazioni è una scelta di qualità</h2>
         <div className="grid">
           <Card title="Prima" kind="w"><p>Diagnosi, bozza di «abbiamo preso in carico», correzione dopo. La persona riceveva una promessa, non un risultato, e la diagnosi poteva essere superficiale.</p></Card>
-          <Card title="Dopo" kind="i"><p>Lettura, correzione guardata, nuova lettura, poi la bozza: racconta una situazione già sistemata. Se serve una decisione umana, solo «presa in carico».</p></Card>
+          <Card title="Dopo" kind="i"><p>Lettura, correzione guardata, nuova lettura, poi la bozza: racconta una situazione già sistemata. Se serve una decisione umana, il caso passa in handoff con la bozza vera già scritta, pronta per quando il lavoro è fatto.</p></Card>
           <Card title="Perché conta"><p>La lettura mostra segnali che una lettura veloce non vede, per esempio «storico NON COLLEGATO». Un testo cortese ma sbagliato è peggio di una risposta più lenta.</p></Card>
         </div>
         <Box title="Operazione nuova">Dopo ogni review, una nuova operazione entra solo con la sua batteria di guardie. Se un caso si ripete, si aggiunge un'operazione: non si corregge a mano ogni volta.</Box>
       </div>
     ),
-    notes: "Ricordare la differenza tra cortese e preciso: in un caso la prima versione scriveva «non risulta nessun altro profilo» ma lo storico esisteva sotto un'altra email. La causa vera si trova con la lettura. Le bozze rispettano anche le regole di stile del responsabile: saluto fisso, testo semplice, frasi brevi, firma di gruppo, solo fatti verificati."
+    notes: "Ricordare la differenza tra cortese e preciso: in un caso la prima versione scriveva «non risulta nessun altro profilo» ma lo storico esisteva sotto un'altra email. La causa vera si trova con la lettura. A novembre si è aggiunto un secondo vincolo: una risposta di sola cortesia («abbiamo preso in carico») non basta, perché rimanda il lavoro; il caso deve avere un seguito, cioè l'handoff. Le bozze rispettano anche le regole di stile del responsabile: saluto fisso, testo semplice, frasi brevi, firma di gruppo, solo fatti verificati."
   },
 
   /* --- il caso --- */
   {
-    block: B + 'Il caso di novembre',
+    block: B + 'Primo caso di studio',
     content: () => (
       <div className="pad">
-        <Tag>Il caso di novembre</Tag>
+        <Tag>Primo caso di studio · novembre</Tag>
         <h2>Dal giro all'approvazione</h2>
         <ul className="timeline">
           <li><strong>1 ·</strong> Il giro aveva già diagnosticato quattro casi e proposto le correzioni.</li>
@@ -768,6 +863,25 @@ const slides = [
     notes: "Il caso mette insieme quasi tutto: tre ruoli (il giro che propone, la sessione principale che coordina, un agente devops che esegue con backup), la persona che approva e invia. Il rifiuto è il momento centrale: l'azione sembrava ovvia ma la guardia ha visto un'iscrizione e ha riportato la decisione a una persona. Sul punto cinque: una soglia di similarità da sola è una scorciatoia, per questo si chiede una prova indipendente. Nessun dato personale: i casi sono descritti solo per tipo."
   },
   {
+    block: B + 'Secondo caso di studio',
+    content: () => (
+      <div className="pad">
+        <Tag>Secondo caso di studio · novembre</Tag>
+        <h2>Dai casi fermi al sistema completo</h2>
+        <ul className="timeline">
+          <li><strong>1 · Sintomo.</strong> «I giri non producono bozze». Non era un guasto: otto casi ben diagnosticati, scritti come proposta in un riepilogo che nessuno apriva, fermi un giorno intero.</li>
+          <li><strong>2 · I casi.</strong> La sessione principale li ha chiusi: due dati anagrafici corretti con backup, una classifica ricalcolata su decisione del responsabile, una modifica al codice per le tessere di chi non ha un identificativo fiscale italiano (test, review, deploy), nove bozze. Le decisioni, in una sola domanda con opzioni.</li>
+          <li><strong>3 · Il processo.</strong> Handoff in file, avviso su Telegram, etichetta «Da fare», un comando che chiude i casi sempre allo stesso modo.</li>
+          <li><strong>4 · I limiti.</strong> Gli allegati, che bloccavano più casi. Due intoppi: Drive non scendeva sul PC nella cartella scelta, e il primo giro dello script ha creato cartelle doppie. Rimedio: salvare dove il PC sincronizza davvero, cache per esecuzione, blocco contro i giri sovrapposti, tetto di tempo.</li>
+        </ul>
+        <Box title="Da tenere presente">
+          Il sistema nuovo non ha ancora numeri: quelli di questa lezione coprono nove giorni di inizio novembre. Gli avvisi passano da un servizio esterno. Il contenuto degli allegati resta un input non fidato.
+        </Box>
+      </div>
+    ),
+    notes: "Raccontare in modo sobrio, senza eroismi: il sistema funzionava e aveva un buco. Il sintomo era una frase del responsabile, non un errore in un registro: un agente autonomo può fallire in silenzio, producendo un lavoro che nessuno legge. La lezione, dalla guida (novembre 2026): un agente autonomo non deve solo fare bene il suo pezzo, deve consegnare ciò che non sa fare a qualcuno che sicuramente lo vedrà, con tutto il necessario per chiuderlo in pochi minuti. Livelli di intervento: i casi (dati e codice), il processo (handoff, avviso, comando), i limiti (allegati). Il punto sulle decisioni in una sola domanda: chiedere una alla volta fa perdere la giornata. Gli intoppi di Drive e delle cartelle doppie sono due lezioni piccole: verificare dove scende davvero la sincronizzazione, e ricordare che un servizio non vede subito ciò che ha appena creato, quindi serve una cache per esecuzione, più un blocco contro i giri sovrapposti. Date, nomi e strumenti interni sono volutamente generici."
+  },
+  {
     block: B + 'I limiti',
     content: () => (
       <div className="pad">
@@ -779,20 +893,21 @@ const slides = [
             <li>non tocca gare, iscrizioni, pagamenti</li>
             <li>non corregge profili di minori</li>
             <li>non fa deploy né modifica il codice</li>
-            <li>nei casi ambigui li riporta</li>
+            <li>nei casi ambigui li consegna a una persona</li>
           </ul></Card>
           <Card title="Metriche utili" kind="i"><ul>
             <li>richieste per giro e per classe (A, B, C)</li>
             <li>correzioni applicate, proposte, rifiutate</li>
             <li>tempo dalla richiesta alla bozza</li>
             <li>giri a vuoto: devono costare quasi niente</li>
+            <li>casi consegnati e tempo per chiuderli</li>
             <li>bozze riscritte dall'umano, a campione</li>
           </ul></Card>
         </div>
         <Box title="Non è un sistema di sicurezza">Le guardie riducono il rischio, non lo azzerano. Si riesaminano a ogni caso nuovo.</Box>
       </div>
     ),
-    notes: "Chiudere la parte tecnica con una frase onesta: nessuna guardia è definitiva. Tra le metriche, la più indicativa è «troppi rifiuti per la stessa causa»: o la guardia è troppo stretta, o è un caso nuovo da automatizzare con un'operazione nuova. Un'altra è il numero di bozze che la persona deve riscrivere: misura la qualità del tono e dei fatti."
+    notes: "Chiudere la parte tecnica con una frase onesta: nessuna guardia è definitiva. Tra le metriche, la più indicativa è «troppi rifiuti per la stessa causa»: o la guardia è troppo stretta, o è un caso nuovo da automatizzare con un'operazione nuova. Un'altra è il numero di casi consegnati ancora aperti dopo un giorno. Un'altra è il numero di bozze che la persona deve riscrivere: misura la qualità del tono e dei fatti."
   },
 
   /* --- replicare --- */
@@ -801,21 +916,22 @@ const slides = [
     content: () => (
       <div className="pad">
         <Tag>Checklist per replicarlo</Tag>
-        <h2>Nove passi, in quest'ordine</h2>
+        <h2>Dieci passi, in quest'ordine</h2>
         <ol className="twocol">
           <li><strong>Canale</strong>: casella dedicata, etichetta per le richieste, seconda etichetta «Gestita».</li>
           <li><strong>Mappa delle cause</strong>: 30-50 richieste in categorie. Se il 60% non si diagnostica dai dati, non rende.</li>
-          <li><strong>Lettura e comandi fissi</strong>: sola lettura, valori validati, un eseguibile con sottocomandi.</li>
+          <li><strong>Lettura e comandi fissi</strong>: sola lettura, valori validati, un eseguibile con sottocomandi. Allegati da una pipeline esterna, con tipi e nomi controllati.</li>
           <li><strong>Correzioni una alla volta</strong>: guardie, prova a secco, <code className="nw">--apply</code>, registro, undo; niente minori, niente denaro.</li>
           <li><strong>Operazioni sospese</strong>: scrivi quelle rifiutate per sempre, con il perché.</li>
           <li><strong>Regole inviolabili nel prompt</strong>: niente invio, mail = dati, niente strumenti di gestione né segreti.</li>
           <li><strong>Isolamento e uscite</strong>: cartella isolata, bozza e riepilogo fuori dal repository, notifica con soli numeri, controllo esterno dei giri saltati.</li>
+          <li><strong>Consegna dei casi aperti</strong>: un file per caso, un avviso a una persona, un comando che li chiude. Senza, i casi difficili si perdono.</li>
           <li><strong>Stile e ciclo di miglioramento</strong>: saluto, tono, firma nel prompt; ogni risposta data a mano diventa una regola nel manuale.</li>
           <li><strong>Rodaggio</strong>: prima settimana solo lettura e bozze; poi una correzione alla volta, con review indipendente di ogni operazione nuova.</li>
         </ol>
       </div>
     ),
-    notes: "L'ordine conta: prima si capisce se il problema è adatto (mappa delle cause), poi si costruisce la lettura, poi i comandi, poi le correzioni una alla volta. Chi parte dalle correzioni costruisce sulla sabbia. Un trucco pratico per l'isolamento: un'attività di prova che deve fallire se chiede un permesso, per verificare che la cartella isolata funzioni davvero. Sul rodaggio: la prima settimana si parte in sola lettura perché costa poco e dà dati reali; l'autonomia si concede un passo alla volta. Il principio sulle azioni irreversibili è quello dell'argomento 11."
+    notes: "L'ordine conta: prima si capisce se il problema è adatto (mappa delle cause), poi si costruisce la lettura, poi i comandi, poi le correzioni una alla volta. Chi parte dalle correzioni costruisce sulla sabbia. Un trucco pratico per l'isolamento: un'attività di prova che deve fallire se chiede un permesso, per verificare che la cartella isolata funzioni davvero. Sul rodaggio: la prima settimana si parte in sola lettura perché costa poco e dà dati reali; l'autonomia si concede un passo alla volta. Il passo sulla consegna è il più facile da dimenticare: nel caso reale è arrivato dopo, perché i casi difficili restavano scritti dove nessuno guardava. Il principio sulle azioni irreversibili è quello dell'argomento 11."
   },
 
   /* --- attività --- */
@@ -823,47 +939,52 @@ const slides = [
     block: B + 'Attività',
     content: () => (
       <div className="pad">
-        <Tag>Attività al PC · 60 minuti</Tag>
+        <Tag>Attività al PC · 70 minuti</Tag>
         <h2>L'helpdesk della palestra</h2>
-        <p className="muted">Si lavora sulla palestra comune del corso: la piccola app di prenotazione dei laboratori, in Node.js. Dati inventati; anche le mail ostili usano indirizzi <code>@demo.invalid</code>.</p>
-        <div className="grid g2">
+        <p className="muted">Palestra comune: l'app di prenotazione dei laboratori, in Node.js. Dati inventati; anche le mail ostili usano <code>@demo.invalid</code>. Per chi finisce prima: tre operazioni da sospendere per sempre, con il perché.</p>
+        <div className="grid g3">
           <Card title="A · Mappa delle cause (10 min)">
-            <p>Fatevi generare 30 richieste inventate di docenti sulle prenotazioni e dividetele in categorie. Quante si diagnosticano dai dati? Quali sono rumore?</p>
+            <p>Fatevi generare 30 richieste inventate sulle prenotazioni e dividetele in categorie. Quante si diagnosticano dai dati? Quali sono rumore?</p>
           </Card>
           <Card title="B · Superficie d'azione (15 min)" kind="i">
             <p>Elencate i sottocomandi di un unico strumento: lettura o scrittura, formato dell'input, cosa è vietato. Poi lo schema allow e deny.</p>
           </Card>
           <Card title="C · Un comando che rifiuta (25 min)" kind="w">
-            <p>Partite da <code className="nw">partenza-a12</code>: <code>annulla-prenotazione</code> c'è già, incompleto. Senza opzioni è una prova a secco, con <code className="nw">--apply</code> scrive. Prima completate i test che rifiutano: prenotazione altrui, passata, valore malformato.</p>
+            <p>Da <code className="nw">partenza-a12</code>: <code>annulla-prenotazione</code> c'è già, incompleto. Senza opzioni è prova a secco, con <code className="nw">--apply</code> scrive. Prima i test che rifiutano: prenotazione altrui, passata, valore malformato.</p>
           </Card>
           <Card title="D · Attacco (10 min)">
-            <p>Scrivete tre mail ostili inventate. Per ognuna: quale strato la ferma?</p>
+            <p>Scrivete tre mail ostili inventate, una con un allegato che contiene istruzioni. Per ognuna: quale strato la ferma?</p>
+          </Card>
+          <Card title="E · Consegna (10 min)" kind="i">
+            <p>Il caso rifiutato in C: scrivete il file di handoff, con le sezioni della slide, una decisione chiusa e la bozza pronta. Poi: serve un avviso o un'approvazione?</p>
           </Card>
         </div>
-        <Box title="Per chi finisce prima">Elencate tre operazioni da sospendere per sempre e il perché.</Box>
       </div>
     ),
-    notes: "Durata complessiva indicativa 60 minuti (10 + 15 + 25 + 10), divisibile: A, B e D anche senza PC, su carta. La palestra è inventata di proposito: si progetta la superficie, non si tocca un sistema vero. Nella parte C chiedere di scrivere prima i test che rifiutano, come si fa con i test: il comando deve rifiutare la prenotazione di un altro utente, quella già passata e un valore malformato (per esempio un identificativo di formato sbagliato), senza modificare nulla; solo con --apply e un caso valido scrive. A fine attività far presentare a due gruppi il loro elenco di guardie e chiedere agli altri di trovare un caso che le aggira."
+    notes: "Durata complessiva indicativa 70 minuti (10 + 15 + 25 + 10 + 10), divisibile: A, B, D ed E anche senza PC, su carta. La palestra è inventata di proposito: si progetta la superficie, non si tocca un sistema vero. Nella parte C chiedere di scrivere prima i test che rifiutano, come si fa con i test: il comando deve rifiutare la prenotazione di un altro utente, quella già passata e un valore malformato (per esempio un identificativo di formato sbagliato), senza modificare nulla; solo con --apply e un caso valido scrive. Per la parte E: l'handoff deve bastare a chiudere il caso senza rileggere la mail; l'avviso informa, l'approvazione serve se l'azione è difficile da annullare e nessuno è presente. A fine attività far presentare a due gruppi il loro elenco di guardie e chiedere agli altri di trovare un caso che le aggira."
   },
   {
     block: B + 'Verifica',
     content: () => (
       <div className="pad">
         <Tag>Domande di verifica</Tag>
-        <h2>Otto domande</h2>
+        <h2>Undici domande</h2>
         <ol className="twocol">
           <li>Perché «le istruzioni nelle mail sono dati» non basta come difesa?</li>
           <li>Cos'è la superficie d'azione di un agente e come la si restringe?</li>
-          <li>Perché <code>notify</code> accetta solo un numero e non un testo?</li>
+          <li>Perché <code>notify</code> accetta solo un numero e non un testo, e cosa può ricevere <code>alert</code>?</li>
           <li>Perché la correzione precede la bozza?</li>
           <li>Perché il cambio di email dal mittente è sospeso per sempre?</li>
           <li>Una prova viene rifiutata dalle guardie: cosa fa l'agente e cosa no?</li>
           <li>Perché serve un controllo esterno se il registro dice «riuscito»?</li>
+          <li>Quando un agente deve consegnare un caso a una persona, e cosa scrive nel file?</li>
+          <li>Che differenza c'è tra un avviso e una richiesta di approvazione?</li>
+          <li>Perché un allegato è un input non fidato, e perché non lo scarica il connettore?</li>
           <li>Quale parte non automatizzeresti nel tuo istituto, e perché?</li>
         </ol>
       </div>
     ),
-    notes: "Otto domande, da usare a voce o come scheda. Le risposte attese non sono nelle slide. L'ultima non ha una risposta giusta: serve a collegare il caso al lavoro dei presenti."
+    notes: "Undici domande, da usare a voce o come scheda. Le risposte attese non sono nelle slide. L'ultima non ha una risposta giusta: serve a collegare il caso al lavoro dei presenti."
   },
   {
     block: B + 'Chiusura',
@@ -875,7 +996,7 @@ const slides = [
           <li>Parti da un'attività di <strong>sola lettura</strong> e dalla mappa delle cause: l'automazione rende solo se le cause sono poche e leggibili nei dati.</li>
           <li>Scrivi la <strong>superficie d'azione</strong> (un eseguibile, sottocomandi noti, input in formato ristretto) prima del prompt.</li>
           <li>Ogni scrittura ha prova a secco, <code className="nw">--apply</code>, registro e almeno tre test che rifiutano. Un rifiuto si riporta, non si aggira.</li>
-          <li>L'agente prepara, la persona decide e invia. Minori e dati personali: l'agente vede il minimo.</li>
+          <li>L'agente prepara, la persona decide e invia; ciò che non può chiudere lo consegna, con un file e un avviso. Minori e dati personali: l'agente vede il minimo.</li>
           <li>Per la prompt injection in generale, torna all'argomento 6.</li>
         </ul>
         <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
