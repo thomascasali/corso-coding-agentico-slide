@@ -130,28 +130,6 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </ul>
 <p>Le slide di ogni argomento sono in <code>../../argomento-N/slide.html</code>; i fogli per le attività in <code>../argomento-N/index.html</code>.</p>
 <hr />
-<h2 id="argomento-0-il-racconto-facoltativo">Argomento 0: il racconto (facoltativo)</h2>
-<p>Prima di questo argomento: niente. Aiutano gli argomenti 1 e 3.</p>
-<p><strong>L'idea.</strong> Il primo messaggio con cui è nato un portale della scuola, letto a pezzi, e il lavoro che ne è seguito. Si vede che cosa fa un agente dopo un messaggio corto (legge i documenti allegati, chiede con alternative, scrive la specifica, aspetta l'approvazione, poi scrive il codice) e che cosa il messaggio non diceva: come controllare il risultato. Per quello sono serviti test, un revisore e il collaudo. Il comando <code>/goal</code> dichiara un obiettivo per la sessione: quando l'agente prova a fermarsi, la condizione viene valutata e il lavoro riprende se non è soddisfatta. La condizione però era il testo del prompt, cioè una direzione più che un criterio verificabile.</p>
-<p><strong>Comandi e file.</strong> L'attività parte da una cartella vuota, con l'agente in modalità piano. Un comando per volta:</p>
-<pre><code class="language-powershell">mkdir prova-prompt
-</code></pre>
-<pre><code class="language-powershell">cd prova-prompt
-</code></pre>
-<pre><code class="language-powershell">claude --permission-mode plan
-</code></pre>
-<p>Se non parte in modalità piano, <code>Maiusc+Tab</code> fa girare le modalità finché compare "plan". In OpenCode il tasto <code>Tab</code> passa all'agente di piano. I testi da incollare (il primo messaggio, il regolamento inventato, la scheda del proprio progetto) sono nel foglio dei materiali.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Lavorare fuori da una cartella nuova: la prova si fa in una cartella senza file.</li>
-<li>Leggere solo il riassunto dell'agente: si contano le domande che fa e si distingue tra quelle sui documenti e quelle sulle scelte.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-0/slide.html">Slide</a> · <a href="../argomento-0/index.html">fogli dell'argomento</a></li>
-<li>Memoria di Claude Code: <a href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a> (consultata il 9/11/2026)</li>
-</ul>
-<hr />
 <h2 id="argomento-1-chatbot-completamento-agente">Argomento 1: chatbot, completamento, agente</h2>
 <p>Prima di questo argomento: niente.</p>
 <p><strong>L'idea.</strong> Un chatbot lavora su ciò che gli porti; il completamento propone la riga successiva nel file aperto; un agente ha accesso al progetto e a un terminale, esegue comandi e legge gli esiti. Un agente è un modello, degli strumenti e un ciclo: osserva, pianifica, agisce, verifica, e se qualcosa non torna ricomincia. Vede solo ciò che entra nel contesto: i file che legge, l'output dei comandi, le istruzioni di progetto, la conversazione, lo stato di git. Per l'agente un'istruzione scritta è un fatto, finché qualcosa non la smentisce. La finestra di contesto si riempie; quando è piena Claude Code compatta la conversazione in un riassunto.</p>
@@ -215,658 +193,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <li>Modalità di permesso: <a href="https://code.claude.com/docs/en/permission-modes">https://code.claude.com/docs/en/permission-modes</a> (9/11/2026)</li>
 </ul>
 <hr />
-<h2 id="argomento-2-git-come-rete-di-sicurezza">Argomento 2: Git come rete di sicurezza</h2>
-<p>Prima di questo argomento: argomento 1.</p>
-<p><strong>L'idea.</strong> Un agente può toccare dieci file con una richiesta e riferirne tre a parole. Il riassunto non è una prova: lo stato del repository sì. Le zone di Git sono tre: cartella di lavoro (dove scrive l'agente), area di preparazione (ciò che entra nel prossimo commit) e repository (i commit). Prima di accettare un lavoro si legge <code>git status</code> e <code>git diff</code>; i test verdi non dicono nulla sulle modifiche che nessun test copre, e l'agente può adattare i test alle proprie modifiche. Un commit per ogni passo verificato, con i file aggiunti per nome. Un ramo per ogni lavoro: su quel ramo l'agente può sbagliare quanto vuole e <code>main</code> resta com'era.</p>
-<p><strong>Comandi e file.</strong> Uno per riquadro.</p>
-<pre><code class="language-powershell">git status
-</code></pre>
-<pre><code class="language-powershell">git diff
-</code></pre>
-<pre><code class="language-powershell">git diff --staged
-</code></pre>
-<pre><code class="language-powershell">git diff --stat
-</code></pre>
-<p>Per confrontare con il ramo di partenza: <code class="cmd">git diff main</code>. Un file nuovo, mai aggiunto a Git, non compare in <code>git diff</code>: si trova con <code>git status</code>.</p>
-<p>Salvare con i nomi dei file:</p>
-<pre><code class="language-powershell">git add src/logica.js test/logica.test.js
-</code></pre>
-<pre><code class="language-powershell">git commit -m &quot;Elenco: filtro per laboratorio&quot;
-</code></pre>
-<p>Un ramo di lavoro, e il ritorno al ramo di partenza:</p>
-<pre><code class="language-powershell">git switch -c lavoro-filtro
-</code></pre>
-<pre><code class="language-powershell">git switch main
-</code></pre>
-<p>Tornare indietro, con il file sempre nominato:</p>
-<pre><code class="language-powershell">git restore src/logica.js
-</code></pre>
-<pre><code class="language-powershell">git revert &lt;ID del commit&gt;
-</code></pre>
-<p>La palestra ha punti di partenza fissi, uno per argomento (tag <code>partenza-aN</code>):</p>
-<pre><code class="language-powershell">git switch -c lavoro-a2 partenza-a2
-</code></pre>
-<p>Per un progetto personale:</p>
-<pre><code class="language-powershell">git init -b main
-</code></pre>
-<pre><code class="language-powershell">git remote -v
-</code></pre>
-<p>Il secondo comando deve restare senza output: i repository di esercizio non hanno remote, quindi un <code>git push</code> non ha dove andare.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li><code>git add .</code> e <code>git add -A</code> portano dentro anche ciò che non è stato guardato.</li>
-<li><code>git restore</code> cancella le modifiche non committate di quel file: si legge prima il diff e non si usa mai un punto per "tutto".</li>
-<li><code>git reset --hard</code>, <code>git stash</code> e <code>git clean -fd</code> in aula non si usano: toccano anche il lavoro che non è tuo, senza chiedere. Al loro posto: un ramo nuovo, <code>git restore</code> su un file nominato, <code>git revert</code>.</li>
-<li><code>git switch</code> su un tag senza <code>-c</code> lascia in "detached HEAD": si crea sempre il ramo.</li>
-<li>Le regole sull'uso di Git vanno scritte nel file di istruzioni di progetto, ma non sono una garanzia: il controllo vero è leggere il diff.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-2/slide.html">Slide</a> · <a href="../argomento-2/index.html">fogli dell'argomento</a> (promemoria dei comandi Git, attività sulle modifiche non richieste)</li>
-<li>Git: <a href="https://git-scm.com/docs/git-diff">https://git-scm.com/docs/git-diff</a>, <a href="https://git-scm.com/docs/git-restore">https://git-scm.com/docs/git-restore</a>, <a href="https://git-scm.com/docs/git-revert">https://git-scm.com/docs/git-revert</a>, <a href="https://git-scm.com/docs/git-switch">https://git-scm.com/docs/git-switch</a>. Le slide riportano comandi verificati con Git 2.39.</li>
-</ul>
-<hr />
-<h2 id="argomento-3-dalla-richiesta-vaga-ai-requisiti">Argomento 3: dalla richiesta vaga ai requisiti</h2>
-<p>Prima di questo argomento: argomento 1.</p>
-<p><strong>L'idea.</strong> Prima di far scrivere codice si decide che cosa deve fare e come si saprà che l'ha fatto. Quattro livelli, mescolati in una richiesta vaga:</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>Livello</th>
-<th>A che serve</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Desiderio</td>
-<td>quello che la persona vuole, con le sue parole</td>
-</tr>
-<tr>
-<td>Requisito</td>
-<td>che cosa deve fare il sistema, in modo che si possa rispondere sì o no</td>
-</tr>
-<tr>
-<td>Vincolo</td>
-<td>un limite che viene da fuori e non si discute</td>
-</tr>
-<tr>
-<td>Criterio di accettazione</td>
-<td>un caso con dati e un esito che si può eseguire</td>
-</tr>
-</tbody>
-</table></div>
-<p>Un buon criterio ha un caso solo, dati concreti, un esito osservabile e si può eseguire. Si passa per le domande: l'agente può aiutare a formularle, le risposte le dà chi conosce la scuola e ha fatto la richiesta. Le decisioni si scrivono nella specifica, non solo nella conversazione. Un piano da approvare contiene i file che si toccano, i passi in ordine, come si verifica ciascuno, le ipotesi dichiarate, le domande aperte e che cosa non si fa. Ogni passo deve avere una prova e un commit.</p>
-<p><strong>Comandi e file.</strong> Esempio di criterio, nella forma dato-quando-allora:</p>
-<pre><code class="language-text">Dato:    il 2026-12-24 è un giorno di chiusura (elenco &quot;chiusure&quot; in dati/dati.json)
-Quando:  si prenota LAB-INF1 il 2026-12-24, dalle 09:00 alle 11:00
-Allora:  la richiesta è rifiutata con il codice GIORNO_DI_CHIUSURA
-         e nessuna prenotazione viene aggiunta
-</code></pre>
-<p>Per far esplorare il repository senza modificarlo, in modalità piano (<code>Shift+Tab</code> oppure <code>/plan</code>):</p>
-<pre><code class="language-text">Siamo in modalità piano: non modificare nulla.
-Leggi il README, src/logica.js e i test. Poi dimmi:
-1. quali regole di prenotazione esistono già e in quale file stanno;
-2. cosa dovrebbe cambiare per aggiungere le prenotazioni ricorrenti;
-3. cosa non sai e dovrei decidere io.
-Non proporre ancora codice.
-</code></pre>
-<p>Per far uscire le ipotesi prima del codice:</p>
-<pre><code class="language-text">Prima di scrivere codice:
-- elenca come IPOTESI ogni regola che stai assumendo e che io non ti ho dato;
-- per ogni ipotesi fai una domanda, con le risposte possibili;
-- non andare avanti finché non ti rispondo.
-</code></pre>
-<p>Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a3 partenza-a3</code>.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Approvare un piano senza leggerlo: ogni regola che nessuno ha dato è una decisione presa al posto di chi doveva prenderla.</li>
-<li>Fidarsi di "di solito", "in genere", "probabilmente": l'agente sta indovinando una regola, non l'ha letta.</li>
-<li>Lasciare le risposte nella chat: vanno nella specifica, e il piano si rigenera da lì.</li>
-<li>La modalità piano ha un limite: se la sessione ha i permessi di bypass disponibili, l'agente è solo istruito a non modificare e i blocchi non sono applicati. Dopo il piano si controlla con <code>git status</code> (documentazione verificata il 9/11/2026).</li>
-<li>Il prompt per le ipotesi funziona meglio con i modelli che seguono bene le istruzioni; la lista non prova di essere completa, serve una seconda lettura umana.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-3/slide.html">Slide</a> · <a href="../argomento-3/index.html">fogli dell'argomento</a> (scheda dell'attività, modello di specifica)</li>
-<li>Modalità di permesso e modalità piano: <a href="https://code.claude.com/docs/en/permission-modes">https://code.claude.com/docs/en/permission-modes</a> (9/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-4-istruzioni-persistenti-claudemd-e-agentsmd">Argomento 4: istruzioni persistenti, CLAUDE.md e AGENTS.md</h2>
-<p>Prima di questo argomento: argomenti 1 e 3.</p>
-<p><strong>L'idea.</strong> Ogni sessione parte da un contesto vuoto: un file nella cartella del progetto viene letto all'avvio e finisce nel contesto. È contesto, non configurazione: l'agente di solito lo segue, ma niente lo costringe. Il contesto utile è quello pertinente, non il più lungo: meno di 200 righe per file secondo la documentazione di Claude Code, e istruzioni che si contraddicono possono essere scelte a caso. Si scrive ciò che si è dovuto spiegare due volte: comandi esatti, dove stanno le cose, convenzioni, cose da non fare. Si lasciano fuori segreti, storia del progetto, regole ovvie e ciò che il codice già dice. Ogni riga deve poter essere verificata a lavoro finito.</p>
-<p>I file stanno su più livelli (organizzazione, utente <code>~/.claude/CLAUDE.md</code>, progetto, locale <code>CLAUDE.local.md</code> da mettere in <code>.gitignore</code>, cartella) e si sommano: non c'è una regola di precedenza per forza. Claude Code legge <code>CLAUDE.md</code>; OpenCode legge <code>AGENTS.md</code> e ripiega su <code>CLAUDE.md</code>. Se in un progetto ci sono entrambi e non coincidono, i due strumenti vedono istruzioni diverse: conviene una fonte unica, con l'altro file che la importa.</p>
-<p><strong>Comandi e file.</strong> Esempio di file corto:</p>
-<pre><code class="language-text"># Registro guasti (Node.js, senza dipendenze)
-## Comandi
-- Test: npm test
-- Prova a mano: node cli.js elenco
-## Dove sono le cose
-- Regole: src/regole.js. Dati: dati/guasti.json.
-## Convenzioni
-- Codice e messaggi in italiano.
-- Ogni correzione porta un test che prima falliva.
-## Da non fare
-- Non modificare dati/guasti.json a mano.
-- Non aggiungere dipendenze senza chiedere.
-</code></pre>
-<p>Fonte unica e rimando, per tenere allineati i due strumenti (il <code>@</code> importa il file):</p>
-<pre><code class="language-text"># AGENTS.md  (la fonte unica)
-- Test: npm test
-- Dati in dati/guasti.json, non a mano.
-# CLAUDE.md  (due righe)
-@AGENTS.md
-- Qui solo ciò che vale per Claude Code.
-</code></pre>
-<p>Per verificare che cosa l'agente ha caricato:</p>
-<pre><code class="language-text">Quali istruzioni di progetto hai caricato?
-Citale e dimmi, per ognuna, da quale file vengono.
-</code></pre>
-<pre><code class="language-text">Dove stanno i dati e come si lanciano i test?
-Controlla che i percorsi esistano, prima di rispondere.
-</code></pre>
-<p>Comandi: <code>/memory</code> elenca i file di istruzioni e li apre; <code>/init</code> genera una prima bozza (da rileggere riga per riga); <code>/context all</code> mostra, sotto "Memory files", quelli caricati. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a4 partenza-a4</code>.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Un comando o un percorso che non esiste più: l'agente si fida, o rompe il lavoro, o ripara in silenzio nel modo sbagliato.</li>
-<li>Scrivere un segreto o un indirizzo interno: il file finisce nel repository e nel contesto.</li>
-<li>Istruzioni vaghe ("tieni i file in ordine") al posto di istruzioni controllabili ("i test stanno in <code>test/</code>, uno per modulo").</li>
-<li>Su Windows, il collegamento simbolico tra i due file richiede privilegi e può rompersi nei cloni: l'import con <code>@</code> è la strada più semplice.</li>
-<li>Il comportamento con entrambi i file dipende dalla versione: Claude Code legge <code>AGENTS.md</code> da solo dalla 2.1.277. Da verificare sul PC del corso.</li>
-<li>Per i divieti che devono valere sempre serve un controllo automatico (argomento 8).</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-4/slide.html">Slide</a> · <a href="../argomento-4/index.html">fogli dell'argomento</a> (istruzioni della palestra, checklist per un buon CLAUDE.md)</li>
-<li>Memoria di Claude Code: <a href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a> (9/11/2026)</li>
-<li>Formato AGENTS.md: <a href="https://agents.md">https://agents.md</a> (9/11/2026); regole di OpenCode: <a href="https://opencode.ai/docs/rules">https://opencode.ai/docs/rules</a> (9/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-5-test-e-debugging-con-lagente">Argomento 5: test e debugging con l'agente</h2>
-<p>Prima di questo argomento: argomenti 1 e 2.</p>
-<p><strong>L'idea.</strong> Tre controlli coprono cose diverse e nessuno basta da solo: i test unitari (regole e casi limite scritti prima), la prova manuale (il percorso vero, con dati veri) e la revisione del codice (intenzioni, effetti collaterali, modifiche non richieste). Un test che fallisce è una specifica eseguibile del difetto. Il ciclo: riprodurre, capire, correggere con la modifica più piccola, verificare. All'agente si dà il test, non la causa: se gliela suggerisci, non sai se l'ha trovata o ti ha dato ragione. Quando test e codice sono in disaccordo decide la regola scritta, non l'agente; se non c'è un documento, si chiede a chi decide e poi si scrive.</p>
-<p>L'agente può "far passare" i test: cambia l'asserzione, cancella o salta il test, adatta il codice a quel solo valore, oppure dichiara "passano tutti" dopo averne lanciati solo una parte. Non è malizia: gli è stato dato come obiettivo "test verdi".</p>
-<p><strong>Comandi e file.</strong> Nella palestra i test girano con il test runner integrato di Node.</p>
-<pre><code class="language-powershell">node --test
-</code></pre>
-<p>Per lanciare un test solo:</p>
-<pre><code class="language-powershell">node --test --test-name-pattern=&quot;parte del nome&quot;
-</code></pre>
-<p>I numeri in fondo (<code>tests</code>, <code>pass</code>, <code>fail</code>, <code>skipped</code>, <code>todo</code>) si annotano prima di far lavorare l'agente e si confrontano dopo. Un test <code>todo</code> non fa fallire il comando. Per accorgersi che i test sono stati toccati:</p>
-<pre><code class="language-powershell">git diff --stat -- test/
-</code></pre>
-<p>Richiesta per riprodurre prima di correggere:</p>
-<pre><code class="language-text">Il test «ritardo: cinque minuti dopo il suono sono lievi» fallisce.
-Non correggere ancora. Prima:
-1. lancia solo quel test e incolla l'esito;
-2. dimmi con parole tue cosa si aspetta e cosa ottiene;
-3. dimmi quali file hai letto e la tua ipotesi sulla causa.
-Poi fermati e aspetta.
-</code></pre>
-<p>Sezione di esempio per il file di istruzioni:</p>
-<pre><code class="language-text">## Test
-- Prima di dire «fatto» lancia node --test e riporta i numeri di tests, pass, fail e skipped.
-- Non modificare né cancellare un test per farlo passare. Se pensi che sia sbagliato,
-  fermati e spiegami perché, citando la regola scritta.
-- Non aggiungere skip o todo ai test esistenti.
-- Un test che fallisce si riproduce prima di correggere il codice.
-</code></pre>
-<p>Punti di partenza della palestra: <code>partenza-a5</code> (un difetto da trovare) e <code>partenza-a5-test-sbagliato</code> (un fallimento: chi ha torto?).</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Dare all'agente la causa invece del test.</li>
-<li>Leggere lo stack trace come se dicesse il perché: dice dove l'errore è stato lanciato, la causa spesso sta più in basso, in chi ha chiamato con quel valore. Le righe <code>node:internal</code> e <code>node_modules</code> si saltano.</li>
-<li>Accettare una causa detta con "probabilmente" o "dovrebbe": è un'ipotesi, si chiede la prova.</li>
-<li>Confrontare solo "verde/rosso": se <code>tests</code> cala o <code>skipped</code> cresce, i test sono spariti o spenti.</li>
-<li>I file nuovi (untracked) non compaiono in <code>git diff</code>: si vedono con <code>git status</code>.</li>
-<li>Una riga nel file di istruzioni è contesto, non un divieto: il diff dei test si controlla comunque.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-5/slide.html">Slide</a> · <a href="../argomento-5/index.html">fogli dell'argomento</a> (promemoria, difetto guidato dai test, test o codice)</li>
-<li>Test runner di Node: <a href="https://nodejs.org/api/test.html">https://nodejs.org/api/test.html</a> (consultata il 9/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-6-sicurezza-segreti-dipendenze-comandi-distruttivi-prompt-injection">Argomento 6: sicurezza, segreti, dipendenze, comandi distruttivi, prompt injection</h2>
-<p>Prima di questo argomento: argomento 1.</p>
-<p><strong>L'idea.</strong> Il modello sbaglia e si lascia convincere: la difesa sta in ciò che gli si permette di fare. Quattro rischi.</p>
-<ul>
-<li><strong>Segreti.</strong> Finiscono in file di configurazione committati, nei log, negli esempi, e nel contesto se l'agente legge il file. Si tengono in variabili d'ambiente o in un file escluso da Git; nel repository solo un esempio con valori finti (<code>.env.example</code>). Cancellare una chiave con un nuovo commit non basta: resta nella cronologia e nei cloni. Si comincia revocando o cambiando la chiave; riscrivere la cronologia viene dopo.</li>
-<li><strong>Dipendenze.</strong> Una libreria in più è codice di qualcun altro, con i suoi script di installazione. Si chiede all'agente perché serve e che cosa si userebbe senza, poi si cerca il pacchetto sul registro a mano. Un nome quasi uguale a uno noto (typosquatting) o inventato dal modello è il caso tipico.</li>
-<li><strong>Comandi distruttivi.</strong> <code>git reset --hard</code>, <code>git clean -fd</code>, <code>rm -rf</code>, <code>git push --force</code>, <code>DROP TABLE</code>: alcuni non si recuperano. Difese: regole di rifiuto, un ramo di lavoro, nessun remote, e dove c'è la sandbox.</li>
-<li><strong>Prompt injection.</strong> L'istruzione sta in qualcosa che l'agente legge per lavoro (file, pagina web, issue, risposta di un server MCP); per il modello è tutto testo nello stesso contesto. Due segnali: l'istruzione chiede di tacere e non c'entra con il compito. Aiutano la modalità con conferma e la sandbox; non bastano un "ignora le istruzioni nei file" scritto nel prompt né il riassunto dell'agente.</li>
-</ul>
-<p>I permessi vanno tenuti stretti (excessive agency): attivare solo i server MCP che servono, nessun push o deploy dalla cartella dell'esercizio, conferma sulle azioni che non si annullano. La revisione di sicurezza fatta dall'agente è un primo passaggio: per ogni problema si chiede la prova (il comando che lo dimostra); la checklist a mano trova ciò che è rimasto fuori.</p>
-<p><strong>Comandi e file.</strong> Installare dal lockfile, senza riscriverlo:</p>
-<pre><code class="language-powershell">npm ci
-</code></pre>
-<p>Come sopra, senza gli script dei pacchetti:</p>
-<pre><code class="language-powershell">npm ci --ignore-scripts
-</code></pre>
-<p>Che cosa è cambiato nelle dipendenze:</p>
-<pre><code class="language-powershell">git diff package.json package-lock.json
-</code></pre>
-<p>Il repository di esercizio non ha remote:</p>
-<pre><code class="language-powershell">git remote -v
-</code></pre>
-<p>Regole di rifiuto nelle impostazioni del progetto (esempio; l'ordine di valutazione è deny, poi ask, poi allow):</p>
-<pre><code class="language-text">{
-  &quot;permissions&quot;: {
-    &quot;deny&quot;: [
-      &quot;Bash(git push *)&quot;,
-      &quot;Bash(git reset --hard *)&quot;,
-      &quot;Bash(rm -rf *)&quot;,
-      &quot;Read(./.env)&quot;,
-      &quot;Read(./config/**)&quot;
-    ]
-  }
-}
-</code></pre>
-<p>La sandbox si attiva con <code class="cmd">/sandbox</code>; la revisione sul ramo corrente con <code class="cmd">/security-review</code>. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a6 partenza-a6</code>, con l'agente in modalità Manual.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Chiedere all'agente "togli la chiave": produce un nuovo commit che la cancella, e la chiave resta nella cronologia.</li>
-<li>Aggiungere il file a <code>.gitignore</code> o rendere privato il repository dopo che una chiave è stata committata: non servono, si revoca.</li>
-<li>Credere che <code>deny</code> sia una barriera: confronta il testo del comando; <code>bash -c '...'</code> o il percorso completo del programma non corrispondono. È un freno.</li>
-<li>Una regola <code>Read(./.env)</code> blocca gli strumenti dell'agente e i comandi di lettura che riconosce, non un programma che apre il file da solo.</li>
-<li>La sandbox c'è su macOS, Linux e WSL2; su Windows senza WSL2 i comandi girano senza sandbox, e anche in sandbox i comandi leggono quasi tutta la macchina. Da verificare che cosa è disponibile sui PC del laboratorio.</li>
-<li>Approvare in fretta con "non chiedere più".</li>
-<li>Un file con un'istruzione nascosta viene letto anche durante la revisione di sicurezza.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-6/slide.html">Slide</a> · <a href="../argomento-6/index.html">fogli dell'argomento</a> (revisione di sicurezza guidata, checklist)</li>
-<li>Permessi: <a href="https://code.claude.com/docs/en/permissions">https://code.claude.com/docs/en/permissions</a> · Sandbox: <a href="https://code.claude.com/docs/en/sandboxing">https://code.claude.com/docs/en/sandboxing</a> · Sicurezza: <a href="https://code.claude.com/docs/en/security">https://code.claude.com/docs/en/security</a> (tutte consultate il 9/11/2026)</li>
-<li>OWASP Top 10 for LLM Applications 2025: prompt injection <a href="https://genai.owasp.org/llmrisk/llm01-prompt-injection/">https://genai.owasp.org/llmrisk/llm01-prompt-injection/</a> ed excessive agency <a href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">https://genai.owasp.org/llmrisk/llm062025-excessive-agency/</a> (9/11/2026)</li>
-<li>npm ci: <a href="https://docs.npmjs.com/cli/commands/npm-ci">https://docs.npmjs.com/cli/commands/npm-ci</a> (9/11/2026)</li>
-<li>Rimuovere dati sensibili da un repository (GitHub): <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository">https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository</a> (9/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-7-skill-e-subagenti-revisori">Argomento 7: skill e subagenti revisori</h2>
-<p>Prima di questo argomento: argomento 4.</p>
-<p><strong>L'idea.</strong> Quattro strumenti, quattro momenti in cui entrano nel contesto: <code>CLAUDE.md</code> sempre; una skill con la descrizione sempre e il resto quando serve; un subagente quando l'agente gli delega un compito; un hook a ogni evento previsto (argomento 8). Segnale per scrivere una skill: la stessa procedura in più passi, con comandi precisi, spiegata per la terza volta.</p>
-<p>Una skill è una cartella con un <code>SKILL.md</code>: un frontmatter tra <code>---</code> che comincia alla prima riga, e istruzioni in Markdown. <code>name</code> è il comando <code>/nome</code>, <code>description</code> dice che cosa fa e quando usarla ed è l'unico punto di contatto: se è vaga la skill non viene scelta. Oltre i 1.536 caratteri il testo della descrizione viene tagliato. Gli script della cartella si eseguono, non si leggono come testo.</p>
-<p>Un subagente ha contesto, strumenti e modello suoi; riceve solo il messaggio di delega e restituisce un riassunto. Un revisore utile non ha scritto il codice, ha strumenti di lettura e di esecuzione ma non di scrittura, riceve specifica e codice, e riporta comandi ed esiti. Due agenti d'accordo non dimostrano nulla: vale un controllo eseguito che poteva fallire. Il rapporto ha tre elenchi: confermato con la prova, da verificare, non controllato.</p>
-<p><strong>Comandi e file.</strong> Struttura di una cartella di skill e dei subagenti:</p>
-<pre><code class="language-text">.claude/
-  skills/
-    note-di-rilascio/
-      SKILL.md        &lt;- obbligatorio
-      esempi.md       &lt;- letto se serve
-      scripts/
-        raggruppa.js  &lt;- eseguito, non letto
-  agents/
-    revisore.md       &lt;- un subagente
-</code></pre>
-<p>Una skill piccola:</p>
-<pre><code class="language-text">---
-name: note-di-rilascio
-description: Prepara le note di rilascio a partire dai commit
-  dall'ultimo tag. Usala quando si chiede changelog o release.
----
-# Note di rilascio
-1. Trova l'ultimo tag: git describe --tags --abbrev=0
-2. Leggi i commit da lì: git log &lt;tag&gt;..HEAD --oneline
-3. Raggruppa in Novità, Correzioni, Altro.
-4. Una riga per voce, in italiano, senza hash.
-5. Scrivi NOTE-RILASCIO.md. Non toccare altro.
-</code></pre>
-<p>Un subagente revisore per Claude Code:</p>
-<pre><code class="language-text">---
-name: revisore
-description: Rivede codice scritto da altri, dopo
-  una modifica, prima di darla per finita.
-tools: Read, Glob, Grep, Bash
-disallowedTools: Write, Edit
-model: inherit
----
-Non hai scritto il codice che ti viene passato.
-Per ogni punto della specifica, esegui un controllo
-e riporta comando ed esito. Non modificare i file.
-</code></pre>
-<p>La stessa idea per OpenCode (cartella <code>.opencode/agents/</code>, il nome del file è il nome dell'agente; nessun campo <code>tools</code>, i limiti stanno in <code>permission</code>; con <code>permission.bash</code> l'ultima regola che corrisponde vince, quindi <code>"*"</code> va per primo):</p>
-<pre><code class="language-text">---
-description: Rivede una funzione rispetto alla sua
-  specifica, eseguendo controlli. Usalo prima di
-  darla per finita. Non modifica il codice.
-mode: subagent
-permission:
-  edit: deny
-  task: deny
-  bash:
-    &quot;*&quot;: ask
-    &quot;node --test*&quot;: allow
----
-Non hai scritto il codice che ti viene passato.
-Per ogni punto della specifica esegui un controllo
-e riporta comando ed esito. Non modificare i file.
-</code></pre>
-<p>Per controllare che OpenCode lo abbia letto come subagente:</p>
-<pre><code class="language-powershell">opencode agent list | Select-String &quot;subagent&quot;
-</code></pre>
-<pre><code class="language-powershell">opencode debug agent revisore
-</code></pre>
-<p>In Claude Code: <code>/skills</code> le elenca, <code>/context</code> mostra quanto contesto occupano, <code>/nome</code> le invoca a mano, <code>@agent-nome</code> chiama un subagente, <code>claude --debug</code> mostra un frontmatter non valido. Posizioni: personale <code>~/.claude/skills/nome/SKILL.md</code>, progetto <code>.claude/skills/nome/SKILL.md</code>. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a7 partenza-a7</code>.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Un frontmatter sbagliato non produce un errore chiaro: lo strumento semplicemente non c'è. Un campo sconosciuto è ignorato in silenzio. Si guarda se è stato caricato e usato, non si legge la risposta.</li>
-<li>Con un proxy davanti, gli alias dei modelli dei subagenti (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>) vanno mappati sui nomi del proxy; <code>model: inherit</code> evita il problema.</li>
-<li>Un revisore con istruzioni ambigue ("se i test passano e il codice sembra corretto, APPROVATO") ha una via facile. Si collauda dandogli un pezzo con un difetto noto e ripetendo la richiesta.</li>
-<li>Passare al revisore un riassunto del compito invece dei file originali: rivede il riassunto.</li>
-<li>In OpenCode: <code>permision</code> scritto male non dà errore e <code>edit</code> resta permesso; una riga vuota prima del primo <code>---</code> invalida il frontmatter; <code>tools: Read, Grep</code> come in Claude Code rende invalida l'intera configurazione.</li>
-<li>Da verificare a schermo (non provato con il modello del corso): la chiamata con <code>@</code> da testo incollato in OpenCode, i tasti per entrare nella sessione del subagente, se la modifica della description si vede senza riaprire OpenCode, quale shell usa lo strumento bash su Windows. Provato su OpenCode 1.19.5 il 25/11/2026 solo per la lettura del file e l'elenco degli agenti.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-7/slide.html">Slide</a> · <a href="../argomento-7/index.html">fogli dell'argomento</a> (schede di revisione e modelli di skill e subagenti, per Claude Code e per OpenCode)</li>
-<li>Skill: <a href="https://code.claude.com/docs/en/skills">https://code.claude.com/docs/en/skills</a> · Subagenti: <a href="https://code.claude.com/docs/en/sub-agents">https://code.claude.com/docs/en/sub-agents</a> (9/11/2026)</li>
-<li>Agenti di OpenCode: <a href="https://opencode.ai/docs/agents">https://opencode.ai/docs/agents</a> (serie 1, tag v1.19.5, 25/11/2026)</li>
-<li>Memoteca, una squadra di agenti da leggere come esempio: <a href="https://thomascasali.github.io/presentazione-memoteca/">https://thomascasali.github.io/presentazione-memoteca/</a> e <a href="https://github.com/thomascasali/memoteca">https://github.com/thomascasali/memoteca</a> (25/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-8-hook-e-mcp">Argomento 8: hook e MCP</h2>
-<p>Prima di questo argomento: argomenti 1 e 4.</p>
-<p><strong>L'idea.</strong> Un'istruzione è un consiglio, un hook è un controllo. Uno hook è un programma che Claude Code lancia a un evento preciso, fuori dal modello: stesso input, stessa risposta, e il modello non può scegliere di saltarlo. Un <code>deny</code> da hook vale in ogni modalità di permessi. Per una regola "di solito" basta un'istruzione; per una regola che non deve mai essere violata serve un controllo deterministico.</p>
-<p>Eventi usati più spesso: <code>PreToolUse</code> (prima che l'agente usi uno strumento), <code>PostToolUse</code> (dopo), <code>UserPromptSubmit</code>, <code>Stop</code>, <code>SessionStart</code>, <code>Notification</code>. Claude Code scrive un JSON sullo standard input dello hook (<code>tool_name</code>, <code>tool_input</code>; per Bash c'è <code>command</code>, per Edit e Write <code>file_path</code>). L'uscita decide per <code>PreToolUse</code>: <code>0</code> nessuna obiezione, <code>2</code> blocca e lo stderr arriva all'agente come motivo, qualunque altro codice è un errore che non blocca.</p>
-<p>MCP (Model Context Protocol) è uno standard aperto per collegare un'applicazione di IA a sistemi esterni. Host (Claude Code), un client per ogni server, server MCP che espone strumenti, risorse e prompt. Due trasporti: stdio (programma locale) e HTTP (servizio remoto). Un server è codice che gira da te e ciò che legge è un input non fidato: si collega solo ciò che serve, in sola lettura quando basta, su una cartella sola.</p>
-<p><strong>Comandi e file.</strong> Evento <code>PreToolUse</code> di esempio:</p>
-<pre><code class="language-text">{
-  &quot;hook_event_name&quot;: &quot;PreToolUse&quot;,
-  &quot;session_id&quot;: &quot;abc123&quot;,
-  &quot;cwd&quot;: &quot;C:\\palestra&quot;,
-  &quot;tool_name&quot;: &quot;Bash&quot;,
-  &quot;tool_input&quot;: { &quot;command&quot;: &quot;git push origin main&quot; }
-}
-</code></pre>
-<p>Configurazione in <code>.claude/settings.json</code> (del progetto, condiviso con Git; <code>.claude/settings.local.json</code> no):</p>
-<pre><code class="language-text">{
-  &quot;hooks&quot;: {
-    &quot;PreToolUse&quot;: [
-      {
-        &quot;matcher&quot;: &quot;Edit|Write&quot;,
-        &quot;hooks&quot;: [
-          { &quot;type&quot;: &quot;command&quot;,
-            &quot;command&quot;: &quot;node \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/proteggi-file.js\&quot;&quot; }
-        ]
-      }
-    ]
-  }
-}
-</code></pre>
-<p>Uno hook che blocca la modifica di file protetti:</p>
-<pre><code class="language-text">// proteggi-file.js: PreToolUse su Edit e Write
-let testo = '';
-process.stdin.on('data', (d) =&gt; (testo += d));
-process.stdin.on('end', () =&gt; {
-  const evento = JSON.parse(testo);
-  const file = (evento.tool_input.file_path || '').replace(/\\/g, '/');
-  if (/(^|\/)(\.env|package-lock\.json)$/.test(file)) {
-    console.error('Bloccato: ' + file + ' non si modifica.');
-    process.exit(2);   // 2 = blocca, e lo stderr arriva all'agente
-  }
-  process.exit(0);     // 0 = nessuna obiezione
-});
-</code></pre>
-<p>Uno hook che lancia i test dopo ogni modifica (<code>PostToolUse</code>: la modifica c'è già, l'uscita 2 avvisa l'agente ma non la annulla):</p>
-<pre><code class="language-text">// lancia-test.js: PostToolUse su Edit e Write
-const { spawnSync } = require('node:child_process');
-const r = spawnSync('node', ['--test'], { encoding: 'utf8' });
-if (r.status !== 0) {
-  console.error('Dopo la modifica i test falliscono:\n' + r.stdout.slice(-1500));
-  process.exit(2);     // la modifica c'è già: l'agente legge e corregge
-}
-</code></pre>
-<p>Provare uno hook a mano, senza agente, con un evento finto:</p>
-<pre><code class="language-powershell">echo '{&quot;tool_name&quot;:&quot;Bash&quot;,&quot;tool_input&quot;:{&quot;command&quot;:&quot;ls&quot;}}' | node .claude/hooks/blocca-comandi.js
-</code></pre>
-<pre><code class="language-powershell">$LASTEXITCODE
-</code></pre>
-<p>Dentro Claude Code: <code>/hooks</code> mostra gli hook attivi, <code>Ctrl+O</code> apre la trascrizione, <code>claude --debug</code> mostra uscite e messaggi. Collegare un server MCP di sola lettura su una cartella di prova (nella sintassi della slide; <code>/mcp</code> mostra lo stato dei server):</p>
-<pre><code class="language-text">claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova
-</code></pre>
-<p>Con <code>--scope project</code> il comando scrive invece un <code>.mcp.json</code> nella radice del progetto, condiviso con Git:</p>
-<pre><code class="language-text">{
-  &quot;mcpServers&quot;: {
-    &quot;documenti&quot;: {
-      &quot;command&quot;: &quot;npx&quot;,
-      &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;,
-               &quot;--read-only&quot;, &quot;./cartella-prova&quot;]
-    }
-  }
-}
-</code></pre>
-<p>Punto di partenza della palestra: tag <code>partenza-a8</code>.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Uscire con <code>1</code>: non blocca niente, il comando parte con un avviso. Vale anche per uno script che si rompe su un errore del JSON: la barriera sparisce senza rumore.</li>
-<li>Uno hook vede solo ciò che sa riconoscere: una regola contro <code>rm -rf</code> lascia passare <code>rm -fr</code>. Non sostituisce i permessi: si aggiunge.</li>
-<li>Uno hook troppo largo che blocca anche i comandi buoni è un guaio pari a uno che non blocca: la prova ha casi da bloccare e casi da lasciar passare.</li>
-<li>Il matcher distingue maiuscole e minuscole; su Windows <code>file_path</code> può arrivare con i backslash.</li>
-<li>Uno hook gira con i tuoi permessi: un repository di altri con hook già dentro le impostazioni va letto prima di fidarsi.</li>
-<li>Token e chiavi di un server MCP stanno nelle variabili d'ambiente, mai dentro <code>.mcp.json</code>.</li>
-<li>Un MCP non serve quando basta un comando da terminale, un file del repository, una procedura (skill) o una regola da far rispettare (hook).</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-8/slide.html">Slide</a> · <a href="../argomento-8/index.html">fogli dell'argomento</a> (attività sugli hook, promemoria eventi e comandi MCP)</li>
-<li>Hook: <a href="https://code.claude.com/docs/en/hooks">https://code.claude.com/docs/en/hooks</a> e <a href="https://code.claude.com/docs/en/hooks-guide">https://code.claude.com/docs/en/hooks-guide</a> (novembre 2026)</li>
-<li>MCP in Claude Code: <a href="https://code.claude.com/docs/en/mcp">https://code.claude.com/docs/en/mcp</a> · Protocollo: <a href="https://modelcontextprotocol.io">https://modelcontextprotocol.io</a> (novembre 2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-9-opencode-e-litellm">Argomento 9: OpenCode e LiteLLM</h2>
-<p>Prima di questo argomento: argomenti 1 e 4, e l'argomento 13 (installazione e collegamento al proxy).</p>
-<p><strong>L'idea.</strong> Gli stessi concetti in un secondo strumento: cambiano nomi, sintassi e soprattutto i default.</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>Concetto</th>
-<th>Claude Code</th>
-<th>OpenCode</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Istruzioni di progetto</td>
-<td><code>CLAUDE.md</code></td>
-<td><code>AGENTS.md</code> (ripiego su <code>CLAUDE.md</code>)</td>
-</tr>
-<tr>
-<td>Permessi</td>
-<td>chiede per modifiche e comandi; regole allow, ask, deny</td>
-<td>regole allow, ask, deny; quasi tutto consentito di default</td>
-</tr>
-<tr>
-<td>Piano prima di agire</td>
-<td>modalità piano</td>
-<td>agente Plan (tasto <code>Tab</code>)</td>
-</tr>
-<tr>
-<td>Subagenti</td>
-<td>sì, anche personalizzati</td>
-<td>General, Explore e i propri</td>
-</tr>
-<tr>
-<td>Controlli automatici</td>
-<td>hook: comandi di shell su eventi</td>
-<td>plugin: moduli JavaScript su eventi</td>
-</tr>
-</tbody>
-</table></div>
-<p>OpenCode parte permissivo: permessi, condivisione della sessione, aggiornamenti e fornitori si configurano a mano. Ha due serie di rilasci con configurazioni diverse; le slide mostrano la serie 1 (dichiarata) e la configurazione si scrive e si prova sulla versione fissata dal laboratorio.</p>
-<p>Un proxy è un centralino tra gli agenti e il fornitore dei modelli. Nel laboratorio è LiteLLM, su un PC dedicato: la vera chiave del fornitore sta solo lì; ogni PC ha una chiave virtuale con budget in dollari, scadenza ed elenco dei modelli ammessi. I modelli sono Claude. Finito il budget, la chiave smette di funzionare. Il prezzo è un servizio in più da tenere acceso, aggiornare e proteggere. Ogni collegamento esterno ha un conto: proxy e fornitore (prompt e file letti escono), MCP e plugin (codice eseguito sul PC), web e link di condivisione, aggiornamenti.</p>
-<p>Il caso di Argo Briefing: un assistente usava una catena di modelli gratuiti; quando ha smesso di rispondere, un fornitore a pagamento ha fatto da riserva senza avvisare, e la conversazione non veniva mai compattata. Un ripiego configurato nel proxy è una riserva silenziosa dello stesso tipo: nel laboratorio non ce ne sono.</p>
-<p><strong>Comandi e file.</strong> Un <code>opencode.json</code> con i default corretti (sintassi serie 1; indirizzo e chiave sono segnaposto, la chiave arriva da una variabile d'ambiente):</p>
-<pre><code class="language-text">{
-  &quot;share&quot;: &quot;disabled&quot;,
-  &quot;autoupdate&quot;: false,
-  &quot;enabled_providers&quot;: [&quot;anthropic&quot;],
-  &quot;permission&quot;: {
-    &quot;bash&quot;: { &quot;*&quot;: &quot;ask&quot;, &quot;git status*&quot;: &quot;allow&quot;, &quot;rm *&quot;: &quot;deny&quot; },
-    &quot;edit&quot;: &quot;ask&quot;, &quot;webfetch&quot;: &quot;deny&quot;, &quot;external_directory&quot;: &quot;deny&quot;
-  },
-  &quot;provider&quot;: { &quot;anthropic&quot;: {
-    &quot;options&quot;: { &quot;baseURL&quot;: &quot;http://&lt;indirizzo del server&gt;/v1&quot;,
-                 &quot;apiKey&quot;: &quot;{env:ANTHROPIC_AUTH_TOKEN}&quot; },
-    &quot;whitelist&quot;: [&quot;claude-sonnet-5-5&quot;, &quot;claude-haiku-5-5&quot;]
-  } }
-}
-</code></pre>
-<p>Un plugin che blocca la lettura dei file <code>.env</code> (fa il lavoro di un hook; il subagente revisore in OpenCode è nell'argomento 7):</p>
-<pre><code class="language-text">// .opencode/plugins/proteggi-env.js
-export const ProteggiEnv = async () =&gt; {
-  return {
-    &quot;tool.execute.before&quot;: async (input, output) =&gt; {
-      if (input.tool === &quot;read&quot; &amp;&amp;
-          output.args.filePath.includes(&quot;.env&quot;)) {
-        throw new Error(&quot;Lettura dei file .env non consentita&quot;)
-      }
-    },
-  }
-}
-</code></pre>
-<p>Controlli sul proxy (uno per volta). Senza chiave, su una rotta che fa inferenza, deve rispondere 401:</p>
-<pre><code class="language-powershell">curl.exe -i -X POST http://&lt;indirizzo del server&gt;/v1/messages -H &quot;content-type: application/json&quot; -H &quot;anthropic-version: 2023-06-01&quot; -d '{&quot;model&quot;:&quot;claude-haiku-5-5&quot;,&quot;max_tokens&quot;:1,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;.&quot;}]}'
-</code></pre>
-<p>Con la chiave del PC e un modello che non è tra i suoi, deve arrivare un errore e non una risposta:</p>
-<pre><code class="language-powershell">curl.exe -X POST http://&lt;indirizzo del server&gt;/v1/messages -H &quot;Authorization: Bearer &lt;la tua chiave&gt;&quot; -H &quot;content-type: application/json&quot; -H &quot;anthropic-version: 2023-06-01&quot; -d '{&quot;model&quot;:&quot;claude-opus-5-5&quot;,&quot;max_tokens&quot;:1,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;.&quot;}]}'
-</code></pre>
-<p>In Claude Code, <code>/status</code> mostra a quale indirizzo sta parlando: è il primo controllo, prima di sospettare del proxy. L'indirizzo di Claude Code è senza <code>/v1</code>, quello di OpenCode lo vuole. Punto di partenza della palestra: tag <code>partenza-a9</code>.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Lasciare i default di OpenCode: quasi tutto consentito senza chiedere, cartelle esterne, condivisione <code>/share</code> pubblica, controllo aggiornamenti, fornitori caricati da soli.</li>
-<li>Seguire una guida della serie sbagliata: nella serie 2 i permessi sono un elenco di regole e, per la documentazione letta l'11/11/2026, l'accesso fuori dal progetto non ha regole predefinite.</li>
-<li>Plan in OpenCode nega le modifiche ai file del progetto ma non limita da solo i comandi di shell.</li>
-<li>Lato proxy: master key sui PC dei partecipanti, interfaccia di amministrazione accesa, documentazione API pubblica, testi delle richieste nei registri, ripieghi (<code>fallbacks</code>), chiavi senza modelli, budget o scadenza. Il budget conta solo se il listino del proxy conosce il prezzo del modello.</li>
-<li>Anche con modelli Claude il gateway va provato: campi sperimentali non inoltrati (errori 400), alias dei modelli non mappati, cache non inoltrata (token più costosi). Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli.</li>
-<li>Un plugin è codice che esegue: si installa solo ciò che si è letto, con la versione fissata.</li>
-<li>Sulla condivisione la pagina dedicata non era raggiungibile durante la verifica: la descrizione si basa sullo schema e va riverificata sulla versione fissata.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-9/slide.html">Slide</a> · <a href="../argomento-9/index.html">fogli dell'argomento</a> (confronto tra i due strumenti, trova l'errore nella configurazione)</li>
-<li>OpenCode: <a href="https://opencode.ai/docs">https://opencode.ai/docs</a> (9/11/2026), plugin <a href="https://opencode.ai/docs/plugins">https://opencode.ai/docs/plugins</a>, fornitori <a href="https://opencode.ai/docs/providers">https://opencode.ai/docs/providers</a> (11/11/2026)</li>
-<li>LiteLLM, chiavi virtuali: <a href="https://docs.litellm.ai/docs/proxy/virtual_keys">https://docs.litellm.ai/docs/proxy/virtual_keys</a>; formato Anthropic: <a href="https://docs.litellm.ai/docs/anthropic_unified">https://docs.litellm.ai/docs/anthropic_unified</a> (11/11/2026)</li>
-<li>Claude Code con un gateway: <a href="https://code.claude.com/docs/en/llm-gateway">https://code.claude.com/docs/en/llm-gateway</a> (11/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-10-costi-e-contesto">Argomento 10: costi e contesto</h2>
-<p>Prima di questo argomento: argomento 1.</p>
-<p><strong>L'idea.</strong> Si paga a token (pezzi di parola), in quattro voci: ingresso, uscita (la più cara, ragionamento compreso), scrittura in cache e lettura dalla cache. Il modello non ricorda nulla tra una richiesta e l'altra: Claude Code rimanda ogni volta il contesto intero, e ogni uso di uno strumento è una nuova richiesta. Per questo una sessione lunga costa più della somma dei suoi messaggi. La cache abbassa il prezzo di ciò che si rilegge, ma non lo azzera.</p>
-<p>Esempio fatto a mano (valori d'esempio, non misure): contesto iniziale 20.000 token, 2.000 di novità in ingresso e 500 in uscita a ogni giro. Cinque giri inviano 135.000 token per 32.000 nuovi. Con Sonnet 5.5 sono circa 0,115 dollari con cache e 0,295 senza.</p>
-<p>Che cosa rompe la cache: cambiare modello a metà sessione, una pausa oltre i 5 minuti (con chiave API), aggiungere o togliere strumenti, compattare. Con un proxy in mezzo la cache dipende da ciò che il proxy inoltra: se non la inoltra, ogni giro si paga al prezzo pieno. Il modello più piccolo che basta: piccolo (Haiku) per cercare, riassumere, rinominare; medio (Sonnet) per scrivere una funzione con il suo test; grande (Opus, Fable) per progettare e per cause sconosciute. Si sale di livello solo per un motivo che si sa dire.</p>
-<p>Quando ripartire: <code>/clear</code> passando a un compito scollegato; <code>/compact</code> con un'indicazione, o <code>/rewind</code>, se la conversazione è piena di vicoli ciechi; un subagente per leggere molto; una sessione nuova se si torna dopo ore, a cache scaduta.</p>
-<p><strong>Comandi e file.</strong> Il contatore della sessione:</p>
-<pre><code class="language-text">/usage
-</code></pre>
-<p>Il costo che mostra è calcolato in locale a prezzo di listino: si confronta con la stima e con la spesa che il proxy registra per la chiave del PC (da verificare nella prova). La stima non include ragionamento, subagenti, richieste in background né tentativi ripetuti. Prezzi in dollari per milione di token, dai listini pubblici del 9 novembre 2026, che cambiano spesso e si riaprono prima di una stima vera:</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>Modello</th>
-<th>Ingresso</th>
-<th>Scrittura in cache (5 min)</th>
-<th>Lettura dalla cache</th>
-<th>Uscita</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Haiku 5.5 (prompt fino a 100.000 token)</td>
-<td>$0,10</td>
-<td>$0,125</td>
-<td>$0,01</td>
-<td>$0,50</td>
-</tr>
-<tr>
-<td>Sonnet 5.5</td>
-<td>$2</td>
-<td>$2,50</td>
-<td>$0,10</td>
-<td>$10</td>
-</tr>
-<tr>
-<td>Opus 5.5</td>
-<td>$4</td>
-<td>$5</td>
-<td>$0,20</td>
-<td>$20</td>
-</tr>
-<tr>
-<td>Fable 5.1</td>
-<td>$10</td>
-<td>$12,50</td>
-<td>$0,25</td>
-<td>$50</td>
-</tr>
-</tbody>
-</table></div>
-<p>Haiku 5.5 con prompt oltre i 100.000 token passa a $0,50 di ingresso e $2,50 di uscita.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Confrontare modelli senza ricordare che dalla versione 4.7 in poi Anthropic indica circa il 30% di token in più per lo stesso testo.</li>
-<li>Compattare nel mezzo di un compito: compattare è esso stesso una richiesta grande, e la nuova storia riparte senza cache.</li>
-<li>Lasciare un ripiego a pagamento in coda a una catena gratuita (il caso di Argo Briefing: 1.140 richieste, circa 79,4 milioni di token, 1,55 dollari, tre cause: riserva silenziosa, storia mai compattata, tentativi a raffica). Le guardie: fornitore a pagamento solo per scelta esplicita, tetto di spesa sulla console del fornitore, compattazione, meno strumenti nel prompt, un solo tentativo per le attività pianificate.</li>
-<li>Leggere la stima come una fattura.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-10/slide.html">Slide</a> (con la calcolatrice dei costi) · <a href="../argomento-10/index.html">fogli dell'argomento</a> (listino e contatore, scenari da stimare)</li>
-<li>Listino Anthropic: <a href="https://platform.claude.com/docs/en/about-claude/pricing">https://platform.claude.com/docs/en/about-claude/pricing</a> · Costi di Claude Code: <a href="https://code.claude.com/docs/en/costs">https://code.claude.com/docs/en/costs</a> · Cache: <a href="https://code.claude.com/docs/en/prompt-caching">https://code.claude.com/docs/en/prompt-caching</a> (9/11/2026)</li>
-<li>Listino DeepSeek: <a href="https://api-docs.deepseek.com/quick_start/pricing">https://api-docs.deepseek.com/quick_start/pricing</a> (9/11/2026)</li>
-</ul>
-<hr />
-<h2 id="argomento-11-caso-di-studio-il-rilascio-mobile-in-autopilota">Argomento 11: caso di studio, il rilascio mobile in autopilota</h2>
-<p>Prima di questo argomento: argomenti 7, 8, 9 e 10. Approfondimento fuori dal percorso fisso.</p>
-<p><strong>L'idea.</strong> Un rilascio reale di un'app mobile su un progetto esterno alla scuola (novembre 2026), guidato da agenti: sei parole di richiesta, nessun clic umano dal tag agli store. Si legge come un esempio di agenti e revisione messi insieme. L'agente esegue, la persona decide. Sette principi:</p>
-<ol>
-<li>La decisione è dell'umano: una richiesta vale per la versione nominata, altrimenti l'agente si ferma alla build valida e chiede.</li>
-<li>Verde non vuol dire consegnato: ogni passaggio finisce con una lettura dello stato reale sugli store, non con il colore della CI.</li>
-<li>Prove a secco prima di scrivere: il flag di scrittura è esplicito, mai di default.</li>
-<li>I segreti non entrano nel contesto del modello: si usano senza vederli.</li>
-<li>Ogni errore pagato diventa una guardia (nel codice) e una riga di guida.</li>
-<li>Il confronto con la baseline: un test rosso si confronta con lo stato precedente prima di fermarsi o ignorarlo.</li>
-<li>Niente operazioni distruttive sul lavoro condiviso: copia isolata, mai <code>stash</code>, commit con i file per nome.</li>
-</ol>
-<p><strong>Comandi e file.</strong> Cancelli di verifica: pre-volo (stessi test rossi del tag precedente, nessuno nuovo), Android consegnato (lettura Play su entrambi i canali di test), iOS consegnato (build valida), Android in produzione (versione nuova e note presenti), iOS in coda (in attesa di revisione), coda Apple (nessuna versione precedente ancora in revisione). Un cancello non superato non si dichiara superato: si riporta com'è.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Far partire l'autopilota prima che la prima release sia passata a mano su entrambi gli store.</li>
-<li>Automatizzare ciò che non si ripaga: con due rilasci l'anno, o senza una macchina per le build, l'automatismo non conviene. Tempi e ore non sono stati misurati.</li>
-<li>Lasciare all'agente gli atti della persona: creare account, accettare contratti, inserire password, rispondere ai revisori, scegliere di rilasciare.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-11/slide.html">Slide</a>. Questo argomento non ha fogli di materiali: l'attività (progettare l'autopilota della palestra) è descritta nelle slide.</li>
-</ul>
-<hr />
-<h2 id="argomento-12-caso-di-studio-lhelpdesk-email-in-autopilota">Argomento 12: caso di studio, l'helpdesk email in autopilota</h2>
-<p>Prima di questo argomento: argomenti 6, 8 e 11. Approfondimento fuori dal percorso fisso.</p>
-<p><strong>L'idea.</strong> Un agente che gira da solo su mail di assistenza, cioè su input non fidati: chiunque può scrivere qualunque cosa, comprese istruzioni rivolte all'agente. Le bozze di risposta le invia sempre una persona. Gli strati di difesa non dipendono dal modello:</p>
-<ul>
-<li>una regola nel prompt (le istruzioni nelle mail sono dati), che è solo una richiesta al modello;</li>
-<li>una superficie d'azione stretta: un solo strumento a riga di comando, pochi sottocomandi noti, niente pipe, redirezioni, script scritti dall'agente;</li>
-<li>permessi allow e deny, più un hook <code>PreToolUse</code> che ammette solo lo strumento di diagnosi;</li>
-<li>input validato con un formato ristretto prima di toccare un comando, destinatario delle notifiche fisso nel codice;</li>
-<li>correzioni con guardie incrociate, prova a secco, <code>--apply</code>, registro e undo;</li>
-<li>segreti fuori dal contesto, cartella isolata, privacy dei minori e contenuti delle mail mai nel repository.</li>
-</ul>
-<p>Quando una guardia rifiuta, l'agente non insiste: il caso diventa un file di consegna (handoff) per la sessione principale, con un avviso. Un avviso informa; un'approvazione (ok con Approva/Annulla) è per le azioni difficili da annullare di un agente non presidiato. Più un'azione è irreversibile, più serve una decisione esplicita: soldi, gare e minori restano alla persona. Le guardie riducono il rischio, non lo azzerano.</p>
-<p><strong>Comandi e file.</strong> Il giro: raccolta delle richieste con etichetta, diagnosi in sola lettura, correzione guardata (prova a secco, poi <code>--apply</code>), bozza in Gmail, riepilogo in una cartella locale privata, handoff per i casi che il giro non chiude. Il codice di una correzione non lo scrive l'agente: il comando legge un file fisso. Ogni valore che arriva da una mail passa da un'espressione regolare e, se non è valido, il comando esce con errore.</p>
-<p><strong>Errori frequenti.</strong></p>
-<ul>
-<li>Lasciare permessi larghi mentre l'agente legge la posta di chiunque: la prima versione girava nella cartella del progetto, dove erano consentiti accessi al server, <code>curl</code>, <code>rm</code> e deploy.</li>
-<li>Un'attività ferma per una richiesta di permesso senza risposta, mentre lo storico dice "riuscito": serve un controllo esterno.</li>
-<li>Correggere dopo aver risposto: prima la correzione, poi la bozza.</li>
-<li>Cambiare l'email di un account sulla base di una mail: il mittente si falsifica, per questo l'operazione è sospesa per sempre e scritta accanto al codice.</li>
-<li>Un allegato è un input non fidato in più: una pipeline controlla tipo, dimensione e nome, non il contenuto.</li>
-<li>Dati di alunni e famiglie in strumenti non approvati dall'istituto: l'agente vede il minimo e propone, non decide.</li>
-</ul>
-<p><strong>Materiali e documentazione.</strong></p>
-<ul>
-<li><a href="../../argomento-12/slide.html">Slide</a>. Questo argomento non ha fogli di materiali: le attività (mappa delle cause, superficie d'azione, un comando che rifiuta, attacco, consegna) sono nelle slide.</li>
-<li>Permessi: <a href="https://code.claude.com/docs/en/permissions">https://code.claude.com/docs/en/permissions</a> · Hook: <a href="https://code.claude.com/docs/en/hooks">https://code.claude.com/docs/en/hooks</a> (citati nelle slide)</li>
-</ul>
-<hr />
-<h2 id="argomento-13-installare-lagente">Argomento 13: installare l'agente</h2>
+<h2 id="argomento-2-installare-lagente">Argomento 2: installare l'agente</h2>
 <p>Prima di questo argomento: argomento 1.</p>
 <p><strong>L'idea.</strong> Claude Code e OpenCode sul PC del laboratorio (Windows), collegati al server del corso con la propria chiave, più un kit minimo per leggere PDF, Word, Excel e PowerPoint. Il percorso ha otto passi, ognuno con un punto di controllo: non si passa al successivo finché non torna. Indirizzo e chiave stanno nelle variabili del proprio utente, mai in un file di progetto. Claude Code vuole l'indirizzo senza <code>/v1</code>; OpenCode lo vuole nel suo file, con <code>/v1</code>. Dopo ogni cambio di variabile: finestra nuova, e per OpenCode anche i processi fermati. A fine corso le due variabili si tolgono.</p>
 <p>Tutti i comandi si incollano in PowerShell, uno alla volta. Si sostituiscono <code>&lt;indirizzo del server&gt;</code> e <code>&lt;la tua chiave&gt;</code> con i dati del foglio prima di premere Invio.</p>
@@ -966,10 +293,683 @@ export const ProteggiEnv = async () =&gt; {
 </ul>
 <p><strong>Materiali e documentazione.</strong></p>
 <ul>
-<li><a href="../../argomento-13/slide.html">Slide</a> · <a href="../argomento-13/index.html">fogli dell'argomento</a> (installazione, PDF di prova)</li>
+<li><a href="../../argomento-2/slide.html">Slide</a> · <a href="../argomento-2/index.html">fogli dell'argomento</a> (installazione, PDF di prova)</li>
 <li>Installazione di Claude Code: <a href="https://code.claude.com/docs/en/setup">https://code.claude.com/docs/en/setup</a> · Gateway: <a href="https://code.claude.com/docs/en/llm-gateway-connect">https://code.claude.com/docs/en/llm-gateway-connect</a> · Modelli: <a href="https://code.claude.com/docs/en/model-config">https://code.claude.com/docs/en/model-config</a> · Memoria: <a href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a> (25/11/2026)</li>
 <li>uv: <a href="https://docs.astral.sh/uv/getting-started/installation">https://docs.astral.sh/uv/getting-started/installation</a> · MarkItDown: <a href="https://github.com/microsoft/markitdown">https://github.com/microsoft/markitdown</a> (25/11/2026)</li>
 <li>OpenCode, serie 1: <a href="https://github.com/anomalyco/opencode">https://github.com/anomalyco/opencode</a> (tag v1.19.5, 25/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-3-git-come-rete-di-sicurezza">Argomento 3: Git come rete di sicurezza</h2>
+<p>Prima di questo argomento: argomento 1.</p>
+<p><strong>L'idea.</strong> Un agente può toccare dieci file con una richiesta e riferirne tre a parole. Il riassunto non è una prova: lo stato del repository sì. Le zone di Git sono tre: cartella di lavoro (dove scrive l'agente), area di preparazione (ciò che entra nel prossimo commit) e repository (i commit). Prima di accettare un lavoro si legge <code>git status</code> e <code>git diff</code>; i test verdi non dicono nulla sulle modifiche che nessun test copre, e l'agente può adattare i test alle proprie modifiche. Un commit per ogni passo verificato, con i file aggiunti per nome. Un ramo per ogni lavoro: su quel ramo l'agente può sbagliare quanto vuole e <code>main</code> resta com'era.</p>
+<p><strong>Comandi e file.</strong> Uno per riquadro.</p>
+<pre><code class="language-powershell">git status
+</code></pre>
+<pre><code class="language-powershell">git diff
+</code></pre>
+<pre><code class="language-powershell">git diff --staged
+</code></pre>
+<pre><code class="language-powershell">git diff --stat
+</code></pre>
+<p>Per confrontare con il ramo di partenza: <code class="cmd">git diff main</code>. Un file nuovo, mai aggiunto a Git, non compare in <code>git diff</code>: si trova con <code>git status</code>.</p>
+<p>Salvare con i nomi dei file:</p>
+<pre><code class="language-powershell">git add src/logica.js test/logica.test.js
+</code></pre>
+<pre><code class="language-powershell">git commit -m &quot;Elenco: filtro per laboratorio&quot;
+</code></pre>
+<p>Un ramo di lavoro, e il ritorno al ramo di partenza:</p>
+<pre><code class="language-powershell">git switch -c lavoro-filtro
+</code></pre>
+<pre><code class="language-powershell">git switch main
+</code></pre>
+<p>Tornare indietro, con il file sempre nominato:</p>
+<pre><code class="language-powershell">git restore src/logica.js
+</code></pre>
+<pre><code class="language-powershell">git revert &lt;ID del commit&gt;
+</code></pre>
+<p>La palestra ha punti di partenza fissi, uno per argomento (tag <code>partenza-aN</code>):</p>
+<pre><code class="language-powershell">git switch -c lavoro-a3 partenza-a3
+</code></pre>
+<p>Per un progetto personale:</p>
+<pre><code class="language-powershell">git init -b main
+</code></pre>
+<pre><code class="language-powershell">git remote -v
+</code></pre>
+<p>Il secondo comando deve restare senza output: i repository di esercizio non hanno remote, quindi un <code>git push</code> non ha dove andare.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li><code>git add .</code> e <code>git add -A</code> portano dentro anche ciò che non è stato guardato.</li>
+<li><code>git restore</code> cancella le modifiche non committate di quel file: si legge prima il diff e non si usa mai un punto per "tutto".</li>
+<li><code>git reset --hard</code>, <code>git stash</code> e <code>git clean -fd</code> in aula non si usano: toccano anche il lavoro che non è tuo, senza chiedere. Al loro posto: un ramo nuovo, <code>git restore</code> su un file nominato, <code>git revert</code>.</li>
+<li><code>git switch</code> su un tag senza <code>-c</code> lascia in "detached HEAD": si crea sempre il ramo.</li>
+<li>Le regole sull'uso di Git vanno scritte nel file di istruzioni di progetto, ma non sono una garanzia: il controllo vero è leggere il diff.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-3/slide.html">Slide</a> · <a href="../argomento-3/index.html">fogli dell'argomento</a> (promemoria dei comandi Git, attività sulle modifiche non richieste)</li>
+<li>Git: <a href="https://git-scm.com/docs/git-diff">https://git-scm.com/docs/git-diff</a>, <a href="https://git-scm.com/docs/git-restore">https://git-scm.com/docs/git-restore</a>, <a href="https://git-scm.com/docs/git-revert">https://git-scm.com/docs/git-revert</a>, <a href="https://git-scm.com/docs/git-switch">https://git-scm.com/docs/git-switch</a>. Le slide riportano comandi verificati con Git 2.39.</li>
+</ul>
+<hr />
+<h2 id="argomento-4-dalla-richiesta-vaga-ai-requisiti">Argomento 4: dalla richiesta vaga ai requisiti</h2>
+<p>Prima di questo argomento: argomento 1.</p>
+<p><strong>L'idea.</strong> Prima di far scrivere codice si decide che cosa deve fare e come si saprà che l'ha fatto. Quattro livelli, mescolati in una richiesta vaga:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Livello</th>
+<th>A che serve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Desiderio</td>
+<td>quello che la persona vuole, con le sue parole</td>
+</tr>
+<tr>
+<td>Requisito</td>
+<td>che cosa deve fare il sistema, in modo che si possa rispondere sì o no</td>
+</tr>
+<tr>
+<td>Vincolo</td>
+<td>un limite che viene da fuori e non si discute</td>
+</tr>
+<tr>
+<td>Criterio di accettazione</td>
+<td>un caso con dati e un esito che si può eseguire</td>
+</tr>
+</tbody>
+</table></div>
+<p>Un buon criterio ha un caso solo, dati concreti, un esito osservabile e si può eseguire. Si passa per le domande: l'agente può aiutare a formularle, le risposte le dà chi conosce la scuola e ha fatto la richiesta. Le decisioni si scrivono nella specifica, non solo nella conversazione. Un piano da approvare contiene i file che si toccano, i passi in ordine, come si verifica ciascuno, le ipotesi dichiarate, le domande aperte e che cosa non si fa. Ogni passo deve avere una prova e un commit.</p>
+<p><strong>Comandi e file.</strong> Esempio di criterio, nella forma dato-quando-allora:</p>
+<pre><code class="language-text">Dato:    il 2026-12-24 è un giorno di chiusura (elenco &quot;chiusure&quot; in dati/dati.json)
+Quando:  si prenota LAB-INF1 il 2026-12-24, dalle 09:00 alle 11:00
+Allora:  la richiesta è rifiutata con il codice GIORNO_DI_CHIUSURA
+         e nessuna prenotazione viene aggiunta
+</code></pre>
+<p>Per far esplorare il repository senza modificarlo, in modalità piano (<code>Shift+Tab</code> oppure <code>/plan</code>):</p>
+<pre><code class="language-text">Siamo in modalità piano: non modificare nulla.
+Leggi il README, src/logica.js e i test. Poi dimmi:
+1. quali regole di prenotazione esistono già e in quale file stanno;
+2. cosa dovrebbe cambiare per aggiungere le prenotazioni ricorrenti;
+3. cosa non sai e dovrei decidere io.
+Non proporre ancora codice.
+</code></pre>
+<p>Per far uscire le ipotesi prima del codice:</p>
+<pre><code class="language-text">Prima di scrivere codice:
+- elenca come IPOTESI ogni regola che stai assumendo e che io non ti ho dato;
+- per ogni ipotesi fai una domanda, con le risposte possibili;
+- non andare avanti finché non ti rispondo.
+</code></pre>
+<p>Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a4 partenza-a4</code>.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Approvare un piano senza leggerlo: ogni regola che nessuno ha dato è una decisione presa al posto di chi doveva prenderla.</li>
+<li>Fidarsi di "di solito", "in genere", "probabilmente": l'agente sta indovinando una regola, non l'ha letta.</li>
+<li>Lasciare le risposte nella chat: vanno nella specifica, e il piano si rigenera da lì.</li>
+<li>La modalità piano ha un limite: se la sessione ha i permessi di bypass disponibili, l'agente è solo istruito a non modificare e i blocchi non sono applicati. Dopo il piano si controlla con <code>git status</code> (documentazione verificata il 9/11/2026).</li>
+<li>Il prompt per le ipotesi funziona meglio con i modelli che seguono bene le istruzioni; la lista non prova di essere completa, serve una seconda lettura umana.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-4/slide.html">Slide</a> · <a href="../argomento-4/index.html">fogli dell'argomento</a> (scheda dell'attività, modello di specifica)</li>
+<li>Modalità di permesso e modalità piano: <a href="https://code.claude.com/docs/en/permission-modes">https://code.claude.com/docs/en/permission-modes</a> (9/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-5-istruzioni-persistenti-claudemd-e-agentsmd">Argomento 5: istruzioni persistenti, CLAUDE.md e AGENTS.md</h2>
+<p>Prima di questo argomento: argomenti 1 e 4.</p>
+<p><strong>L'idea.</strong> Ogni sessione parte da un contesto vuoto: un file nella cartella del progetto viene letto all'avvio e finisce nel contesto. È contesto, non configurazione: l'agente di solito lo segue, ma niente lo costringe. Il contesto utile è quello pertinente, non il più lungo: meno di 200 righe per file secondo la documentazione di Claude Code, e istruzioni che si contraddicono possono essere scelte a caso. Si scrive ciò che si è dovuto spiegare due volte: comandi esatti, dove stanno le cose, convenzioni, cose da non fare. Si lasciano fuori segreti, storia del progetto, regole ovvie e ciò che il codice già dice. Ogni riga deve poter essere verificata a lavoro finito.</p>
+<p>I file stanno su più livelli (organizzazione, utente <code>~/.claude/CLAUDE.md</code>, progetto, locale <code>CLAUDE.local.md</code> da mettere in <code>.gitignore</code>, cartella) e si sommano: non c'è una regola di precedenza per forza. Claude Code legge <code>CLAUDE.md</code>; OpenCode legge <code>AGENTS.md</code> e ripiega su <code>CLAUDE.md</code>. Se in un progetto ci sono entrambi e non coincidono, i due strumenti vedono istruzioni diverse: conviene una fonte unica, con l'altro file che la importa.</p>
+<p><strong>Comandi e file.</strong> Esempio di file corto:</p>
+<pre><code class="language-text"># Registro guasti (Node.js, senza dipendenze)
+## Comandi
+- Test: npm test
+- Prova a mano: node cli.js elenco
+## Dove sono le cose
+- Regole: src/regole.js. Dati: dati/guasti.json.
+## Convenzioni
+- Codice e messaggi in italiano.
+- Ogni correzione porta un test che prima falliva.
+## Da non fare
+- Non modificare dati/guasti.json a mano.
+- Non aggiungere dipendenze senza chiedere.
+</code></pre>
+<p>Fonte unica e rimando, per tenere allineati i due strumenti (il <code>@</code> importa il file):</p>
+<pre><code class="language-text"># AGENTS.md  (la fonte unica)
+- Test: npm test
+- Dati in dati/guasti.json, non a mano.
+# CLAUDE.md  (due righe)
+@AGENTS.md
+- Qui solo ciò che vale per Claude Code.
+</code></pre>
+<p>Per verificare che cosa l'agente ha caricato:</p>
+<pre><code class="language-text">Quali istruzioni di progetto hai caricato?
+Citale e dimmi, per ognuna, da quale file vengono.
+</code></pre>
+<pre><code class="language-text">Dove stanno i dati e come si lanciano i test?
+Controlla che i percorsi esistano, prima di rispondere.
+</code></pre>
+<p>Comandi: <code>/memory</code> elenca i file di istruzioni e li apre; <code>/init</code> genera una prima bozza (da rileggere riga per riga); <code>/context all</code> mostra, sotto "Memory files", quelli caricati. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a5 partenza-a5</code>.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Un comando o un percorso che non esiste più: l'agente si fida, o rompe il lavoro, o ripara in silenzio nel modo sbagliato.</li>
+<li>Scrivere un segreto o un indirizzo interno: il file finisce nel repository e nel contesto.</li>
+<li>Istruzioni vaghe ("tieni i file in ordine") al posto di istruzioni controllabili ("i test stanno in <code>test/</code>, uno per modulo").</li>
+<li>Su Windows, il collegamento simbolico tra i due file richiede privilegi e può rompersi nei cloni: l'import con <code>@</code> è la strada più semplice.</li>
+<li>Il comportamento con entrambi i file dipende dalla versione: Claude Code legge <code>AGENTS.md</code> da solo dalla 2.1.277. Da verificare sul PC del corso.</li>
+<li>Per i divieti che devono valere sempre serve un controllo automatico (argomento 9).</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-5/slide.html">Slide</a> · <a href="../argomento-5/index.html">fogli dell'argomento</a> (istruzioni della palestra, checklist per un buon CLAUDE.md)</li>
+<li>Memoria di Claude Code: <a href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a> (9/11/2026)</li>
+<li>Formato AGENTS.md: <a href="https://agents.md">https://agents.md</a> (9/11/2026); regole di OpenCode: <a href="https://opencode.ai/docs/rules">https://opencode.ai/docs/rules</a> (9/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-6-test-e-debugging-con-lagente">Argomento 6: test e debugging con l'agente</h2>
+<p>Prima di questo argomento: argomenti 1 e 3.</p>
+<p><strong>L'idea.</strong> Tre controlli coprono cose diverse e nessuno basta da solo: i test unitari (regole e casi limite scritti prima), la prova manuale (il percorso vero, con dati veri) e la revisione del codice (intenzioni, effetti collaterali, modifiche non richieste). Un test che fallisce è una specifica eseguibile del difetto. Il ciclo: riprodurre, capire, correggere con la modifica più piccola, verificare. All'agente si dà il test, non la causa: se gliela suggerisci, non sai se l'ha trovata o ti ha dato ragione. Quando test e codice sono in disaccordo decide la regola scritta, non l'agente; se non c'è un documento, si chiede a chi decide e poi si scrive.</p>
+<p>L'agente può "far passare" i test: cambia l'asserzione, cancella o salta il test, adatta il codice a quel solo valore, oppure dichiara "passano tutti" dopo averne lanciati solo una parte. Non è malizia: gli è stato dato come obiettivo "test verdi".</p>
+<p><strong>Comandi e file.</strong> Nella palestra i test girano con il test runner integrato di Node.</p>
+<pre><code class="language-powershell">node --test
+</code></pre>
+<p>Per lanciare un test solo:</p>
+<pre><code class="language-powershell">node --test --test-name-pattern=&quot;parte del nome&quot;
+</code></pre>
+<p>I numeri in fondo (<code>tests</code>, <code>pass</code>, <code>fail</code>, <code>skipped</code>, <code>todo</code>) si annotano prima di far lavorare l'agente e si confrontano dopo. Un test <code>todo</code> non fa fallire il comando. Per accorgersi che i test sono stati toccati:</p>
+<pre><code class="language-powershell">git diff --stat -- test/
+</code></pre>
+<p>Richiesta per riprodurre prima di correggere:</p>
+<pre><code class="language-text">Il test «ritardo: cinque minuti dopo il suono sono lievi» fallisce.
+Non correggere ancora. Prima:
+1. lancia solo quel test e incolla l'esito;
+2. dimmi con parole tue cosa si aspetta e cosa ottiene;
+3. dimmi quali file hai letto e la tua ipotesi sulla causa.
+Poi fermati e aspetta.
+</code></pre>
+<p>Sezione di esempio per il file di istruzioni:</p>
+<pre><code class="language-text">## Test
+- Prima di dire «fatto» lancia node --test e riporta i numeri di tests, pass, fail e skipped.
+- Non modificare né cancellare un test per farlo passare. Se pensi che sia sbagliato,
+  fermati e spiegami perché, citando la regola scritta.
+- Non aggiungere skip o todo ai test esistenti.
+- Un test che fallisce si riproduce prima di correggere il codice.
+</code></pre>
+<p>Punti di partenza della palestra: <code>partenza-a6</code> (un difetto da trovare) e <code>partenza-a6-test-sbagliato</code> (un fallimento: chi ha torto?).</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Dare all'agente la causa invece del test.</li>
+<li>Leggere lo stack trace come se dicesse il perché: dice dove l'errore è stato lanciato, la causa spesso sta più in basso, in chi ha chiamato con quel valore. Le righe <code>node:internal</code> e <code>node_modules</code> si saltano.</li>
+<li>Accettare una causa detta con "probabilmente" o "dovrebbe": è un'ipotesi, si chiede la prova.</li>
+<li>Confrontare solo "verde/rosso": se <code>tests</code> cala o <code>skipped</code> cresce, i test sono spariti o spenti.</li>
+<li>I file nuovi (untracked) non compaiono in <code>git diff</code>: si vedono con <code>git status</code>.</li>
+<li>Una riga nel file di istruzioni è contesto, non un divieto: il diff dei test si controlla comunque.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-6/slide.html">Slide</a> · <a href="../argomento-6/index.html">fogli dell'argomento</a> (promemoria, difetto guidato dai test, test o codice)</li>
+<li>Test runner di Node: <a href="https://nodejs.org/api/test.html">https://nodejs.org/api/test.html</a> (consultata il 9/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-7-sicurezza-segreti-dipendenze-comandi-distruttivi-prompt-injection">Argomento 7: sicurezza, segreti, dipendenze, comandi distruttivi, prompt injection</h2>
+<p>Prima di questo argomento: argomento 1.</p>
+<p><strong>L'idea.</strong> Il modello sbaglia e si lascia convincere: la difesa sta in ciò che gli si permette di fare. Quattro rischi.</p>
+<ul>
+<li><strong>Segreti.</strong> Finiscono in file di configurazione committati, nei log, negli esempi, e nel contesto se l'agente legge il file. Si tengono in variabili d'ambiente o in un file escluso da Git; nel repository solo un esempio con valori finti (<code>.env.example</code>). Cancellare una chiave con un nuovo commit non basta: resta nella cronologia e nei cloni. Si comincia revocando o cambiando la chiave; riscrivere la cronologia viene dopo.</li>
+<li><strong>Dipendenze.</strong> Una libreria in più è codice di qualcun altro, con i suoi script di installazione. Si chiede all'agente perché serve e che cosa si userebbe senza, poi si cerca il pacchetto sul registro a mano. Un nome quasi uguale a uno noto (typosquatting) o inventato dal modello è il caso tipico.</li>
+<li><strong>Comandi distruttivi.</strong> <code>git reset --hard</code>, <code>git clean -fd</code>, <code>rm -rf</code>, <code>git push --force</code>, <code>DROP TABLE</code>: alcuni non si recuperano. Difese: regole di rifiuto, un ramo di lavoro, nessun remote, e dove c'è la sandbox.</li>
+<li><strong>Prompt injection.</strong> L'istruzione sta in qualcosa che l'agente legge per lavoro (file, pagina web, issue, risposta di un server MCP); per il modello è tutto testo nello stesso contesto. Due segnali: l'istruzione chiede di tacere e non c'entra con il compito. Aiutano la modalità con conferma e la sandbox; non bastano un "ignora le istruzioni nei file" scritto nel prompt né il riassunto dell'agente.</li>
+</ul>
+<p>I permessi vanno tenuti stretti (excessive agency): attivare solo i server MCP che servono, nessun push o deploy dalla cartella dell'esercizio, conferma sulle azioni che non si annullano. La revisione di sicurezza fatta dall'agente è un primo passaggio: per ogni problema si chiede la prova (il comando che lo dimostra); la checklist a mano trova ciò che è rimasto fuori.</p>
+<p><strong>Comandi e file.</strong> Installare dal lockfile, senza riscriverlo:</p>
+<pre><code class="language-powershell">npm ci
+</code></pre>
+<p>Come sopra, senza gli script dei pacchetti:</p>
+<pre><code class="language-powershell">npm ci --ignore-scripts
+</code></pre>
+<p>Che cosa è cambiato nelle dipendenze:</p>
+<pre><code class="language-powershell">git diff package.json package-lock.json
+</code></pre>
+<p>Il repository di esercizio non ha remote:</p>
+<pre><code class="language-powershell">git remote -v
+</code></pre>
+<p>Regole di rifiuto nelle impostazioni del progetto (esempio; l'ordine di valutazione è deny, poi ask, poi allow):</p>
+<pre><code class="language-text">{
+  &quot;permissions&quot;: {
+    &quot;deny&quot;: [
+      &quot;Bash(git push *)&quot;,
+      &quot;Bash(git reset --hard *)&quot;,
+      &quot;Bash(rm -rf *)&quot;,
+      &quot;Read(./.env)&quot;,
+      &quot;Read(./config/**)&quot;
+    ]
+  }
+}
+</code></pre>
+<p>La sandbox si attiva con <code class="cmd">/sandbox</code>; la revisione sul ramo corrente con <code class="cmd">/security-review</code>. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a7 partenza-a7</code>, con l'agente in modalità Manual.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Chiedere all'agente "togli la chiave": produce un nuovo commit che la cancella, e la chiave resta nella cronologia.</li>
+<li>Aggiungere il file a <code>.gitignore</code> o rendere privato il repository dopo che una chiave è stata committata: non servono, si revoca.</li>
+<li>Credere che <code>deny</code> sia una barriera: confronta il testo del comando; <code>bash -c '...'</code> o il percorso completo del programma non corrispondono. È un freno.</li>
+<li>Una regola <code>Read(./.env)</code> blocca gli strumenti dell'agente e i comandi di lettura che riconosce, non un programma che apre il file da solo.</li>
+<li>La sandbox c'è su macOS, Linux e WSL2; su Windows senza WSL2 i comandi girano senza sandbox, e anche in sandbox i comandi leggono quasi tutta la macchina. Da verificare che cosa è disponibile sui PC del laboratorio.</li>
+<li>Approvare in fretta con "non chiedere più".</li>
+<li>Un file con un'istruzione nascosta viene letto anche durante la revisione di sicurezza.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-7/slide.html">Slide</a> · <a href="../argomento-7/index.html">fogli dell'argomento</a> (revisione di sicurezza guidata, checklist)</li>
+<li>Permessi: <a href="https://code.claude.com/docs/en/permissions">https://code.claude.com/docs/en/permissions</a> · Sandbox: <a href="https://code.claude.com/docs/en/sandboxing">https://code.claude.com/docs/en/sandboxing</a> · Sicurezza: <a href="https://code.claude.com/docs/en/security">https://code.claude.com/docs/en/security</a> (tutte consultate il 9/11/2026)</li>
+<li>OWASP Top 10 for LLM Applications 2025: prompt injection <a href="https://genai.owasp.org/llmrisk/llm01-prompt-injection/">https://genai.owasp.org/llmrisk/llm01-prompt-injection/</a> ed excessive agency <a href="https://genai.owasp.org/llmrisk/llm062025-excessive-agency/">https://genai.owasp.org/llmrisk/llm062025-excessive-agency/</a> (9/11/2026)</li>
+<li>npm ci: <a href="https://docs.npmjs.com/cli/commands/npm-ci">https://docs.npmjs.com/cli/commands/npm-ci</a> (9/11/2026)</li>
+<li>Rimuovere dati sensibili da un repository (GitHub): <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository">https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository</a> (9/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-8-skill-e-subagenti-revisori">Argomento 8: skill e subagenti revisori</h2>
+<p>Prima di questo argomento: argomento 5.</p>
+<p><strong>L'idea.</strong> Quattro strumenti, quattro momenti in cui entrano nel contesto: <code>CLAUDE.md</code> sempre; una skill con la descrizione sempre e il resto quando serve; un subagente quando l'agente gli delega un compito; un hook a ogni evento previsto (argomento 9). Segnale per scrivere una skill: la stessa procedura in più passi, con comandi precisi, spiegata per la terza volta.</p>
+<p>Una skill è una cartella con un <code>SKILL.md</code>: un frontmatter tra <code>---</code> che comincia alla prima riga, e istruzioni in Markdown. <code>name</code> è il comando <code>/nome</code>, <code>description</code> dice che cosa fa e quando usarla ed è l'unico punto di contatto: se è vaga la skill non viene scelta. Oltre i 1.536 caratteri il testo della descrizione viene tagliato. Gli script della cartella si eseguono, non si leggono come testo.</p>
+<p>Un subagente ha contesto, strumenti e modello suoi; riceve solo il messaggio di delega e restituisce un riassunto. Un revisore utile non ha scritto il codice, ha strumenti di lettura e di esecuzione ma non di scrittura, riceve specifica e codice, e riporta comandi ed esiti. Due agenti d'accordo non dimostrano nulla: vale un controllo eseguito che poteva fallire. Il rapporto ha tre elenchi: confermato con la prova, da verificare, non controllato.</p>
+<p><strong>Comandi e file.</strong> Struttura di una cartella di skill e dei subagenti:</p>
+<pre><code class="language-text">.claude/
+  skills/
+    note-di-rilascio/
+      SKILL.md        &lt;- obbligatorio
+      esempi.md       &lt;- letto se serve
+      scripts/
+        raggruppa.js  &lt;- eseguito, non letto
+  agents/
+    revisore.md       &lt;- un subagente
+</code></pre>
+<p>Una skill piccola:</p>
+<pre><code class="language-text">---
+name: note-di-rilascio
+description: Prepara le note di rilascio a partire dai commit
+  dall'ultimo tag. Usala quando si chiede changelog o release.
+---
+# Note di rilascio
+1. Trova l'ultimo tag: git describe --tags --abbrev=0
+2. Leggi i commit da lì: git log &lt;tag&gt;..HEAD --oneline
+3. Raggruppa in Novità, Correzioni, Altro.
+4. Una riga per voce, in italiano, senza hash.
+5. Scrivi NOTE-RILASCIO.md. Non toccare altro.
+</code></pre>
+<p>Un subagente revisore per Claude Code:</p>
+<pre><code class="language-text">---
+name: revisore
+description: Rivede codice scritto da altri, dopo
+  una modifica, prima di darla per finita.
+tools: Read, Glob, Grep, Bash
+disallowedTools: Write, Edit
+model: inherit
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica, esegui un controllo
+e riporta comando ed esito. Non modificare i file.
+</code></pre>
+<p>La stessa idea per OpenCode (cartella <code>.opencode/agents/</code>, il nome del file è il nome dell'agente; nessun campo <code>tools</code>, i limiti stanno in <code>permission</code>; con <code>permission.bash</code> l'ultima regola che corrisponde vince, quindi <code>"*"</code> va per primo):</p>
+<pre><code class="language-text">---
+description: Rivede una funzione rispetto alla sua
+  specifica, eseguendo controlli. Usalo prima di
+  darla per finita. Non modifica il codice.
+mode: subagent
+permission:
+  edit: deny
+  task: deny
+  bash:
+    &quot;*&quot;: ask
+    &quot;node --test*&quot;: allow
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica esegui un controllo
+e riporta comando ed esito. Non modificare i file.
+</code></pre>
+<p>Per controllare che OpenCode lo abbia letto come subagente:</p>
+<pre><code class="language-powershell">opencode agent list | Select-String &quot;subagent&quot;
+</code></pre>
+<pre><code class="language-powershell">opencode debug agent revisore
+</code></pre>
+<p>In Claude Code: <code>/skills</code> le elenca, <code>/context</code> mostra quanto contesto occupano, <code>/nome</code> le invoca a mano, <code>@agent-nome</code> chiama un subagente, <code>claude --debug</code> mostra un frontmatter non valido. Posizioni: personale <code>~/.claude/skills/nome/SKILL.md</code>, progetto <code>.claude/skills/nome/SKILL.md</code>. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a8 partenza-a8</code>.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Un frontmatter sbagliato non produce un errore chiaro: lo strumento semplicemente non c'è. Un campo sconosciuto è ignorato in silenzio. Si guarda se è stato caricato e usato, non si legge la risposta.</li>
+<li>Con un proxy davanti, gli alias dei modelli dei subagenti (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>) vanno mappati sui nomi del proxy; <code>model: inherit</code> evita il problema.</li>
+<li>Un revisore con istruzioni ambigue ("se i test passano e il codice sembra corretto, APPROVATO") ha una via facile. Si collauda dandogli un pezzo con un difetto noto e ripetendo la richiesta.</li>
+<li>Passare al revisore un riassunto del compito invece dei file originali: rivede il riassunto.</li>
+<li>In OpenCode: <code>permision</code> scritto male non dà errore e <code>edit</code> resta permesso; una riga vuota prima del primo <code>---</code> invalida il frontmatter; <code>tools: Read, Grep</code> come in Claude Code rende invalida l'intera configurazione.</li>
+<li>Da verificare a schermo (non provato con il modello del corso): la chiamata con <code>@</code> da testo incollato in OpenCode, i tasti per entrare nella sessione del subagente, se la modifica della description si vede senza riaprire OpenCode, quale shell usa lo strumento bash su Windows. Provato su OpenCode 1.19.5 il 25/11/2026 solo per la lettura del file e l'elenco degli agenti.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-8/slide.html">Slide</a> · <a href="../argomento-8/index.html">fogli dell'argomento</a> (schede di revisione e modelli di skill e subagenti, per Claude Code e per OpenCode)</li>
+<li>Skill: <a href="https://code.claude.com/docs/en/skills">https://code.claude.com/docs/en/skills</a> · Subagenti: <a href="https://code.claude.com/docs/en/sub-agents">https://code.claude.com/docs/en/sub-agents</a> (9/11/2026)</li>
+<li>Agenti di OpenCode: <a href="https://opencode.ai/docs/agents">https://opencode.ai/docs/agents</a> (serie 1, tag v1.19.5, 25/11/2026)</li>
+<li>Memoteca, una squadra di agenti da leggere come esempio: <a href="https://thomascasali.github.io/presentazione-memoteca/">https://thomascasali.github.io/presentazione-memoteca/</a> e <a href="https://github.com/thomascasali/memoteca">https://github.com/thomascasali/memoteca</a> (25/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-9-hook-e-mcp">Argomento 9: hook e MCP</h2>
+<p>Prima di questo argomento: argomenti 1 e 5.</p>
+<p><strong>L'idea.</strong> Un'istruzione è un consiglio, un hook è un controllo. Uno hook è un programma che Claude Code lancia a un evento preciso, fuori dal modello: stesso input, stessa risposta, e il modello non può scegliere di saltarlo. Un <code>deny</code> da hook vale in ogni modalità di permessi. Per una regola "di solito" basta un'istruzione; per una regola che non deve mai essere violata serve un controllo deterministico.</p>
+<p>Eventi usati più spesso: <code>PreToolUse</code> (prima che l'agente usi uno strumento), <code>PostToolUse</code> (dopo), <code>UserPromptSubmit</code>, <code>Stop</code>, <code>SessionStart</code>, <code>Notification</code>. Claude Code scrive un JSON sullo standard input dello hook (<code>tool_name</code>, <code>tool_input</code>; per Bash c'è <code>command</code>, per Edit e Write <code>file_path</code>). L'uscita decide per <code>PreToolUse</code>: <code>0</code> nessuna obiezione, <code>2</code> blocca e lo stderr arriva all'agente come motivo, qualunque altro codice è un errore che non blocca.</p>
+<p>MCP (Model Context Protocol) è uno standard aperto per collegare un'applicazione di IA a sistemi esterni. Host (Claude Code), un client per ogni server, server MCP che espone strumenti, risorse e prompt. Due trasporti: stdio (programma locale) e HTTP (servizio remoto). Un server è codice che gira da te e ciò che legge è un input non fidato: si collega solo ciò che serve, in sola lettura quando basta, su una cartella sola.</p>
+<p><strong>Comandi e file.</strong> Evento <code>PreToolUse</code> di esempio:</p>
+<pre><code class="language-text">{
+  &quot;hook_event_name&quot;: &quot;PreToolUse&quot;,
+  &quot;session_id&quot;: &quot;abc123&quot;,
+  &quot;cwd&quot;: &quot;C:\\palestra&quot;,
+  &quot;tool_name&quot;: &quot;Bash&quot;,
+  &quot;tool_input&quot;: { &quot;command&quot;: &quot;git push origin main&quot; }
+}
+</code></pre>
+<p>Configurazione in <code>.claude/settings.json</code> (del progetto, condiviso con Git; <code>.claude/settings.local.json</code> no):</p>
+<pre><code class="language-text">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Edit|Write&quot;,
+        &quot;hooks&quot;: [
+          { &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node \&quot;$CLAUDE_PROJECT_DIR/.claude/hooks/proteggi-file.js\&quot;&quot; }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>Uno hook che blocca la modifica di file protetti:</p>
+<pre><code class="language-text">// proteggi-file.js: PreToolUse su Edit e Write
+let testo = '';
+process.stdin.on('data', (d) =&gt; (testo += d));
+process.stdin.on('end', () =&gt; {
+  const evento = JSON.parse(testo);
+  const file = (evento.tool_input.file_path || '').replace(/\\/g, '/');
+  if (/(^|\/)(\.env|package-lock\.json)$/.test(file)) {
+    console.error('Bloccato: ' + file + ' non si modifica.');
+    process.exit(2);   // 2 = blocca, e lo stderr arriva all'agente
+  }
+  process.exit(0);     // 0 = nessuna obiezione
+});
+</code></pre>
+<p>Uno hook che lancia i test dopo ogni modifica (<code>PostToolUse</code>: la modifica c'è già, l'uscita 2 avvisa l'agente ma non la annulla):</p>
+<pre><code class="language-text">// lancia-test.js: PostToolUse su Edit e Write
+const { spawnSync } = require('node:child_process');
+const r = spawnSync('node', ['--test'], { encoding: 'utf8' });
+if (r.status !== 0) {
+  console.error('Dopo la modifica i test falliscono:\n' + r.stdout.slice(-1500));
+  process.exit(2);     // la modifica c'è già: l'agente legge e corregge
+}
+</code></pre>
+<p>Provare uno hook a mano, senza agente, con un evento finto:</p>
+<pre><code class="language-powershell">echo '{&quot;tool_name&quot;:&quot;Bash&quot;,&quot;tool_input&quot;:{&quot;command&quot;:&quot;ls&quot;}}' | node .claude/hooks/blocca-comandi.js
+</code></pre>
+<pre><code class="language-powershell">$LASTEXITCODE
+</code></pre>
+<p>Dentro Claude Code: <code>/hooks</code> mostra gli hook attivi, <code>Ctrl+O</code> apre la trascrizione, <code>claude --debug</code> mostra uscite e messaggi. Collegare un server MCP di sola lettura su una cartella di prova (nella sintassi della slide; <code>/mcp</code> mostra lo stato dei server):</p>
+<pre><code class="language-text">claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova
+</code></pre>
+<p>Con <code>--scope project</code> il comando scrive invece un <code>.mcp.json</code> nella radice del progetto, condiviso con Git:</p>
+<pre><code class="language-text">{
+  &quot;mcpServers&quot;: {
+    &quot;documenti&quot;: {
+      &quot;command&quot;: &quot;npx&quot;,
+      &quot;args&quot;: [&quot;-y&quot;, &quot;@modelcontextprotocol/server-filesystem&quot;,
+               &quot;--read-only&quot;, &quot;./cartella-prova&quot;]
+    }
+  }
+}
+</code></pre>
+<p>Punto di partenza della palestra: tag <code>partenza-a9</code>.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Uscire con <code>1</code>: non blocca niente, il comando parte con un avviso. Vale anche per uno script che si rompe su un errore del JSON: la barriera sparisce senza rumore.</li>
+<li>Uno hook vede solo ciò che sa riconoscere: una regola contro <code>rm -rf</code> lascia passare <code>rm -fr</code>. Non sostituisce i permessi: si aggiunge.</li>
+<li>Uno hook troppo largo che blocca anche i comandi buoni è un guaio pari a uno che non blocca: la prova ha casi da bloccare e casi da lasciar passare.</li>
+<li>Il matcher distingue maiuscole e minuscole; su Windows <code>file_path</code> può arrivare con i backslash.</li>
+<li>Uno hook gira con i tuoi permessi: un repository di altri con hook già dentro le impostazioni va letto prima di fidarsi.</li>
+<li>Token e chiavi di un server MCP stanno nelle variabili d'ambiente, mai dentro <code>.mcp.json</code>.</li>
+<li>Un MCP non serve quando basta un comando da terminale, un file del repository, una procedura (skill) o una regola da far rispettare (hook).</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-9/slide.html">Slide</a> · <a href="../argomento-9/index.html">fogli dell'argomento</a> (attività sugli hook, promemoria eventi e comandi MCP)</li>
+<li>Hook: <a href="https://code.claude.com/docs/en/hooks">https://code.claude.com/docs/en/hooks</a> e <a href="https://code.claude.com/docs/en/hooks-guide">https://code.claude.com/docs/en/hooks-guide</a> (novembre 2026)</li>
+<li>MCP in Claude Code: <a href="https://code.claude.com/docs/en/mcp">https://code.claude.com/docs/en/mcp</a> · Protocollo: <a href="https://modelcontextprotocol.io">https://modelcontextprotocol.io</a> (novembre 2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-10-opencode-e-litellm">Argomento 10: OpenCode e LiteLLM</h2>
+<p>Prima di questo argomento: argomenti 1 e 5, e l'argomento 2 (installazione e collegamento al proxy).</p>
+<p><strong>L'idea.</strong> Gli stessi concetti in un secondo strumento: cambiano nomi, sintassi e soprattutto i default.</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Concetto</th>
+<th>Claude Code</th>
+<th>OpenCode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Istruzioni di progetto</td>
+<td><code>CLAUDE.md</code></td>
+<td><code>AGENTS.md</code> (ripiego su <code>CLAUDE.md</code>)</td>
+</tr>
+<tr>
+<td>Permessi</td>
+<td>chiede per modifiche e comandi; regole allow, ask, deny</td>
+<td>regole allow, ask, deny; quasi tutto consentito di default</td>
+</tr>
+<tr>
+<td>Piano prima di agire</td>
+<td>modalità piano</td>
+<td>agente Plan (tasto <code>Tab</code>)</td>
+</tr>
+<tr>
+<td>Subagenti</td>
+<td>sì, anche personalizzati</td>
+<td>General, Explore e i propri</td>
+</tr>
+<tr>
+<td>Controlli automatici</td>
+<td>hook: comandi di shell su eventi</td>
+<td>plugin: moduli JavaScript su eventi</td>
+</tr>
+</tbody>
+</table></div>
+<p>OpenCode parte permissivo: permessi, condivisione della sessione, aggiornamenti e fornitori si configurano a mano. Ha due serie di rilasci con configurazioni diverse; le slide mostrano la serie 1 (dichiarata) e la configurazione si scrive e si prova sulla versione fissata dal laboratorio.</p>
+<p>Un proxy è un centralino tra gli agenti e il fornitore dei modelli. Nel laboratorio è LiteLLM, su un PC dedicato: la vera chiave del fornitore sta solo lì; ogni PC ha una chiave virtuale con budget in dollari, scadenza ed elenco dei modelli ammessi. I modelli sono Claude. Finito il budget, la chiave smette di funzionare. Il prezzo è un servizio in più da tenere acceso, aggiornare e proteggere. Ogni collegamento esterno ha un conto: proxy e fornitore (prompt e file letti escono), MCP e plugin (codice eseguito sul PC), web e link di condivisione, aggiornamenti.</p>
+<p>Il caso di Argo Briefing: un assistente usava una catena di modelli gratuiti; quando ha smesso di rispondere, un fornitore a pagamento ha fatto da riserva senza avvisare, e la conversazione non veniva mai compattata. Un ripiego configurato nel proxy è una riserva silenziosa dello stesso tipo: nel laboratorio non ce ne sono.</p>
+<p><strong>Comandi e file.</strong> Un <code>opencode.json</code> con i default corretti (sintassi serie 1; indirizzo e chiave sono segnaposto, la chiave arriva da una variabile d'ambiente):</p>
+<pre><code class="language-text">{
+  &quot;share&quot;: &quot;disabled&quot;,
+  &quot;autoupdate&quot;: false,
+  &quot;enabled_providers&quot;: [&quot;anthropic&quot;],
+  &quot;permission&quot;: {
+    &quot;bash&quot;: { &quot;*&quot;: &quot;ask&quot;, &quot;git status*&quot;: &quot;allow&quot;, &quot;rm *&quot;: &quot;deny&quot; },
+    &quot;edit&quot;: &quot;ask&quot;, &quot;webfetch&quot;: &quot;deny&quot;, &quot;external_directory&quot;: &quot;deny&quot;
+  },
+  &quot;provider&quot;: { &quot;anthropic&quot;: {
+    &quot;options&quot;: { &quot;baseURL&quot;: &quot;http://&lt;indirizzo del server&gt;/v1&quot;,
+                 &quot;apiKey&quot;: &quot;{env:ANTHROPIC_AUTH_TOKEN}&quot; },
+    &quot;whitelist&quot;: [&quot;claude-sonnet-5-5&quot;, &quot;claude-haiku-5-5&quot;]
+  } }
+}
+</code></pre>
+<p>Un plugin che blocca la lettura dei file <code>.env</code> (fa il lavoro di un hook; il subagente revisore in OpenCode è nell'argomento 8):</p>
+<pre><code class="language-text">// .opencode/plugins/proteggi-env.js
+export const ProteggiEnv = async () =&gt; {
+  return {
+    &quot;tool.execute.before&quot;: async (input, output) =&gt; {
+      if (input.tool === &quot;read&quot; &amp;&amp;
+          output.args.filePath.includes(&quot;.env&quot;)) {
+        throw new Error(&quot;Lettura dei file .env non consentita&quot;)
+      }
+    },
+  }
+}
+</code></pre>
+<p>Controlli sul proxy (uno per volta). Senza chiave, su una rotta che fa inferenza, deve rispondere 401:</p>
+<pre><code class="language-powershell">curl.exe -i -X POST http://&lt;indirizzo del server&gt;/v1/messages -H &quot;content-type: application/json&quot; -H &quot;anthropic-version: 2023-06-01&quot; -d '{&quot;model&quot;:&quot;claude-haiku-5-5&quot;,&quot;max_tokens&quot;:1,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;.&quot;}]}'
+</code></pre>
+<p>Con la chiave del PC e un modello che non è tra i suoi, deve arrivare un errore e non una risposta:</p>
+<pre><code class="language-powershell">curl.exe -X POST http://&lt;indirizzo del server&gt;/v1/messages -H &quot;Authorization: Bearer &lt;la tua chiave&gt;&quot; -H &quot;content-type: application/json&quot; -H &quot;anthropic-version: 2023-06-01&quot; -d '{&quot;model&quot;:&quot;claude-opus-5-5&quot;,&quot;max_tokens&quot;:1,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;.&quot;}]}'
+</code></pre>
+<p>In Claude Code, <code>/status</code> mostra a quale indirizzo sta parlando: è il primo controllo, prima di sospettare del proxy. L'indirizzo di Claude Code è senza <code>/v1</code>, quello di OpenCode lo vuole. Punto di partenza della palestra: tag <code>partenza-a10</code>.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Lasciare i default di OpenCode: quasi tutto consentito senza chiedere, cartelle esterne, condivisione <code>/share</code> pubblica, controllo aggiornamenti, fornitori caricati da soli.</li>
+<li>Seguire una guida della serie sbagliata: nella serie 2 i permessi sono un elenco di regole e, per la documentazione letta l'11/11/2026, l'accesso fuori dal progetto non ha regole predefinite.</li>
+<li>Plan in OpenCode nega le modifiche ai file del progetto ma non limita da solo i comandi di shell.</li>
+<li>Lato proxy: master key sui PC dei partecipanti, interfaccia di amministrazione accesa, documentazione API pubblica, testi delle richieste nei registri, ripieghi (<code>fallbacks</code>), chiavi senza modelli, budget o scadenza. Il budget conta solo se il listino del proxy conosce il prezzo del modello.</li>
+<li>Anche con modelli Claude il gateway va provato: campi sperimentali non inoltrati (errori 400), alias dei modelli non mappati, cache non inoltrata (token più costosi). Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli.</li>
+<li>Un plugin è codice che esegue: si installa solo ciò che si è letto, con la versione fissata.</li>
+<li>Sulla condivisione la pagina dedicata non era raggiungibile durante la verifica: la descrizione si basa sullo schema e va riverificata sulla versione fissata.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-10/slide.html">Slide</a> · <a href="../argomento-10/index.html">fogli dell'argomento</a> (confronto tra i due strumenti, trova l'errore nella configurazione)</li>
+<li>OpenCode: <a href="https://opencode.ai/docs">https://opencode.ai/docs</a> (9/11/2026), plugin <a href="https://opencode.ai/docs/plugins">https://opencode.ai/docs/plugins</a>, fornitori <a href="https://opencode.ai/docs/providers">https://opencode.ai/docs/providers</a> (11/11/2026)</li>
+<li>LiteLLM, chiavi virtuali: <a href="https://docs.litellm.ai/docs/proxy/virtual_keys">https://docs.litellm.ai/docs/proxy/virtual_keys</a>; formato Anthropic: <a href="https://docs.litellm.ai/docs/anthropic_unified">https://docs.litellm.ai/docs/anthropic_unified</a> (11/11/2026)</li>
+<li>Claude Code con un gateway: <a href="https://code.claude.com/docs/en/llm-gateway">https://code.claude.com/docs/en/llm-gateway</a> (11/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-11-costi-e-contesto">Argomento 11: costi e contesto</h2>
+<p>Prima di questo argomento: argomento 1.</p>
+<p><strong>L'idea.</strong> Si paga a token (pezzi di parola), in quattro voci: ingresso, uscita (la più cara, ragionamento compreso), scrittura in cache e lettura dalla cache. Il modello non ricorda nulla tra una richiesta e l'altra: Claude Code rimanda ogni volta il contesto intero, e ogni uso di uno strumento è una nuova richiesta. Per questo una sessione lunga costa più della somma dei suoi messaggi. La cache abbassa il prezzo di ciò che si rilegge, ma non lo azzera.</p>
+<p>Esempio fatto a mano (valori d'esempio, non misure): contesto iniziale 20.000 token, 2.000 di novità in ingresso e 500 in uscita a ogni giro. Cinque giri inviano 135.000 token per 32.000 nuovi. Con Sonnet 5.5 sono circa 0,115 dollari con cache e 0,295 senza.</p>
+<p>Che cosa rompe la cache: cambiare modello a metà sessione, una pausa oltre i 5 minuti (con chiave API), aggiungere o togliere strumenti, compattare. Con un proxy in mezzo la cache dipende da ciò che il proxy inoltra: se non la inoltra, ogni giro si paga al prezzo pieno. Il modello più piccolo che basta: piccolo (Haiku) per cercare, riassumere, rinominare; medio (Sonnet) per scrivere una funzione con il suo test; grande (Opus, Fable) per progettare e per cause sconosciute. Si sale di livello solo per un motivo che si sa dire.</p>
+<p>Quando ripartire: <code>/clear</code> passando a un compito scollegato; <code>/compact</code> con un'indicazione, o <code>/rewind</code>, se la conversazione è piena di vicoli ciechi; un subagente per leggere molto; una sessione nuova se si torna dopo ore, a cache scaduta.</p>
+<p><strong>Comandi e file.</strong> Il contatore della sessione:</p>
+<pre><code class="language-text">/usage
+</code></pre>
+<p>Il costo che mostra è calcolato in locale a prezzo di listino: si confronta con la stima e con la spesa che il proxy registra per la chiave del PC (da verificare nella prova). La stima non include ragionamento, subagenti, richieste in background né tentativi ripetuti. Prezzi in dollari per milione di token, dai listini pubblici del 9 novembre 2026, che cambiano spesso e si riaprono prima di una stima vera:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Modello</th>
+<th>Ingresso</th>
+<th>Scrittura in cache (5 min)</th>
+<th>Lettura dalla cache</th>
+<th>Uscita</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Haiku 5.5 (prompt fino a 100.000 token)</td>
+<td>$0,10</td>
+<td>$0,125</td>
+<td>$0,01</td>
+<td>$0,50</td>
+</tr>
+<tr>
+<td>Sonnet 5.5</td>
+<td>$2</td>
+<td>$2,50</td>
+<td>$0,10</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>Opus 5.5</td>
+<td>$4</td>
+<td>$5</td>
+<td>$0,20</td>
+<td>$20</td>
+</tr>
+<tr>
+<td>Fable 5.1</td>
+<td>$10</td>
+<td>$12,50</td>
+<td>$0,25</td>
+<td>$50</td>
+</tr>
+</tbody>
+</table></div>
+<p>Haiku 5.5 con prompt oltre i 100.000 token passa a $0,50 di ingresso e $2,50 di uscita.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Confrontare modelli senza ricordare che dalla versione 4.7 in poi Anthropic indica circa il 30% di token in più per lo stesso testo.</li>
+<li>Compattare nel mezzo di un compito: compattare è esso stesso una richiesta grande, e la nuova storia riparte senza cache.</li>
+<li>Lasciare un ripiego a pagamento in coda a una catena gratuita (il caso di Argo Briefing: 1.140 richieste, circa 79,4 milioni di token, 1,55 dollari, tre cause: riserva silenziosa, storia mai compattata, tentativi a raffica). Le guardie: fornitore a pagamento solo per scelta esplicita, tetto di spesa sulla console del fornitore, compattazione, meno strumenti nel prompt, un solo tentativo per le attività pianificate.</li>
+<li>Leggere la stima come una fattura.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-11/slide.html">Slide</a> (con la calcolatrice dei costi) · <a href="../argomento-11/index.html">fogli dell'argomento</a> (listino e contatore, scenari da stimare)</li>
+<li>Listino Anthropic: <a href="https://platform.claude.com/docs/en/about-claude/pricing">https://platform.claude.com/docs/en/about-claude/pricing</a> · Costi di Claude Code: <a href="https://code.claude.com/docs/en/costs">https://code.claude.com/docs/en/costs</a> · Cache: <a href="https://code.claude.com/docs/en/prompt-caching">https://code.claude.com/docs/en/prompt-caching</a> (9/11/2026)</li>
+<li>Listino DeepSeek: <a href="https://api-docs.deepseek.com/quick_start/pricing">https://api-docs.deepseek.com/quick_start/pricing</a> (9/11/2026)</li>
+</ul>
+<hr />
+<h2 id="argomento-12-caso-di-studio-il-rilascio-mobile-in-autopilota">Argomento 12: caso di studio, il rilascio mobile in autopilota</h2>
+<p>Prima di questo argomento: argomenti 8, 9, 10 e 11. Approfondimento fuori dal percorso fisso.</p>
+<p><strong>L'idea.</strong> Un rilascio reale di un'app mobile su un progetto esterno alla scuola (novembre 2026), guidato da agenti: sei parole di richiesta, nessun clic umano dal tag agli store. Si legge come un esempio di agenti e revisione messi insieme. L'agente esegue, la persona decide. Sette principi:</p>
+<ol>
+<li>La decisione è dell'umano: una richiesta vale per la versione nominata, altrimenti l'agente si ferma alla build valida e chiede.</li>
+<li>Verde non vuol dire consegnato: ogni passaggio finisce con una lettura dello stato reale sugli store, non con il colore della CI.</li>
+<li>Prove a secco prima di scrivere: il flag di scrittura è esplicito, mai di default.</li>
+<li>I segreti non entrano nel contesto del modello: si usano senza vederli.</li>
+<li>Ogni errore pagato diventa una guardia (nel codice) e una riga di guida.</li>
+<li>Il confronto con la baseline: un test rosso si confronta con lo stato precedente prima di fermarsi o ignorarlo.</li>
+<li>Niente operazioni distruttive sul lavoro condiviso: copia isolata, mai <code>stash</code>, commit con i file per nome.</li>
+</ol>
+<p><strong>Comandi e file.</strong> Cancelli di verifica: pre-volo (stessi test rossi del tag precedente, nessuno nuovo), Android consegnato (lettura Play su entrambi i canali di test), iOS consegnato (build valida), Android in produzione (versione nuova e note presenti), iOS in coda (in attesa di revisione), coda Apple (nessuna versione precedente ancora in revisione). Un cancello non superato non si dichiara superato: si riporta com'è.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Far partire l'autopilota prima che la prima release sia passata a mano su entrambi gli store.</li>
+<li>Automatizzare ciò che non si ripaga: con due rilasci l'anno, o senza una macchina per le build, l'automatismo non conviene. Tempi e ore non sono stati misurati.</li>
+<li>Lasciare all'agente gli atti della persona: creare account, accettare contratti, inserire password, rispondere ai revisori, scegliere di rilasciare.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-12/slide.html">Slide</a>. Questo argomento non ha fogli di materiali: l'attività (progettare l'autopilota della palestra) è descritta nelle slide.</li>
+</ul>
+<hr />
+<h2 id="argomento-13-caso-di-studio-lhelpdesk-email-in-autopilota">Argomento 13: caso di studio, l'helpdesk email in autopilota</h2>
+<p>Prima di questo argomento: argomenti 7, 9 e 12. Approfondimento fuori dal percorso fisso.</p>
+<p><strong>L'idea.</strong> Un agente che gira da solo su mail di assistenza, cioè su input non fidati: chiunque può scrivere qualunque cosa, comprese istruzioni rivolte all'agente. Le bozze di risposta le invia sempre una persona. Gli strati di difesa non dipendono dal modello:</p>
+<ul>
+<li>una regola nel prompt (le istruzioni nelle mail sono dati), che è solo una richiesta al modello;</li>
+<li>una superficie d'azione stretta: un solo strumento a riga di comando, pochi sottocomandi noti, niente pipe, redirezioni, script scritti dall'agente;</li>
+<li>permessi allow e deny, più un hook <code>PreToolUse</code> che ammette solo lo strumento di diagnosi;</li>
+<li>input validato con un formato ristretto prima di toccare un comando, destinatario delle notifiche fisso nel codice;</li>
+<li>correzioni con guardie incrociate, prova a secco, <code>--apply</code>, registro e undo;</li>
+<li>segreti fuori dal contesto, cartella isolata, privacy dei minori e contenuti delle mail mai nel repository.</li>
+</ul>
+<p>Quando una guardia rifiuta, l'agente non insiste: il caso diventa un file di consegna (handoff) per la sessione principale, con un avviso. Un avviso informa; un'approvazione (ok con Approva/Annulla) è per le azioni difficili da annullare di un agente non presidiato. Più un'azione è irreversibile, più serve una decisione esplicita: soldi, gare e minori restano alla persona. Le guardie riducono il rischio, non lo azzerano.</p>
+<p><strong>Comandi e file.</strong> Il giro: raccolta delle richieste con etichetta, diagnosi in sola lettura, correzione guardata (prova a secco, poi <code>--apply</code>), bozza in Gmail, riepilogo in una cartella locale privata, handoff per i casi che il giro non chiude. Il codice di una correzione non lo scrive l'agente: il comando legge un file fisso. Ogni valore che arriva da una mail passa da un'espressione regolare e, se non è valido, il comando esce con errore.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Lasciare permessi larghi mentre l'agente legge la posta di chiunque: la prima versione girava nella cartella del progetto, dove erano consentiti accessi al server, <code>curl</code>, <code>rm</code> e deploy.</li>
+<li>Un'attività ferma per una richiesta di permesso senza risposta, mentre lo storico dice "riuscito": serve un controllo esterno.</li>
+<li>Correggere dopo aver risposto: prima la correzione, poi la bozza.</li>
+<li>Cambiare l'email di un account sulla base di una mail: il mittente si falsifica, per questo l'operazione è sospesa per sempre e scritta accanto al codice.</li>
+<li>Un allegato è un input non fidato in più: una pipeline controlla tipo, dimensione e nome, non il contenuto.</li>
+<li>Dati di alunni e famiglie in strumenti non approvati dall'istituto: l'agente vede il minimo e propone, non decide.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-13/slide.html">Slide</a>. Questo argomento non ha fogli di materiali: le attività (mappa delle cause, superficie d'azione, un comando che rifiuta, attacco, consegna) sono nelle slide.</li>
+<li>Permessi: <a href="https://code.claude.com/docs/en/permissions">https://code.claude.com/docs/en/permissions</a> · Hook: <a href="https://code.claude.com/docs/en/hooks">https://code.claude.com/docs/en/hooks</a> (citati nelle slide)</li>
+</ul>
+<hr />
+<h2 id="argomento-14-il-racconto-facoltativo">Argomento 14: il racconto (facoltativo)</h2>
+<p>Prima di questo argomento: niente. Aiutano gli argomenti 1 e 4.</p>
+<p><strong>L'idea.</strong> Il primo messaggio con cui è nato un portale della scuola, letto a pezzi, e il lavoro che ne è seguito. Si vede che cosa fa un agente dopo un messaggio corto (legge i documenti allegati, chiede con alternative, scrive la specifica, aspetta l'approvazione, poi scrive il codice) e che cosa il messaggio non diceva: come controllare il risultato. Per quello sono serviti test, un revisore e il collaudo. Il comando <code>/goal</code> dichiara un obiettivo per la sessione: quando l'agente prova a fermarsi, la condizione viene valutata e il lavoro riprende se non è soddisfatta. La condizione però era il testo del prompt, cioè una direzione più che un criterio verificabile.</p>
+<p><strong>Comandi e file.</strong> L'attività parte da una cartella vuota, con l'agente in modalità piano. Un comando per volta:</p>
+<pre><code class="language-powershell">mkdir prova-prompt
+</code></pre>
+<pre><code class="language-powershell">cd prova-prompt
+</code></pre>
+<pre><code class="language-powershell">claude --permission-mode plan
+</code></pre>
+<p>Se non parte in modalità piano, <code>Maiusc+Tab</code> fa girare le modalità finché compare "plan". In OpenCode il tasto <code>Tab</code> passa all'agente di piano. I testi da incollare (il primo messaggio, il regolamento inventato, la scheda del proprio progetto) sono nel foglio dei materiali.</p>
+<p><strong>Errori frequenti.</strong></p>
+<ul>
+<li>Lavorare fuori da una cartella nuova: la prova si fa in una cartella senza file.</li>
+<li>Leggere solo il riassunto dell'agente: si contano le domande che fa e si distingue tra quelle sui documenti e quelle sulle scelte.</li>
+</ul>
+<p><strong>Materiali e documentazione.</strong></p>
+<ul>
+<li><a href="../../argomento-14/slide.html">Slide</a> · <a href="../argomento-14/index.html">fogli dell'argomento</a></li>
+<li>Memoria di Claude Code: <a href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a> (consultata il 9/11/2026)</li>
 </ul>
 <hr />
 <h2 id="laboratorio-progetto">Laboratorio-progetto</h2>

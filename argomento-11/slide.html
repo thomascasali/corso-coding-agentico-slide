@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 11 · Rilascio mobile in autopilota · Coding agentico</title>
+<title>Argomento 11 · Costi e contesto · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -192,6 +192,36 @@
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
+
+/* componenti propri dell'argomento 11: diagramma dei giri e calcolatrice (colori del tema, nessuna animazione) */
+  .gr { display: grid; grid-template-columns: 5.2em 1fr 4.6em; gap: 10px; align-items: center; margin-bottom: 6px; }
+  .gl, .gv { font-size: var(--fs-sm); color: var(--muted); }
+  .gv { text-align: right; font-family: var(--mono); font-size: var(--fs-xs); color: var(--text); }
+  .gt { display: flex; height: 22px; border: 1px solid var(--border); background: var(--panel); border-radius: 4px; overflow: hidden; }
+  .gt i { display: block; height: 100%; }
+  .old { background: repeating-linear-gradient(45deg, var(--border) 0 4px, var(--panel) 4px 8px); }
+  .new { background: var(--accent); }
+  .sw { display: inline-block; width: 22px; height: 14px; vertical-align: -2px; margin-right: 6px; border: 1px solid var(--border); }
+  .calc { display: grid; gap: 8px; }
+  .calc-top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .calc-btn { font: inherit; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 2px 12px; cursor: pointer; }
+  .calc-btn:hover { border-color: var(--accent); }
+  .calc-btn[aria-pressed="true"] { background: var(--panel-2); border: 2px solid var(--accent); padding: 1px 11px; }
+  .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; }
+  .ctl { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.2; }
+  .ctl b { color: var(--accent); font-weight: 700; }
+  .ctl input[type=range] { display: block; width: 100%; accent-color: var(--accent); margin-top: 2px; }
+  .ctl select { display: block; width: 100%; font: inherit; font-size: var(--fs-xs); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; margin-top: 2px; }
+  .ctl.chk { display: flex; align-items: center; gap: 8px; color: var(--text); }
+  .ctl.chk input { width: 20px; height: 20px; accent-color: var(--accent); }
+  .cb { display: grid; grid-template-columns: 7em 1fr 7.5em; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--muted); margin-bottom: 4px; }
+  .cb b { color: var(--text); font-family: var(--mono); font-size: var(--fs-xs); text-align: right; }
+  .cbt { display: block; height: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+  .cbt i { display: block; height: 100%; background: var(--accent); }
+  .cbt i.d { background: var(--danger); }
+  .calc .stat b { font-size: var(--fs-lead); }
+  @media (max-width: 900px) { .calc-grid { grid-template-columns: 1fr 1fr; } .cb { grid-template-columns: 5.5em 1fr 6.5em; } }
+  @media (max-width: 600px) { .calc-grid { grid-template-columns: 1fr; } .gr { grid-template-columns: 4.2em 1fr 4.4em; } }
 </style>
 </head>
 <body>
@@ -327,437 +357,482 @@ function CommandBox({ cmd, label, tall, kind }) {
 
 /* @componenti-fine */
 
-/* Una slide per principio: regola, caso, dove si vede */
-function Principio({ n, titolo, regola, caso, segno }) {
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 11 — Costi e contesto · ';
+
+/* Fonte con data di consultazione: i listini e la documentazione cambiano in fretta */
+const Fonte = ({ href, children, cosa = 'documentazione' }) => (
+  <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>{children}</a>, {cosa}, consultata il 9 novembre 2026.</p>
+);
+
+const eur = n => n.toLocaleString('it-IT');
+
+/* ---------- diagramma: il contesto rimandato a ogni giro ---------- */
+function GiriCresce() {
+  /* [giro, token inviati, di cui gia' inviati nel giro prima]. Valori di esempio: contesto iniziale 20.000,
+     2.000 token di novita' in ingresso e 500 in uscita a ogni giro. */
+  const righe = [[1, 22000, 0], [2, 24500, 22000], [3, 27000, 24500], [4, 29500, 27000], [5, 32000, 29500]];
+  const max = 32000;
   return (
-    <div className="pad">
-      <Tag>Principio {n} di 7</Tag>
-      <h2>{titolo}</h2>
-      <div className="grid" style={{ marginTop: 6 }}>
-        <Card title="La regola"><p>{regola}</p></Card>
-        <Card title="Nel rilascio 2.1.9" kind="i"><p>{caso}</p></Card>
-        <Card title="Dove si vede" kind="w"><p>{segno}</p></Card>
-      </div>
+    <div role="img" aria-label="Cinque giri di una sessione: la richiesta cresce da 22.000 a 32.000 token e a ogni giro la parte già inviata nel giro precedente viene rimandata per intero">
+      {righe.map(([g, tot, vecchio]) => (
+        <div className="gr" key={g} aria-hidden="true">
+          <span className="gl">Giro {g}</span>
+          <div className="gt">
+            <i className="old" style={{ width: (vecchio / max * 100) + '%' }} />
+            <i className="new" style={{ width: ((tot - vecchio) / max * 100) + '%' }} />
+          </div>
+          <span className="gv">{eur(tot)}</span>
+        </div>
+      ))}
+      <p className="legend" style={{ marginTop: 8 }}>
+        <span className="sw old" aria-hidden="true"></span> già inviato nel giro prima, rimandato per intero
+        <span className="sw new" aria-hidden="true" style={{ marginLeft: 16 }}></span> novità del giro
+      </p>
     </div>
   );
 }
 
-/* Diagramma a livelli: due righe di riquadri, impilati su schermi stretti */
-function Livelli() {
-  const N = ({ t, s, k = '' }) => <div className={'node ' + k}><b>{t}</b><span>{s}</span></div>;
+/* ---------- calcolatrice del costo di una sessione ---------- */
+/* Prezzi: dollari per milione di token, listini pubblici consultati il 9 novembre 2026.
+   Anthropic: platform.claude.com/docs/en/about-claude/pricing (scrittura in cache = quella da 5 minuti).
+   DeepSeek: api-docs.deepseek.com/quick_start/pricing (la pagina indica solo ingresso con cache e senza, e uscita:
+   qui la "scrittura" vale quanto l'ingresso senza cache). Haiku 5.5 sopra i 100.000 token del prompt ha un listino piu' alto. */
+const PREZZI = [
+  { id: 'haiku', nome: 'Haiku 5.5', i: 0.10, w: 0.125, r: 0.01, o: 0.50, alto: { i: 0.50, w: 0.625, r: 0.05, o: 2.50 } },
+  { id: 'sonnet', nome: 'Sonnet 5.5', i: 2, w: 2.5, r: 0.10, o: 10 },
+  { id: 'opus', nome: 'Opus 5.5', i: 4, w: 5, r: 0.20, o: 20 },
+  { id: 'fable', nome: 'Fable 5.1', i: 10, w: 12.5, r: 0.25, o: 50 },
+  { id: 'dsoff', nome: 'DeepSeek Flash, fuori orario di punta', i: 0.15, w: 0.15, r: 0.003, o: 0.60 },
+  { id: 'dspicco', nome: 'DeepSeek Flash, orario di punta', i: 0.30, w: 0.30, r: 0.006, o: 1.20 },
+];
+const SOGLIA_ALTA = 100000;   /* Haiku 5.5: prompt oltre questa soglia */
+const RIASSUNTO = 5000;       /* token del riassunto prodotto da una compattazione: valore d'esempio */
+
+/* Costo in dollari di una richiesta: ingresso totale, parte gia' in cache, uscita. */
+function costoRichiesta(p, ingresso, inCache, uscita, cache) {
+  const t = (p.alto && ingresso > SOGLIA_ALTA) ? p.alto : p;
+  if (!cache) return (ingresso * t.i + uscita * t.o) / 1e6;
+  const letti = Math.min(inCache, ingresso);
+  return (letti * t.r + (ingresso - letti) * t.w + uscita * t.o) / 1e6;
+}
+
+/* Simula la sessione giro per giro. s = { giri, c0, nuovi, out, pause, tetto }.
+   Ogni giro e' una richiesta con tutta la storia; la cache copre il prefisso gia' inviato (si azzera con una pausa
+   oltre i 5 minuti e dopo una compattazione); se il contesto supera il tetto, prima parte una richiesta di
+   compattazione che produce un riassunto di RIASSUNTO token. */
+function stimaSessione(p, s, cache) {
+  const pause = new Set();
+  for (let k = 0; k < s.pause; k++) pause.add(Math.round((k + 1) * s.giri / (s.pause + 1)));
+  let costo = 0, inCache = 0, storia = s.c0, inviati = 0, nuovi = s.c0, richieste = 0, compattazioni = 0;
+  for (let i = 1; i <= s.giri; i++) {
+    let ing = storia + s.nuovi;
+    if (s.tetto && ing > s.tetto) {
+      costo += costoRichiesta(p, ing, inCache, RIASSUNTO, cache);
+      inviati += ing; richieste++; compattazioni++;
+      storia = s.c0 + RIASSUNTO; inCache = 0; ing = storia + s.nuovi;
+    }
+    if (pause.has(i)) inCache = 0;
+    costo += costoRichiesta(p, ing, inCache, s.out, cache);
+    inviati += ing; richieste++; nuovi += s.nuovi + s.out;
+    inCache = ing; storia = ing + s.out;
+  }
+  return { costo, inviati, nuovi, richieste, compattazioni };
+}
+
+const dollari = n => '$' + n.toLocaleString('it-IT', { minimumFractionDigits: n < 0.1 ? 4 : 3, maximumFractionDigits: n < 0.1 ? 4 : 3 });
+
+const PRESET = {
+  A: { nome: 'A. Correggere un difetto', giri: 12, c0: 20000, nuovi: 2000, out: 400, pause: 0, tetto: 0 },
+  B: { nome: 'B. Nuova funzione con test', giri: 60, c0: 20000, nuovi: 2500, out: 500, pause: 2, tetto: 0 },
+  C: { nome: 'C. Giornata intera', giri: 150, c0: 20000, nuovi: 2500, out: 500, pause: 6, tetto: 200000 },
+};
+
+function Controllo({ etichetta, valore, children }) {
+  return <label className="ctl"><span>{etichetta}: <b>{valore}</b></span>{children}</label>;
+}
+
+function CalcolatriceSessione() {
+  const [s, setS] = useState(PRESET.B);
+  const [modello, setModello] = useState('sonnet');
+  const [cache, setCache] = useState(true);
+  const [preset, setPreset] = useState('B');
+  const p = PREZZI.find(x => x.id === modello);
+  const set = (k, v) => { setS(o => ({ ...o, [k]: v })); setPreset(null); };
+  const r = stimaSessione(p, s, cache);
+  const senza = stimaSessione(p, s, false);
+  const con = stimaSessione(p, s, true);
+  const max = Math.max(r.costo, senza.costo, con.costo, 1e-9);
+  const num = (k, min, max2, step, unit) => (
+    <input type="range" min={min} max={max2} step={step} value={s[k]} onChange={e => set(k, +e.target.value)} />
+  );
   return (
-    <div role="group" aria-label="Livelli del rilascio: persona, sessione lead, agente specialista, tag git; poi CI, API degli store, verifica, report alla persona">
-      <div className="rowlabel">Decisione e preparazione</div>
-      <div className="flow">
-        <N t="1 Persona" s="decide se e quando rilasciare" k="w" />
-        <N t="2 Sessione lead" s="pianifica, delega, verifica" />
-        <N t="3 Agente" s="specialista: pre-volo, note, commit, tag" />
-        <N t="4 Tag git" s="mobile-vX.Y.Z: versione e partenza" k="i" />
+    <div className="calc">
+      <div className="calc-top">
+        <span className="muted">Parti da:</span>
+        {Object.entries(PRESET).map(([k, v]) => (
+          <button key={k} className="calc-btn" aria-pressed={preset === k} onClick={() => { setS(v); setPreset(k); }}>{v.nome}</button>
+        ))}
       </div>
-      <p className="join" aria-hidden="true">&darr; il tag fa partire la CI</p>
-      <div className="rowlabel">Esecuzione e verifica</div>
-      <div className="flow">
-        <N t="5 CI" s="test, build, firma, consegna ai tester" k="i" />
-        <N t="6 API degli store" s="Play e App Store Connect" k="i" />
-        <N t="7 Verifica" s="cancelli: legge lo stato reale" />
-        <N t="Report" s="in italiano, 10 righe, alla persona" k="w" />
+      <div className="calc-grid">
+        <label className="ctl"><span>Modello</span>
+          <select value={modello} onChange={e => setModello(e.target.value)}>
+            {PREZZI.map(x => <option key={x.id} value={x.id}>{x.nome}</option>)}
+          </select>
+        </label>
+        <Controllo etichetta="Giri (richieste)" valore={s.giri}>{num('giri', 1, 300, 1)}</Controllo>
+        <Controllo etichetta="Contesto iniziale" valore={eur(s.c0) + ' tok'}>{num('c0', 5000, 60000, 1000)}</Controllo>
+        <Controllo etichetta="Novità per giro (ingresso)" valore={eur(s.nuovi) + ' tok'}>{num('nuovi', 200, 8000, 100)}</Controllo>
+        <Controllo etichetta="Uscita per giro" valore={eur(s.out) + ' tok'}>{num('out', 100, 3000, 50)}</Controllo>
+        <Controllo etichetta="Pause oltre i 5 minuti" valore={s.pause}>{num('pause', 0, 10, 1)}</Controllo>
+        <label className="ctl"><span>Compattazione</span>
+          <select value={s.tetto} onChange={e => set('tetto', +e.target.value)}>
+            <option value={0}>mai</option>
+            <option value={200000}>oltre 200.000 token</option>
+            <option value={100000}>oltre 100.000 token</option>
+          </select>
+        </label>
+        <label className="ctl chk"><input type="checkbox" checked={cache} onChange={e => setCache(e.target.checked)} /> <span>Cache dei prompt attiva</span></label>
       </div>
+      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }} aria-live="polite">
+        <Stat big={eur(r.richieste)} label={'richieste al modello' + (r.compattazioni ? ' (' + r.compattazioni + ' compattazioni)' : '')} />
+        <Stat big={eur(r.inviati)} label="token inviati in ingresso, in tutto" />
+        <Stat big={eur(r.nuovi)} label="token nuovi (novità e uscita)" />
+        <Stat big={dollari(r.costo)} label={'costo stimato, ' + p.nome} />
+      </div>
+      <div>
+        <div className="cb"><span>Con cache</span><span className="cbt"><i style={{ width: (con.costo / max * 100) + '%' }} /></span><b>{dollari(con.costo)}</b></div>
+        <div className="cb"><span>Senza cache</span><span className="cbt"><i className="d" style={{ width: (senza.costo / max * 100) + '%' }} /></span><b>{dollari(senza.costo)}</b></div>
+      </div>
+      <p className="legend">Valori di esempio, non misurati. Prezzi in dollari dai listini pubblici del 9 novembre 2026. Ragionamento, subagenti e tentativi ripetuti non sono inclusi.</p>
     </div>
   );
 }
-
-const GUARDIA = [
-  "const notes = fs.readFileSync(notesFile, 'utf8').trim();",
-  "// 9/11/2026: la 2.1.9 e' andata in produzione con note vuote.",
-  "if (notes.length < 20)  fail('note assenti o troppo corte');",
-  "if (notes.length > 500) fail('oltre il limite di Google Play');",
-].join('\n');
-
-/* ---------- le slide ---------- */
 
 const slides = [
   {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Apertura',
+    block: B + 'Apertura',
     content: () => (
-      <div className="center">
-        <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento 11</p>
-        <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>Dalla frase allo store<span className="cursor" aria-hidden="true"></span></h1>
-        <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>Il rilascio di un'app mobile guidato da agenti, senza un clic umano.</p>
-        <p className="muted" style={{ marginTop: 14 }}>Caso vero di novembre 2026, su un progetto esterno alla scuola: non è un sistema dell'ITTS "Belluzzi-Da Vinci".</p>
-        <p className="muted">Prima di questo argomento conviene aver visto: argomenti 7, 8, 9 e 10 (skill e subagenti, hook, proxy, costi).</p>
-      </div>
+      <Apertura n="11" titolo="Costi e contesto"
+        sottotitolo="Quanto costa una sessione con un agente, perché cresce più di quanto sembra e come si tiene sotto controllo."
+        caso="Il caso: un bot che tra agosto e settembre 2026 ha speso 1,55 dollari senza che nessuno l'avesse deciso."
+        prima={<>argomento 1 (<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>Dal chatbot all'agente</a>): finestra di contesto, <code>/context</code>, <code>/compact</code>.</>} />
     ),
-    notes: "Apertura. Il caso è un rilascio reale (versione 2.1.9 di un'app Flutter, 8-9 novembre 2026) su un progetto di Thomas esterno alla scuola. Serve a vedere insieme i principi del corso (decisione umana, permessi, segreti, verifica, test) in una catena che deve funzionare di notte e senza supervisione. Non è una lezione su Flutter: la tecnologia dell'app è irrilevante. Richiami dagli argomenti precedenti: skill e subagenti (7), hook (8), proxy (9), costi (10)."
+    notes: "Si parte dalla cifra, piccola di proposito: 1,55 dollari. Il problema non fu l'importo ma il meccanismo, che con un altro volume o un altro modello avrebbe prodotto un'altra cifra. L'argomento va in tre mosse: che cosa si paga, come si stima, che cosa è successo. I prezzi vengono dai listini pubblici consultati il 9 novembre 2026 e cambiano spesso; i parametri della calcolatrice sono esempi dichiarati, non misure. In aula Claude Code usa modelli Claude attraverso un proxy del laboratorio: i prezzi sono quelli dei listini e il metodo di stima vale lo stesso."
   },
   {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Il risultato',
+    block: B + 'Cosa si paga',
     content: () => (
       <div className="pad">
-        <Tag>Il risultato</Tag>
-        <h2>Sei parole, due store</h2>
-        <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)', margin: '2px 0 8px' }}>
-          <span aria-hidden="true" style={{ color: 'var(--accent)' }}>&gt; </span>«procediamo con il rilascio della App»
-        </p>
-        <p>È tutto ciò che ha scritto il responsabile del progetto, l'8 novembre alle 22:02. Il resto lo ha fatto la catena: pre-volo, note, commit, tag, build, firma, tester, promozione su Android, revisione su iOS, verifica.</p>
+        <Tag>Token</Tag>
+        <h2>Si paga a token, in quattro voci</h2>
+        <p>Un token è un pezzo di parola. Il fornitore conta quanti ne entrano nel modello e quanti ne escono, e li fa pagare con prezzi diversi.</p>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))' }}>
+          <Card title="Ingresso"><p>Tutto ciò che il modello legge a ogni richiesta: istruzioni, conversazione, file letti, risultati dei comandi.</p></Card>
+          <Card title="Uscita" kind="w"><p>Ciò che scrive: testo, comandi, e il ragionamento, che si paga come uscita. È la voce più cara.</p></Card>
+          <Card title="Scrittura in cache" kind="i"><p>La prima volta che un blocco di ingresso viene memorizzato: costa un quarto in più dell'ingresso normale.</p></Card>
+          <Card title="Lettura dalla cache"><p>Quando lo stesso blocco ritorna: costa una frazione dell'ingresso (tra un decimo e un cinquantesimo, secondo il modello).</p></Card>
+        </div>
+        <Box type="info" title="Stesso testo, token diversi">Anthropic indica che i modelli dalla 4.7 in poi usano un tokenizzatore che produce circa il 30% di token in più, per lo stesso testo, dei modelli precedenti.</Box>
+        <Fonte href="https://platform.claude.com/docs/en/about-claude/pricing">platform.claude.com, pricing</Fonte>
+      </div>
+    ),
+    notes: "Quattro voci, non due: a una sessione di coding pesano soprattutto la lettura e la scrittura in cache, perché il contesto è grande e si ripete. Il ragionamento esteso si fattura come uscita (documentazione di Claude Code sui costi, novembre 2026). I rapporti sono quelli del listino: scrittura in cache da 5 minuti a 1,25 volte l'ingresso; lettura da 1/10 (Haiku 5.5) a 1/50 (DeepSeek Flash) dell'ingresso. Il tokenizzatore: la nota è nella pagina dei prezzi di Anthropic, e conviene ricordarla quando si confrontano modelli."
+  },
+  {
+    block: B + 'Il listino',
+    content: () => (
+      <div className="pad">
+        <Tag>Listino pubblico</Tag>
+        <h2>Quanto costa un milione di token</h2>
+        <DT cols={['Modello', 'Ingresso', 'Scrittura in cache (5 min)', 'Lettura dalla cache', 'Uscita']} rows={[
+          ['Haiku 5.5 (prompt fino a 100.000 token)', '$0,10', '$0,125', '$0,01', '$0,50'],
+          ['Sonnet 5.5', '$2', '$2,50', '$0,10', '$10'],
+          ['Opus 5.5', '$4', '$5', '$0,20', '$20'],
+          ['Fable 5.1', '$10', '$12,50', '$0,25', '$50'],
+          ['DeepSeek Flash, fuori orario di punta', '$0,15', 'come l\'ingresso', '$0,003', '$0,60'],
+        ]} />
+        <p className="muted">Haiku 5.5 con prompt oltre i 100.000 token passa a $0,50 di ingresso e $2,50 di uscita. DeepSeek raddoppia i prezzi nelle ore di punta (01-04 e 06-10 UTC, giorni feriali).</p>
+        <Fonte href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic, pricing</Fonte>
+        <Fonte href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek, models and pricing</Fonte>
+      </div>
+    ),
+    notes: "Prezzi in dollari per milione di token, dai listini pubblici consultati il 9 novembre 2026. Sono quelli che usa la calcolatrice. Due letture utili: a parità di fornitore Sonnet 5.5 costa 20 volte Haiku 5.5, Opus 5.5 il doppio di Sonnet 5.5 e Fable 5.1 cinque volte; e fra fornitori diversi la differenza arriva a due ordini di grandezza. Il listino DeepSeek indica solo ingresso con cache, ingresso senza cache e uscita: per la scrittura in cache la calcolatrice usa l'ingresso senza cache. Il listino cambia: prima di una stima vera si riapre la pagina del fornitore."
+  },
+  {
+    block: B + 'Il contesto si rimanda',
+    content: () => (
+      <div className="pad">
+        <Tag>Perché cresce</Tag>
+        <h2>A ogni giro il modello rilegge tutto</h2>
+        <div className="cols">
+          <div>
+            <p>Il modello non ricorda nulla fra una richiesta e l'altra. Claude Code rimanda ogni volta il contesto intero: istruzioni, messaggi, file letti, risultati dei comandi. Ogni uso di uno strumento è una nuova richiesta.</p>
+            <p>Per questo una sessione lunga costa più della somma dei messaggi: la coda cambia poco, la testa si ripaga a ogni giro.</p>
+          </div>
+          <GiriCresce />
+        </div>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Il diagramma usa valori di esempio: contesto iniziale di 20.000 token, 2.000 di novità in ingresso e 500 in uscita a ogni giro. Non sono misure di una sessione vera. Secondo la documentazione di Claude Code (novembre 2026) il modello non ricorda nulla fra una richiesta e l'altra e il contesto viene rimandato intero; con la cache la parte invariata si rilegge a prezzo ridotto, ma la si legge comunque. Un'osservazione utile in aula: chi scrive una riga in una sessione aperta da ore paga comunque tutta la conversazione."
+  },
+  {
+    block: B + 'Un esempio a mano',
+    content: () => (
+      <div className="pad">
+        <Tag>Cinque giri</Tag>
+        <h2>135.000 token inviati per 32.000 nuovi</h2>
+        <div className="cols">
+          <DT cols={['Giro', 'Token inviati', 'Novità del giro']} rows={[
+            ['1', '22.000', '22.000'], ['2', '24.500', '2.500'], ['3', '27.000', '2.500'], ['4', '29.500', '2.500'], ['5', '32.000', '2.500'],
+          ]} />
+          <div>
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+              <Stat big="$0,115" label="Sonnet 5.5, con cache" />
+              <Stat big="$0,295" label="Sonnet 5.5, senza cache" />
+            </div>
+            <p className="muted" style={{ marginTop: 10 }}>Con cache: 103.000 token letti a $0,10, 32.000 scritti a $2,50, 2.500 in uscita a $10, tutto per milione. Il primo giro paga la scrittura dell'intero contesto.</p>
+          </div>
+        </div>
+        <Box type="tip" title="Controlla il conto">Con la tabella del listino puoi rifarlo a mano: ingresso inviato, parte letta dalla cache, parte scritta, uscita. La calcolatrice fa lo stesso per tutti i giri.</Box>
+      </div>
+    ),
+    notes: "Valori di esempio: contesto iniziale 20.000, in ogni giro 2.000 di novità in ingresso e 500 in uscita (le 500 del giro prima rientrano come ingresso nel successivo, per questo le novità sono 2.500). Totale inviato 22.000 + 24.500 + 27.000 + 29.500 + 32.000 = 135.000, contro 32.000 di materiale nuovo in ingresso: 4,2 volte. Con cache: letti 103.000 (la somma dei primi quattro giri), scritti 32.000, uscita 2.500: 0,0103 + 0,0800 + 0,0250 = 0,1153 dollari. Senza cache: 135.000 x 2 / 1.000.000 = 0,270 più 0,025 di uscita = 0,295. Fare i conti alla lavagna con la sala."
+  },
+  {
+    block: B + 'La cache dei prompt',
+    content: () => (
+      <div className="pad">
+        <Tag>Cache</Tag>
+        <h2>La cache rende il riletto economico</h2>
+        <div role="group" aria-label="Quattro momenti della cache in una sessione">
+          <Flow nodes={[
+            ['1 Prima richiesta', 'scrive tutto in cache: 1,25 volte l\'ingresso', 'w'],
+            ['2 Richieste seguenti', 'leggono il già visto e scrivono solo la coda'],
+            ['3 Pausa lunga', 'oltre i 5 minuti la cache scade', 'i'],
+            ['4 Dopo la pausa', 'si riscrive tutto, come al primo giro', 'w'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>Claude Code gestisce la cache da solo. La cache riconosce il prefisso identico: se cambia qualcosa all'inizio, si rielabora tutto ciò che segue.</p>
+        <Box type="info" title="Quanto dura">Con una chiave API la cache del dialogo principale dura 5 minuti, con l'abbonamento Claude un'ora. Ogni richiesta che la usa riavvia il conteggio.</Box>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Secondo la documentazione di Claude Code (novembre 2026) la cache riconosce il prefisso della richiesta: una modifica in testa invalida tutto ciò che viene dopo, per questo il contenuto stabile sta all'inizio e la conversazione in coda. I tempi: 5 minuti con chiave API o provider cloud, un'ora per il dialogo principale con abbonamento Claude entro i limiti del piano. In aula si lavora con una chiave virtuale che il proxy trasforma in una chiave API: quindi 5 minuti, da verificare nella prova. LiteLLM restituisce i campi di cache nel conteggio dei token (docs.litellm.ai/docs/anthropic_unified, 11/11/2026), ma resta da vedere che la cache arrivi davvero al modello. Il comando /usage in una versione recente mostra una riga Prompt cache con le richieste, la quota servita dalla cache e se è calda."
+  },
+  {
+    block: B + 'Cosa rompe la cache',
+    content: () => (
+      <div className="pad">
+        <Tag>Cache</Tag>
+        <h2>Quattro modi di buttarla via</h2>
+        <DT cols={['Cosa fai', 'Effetto sulla cache', 'Come evitarlo']} rows={[
+          ['Cambi modello a metà sessione', 'Ogni modello ha la sua cache: il giro dopo rilegge tutto senza sconto', 'Scegli il modello all\'inizio'],
+          ['Fai una pausa lunga', 'La cache scade: il giro dopo riscrive tutto', 'Se resti fermo a lungo, riparti con una sessione nuova'],
+          ['Aggiungi o togli strumenti', 'Le definizioni stanno nel prefisso: cambiano e invalidano', 'Collega gli strumenti prima di cominciare'],
+          ['Compatti', 'La storia diventa un riassunto: nuovo prefisso, cache da rifare', 'Compatta fra un compito e l\'altro, non nel mezzo'],
+        ]} />
+        <Box type="warn" title="Con un proxy in mezzo">La cache dipende da ciò che il proxy inoltra al modello. Se non la inoltra, ogni giro si paga al prezzo pieno: la riga "senza cache" della calcolatrice è il caso peggiore.</Box>
+        <Fonte href="https://code.claude.com/docs/en/prompt-caching">code.claude.com, prompt caching</Fonte>
+      </div>
+    ),
+    notes: "Elenco ridotto a quattro voci dalla pagina sulla cache di Claude Code (novembre 2026), che ne contiene altre. Il cambio di modello chiede una conferma se la cache è ancora calda. La documentazione dice anche che con un indirizzo base personalizzato o un gateway la cache vive dove le richieste vengono inoltrate e che funziona solo se il gateway lascia passare i marcatori di cache: da verificare con il proxy del laboratorio, non da dare per scontato (code.claude.com/docs/en/llm-gateway-protocol, 11/11/2026: cache vuota con token in ingresso alti è il segno di una cache non inoltrata). Questo è il primo punto di contatto con l'argomento 10."
+  },
+  {
+    block: B + 'Il modello per compito',
+    content: () => (
+      <div className="pad">
+        <Tag>Scegliere il modello</Tag>
+        <h2>Il più piccolo che basta</h2>
+        <DT cols={['Compito', 'Livello', 'Perché']} rows={[
+          ['Cercare nel repo, riassumere un log, rinominare, ritoccare un testo', 'Piccolo (Haiku)', 'Il come è deciso e un comando prova che è fatto'],
+          ['Scrivere una funzione con il suo test, correggere un difetto noto', 'Medio (Sonnet)', 'La maggior parte del lavoro di programmazione'],
+          ['Progettare, scegliere fra approcci, trovare una causa sconosciuta', 'Grande (Opus, Fable)', 'Qui il ragionamento è il prodotto'],
+        ]} />
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', marginTop: 10 }}>
+          <Stat big="20x" label="Sonnet 5.5 su Haiku 5.5 (ingresso e uscita)" />
+          <Stat big="2x" label="Opus 5.5 su Sonnet 5.5" />
+          <Stat big="5x" label="Fable 5.1 su Sonnet 5.5" />
+        </div>
+        <p className="muted" style={{ marginTop: 8 }}>Si sale di livello solo per un motivo che si sa dire. Un compito sbagliato e rifatto costa due volte.</p>
+        <Fonte href="https://code.claude.com/docs/en/costs">code.claude.com, manage costs</Fonte>
+      </div>
+    ),
+    notes: "La documentazione sui costi (novembre 2026) dice che Sonnet gestisce bene la maggior parte dei compiti di programmazione e che Opus va riservato a decisioni architetturali e ragionamenti in più passi; per i subagenti semplici si può indicare model: haiku nella loro configurazione. I rapporti fra modelli sono calcolati dal listino del 9 novembre 2026. In aula i modelli sono quelli del corso sul proxy (Haiku e Sonnet; Opus solo con la chiave del docente, se prevista): il criterio resta, compito chiuso e verificabile, modello piccolo. Il costo di un lavoro rifatto dipende dal caso, e qui non c'è una misura da mostrare."
+  },
+  {
+    block: B + 'Quando ripartire',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>Compattare, azzerare o ripartire</h2>
+        <DT cols={['Situazione', 'Mossa', 'Perché']} rows={[
+          [<>Passi a un compito scollegato</>, <code>/clear</code>, 'Non costa nulla, mentre la vecchia conversazione si pagherebbe a ogni messaggio'],
+          ['Stesso compito, ma la conversazione è piena di vicoli ciechi', <><code>/rewind</code> o <code>/compact</code> con una indicazione</>, 'Si tiene ciò che serve e si butta il resto'],
+          ['Devi leggere molto (log, documentazione)', 'Un subagente', 'Le letture restano nel suo contesto e torna solo il riassunto'],
+          ['Torni a una sessione ferma da ore', 'Meglio una sessione nuova', 'Cache scaduta: compattare costringe a rileggere tutto'],
+        ]} />
+        <Box type="info" title="Richiamo">Il contesto e i comandi <code>/context</code>, <code>/compact</code>, <code>/clear</code> sono nell'argomento 1. Qui si aggiunge il conto: compattare è esso stesso una richiesta grande.</Box>
+        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com, context window</Fonte>
+      </div>
+    ),
+    notes: "Secondo la documentazione (novembre 2026): /clear azzera e non costa nulla; /compact può ricevere un'indicazione su cosa tenere; /rewind torna a un punto precedente già in cache; i subagenti tengono le letture grosse fuori dal contesto principale. Attenzione al costo della compattazione: è una richiesta che rilegge la conversazione da riassumere, a buon mercato se la cache è calda e cara se è scaduta. Per questo conviene compattare fra un compito e l'altro. La compattazione automatica scatta da sola vicino al limite della finestra, che dipende dal modello."
+  },
+  {
+    block: B + 'La calcolatrice',
+    content: () => (
+      <div className="pad">
+        <Tag>Calcolatrice</Tag>
+        <h2>Quanto costa questa sessione?</h2>
+        <CalcolatriceSessione />
+      </div>
+    ),
+    notes: "Provare con la sala, nell'ordine: 1) scenario B con Sonnet 5.5, circa 1,96 dollari; 2) spegnere la cache: circa 13,62; 3) portare le pause a 0: circa 1,44; con 6 pause circa 2,98; 4) cambiare il modello. Lo scenario C con compattazione oltre 200.000 token costa circa 5,09 dollari, senza compattazione 9,04 (la sessione non compattata è irrealistica: Claude Code compatta da solo vicino al limite, ma il confronto fa vedere il peso della storia). Il modello simula il contesto giro per giro: ogni giro rimanda la storia, la cache copre il prefisso già inviato, una pausa lunga o una compattazione la azzerano. Il riassunto di una compattazione vale 5.000 token, il contesto iniziale 20.000: valori d'esempio. Per Haiku 5.5 sopra i 100.000 token di prompt vale il listino alto."
+  },
+  {
+    block: B + 'Limiti della stima',
+    content: () => (
+      <div className="pad">
+        <Tag>Cosa non vede la stima</Tag>
+        <h2>Una stima, non una fattura</h2>
+        <div className="grid">
+          <Card title="Ragionamento" kind="w"><p>Il pensiero esteso si paga come uscita e può valere decine di migliaia di token a richiesta.</p></Card>
+          <Card title="Subagenti" kind="w"><p>Ogni subagente manda richieste sue, con il proprio contesto, oltre a quelle della sessione.</p></Card>
+          <Card title="Richieste nascoste" kind="w"><p>Suggerimenti di prompt, riassunti di sessione e attività pianificate partono anche a sessione ferma.</p></Card>
+          <Card title="Listino e tokenizzatore" kind="i"><p>I prezzi cambiano, e modelli diversi contano token diversi per lo stesso testo.</p></Card>
+        </div>
+        <Box type="info" title="Un ordine di grandezza">Anthropic riporta, per le installazioni aziendali di Claude Code, circa 13 dollari per sviluppatore per giorno attivo, sotto i 30 per il 90% degli utenti. Lo scenario B, su Sonnet 5.5, vale circa 2 dollari: una sessione, non una giornata.</Box>
+        <Fonte href="https://code.claude.com/docs/en/costs">code.claude.com, manage costs</Fonte>
+      </div>
+    ),
+    notes: "La calcolatrice non include ragionamento, subagenti, richieste in background né tentativi ripetuti: tutte voci che la documentazione sui costi (novembre 2026) elenca fra le cause per cui una sessione lunga pesa più di quanto sembri. I 13 dollari al giorno sono una media su distribuzioni di organizzazioni reali, citata da Anthropic: non è una previsione per un singolo. Il contatore della sessione si legge con /usage, la riga Total cost è calcolata in locale a prezzo di listino. Con modelli Claude attraverso il proxy la cifra ha senso, ma resta una stima locale: si confronta con la spesa che il proxy registra per la chiave del PC (da verificare nella prova)."
+  },
+  {
+    block: B + 'Il caso di Argo Briefing',
+    content: () => (
+      <div className="pad">
+        <Tag>Il caso</Tag>
+        <h2>Un bot, una catena di fornitori, una riserva</h2>
+        <p>Argo Briefing è un bot che ogni mattina prepara un briefing e durante la giornata manda avvisi su Telegram. Per il modello usava prima di tutto fornitori gratuiti.</p>
+        <div role="group" aria-label="Come è nato l'incidente, in quattro passi">
+          <Flow nodes={[
+            ['1 Catena gratuita', 'il modello principale e i sostituti rispondono'],
+            ['2 Il fornitore lo ritira', 'il 7 agosto il modello va fuori servizio e i sostituti vanno in timeout', 'w'],
+            ['3 La riserva', 'resta un fornitore a pagamento, in coda alla catena', 'i'],
+            ['4 Nessun errore', 'il bot funziona, e ogni richiesta si paga', 'w'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>Il fornitore a pagamento era stato messo lì come ultima possibilità. Con la catena gratuita ferma ha cominciato a fare tutto il lavoro, senza che nulla lo segnalasse.</p>
+      </div>
+    ),
+    notes: "Il caso è documentato nel registro di lavoro del progetto e negli appunti di progetto di Thomas (4 settembre 2026). Il modello principale era un modello gratuito su una piattaforma di inferenza, che l'ha ritirato il 7 agosto 2026 (risposta HTTP 410); i sostituti con data erano in timeout o in errore. In coda alla catena c'era un fornitore a pagamento, DeepSeek. Con la catena gratuita morta, ogni richiesta ricadeva sul fornitore a pagamento. Raccontarlo senza colpe: la configurazione era ragionevole finché la catena funzionava."
+  },
+  {
+    block: B + 'I numeri e le cause',
+    content: () => (
+      <div className="pad">
+        <Tag>Il caso</Tag>
+        <h2>1,55 dollari e tre cause</h2>
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
-          <Stat big="0" label="clic umani dal tag agli store" />
-          <Stat big="16 min" label="dal tag alla CI completa (15 min 56 s)" />
-          <Stat big="2 su 2" label="Android in produzione, iOS in revisione" />
-          <Stat big="1" label="errore, corretto subito e poi blindato" />
+          <Stat big="$1,55" label="credito consumato" />
+          <Stat big="1.140" label="richieste" />
+          <Stat big="79,4 M" label="token in tutto" />
+          <Stat big="~70.000" label="token per richiesta" />
         </div>
-        <Box title="Una deviazione dalla regola">La frase non nomina la versione. L'agente ha rilasciato la 2.1.9 senza fermarsi: la versione era chiara dal contesto della sessione. La regola però chiede che sia scritta; la forma corretta è «rilascia la 2.1.9».</Box>
-      </div>
-    ),
-    notes: "Numeri verificati sul repository il 9/11/2026: tag mobile-v2.1.9 spinto alle 23:16 dell'8/11, CI conclusa alle 23:32 (15 minuti e 56 secondi per controllo di qualità, build Android, build iOS e mail di esito). 'Zero clic' vale dal tag agli store: la decisione di rilasciare e la prova dell'app prima del tag restano della persona. La frase è quella vera, scritta alle 22:02 dell'8/11. La guida di processo dice che, se il messaggio non nomina la versione, l'agente si ferma alla build valida e chiede; qui è andato avanti perché la versione si capiva dalla sessione. Raccontarlo come una deviazione, non come un modello: tornerà nel principio 1 e nelle domande."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Le parole',
-    content: () => (
-      <div className="pad">
-        <Tag>Prima di cominciare</Tag>
-        <h2>Otto parole per leggere il caso</h2>
-        <dl className="terms">
-          <div><dt>CI</dt><dd>Integrazione continua: un servizio che a ogni tag esegue da solo test, build e consegna.</dd></div>
-          <div><dt>Tag</dt><dd>Etichetta git su un commit. Qui il nome del tag è anche la versione e il segnale di partenza.</dd></div>
-          <div><dt>Pre-volo</dt><dd>I controlli fatti prima di creare il tag.</dd></div>
-          <div><dt>Test golden</dt><dd>Test che confrontano un'immagine generata con una di riferimento.</dd></div>
-          <div><dt>Baseline</dt><dd>Lo stato di partenza con cui si confronta: qui, i test rossi sul tag precedente.</dd></div>
-          <div><dt>Worktree</dt><dd>Seconda cartella di lavoro dello stesso repository, su un altro commit. Si usa e si cancella.</dd></div>
-          <div><dt>Stash</dt><dd>Mette da parte le modifiche non salvate della cartella: anche quelle di altri.</dd></div>
-          <div><dt>Prova a secco</dt><dd>Esecuzione che fa tutto tranne l'ultimo passo: valida e annulla.</dd></div>
-        </dl>
-      </div>
-    ),
-    notes: "Per un pubblico tecnico quasi tutto è noto: fermarsi solo su golden, baseline e prova a secco. Il tag è la versione anche in senso letterale: il nome mobile-vX.Y.Z fissa il numero di versione su entrambi gli store. Lo stash è spiegato bene al principio 7."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Il risultato',
-    content: () => (
-      <div className="pad">
-        <Tag>Il risultato</Tag>
-        <h2>Non è un esperimento isolato</h2>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
-          <Stat big="66" label="tag di rilascio dal 5 settembre 2026" />
-          <Stat big="5" label="rilasci in 4 giorni: dalla 2.1.5 (5/11) alla 2.1.9 (8/11)" />
-          <Stat big="15-18 min" label="durata della CI in quei cinque rilasci" />
-          <Stat big="24" label="file toccati dalla 2.1.8 alla 2.1.9 (+950, -172 righe)" />
-        </div>
-        <Box title="Il confronto, con un limite">
-          La guida interna conta, per un rilascio a mano, una dozzina di operazioni in cinque console (Git, GitHub, Mac, Play Console, App Store Connect). Ognuna ha già fatto perdere ore a qualcuno: un numero di build riusato, una bozza che nessuno vede, note vuote, una versione ferma cinque giorni. Il tempo di un rilascio manuale equivalente non è stato misurato.
-        </Box>
-      </div>
-    ),
-    notes: "Tutti i numeri vengono da git (tag e commit) e dalla cronologia delle esecuzioni della CI. Nei cinque rilasci dal 5 all'8 novembre ogni CI è durata tra 15 e 18 minuti. Non dichiariamo un tempo 'risparmiato': non è stato misurato un rilascio manuale equivalente. Si può dire quanti passaggi e quante console sparivano, e quali errori erano già stati pagati."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · La giornata',
-    content: () => (
-      <div className="pad">
-        <Tag>La giornata dell'8 novembre</Tag>
-        <h2>Prima del rilascio: un bug vero</h2>
-        <p>Un telefono rileggeva torneo e iscritti due volte al secondo: la scheda ripartiva a ogni ritorno in primo piano, anche senza essere mai usciti dall'app.</p>
-        <ul className="timeline">
-          <li><time>16:00</time>Correzione del bug, con il test nello stesso commit: ora conta solo il ritorno dal background dopo qualche secondo.</li>
-          <li><time>21:37-22:02</time>Altre correzioni, pulizia dei log di debug, una ottimizzazione.</li>
-          <li><time>22:02</time>Il responsabile scrive la frase: «procediamo con il rilascio della App».</li>
-          <li><time>23:16</time>Note di rilascio nel repository, commit, tag.</li>
-          <li><time>23:32</time>CI completa: build Android e iOS consegnate ai tester.</li>
-          <li><time>9/11</time>Android in produzione, iOS in revisione con rilascio automatico, tutto verificato sulle API degli store.</li>
-        </ul>
-      </div>
-    ),
-    notes: "Orari dai commit e dalla CI del repository (fuso orario italiano); la frase delle 22:02 viene dalla sessione di lavoro. La parte di ingegneria è normale: causa trovata, correzione, test. Nel commit delle 16:00 c'è anche il test che copre il caso. Il rilascio automatico comincia dopo, ma si regge su questo lavoro: l'automazione moltiplica la qualità che c'è già, non la crea."
-  },
-
-  /* --- architettura --- */
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Architettura',
-    content: () => (
-      <div className="pad">
-        <Tag>Architettura a livelli</Tag>
-        <h2>Chi decide, chi esegue, chi verifica</h2>
-        <Livelli />
-        <p className="muted" style={{ marginTop: 8 }}>Dopo la CI, l'agente torna: promuove e invia in revisione tramite le API degli store (livello 6) e ne legge lo stato reale (livello 7).</p>
-      </div>
-    ),
-    notes: "Il diagramma va letto a riquadri, prima riga poi seconda. Livello 1: la persona decide se e quando. Livello 2: la sessione principale (il lead) pianifica e non esegue di persona. Livello 3: un agente specialista di CI e rilascio fa il pre-volo e prepara note, commit e tag. Livello 4: il tag git è insieme la versione e il grilletto. Livello 5: la CI costruisce e consegna ai tester. Livello 6 sono le API di Play e App Store Connect, che l'agente usa dopo la CI per promuovere e inviare in revisione. Livello 7: le letture che dicono cosa è successo davvero; il report torna alla persona. La CI non promuove mai: lo fa un passo separato, dopo la richiesta esplicita."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Architettura',
-    content: () => (
-      <div className="pad">
-        <Tag>Ruoli</Tag>
-        <h2>Ognuno fa una cosa sola</h2>
-        <div className="tablewrap">
-          <table>
-            <thead><tr><th>Chi</th><th>Fa</th><th>Non fa</th></tr></thead>
-            <tbody>
-              <tr><td>Persona</td><td>decide se e quando; prova l'app prima; credenziali e account</td><td>nessun passaggio tecnico del rilascio</td></tr>
-              <tr><td>Sessione lead</td><td>riceve la richiesta, delega, sintetizza il report</td><td>non esegue il rilascio di persona</td></tr>
-              <tr><td>Agente specialista</td><td>pre-volo, note, commit, tag, promozione, verifiche</td><td>non cambia la CI di nascosto, non stampa segreti, non rilancia a occhi chiusi</td></tr>
-              <tr><td>CI</td><td>test, build, firma, consegna ai tester</td><td>non promuove, non invia in revisione</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <Box title="Cosa l'autopilota non fa mai">
-          Creare account, accettare contratti, inserire password, firmare lettere, rispondere ai revisori, scegliere di rilasciare. Sono atti della persona.
-        </Box>
-      </div>
-    ),
-    notes: "Collegare ai permessi e ai subagenti visti nel corso: il confine tra i livelli è un confine di responsabilità, non solo tecnico. Il lead non esegue per due motivi: tiene pulito il proprio contesto e può controllare il lavoro come un secondo paio d'occhi. Chiedere ai colleghi quale riga di questa tabella, nella loro scuola, sarebbe la più difficile da far rispettare."
-  },
-
-  /* --- principi --- */
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 1',
-    content: () => (
-      <Principio n="1" titolo="La decisione è dell'umano, l'esecuzione dell'agente"
-        regola="L'agente non decide se rilasciare. Una richiesta esplicita per una versione precisa vale come decisione solo per quella versione. Se il messaggio non nomina la versione, l'agente si ferma alla build valida e chiede."
-        caso="La frase del responsabile è stata l'unico input umano, ma non nominava la versione. La 2.1.9 era chiara dal contesto della sessione e l'agente è andato avanti: una deviazione. La forma corretta era «rilascia la 2.1.9»."
-        segno="Nella guida di processo, sezione sui ruoli. «Dal contesto» è proprio ciò che un agente può leggere male: per questo la regola vuole la versione scritta, e il lead ne ricava l'ordine di partire, non altro." />
-    ),
-    notes: "Il principio è l'autonomia graduata: più l'azione è irreversibile e visibile fuori, più serve una decisione umana esplicita, legata a un oggetto preciso. 'Rilascia la 2.1.9' autorizza la 2.1.9, non la 2.1.10. Nel caso reale la frase era «procediamo con il rilascio della App»: la versione si capiva, ma non era scritta, e la regola chiedeva di fermarsi e chiedere. Non è andata male, ed è proprio per questo che conviene dirlo: una regola che si salta quando 'tanto è chiaro' non è più una regola. Domanda per la sala: nel vostro lavoro, quale azione irreversibile parte oggi senza una decisione esplicita?"
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 2',
-    content: () => (
-      <Principio n="2" titolo="Verde non vuol dire consegnato"
-        regola="Un job verde può non aver consegnato nulla, e uno rosso può nascondere una consegna riuscita. Ogni passaggio finisce con una lettura dello stato reale, fatta con le API dello store e non con il colore della CI."
-        caso="Dopo la CI l'agente legge Google Play su entrambi i canali di test (stesso numero di versione, nome 2.1.9, stato completato) e verifica che la build iOS sia valida, non ancora in elaborazione. Dopo la promozione rilegge la produzione."
-        segno="Nei cancelli di verifica (slide dedicata). Origine: il 12 settembre due build valide e nulla su Play, per un passaggio di salvataggio file bloccante, un controllo «if [ -n ... ]» su un secret multi-riga e un numero di versione troppo basso." />
-    ),
-    notes: "Collegare al corso: il test che passa non è l'obiettivo, è un indizio. L'obiettivo si controlla nel posto dove vive, qui lo store. Il 12 settembre l'esito della CI era scollegato dalla realtà: da lì i cancelli leggono sempre la fonte di verità. Stesso principio per chi fa una migrazione di dati: non basta 'script terminato', serve contare le righe a destinazione."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 3',
-    content: () => (
-      <Principio n="3" titolo="Prove a secco prima di scrivere"
-        regola="Ogni script che scrive su un sistema esterno ha una modalità che fa tutto tranne l'ultimo passo: crea, valida, annulla. Si lancia sempre quella prima, poi si lancia la vera."
-        caso="La promozione su Android si fa due volte: la prima senza il flag di scrittura (crea la modifica sullo store, la valida, la elimina), la seconda con il flag. Per ogni script nuovo, prima l'aiuto e la prova a secco."
-        segno="Nei comandi della procedura: il flag di scrittura è esplicito, mai di default. Un errore di parametri si scopre quando costa zero." />
-    ),
-    notes: "La prova a secco serve a due livelli: valida i parametri e rende visibile all'agente (e a chi rilegge il log) cosa sta per succedere. Il flag di scrittura esplicito fa sì che 'dimenticarsi' non possa produrre un effetto. Nel laboratorio di informatica lo stesso schema vale per uno script di reset delle password o di cancellazione dei profili."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 4',
-    content: () => (
-      <Principio n="4" titolo="I segreti non entrano nel contesto del modello"
-        regola="Chiavi, password e certificati non si incollano nel prompt, non si stampano, non si leggono per intero. Esistono in un posto fuori dal repository e si usano solo attraverso script che le leggono da sé."
-        caso="Chiave API dello store, account di servizio, keystore e certificati stanno in una cartella fuori da git e nei secret della CI. L'agente lancia script con un file di configurazione che contiene percorsi, non valori. Le credenziali nei moduli le inserisce la persona."
-        segno="Nella tabella dei prerequisiti: «dove stanno», mai «quali sono». Tutto ciò che entra nel contesto finisce nei log e nelle trascrizioni, e da lì non esce più." />
-    ),
-    notes: "Il contesto del modello è un posto che si registra, si copia, a volte si invia a un servizio esterno. Un segreto che ci entra va considerato compromesso. La soluzione non è 'fidarsi dell'agente': è togliergli la necessità di vedere il valore. Lo script lo legge, lo usa e non lo restituisce. Richiamare i permessi dell'agente e la gestione delle variabili d'ambiente visti nel corso."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 5',
-    content: () => (
-      <div className="pad">
-        <Tag>Principio 5 di 7</Tag>
-        <h2>Ogni errore pagato diventa una guardia</h2>
-        <p>L'errore del 9 novembre: la prima promozione è partita con le note di rilascio <strong>vuote</strong>, perché lo script le accettava.</p>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-          <Card title="1 · Correzione" kind="w"><p>Promozione rilanciata subito con le note.</p></Card>
-          <Card title="2 · Guardia nel codice" kind="i"><p>Lo script rifiuta note sotto i 20 caratteri, oltre al tetto di 500. Prima di scrivere resta il controllo con <code>wc -c</code>.</p></Card>
-          <Card title="3 · Riga di guida"><p>Errore, data e regola nella guida: la prossima sessione la legge prima di partire.</p></Card>
-        </div>
-        <pre aria-label="Codice della guardia (versione semplificata)">{GUARDIA}</pre>
-      </div>
-    ),
-    notes: "Il caso centrale della lezione. Tre livelli: si ripara l'errore, si impedisce che si ripeta nel punto in cui è nato (il codice), si scrive la regola dove la leggerà chi non c'era (la guida). La guardia nel codice vale più della raccomandazione: una frase 'ricordati di controllare' dipende dall'attenzione, un controllo che termina con errore no. Il codice a schermo è una versione semplificata della guardia reale. Esercizio collegato: scrivetene una voi."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 6',
-    content: () => (
-      <Principio n="6" titolo="Il confronto con la baseline"
-        regola="Un test rosso non è per forza una regressione. Prima di fermarsi o di ignorarlo, si controlla se falliva già prima: se sì, è rumore di ambiente; se era verde, blocca."
-        caso="I test golden confrontano immagini: quelle generate su Windows differiscono di pochi pixel da quelle su macOS, e la CI li esclude. Sul PC alcuni risultavano rossi. L'agente ha rieseguito gli stessi test sul tag precedente: stessi rossi, nessuno nuovo, si procede."
-        segno="Nel pre-volo: il confronto è un risultato scritto (elenco dei rossi prima e dopo), non una sensazione. Un golden che era verde e ora è rosso blocca il tag." />
-    ),
-    notes: "Il metodo è una versione povera di un esperimento controllato: si cambia una sola cosa (il codice) e si guarda se cambia l'esito. Senza baseline un agente ha due strade sbagliate: ignorare i rossi 'perché sono noti' o fermarsi su ogni rosso. Con la baseline la decisione si basa su un dato. Nella tabella dei cancelli è il pre-volo."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Principio 7',
-    content: () => (
-      <Principio n="7" titolo="Niente operazioni distruttive sul workspace condiviso"
-        regola="La cartella di lavoro contiene anche il lavoro non ancora salvato di altre sessioni e di altre persone. Nessun comando che lo sposti o lo travolga: per confrontare con il passato si crea una copia isolata."
-        caso="Per provare il tag precedente l'agente ha usato un worktree separato e poi lo ha cancellato; mai lo stash, che avrebbe spostato modifiche non sue. Il commit ha usato percorsi espliciti, non «aggiungi tutto». Prima del push, controllo dei commit in uscita."
-        segno="Nella procedura: «git add» con file nominati, elenco dei commit non ancora spinti, un commit sconosciuto è un allarme." />
-    ),
-    notes: "Pericolo concreto: l'agente lavora in una cartella condivisa e non sa cosa ci sia di non salvato. Il worktree è una seconda copia di lavoro dello stesso repository: il confronto non tocca l'originale e si butta via. Mostrare i comandi se la sala non li conosce: git worktree add, lavoro, git worktree remove. Stesso criterio per rm -r, git reset --hard e git clean: mai sul lavoro che non si è creato."
-  },
-
-  /* --- cancelli e checklist --- */
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Cancelli',
-    content: () => (
-      <div className="pad">
-        <Tag>Cancelli di verifica</Tag>
-        <h2>Cosa vuol dire «consegnato davvero»</h2>
-        <div className="tablewrap">
-          <table>
-            <thead><tr><th>Cancello</th><th>Come si verifica</th><th>Atteso</th></tr></thead>
-            <tbody>
-              <tr><td>Pre-volo</td><td>worktree sul tag precedente</td><td>stessi test rossi, nessuno nuovo</td></tr>
-              <tr><td>Android consegnato</td><td>lettura Play, entrambi i canali di test</td><td>versione nuova, nome giusto, completato</td></tr>
-              <tr><td>iOS consegnato</td><td>lettura App Store Connect</td><td>build valida (non in elaborazione)</td></tr>
-              <tr><td>Android in produzione</td><td>lettura Play dopo la scrittura</td><td>versione nuova e note presenti</td></tr>
-              <tr><td>iOS in coda</td><td>stato della versione</td><td>in attesa di revisione, rilascio dopo l'approvazione</td></tr>
-              <tr><td>Coda Apple</td><td>elenco delle versioni</td><td>nessuna precedente ancora in revisione, o segnalata</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="muted" style={{ marginTop: 6 }}><strong>Regola:</strong> un cancello non superato non si dichiara superato, si riporta com'è nel report.</p>
-      </div>
-    ),
-    notes: "Ogni riga è una domanda a cui risponde una fonte esterna, non l'agente. L'ultima riga illustra il 'dire quello che si vede': se la versione precedente è ancora in revisione, la nuova si accoda; l'agente non cancella niente, lo segnala. Il rilascio automatico dopo l'approvazione ha un'origine pratica: una versione già approvata restò cinque giorni ferma in rilascio manuale, con utenti su una versione difettosa."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
-    content: () => (
-      <div className="pad">
-        <Tag>Cosa serve per replicarlo</Tag>
-        <h2>Prerequisiti, una volta sola</h2>
-        <div className="grid">
-          <Card title="Infrastruttura">
-            <ul>
-              <li>Un computer sempre acceso per le build (qui un Mac mini collegato al repository)</li>
-              <li>CI attivata dal tag, con controllo di qualità prima delle build</li>
-              <li>Versione dello strumento uguale su PC, build e CI</li>
-            </ul>
-          </Card>
-          <Card title="Accessi" kind="w">
-            <ul>
-              <li>Account sviluppatore per i due store, record dell'app creati dal titolare</li>
-              <li>Chiave API di App Store Connect e account di servizio di Play con permesso di produzione</li>
-              <li>Certificati, keystore e secret della CI, fuori dal repository</li>
-            </ul>
-          </Card>
-          <Card title="Strumenti e testi" kind="i">
-            <ul>
-              <li>Script di lettura e promozione, ciascuno con aiuto e prova a secco</li>
-              <li>Testi dello store e file delle note di ogni versione, nel repository</li>
-              <li>Una guida con i cancelli e gli errori già pagati</li>
-            </ul>
-          </Card>
-        </div>
-        <Box title="Regola d'oro">L'autopilota parte solo dopo che la prima release è passata a mano su entrambi gli store. Prima non c'è nulla da cui capire se un errore è nuovo.</Box>
-      </div>
-    ),
-    notes: "L'elenco non cita valori né percorsi: solo categorie. Per un'app scolastica o interna molte voci cadono (niente store pubblici, magari un solo canale di distribuzione), ma restano valide la CI da tag, i cancelli e la guida degli errori. La regola d'oro è la più contro-intuitiva: l'automazione non salta il lavoro manuale, lo presuppone."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
-    content: () => (
-      <div className="pad">
-        <Tag>Investimento e ritorno</Tag>
-        <h2>Cosa costa e cosa rende</h2>
-        <div className="grid">
-          <Card title="Il costo iniziale" kind="w">
-            <ul>
-              <li>Prima release a mano su entrambi gli store, con i controlli delle console</li>
-              <li>Su Play con account personale: 12 tester per 14 giorni, un'attesa che non si comprime</li>
-              <li>Costruire script di lettura, prove a secco, CI e guida</li>
-              <li>Ogni errore di avvio paga la sua riga di guida</li>
-            </ul>
-          </Card>
-          <Card title="Il ritorno">
-            <ul>
-              <li>Un rilascio diventa una frase con la versione e una verifica</li>
-              <li>Cinque rilasci in quattro giorni, ciascuno verificato sugli store</li>
-              <li>Gli errori non si ripetono: restano nel codice e nella guida</li>
-              <li>Chi arriva dopo, persona o agente, parte da un manuale scritto</li>
-            </ul>
-          </Card>
-        </div>
-        <Box title="Cosa non sappiamo">Tempi e ore non sono stati misurati, né per costruire la catena né per un rilascio a mano equivalente. Per il costo in token di un agente che lavora a lungo, vedi la stima dell'argomento 10.</Box>
-        <Box title="Quando non conviene">Se rilasci due volte l'anno, o se non esiste una macchina per le build, l'automatismo non si ripaga.</Box>
-      </div>
-    ),
-    notes: "Non c'è una cifra di ore da mostrare: il costo non è stato misurato come tale, e dichiararne una sarebbe inventare. Si può dire cosa ha richiesto: la prima release manuale, l'attesa dei tester, la costruzione degli script. Sul ritorno si può dire solo che cinque rilasci in quattro giorni ci sono stati e che ciascuno ha avuto i suoi cancelli; non che il rischio sia stato azzerato. Chiedere alla sala: quanto rilasciate? La risposta decide se serve. Un iOS a mano con la CI solo per Android è una scelta sensata."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Replicarlo',
-    content: () => (
-      <div className="pad">
-        <Tag>A ogni rilascio</Tag>
-        <h2>Lista di controllo</h2>
-        <ul>
-          <li>Richiesta della persona con il numero di versione scritto</li>
-          <li>Pre-volo: test rossi confrontati con il tag precedente in una copia isolata</li>
-          <li>Note di rilascio nel repository, commit con file nominati, commit in uscita controllati, tag</li>
-          <li>Cancelli di consegna: Android sui due canali, iOS con build valida</li>
-          <li>Android in produzione: note non vuote, prova a secco, scrittura, rilettura</li>
-          <li>iOS: rilascio dopo l'approvazione, in attesa di revisione, coda controllata</li>
-          <li>Report in italiano, massimo 10 righe, con errori trovati e corretti</li>
-          <li>Un errore nuovo diventa una riga di guida e, se serve, un controllo nel codice</li>
-        </ul>
-      </div>
-    ),
-    notes: "Questa slide può restare proiettata durante l'attività. È la versione corta della guida interna di processo. Se la sala sta pensando a un proprio caso (aggiornamento del sito della scuola, rilascio di un servizio interno) chiedere di sostituire 'store' con 'ambiente di produzione' e vedere quante righe reggono."
-  },
-
-  /* --- attività --- */
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Attività',
-    content: () => (
-      <div className="pad">
-        <Tag>Attività al PC</Tag>
-        <h2>Progettate l'autopilota della palestra</h2>
-        <p className="muted">App di esempio: la palestra comune del corso, la piccola app di prenotazione dei laboratori in Node.js. Dati inventati, nessun repository della scuola.</p>
-        <div className="grid">
-          <Card title="A · Il documento">
-            <p>Scrivete una pagina <code>rilascio.md</code>: chi decide, chi esegue, almeno quattro cancelli con la fonte che li verifica, tre cose che l'agente non deve mai fare.</p>
-          </Card>
-          <Card title="B · La guardia" kind="i">
-            <p>Chiedete all'agente uno script <code>controlla-note.js</code> che rifiuta note vuote o più lunghe di 500 caratteri, con tre test: vuote, giuste, troppo lunghe. Prima il test che fallisce, poi lo script.</p>
-          </Card>
-          <Card title="C · Il confronto" kind="w">
-            <p>Scambiate il documento con un collega: trovate il cancello che manca e la regola che si può aggirare. Aggiornate la pagina.</p>
-          </Card>
-        </div>
-        <Box title="Per chi finisce prima">Aggiungete la prova a secco: lo script scrive solo con un flag esplicito, altrimenti stampa cosa farebbe.</Box>
-      </div>
-    ),
-    notes: "Le parti A e C si fanno anche senza PC. Si lavora sulla palestra comune, con dati inventati: si progetta il processo, non si tocca un sistema vero. Alla parte B osservare se l'agente scrive prima il test e se il test fallisce davvero prima dello script: è lo stesso ordine dei casi ben fatti. A fine attività chiedere a due persone quale cancello avevano dimenticato."
-  },
-  {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Verifica',
-    content: () => (
-      <div className="pad">
-        <Tag>Domande di verifica</Tag>
-        <h2>Per capire se il caso è passato</h2>
-        <ol>
-          <li>Perché la CI consegna ai tester ma non promuove in produzione?</li>
-          <li>Il job è verde, ma sullo store non c'è nulla. Cosa leggi, e dove?</li>
-          <li>Sul PC due test golden sono rossi. Tagghi o no? Come decidi?</li>
-          <li>Perché un worktree e non uno stash per tornare al tag precedente?</li>
-          <li>Dove stanno le chiavi e che cosa ne vede il modello?</li>
-          <li>Le note sono andate vuote: quali sono le tre correzioni, e quale vale di più?</li>
-          <li>«Procediamo con il rilascio della App»: basta come decisione? Come va riscritta?</li>
-          <li>Quale parte della catena non automatizzeresti a scuola, e perché?</li>
+        <ol className="steps" style={{ marginTop: 12 }}>
+          <li className="w"><b>Riserva silenziosa.</b> Il fornitore a pagamento sostituiva la catena gratuita senza avviso.</li>
+          <li className="w"><b>Storia mai compattata.</b> Contesto di circa 70.000 token a richiesta: la conversazione cresceva, con 21 strumenti descritti nel prompt.</li>
+          <li className="w"><b>Tentativi a raffica.</b> Circa 10 richieste all'ora per 24 ore, anche quando non serviva.</li>
         </ol>
+        <p className="muted">79,4 milioni diviso 1.140 fa circa 70.000: è la riga "contesto che si rimanda" in versione reale.</p>
       </div>
     ),
-    notes: "Otto domande, da usare a voce o come scheda. Le risposte attese sono riservate al docente e non sono pubblicate. La 7 riprende la frase vera del caso: la versione era chiara dalla sessione ma non scritta. La 8 non ha una risposta giusta: serve a collegare il caso al lavoro dei presenti."
+    notes: "Numeri dal registro di lavoro (settembre 2026): 1,55 dollari di credito del fornitore, 1.140 richieste, 79,4 milioni di token, circa 70.000 token a richiesta. Il listino del fornitore è cambiato dopo, quindi non conviene rifare il conto dei dollari con i prezzi di oggi: l'importo è piccolo, il meccanismo no. Le tre cause: riserva a pagamento in coda a una catena gratuita ormai morta; storia mai compattata più 21 strumenti nel prompt; tempeste di tentativi (circa 10 all'ora per 24 ore). Il contesto di 70.000 token a richiesta è esattamente il caso dell'argomento: la testa si ripaga a ogni giro. La quota di cache nella spesa non è documentata: non va supposta."
   },
   {
-    block: 'Argomento 11 — Rilascio mobile in autopilota · Chiusura',
+    block: B + 'Le guardie',
     content: () => (
       <div className="pad">
-        <Tag>Chiusura</Tag>
-        <h2>Cosa portare a casa</h2>
-        <ul>
-          <li>L'agente esegue, la persona decide: il confine è scritto, e la versione pure.</li>
-          <li>Ci si fida dello store, non della CI: ogni passaggio finisce con una lettura reale.</li>
-          <li>Prima a secco, poi sul serio.</li>
-          <li>I segreti si usano senza vederli.</li>
-          <li>Un errore pagato non si paga due volte: guardia nel codice e riga di guida.</li>
-        </ul>
-        <Box title="Dopo questo argomento">L'argomento 12 prende lo stesso schema e lo applica a un agente che gira da solo su input non fidati: l'helpdesk email in autopilota.</Box>
-        <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+        <Tag>Cosa è cambiato</Tag>
+        <h2>Cinque guardie</h2>
+        <DT cols={['Guardia', 'Cosa evita']} rows={[
+          ['Il fornitore a pagamento solo come scelta esplicita, con ripieghi sempre gratuiti', 'Una riserva che si attiva da sola'],
+          ['Tetto di spesa sulla console del fornitore', 'Una spesa senza limite, qualunque cosa vada storta nel bot'],
+          ['Compattazione e azzeramento giornaliero della sessione', 'Un contesto che cresce senza fine'],
+          ['Undici strumenti disattivati e nessuna skill inclusa di serie: strumenti nel prompt da 26.302 a 7.160 caratteri, skill da 4.080 a 775', 'Un prompt grande ripagato a ogni richiesta'],
+          ['Un solo tentativo per le attività pianificate, controllo periodico vuoto', 'Le raffiche di richieste inutili'],
+        ]} />
+        <p className="muted">Al momento il modello principale è a pagamento per scelta esplicita, con un ripiego gratuito. Sui comandi tipici risponde in 14-16 secondi. Il modello gratuito provvisorio ne impiegava 120-357.</p>
       </div>
     ),
-    notes: "Ultima slide. Riprendere i cinque punti e lasciare spazio alle domande. Il caso non è una ricetta per tutti: è un modo di guardare un processo e chiedersi quali cancelli ha, e chi li legge. L'argomento 12 sposta la domanda: qui l'input è una persona fidata, là sono email di sconosciuti. Ricordare che i dati dell'app usata negli esercizi sono inventati."
+    notes: "Le guardie sono quelle registrate negli appunti di progetto del 4 settembre 2026. Regola scritta allora: provider a pagamento solo come scelta esplicita, ripiego sempre gratuito, tetto di spesa sul portale del fornitore. Le misure sono in caratteri, non in token: 26.302 contro 7.160 per le definizioni degli strumenti (11 disattivati), 4.080 contro 775 per le skill. Sull'ultima riga: un solo tentativo per le attività pianificate e un file del controllo periodico lasciato vuoto. I tempi di 120-357 secondi e 14-16 secondi sono quelli registrati il 3-4 settembre per due modelli diversi, quindi non attribuirli a una sola causa. Il filo conduttore: ogni guardia è un controllo che non dipende dall'attenzione di qualcuno."
+  },
+  {
+    block: B + 'Il proxy del corso',
+    content: () => (
+      <div className="pad">
+        <Tag>Lo stesso rischio, oggi</Tag>
+        <h2>Cosa significa per il proxy del laboratorio</h2>
+        <p>Il proxy che collega gli agenti ai modelli può ripetere l'incidente di Argo Briefing in piccolo. Le scelte fatte per il corso seguono le stesse guardie.</p>
+        <DT cols={['Rischio', 'Scelta nel proxy']} rows={[
+          ['Ripiego verso un altro modello quando qualcosa fallisce', 'Nessun ripiego nel file, e disable_fallbacks su ogni chiave'],
+          ['Modelli non voluti o più costosi del necessario', 'Solo i modelli del corso, elencati su ogni chiave'],
+          ['Un PC che consuma per tutti', 'Una chiave per PC, con budget in dollari e scadenza'],
+          ['Cifre di costo ottimistiche', 'La spesa è calcolata dal listino incluso nella versione fissata; il tetto vero sta anche sulla console del fornitore'],
+        ]} />
+        <p className="muted">Configurazione e prove sono nell'argomento 10.</p>
+      </div>
+    ),
+    notes: "Collegamento con l'argomento 10. Il proxy è LiteLLM, installato e configurato dal docente su un PC dedicato, con la vera chiave del fornitore solo lì, una chiave virtuale per ogni PC e nessun costo per i partecipanti (docs.litellm.ai/docs/proxy/virtual_keys e /proxy/reliability, 11/11/2026). I ripieghi verso altri modelli non ci sono: sarebbero lo stesso meccanismo del caso di Argo Briefing. Il costo che il proxy registra è calcolato da un listino: un modello che mancasse dal listino varrebbe zero e il budget non scatterebbe, quindi non può fare da tetto unico. Se un partecipante chiede 'ma allora quanto spendiamo?', si risponde con la spesa registrata per chiave e con il limite sulla console del fornitore. Non mostrare in slide chiavi, indirizzi o nomi di rete."
+  },
+  {
+    block: B + 'Attività al PC',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Stimate tre sessioni sulla palestra</h2>
+        <ol className="timeline">
+          <li><time>1</time>Apri la scheda e inserisci i tre scenari (correggere un difetto, aggiungere una funzione, una giornata intera) nella calcolatrice della slide 10.</li>
+          <li><time>2</time>Annota il costo con e senza cache, e con un altro modello a scelta.</li>
+          <li><time>3</time>Nella tua sessione, esegui <code>/usage</code>: confronta i token letti dal contatore con quelli della stima e scrivi cosa non torna.</li>
+        </ol>
+        <ActivityBadge n="11" file="scenari-da-stimare.html" label="Tre sessioni da stimare" />
+        <ActivityBadge n="11" file="listino-e-contatore.html" label="Listino e contatore della sessione" />
+        <p className="muted" style={{ marginTop: 10 }}>Nel laboratorio i modelli sono Claude, quindi il contatore dovrebbe mostrare un costo sensato: se le cifre non tornano, confronta anche i token.</p>
+      </div>
+    ),
+    notes: "Il blocco si chiude al PC. Gli scenari sono tre: A correggere un difetto, B aggiungere una funzione con test, C una giornata intera. Prima si compila la tabella a mano o con la calcolatrice, poi si guarda il contatore reale con /usage: il confronto serve a vedere quanto la stima sbaglia, e per quale voce. Il comando /usage mostra, nella documentazione di novembre 2026, il costo totale calcolato in locale a prezzo di listino e i token per modello; la riga della cache c'è nelle versioni recenti. Con i modelli Claude del laboratorio la cifra in dollari è significativa; se mancasse la riga della cache o le cifre fossero strane, si confrontano i token. Le soluzioni le ha il docente."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Una sessione di 60 giri costa molto più della somma dei messaggi scritti. Qual è la ragione principale?" opzioni={[
+          { t: 'A ogni richiesta il modello rilegge tutta la conversazione, e le richieste sono tante.', ok: true, perche: 'Il modello non ricorda fra una richiesta e l\'altra: la cache riduce il prezzo della parte riletta, ma non la cancella.' },
+          { t: 'Dopo il trentesimo giro ogni messaggio costa il doppio.', ok: false, perche: 'Il prezzo per token non dipende dal numero del giro: cambia quanti token si mandano.' },
+          { t: 'La cache fa pagare di più le sessioni lunghe.', ok: false, perche: 'È il contrario: la cache fa pagare la parte riletta molto meno, ma non zero.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione sul punto centrale dell'argomento. La risposta A. Se qualcuno sceglie C, riprendere la slide sulla cache: leggere dalla cache costa da un decimo a un cinquantesimo dell'ingresso, ma una sessione lunga legge molto. Se sceglie B, ricordare che il prezzo per token non cambia con il numero del giro; in Haiku 5.5 il listino sale solo oltre i 100.000 token di prompt, ed è una soglia sul prompt, non sul giro."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Si paga a token e il contesto si rimanda a ogni giro: la sessione lunga costa più dei suoi messaggi.',
+          'La cache abbassa il prezzo di ciò che si rilegge. Una pausa lunga, un cambio di modello o una compattazione la azzerano.',
+          'Il modello più piccolo che basta: si sale solo per un motivo che si sa dire.',
+          'Un tetto di spesa sulla console del fornitore, e nessuna riserva a pagamento che si attivi da sola.',
+        ]}
+        dopo={<>Argomento 12 (<a className="text-link" href="../argomento-12/slide.html" onClick={e => e.stopPropagation()}>il rilascio mobile in autopilota</a>): una catena di agenti letta con costi e ritorno, senza cifre inventate.</>} />
+    ),
+    notes: "Riprendere le quattro idee e lasciare spazio alle domande. Il link porta all'argomento 12, che confronta costo e ritorno di una catena di agenti in termini qualitativi. Ricordare che i prezzi sono del 9 novembre 2026 e cambiano: la stima va rifatta con il listino aperto."
   },
 ];
 

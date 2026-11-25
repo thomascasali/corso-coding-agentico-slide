@@ -514,7 +514,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Il contesto è tutto ciò che il modello ha davanti quando decide. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 4. Sottolineare la colonna di destra: gran parte degli errori degli agenti viene da qualcosa che non vedevano."
+    notes: "Il contesto è tutto ciò che il modello ha davanti quando decide. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 5. Sottolineare la colonna di destra: gran parte degli errori degli agenti viene da qualcosa che non vedevano."
   },
   {
     block: B + 'Il contesto può mentire',
@@ -529,7 +529,7 @@ const slides = [
           <Card title="Cosa fai tu">
             <ul>
               <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>Get-Content</code></li>
-              <li>Tieni le istruzioni corte e vere (argomento 4)</li>
+              <li>Tieni le istruzioni corte e vere (argomento 5)</li>
             </ul>
           </Card>
         </div>
@@ -550,11 +550,11 @@ const slides = [
           ['Output dei comandi', 'A ogni comando', 'Un test che stampa molto pesa quanto un file'],
           ['Conversazione', 'A ogni messaggio', 'A ogni giro del ciclo'],
         ]} />
-        <Box type="info" title="Finestra di contesto">È la quantità massima di testo (misurata in <em>token</em>, pezzi di parola) che il modello può avere davanti insieme. Oltre il limite non entra altro, e ogni messaggio costa in token (argomento 10).</Box>
+        <Box type="info" title="Finestra di contesto">È la quantità massima di testo (misurata in <em>token</em>, pezzi di parola) che il modello può avere davanti insieme. Oltre il limite non entra altro, e ogni messaggio costa in token (argomento 11).</Box>
         <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
       </div>
     ),
-    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 10 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello usato."
+    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 11 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello usato."
   },
   {
     block: B + 'Quando è piena',
@@ -587,7 +587,7 @@ const slides = [
         ]} />
       </div>
     ),
-    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nel diff (argomento 2); nella prima esercitazione, senza Git, si confrontano la traccia, i file e il riepilogo."
+    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nel diff (argomento 3); nella prima esercitazione, senza Git, si confrontano la traccia, i file e il riepilogo."
   },
   {
     block: B + 'Permessi',
@@ -701,7 +701,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
       </div>
     ),
-    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 3, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nella prima esercitazione il piano si chiede prima di far partire il lavoro, e si approva o si corregge."
+    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 4, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nella prima esercitazione il piano si chiede prima di far partire il lavoro, e si approva o si corregge."
   },
   {
     block: B + 'Tu sei nel ciclo',
@@ -714,11 +714,11 @@ const slides = [
           <Card title="Correggere" kind="i"><p>Scrivi la correzione e invia: l'agente la legge appena finite le chiamate in corso.</p></Card>
           <Card title="Tornare indietro" kind="w"><p><code>Esc</code> due volte riporta i file a uno stato precedente (checkpoint).</p></Card>
         </div>
-        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono Git (argomento 2). La prima esercitazione lavora su una copia usa e getta per lo stesso motivo.</Box>
+        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono Git (argomento 3). La prima esercitazione lavora su una copia usa e getta per lo stesso motivo.</Box>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 2 insegna a leggere il diff e a fare commit; qui, in attesa, si lavora su una copia da buttare."
+    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 3 insegna a leggere il diff e a fare commit; qui, in attesa, si lavora su una copia da buttare."
   },
   {
     block: B + 'Il racconto',
@@ -736,7 +736,7 @@ const slides = [
         <Box type="tip" title="Lezione">Ciò che l'agente racconta e ciò che ha fatto sono due cose. La traccia degli strumenti è la seconda.</Box>
       </div>
     ),
-    notes: "Episodio del racconto di Thomas, solo fatti documentati: nella primavera 2026 nasce un gruppo di dieci agenti; il 20 luglio si scopre che non erano mai partiti, per un carattere di troppo nell'intestazione dei due agenti principali (gli specialisti l'intestazione non l'avevano proprio). Nessun errore visibile: la sessione principale rispondeva comunque. Il legame con l'argomento: un riassunto fluido non dimostra niente, la traccia delle chiamate sì. Dal racconto nasce anche il passaggio obbligato da un revisore. Gli agenti e i subagenti tornano nell'argomento 7."
+    notes: "Episodio del racconto di Thomas, solo fatti documentati: nella primavera 2026 nasce un gruppo di dieci agenti; il 20 luglio si scopre che non erano mai partiti, per un carattere di troppo nell'intestazione dei due agenti principali (gli specialisti l'intestazione non l'avevano proprio). Nessun errore visibile: la sessione principale rispondeva comunque. Il legame con l'argomento: un riassunto fluido non dimostra niente, la traccia delle chiamate sì. Dal racconto nasce anche il passaggio obbligato da un revisore. Gli agenti e i subagenti tornano nell'argomento 8."
   },
   {
     block: B + 'Verso la prima esercitazione',
@@ -745,7 +745,7 @@ const slides = [
         <Tag>Esercitazione</Tag>
         <h2>Adesso si installa, poi si prova</h2>
         <ol className="timeline">
-          <li><time>1</time>Si installa l'agente sul PC e lo si collega al server del corso (argomento 13).</li>
+          <li><time>1</time>Si installa l'agente sul PC e lo si collega al server del corso (argomento 2).</li>
           <li><time>2</time>Si estrae la cartella di prova e si avvia l'agente in Manual.</li>
           <li><time>3</time>Gli si chiede prima un piano: si legge, si approva o si corregge.</li>
           <li><time>4</time>Si guardano i permessi che chiede e si controlla a mano il riepilogo.</li>
@@ -755,7 +755,7 @@ const slides = [
         <ActivityBadge n="1" file="prima-esercitazione.html" label="Prima esercitazione: l'agente controlla le richieste di installazione" />
       </div>
     ),
-    notes: "Ponte verso l'installazione (argomento 13) e la prima esercitazione. L'esercitazione parte dal piano visto nella demo: stesso gesto, ora con l'agente installato sul PC. La cartella contiene richieste di installazione software di una scuola inventata, un catalogo, un regolamento, una procedura sotto forma di skill e due richieste nuove da aggiungere dopo. Gli effetti precisi sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se usa la skill da solo) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio."
+    notes: "Ponte verso l'installazione (argomento 2) e la prima esercitazione. L'esercitazione parte dal piano visto nella demo: stesso gesto, ora con l'agente installato sul PC. La cartella contiene richieste di installazione software di una scuola inventata, un catalogo, un regolamento, una procedura sotto forma di skill e due richieste nuove da aggiungere dopo. Gli effetti precisi sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se usa la skill da solo) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio."
   },
   {
     block: B + 'Chiusura',
@@ -769,9 +769,9 @@ const slides = [
           'Il piano è una proposta, e si approva o si corregge: è la differenza vista nella demo.',
           'Il riassunto di un agente non è la prova: lo è la traccia.',
         ]}
-        dopo="Argomento 13: installare l'agente, poi la prima esercitazione su una cartella di prova. Argomento 2: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 3: dalla richiesta vaga ai requisiti, con la modalità piano." />
+        dopo="Argomento 2: installare l'agente, poi la prima esercitazione su una cartella di prova. Argomento 3: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 4: dalla richiesta vaga ai requisiti, con la modalità piano." />
     ),
-    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Poi l'installazione (argomento 13) e la prima esercitazione. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
+    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Poi l'installazione (argomento 2) e la prima esercitazione. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
   },
 ];
 

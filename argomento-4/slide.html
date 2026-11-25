@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 4 · Istruzioni persistenti · Coding agentico</title>
+<title>Argomento 4 · Dalla richiesta ai requisiti · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -329,315 +329,318 @@ function CommandBox({ cmd, label, tall, kind }) {
 
 /* ---------- le slide di questo argomento ---------- */
 /* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
-const B = 'Argomento 4 — Istruzioni persistenti · ';
+const B = 'Argomento 4 — Dalla richiesta ai requisiti · ';
 
-const ESEMPIO = String.raw`# Registro guasti (Node.js, senza dipendenze)
+const CRITERIO = String.raw`Dato:    il 2026-12-24 è un giorno di chiusura (elenco "chiusure" in dati/dati.json)
+Quando:  si prenota LAB-INF1 il 2026-12-24, dalle 09:00 alle 11:00
+Allora:  la richiesta è rifiutata con il codice GIORNO_DI_CHIUSURA
+         e nessuna prenotazione viene aggiunta
 
-## Comandi
-- Test: npm test
-- Prova a mano: node cli.js elenco
+$ node cli.js prenota --lab LAB-INF1 --docente d01 --classe 3A-INF --data 2026-12-24 --inizio 09:00 --fine 11:00
+RIFIUTATA (GIORNO_DI_CHIUSURA): Il 2026-12-24 la scuola è chiusa.`;
 
-## Dove sono le cose
-- Regole: src/regole.js. Dati: dati/guasti.json.
+const PROMPT_ESPLORA = String.raw`Siamo in modalità piano: non modificare nulla.
+Leggi il README, src/logica.js e i test. Poi dimmi:
+1. quali regole di prenotazione esistono già e in quale file stanno;
+2. cosa dovrebbe cambiare per aggiungere le prenotazioni ricorrenti;
+3. cosa non sai e dovrei decidere io.
+Non proporre ancora codice.`;
 
-## Convenzioni
-- Codice e messaggi in italiano.
-- Ogni correzione porta un test che prima falliva.
+const PIANO = String.raw`Piano: prenotazioni ricorrenti (esempio scritto per questa slide)
+1. Aggiungere a prenota() un parametro "ricorrenza".
+2. Generare una data a settimana per 52 settimane.
+3. Per ogni data chiamare controllaRichiesta() e salvare.
+4. Se la data cade in un giorno di chiusura, passare alla successiva.
+5. Se una data è occupata, saltarla e continuare.
+6. Aggiungere un test per la serie settimanale.
+7. Aggiornare il README.`;
 
-## Da non fare
-- Non modificare dati/guasti.json a mano.
-- Non aggiungere dipendenze senza chiedere.`;
-
-const SBAGLIATO = String.raw`# CLAUDE.md di un progetto inventato
-- Test: npm run prova
-
-# package.json dello stesso progetto
-"scripts": { "test": "node --test" }
-
-# Cosa fa l'agente
-$ npm run prova
-npm error Missing script: "prova"
-> aggiungo lo script "prova" a package.json`;
-
-const IMPORT = String.raw`# AGENTS.md  (la fonte unica)
-- Test: npm test
-- Dati in dati/guasti.json, non a mano.
-
-# CLAUDE.md  (due righe)
-@AGENTS.md
-- Qui solo ciò che vale per Claude Code.`;
+const PROMPT_IPOTESI = String.raw`Prima di scrivere codice:
+- elenca come IPOTESI ogni regola che stai assumendo e che io non ti ho dato;
+- per ogni ipotesi fai una domanda, con le risposte possibili;
+- non andare avanti finché non ti rispondo.`;
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="4" titolo="Istruzioni persistenti" sottotitolo="CLAUDE.md e AGENTS.md: che cosa scrivere perché l'agente lo sappia a ogni sessione, e come accorgersi che non funziona."
-        caso="Da dove nasce: ciò che si impara su un progetto non passa da solo al progetto successivo."
-        prima="argomenti 1 e 3." />
+      <Apertura n="4" titolo="Dalla richiesta ai requisiti"
+        sottotitolo="Prima di far scrivere codice all'agente si decide che cosa deve fare e come si saprà che l'ha fatto."
+        caso="Il caso: un portale costruito in cinque tappe, e una richiesta di due righe."
+        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
     ),
-    notes: `Apertura. Ogni sessione dell'agente parte da una finestra di contesto vuota: quello che sa del progetto è ciò che gli diamo noi. Il racconto: le istruzioni di progetto e la base di conoscenza sono nate per non ripetere gli stessi errori da un progetto all'altro. Annunciare l'attività sulla palestra. Funzioni verificate sulla documentazione ufficiale il 9 novembre 2026: le date invecchiano.`
+    notes: "Si parte da una richiesta di due righe, come ne arrivano davvero a un ufficio tecnico. Un agente la eseguirebbe subito. Il lavoro di questo argomento sta prima: capire che cosa si sta chiedendo e come si controllerà il risultato. Tutto si prova sulla palestra, l'app di prenotazione dei laboratori con dati inventati."
   },
   {
-    block: B + 'Il contesto utile',
+    block: B + 'La richiesta',
     content: () => (
       <div className="pad">
-        <Tag>Il principio</Tag>
-        <h2>Ogni sessione riparte da zero</h2>
+        <Tag>Il punto di partenza</Tag>
+        <h2>Due righe e un grazie</h2>
+        <blockquote style={{ borderLeft: '5px solid var(--accent)', padding: '6px 16px', margin: '8px 0 14px', maxWidth: 'none' }}>
+          <p style={{ maxWidth: 'none' }}>«Buongiorno, i docenti ci chiedono di poter prenotare i laboratori in modo ricorrente, perché ogni settimana ripetono la stessa cosa. Potete aggiungere le prenotazioni ricorrenti? Grazie.»</p>
+          <p className="muted">Messaggio inventato per l'esercizio. Dice tutto quello che la vicepresidenza ha da dire.</p>
+        </blockquote>
         <div className="grid">
-          <Card title="Senza istruzioni"><p>L'agente ricostruisce il progetto leggendo i file. Spesso indovina, a volte no.</p></Card>
-          <Card title="Con istruzioni" kind="i"><p>Un file nella cartella del progetto viene letto all'avvio e finisce nel contesto, ogni volta.</p></Card>
-          <Card title="Il limite" kind="w"><p>È contesto, non configurazione: l'agente di solito lo segue, ma niente lo costringe.</p></Card>
+          <Card title="Che cosa farebbe l'agente" kind="w"><p>Scrive il codice in pochi minuti. Funziona. E decide da solo tutto quello che il messaggio non dice.</p></Card>
+          <Card title="Provate voi" kind="i"><p>Scrivete su un foglio tre domande che fareste alla vicepresidenza prima di toccare il codice.</p></Card>
         </div>
-        <ul style={{ marginTop: 12 }}>
-          <li><strong>Il contesto utile è quello pertinente, non il più lungo.</strong> Meno di 200 righe per file, secondo la documentazione di Claude Code.</li>
-          <li>Se due istruzioni si contraddicono, l'agente può sceglierne una a caso.</li>
-          <li>Per i divieti che devono valere sempre serve un controllo automatico: gli hook dell'argomento 8.</li>
-        </ul>
       </div>
     ),
-    notes: `Fonte: code.claude.com/docs/en/memory, letta il 9/11/2026. Ogni sessione comincia con una finestra di contesto nuova. La documentazione indica meno di 200 righe per file di CLAUDE.md, avverte che file più lunghi consumano contesto e riducono l'aderenza, che istruzioni in contraddizione possono essere scelte a caso, e che il file è contesto e non configurazione imposta: per bloccare un'azione in ogni caso indica un hook PreToolUse. Gli import con @ organizzano il file ma non ne riducono il costo. Domanda al pubblico: quante righe ha il vostro README, e quante servono a chi deve lavorare sul codice?`
+    notes: "Lasciare qualche istante perché ognuno scriva le sue tre domande: servono dopo, per il confronto con quello che l'agente chiede o non chiede. Non anticipare le risposte. Il messaggio è inventato, come tutti i dati della palestra."
   },
   {
-    block: B + 'Cosa metterci',
+    block: B + 'Quattro cose diverse',
     content: () => (
       <div className="pad">
-        <Tag>Contenuto</Tag>
-        <h2>Che cosa metterci</h2>
-        <div className="grid">
-          <Card title="Comandi"><p>Come si avvia, come si testa, come si controlla lo stile. Quelli esatti, copiabili.</p></Card>
-          <Card title="Dove stanno le cose" kind="i"><p>Cartelle, file dei dati, punto d'ingresso. Solo ciò che l'agente non ricava in pochi secondi.</p></Card>
-          <Card title="Convenzioni"><p>Lingua del codice e dei messaggi, nomi, come si scrive un test, come si fanno i commit.</p></Card>
-          <Card title="Da non fare" kind="d"><p>File da non toccare, dati da non scrivere, dipendenze da non aggiungere senza chiedere.</p></Card>
-        </div>
-        <Box type="tip" title="La regola pratica">Scrivi ciò che hai dovuto spiegare due volte all'agente, o a un collega nuovo.</Box>
-      </div>
-    ),
-    notes: `Quattro famiglie: comandi, posizioni, convenzioni, divieti. La documentazione ufficiale suggerisce esattamente questo tipo di contenuto: comandi di build e test, convenzioni, cose che l'agente non scoprirebbe da solo. Il criterio: se l'agente lo scopre in cinque secondi leggendo il codice, non serve scriverlo; se l'ha sbagliato una volta, sì.`
-  },
-  {
-    block: B + 'Cosa non metterci',
-    content: () => (
-      <div className="pad">
-        <Tag>Contenuto</Tag>
-        <h2>Che cosa lasciare fuori</h2>
-        <div className="grid">
-          <Card title="Segreti" kind="d"><p>Password, token, chiavi, indirizzi interni. Il file finisce nel repository e nel contesto.</p></Card>
-          <Card title="La storia del progetto" kind="w"><p>Il perché di una scelta di tre anni fa. Va nella documentazione, non nelle istruzioni.</p></Card>
-          <Card title="Regole ovvie" kind="w"><p>«Scrivi codice pulito», «gestisci gli errori». Non cambiano nulla e allungano il file.</p></Card>
-          <Card title="Ciò che il codice già dice" kind="w"><p>L'elenco dei file di una cartella piccola. Cambia, e il file resta vecchio.</p></Card>
-        </div>
-        <Box type="danger" title="Segreti">Un'istruzione come «usa la chiave che trovi in .env» è già troppo. Si scrive dove sta la configurazione, mai il suo valore.</Box>
-      </div>
-    ),
-    notes: `Il file di progetto si versiona e si condivide: un segreto lì dentro è un segreto nel repository. Stesso discorso per i dettagli di rete interna. Le regole ovvie sono la tentazione più comune: sembrano prudenza e diluiscono le poche istruzioni che contano.`
-  },
-  {
-    block: B + 'Istruzioni controllabili',
-    content: () => (
-      <div className="pad">
-        <Tag>Scrittura</Tag>
-        <h2>Concreta batte generica</h2>
-        <DT cols={['Vago', 'Concreto']} rows={[
-          ['Testa le modifiche', <>Esegui <code className="nw">npm test</code> prima di dire che hai finito</>],
-          ['Tieni i file in ordine', <>I test stanno in <code className="nw">test/</code>, uno per modulo</>],
-          ['Fai attenzione ai dati', <>Non scrivere in <code className="nw">dati/guasti.json</code>: i test usano una copia</>],
-          ['Usa buoni nomi', 'Nomi di funzioni e variabili in italiano, senza abbreviazioni'],
+        <Tag>Concetti</Tag>
+        <h2>Desideri, requisiti, vincoli, criteri</h2>
+        <DT cols={['Livello', 'A che serve', 'Esempio dalle ricorrenti']} rows={[
+          ['Desiderio', 'Quello che la persona vuole, con le sue parole.', '«Non voglio riscrivere ogni settimana la stessa prenotazione.»'],
+          ['Requisito', 'Che cosa deve fare il sistema, in modo che si possa rispondere sì o no.', 'Una serie crea una prenotazione per ogni data, e ognuna rispetta le regole di sempre.'],
+          ['Vincolo', 'Un limite che viene da fuori e non si discute.', 'Node.js senza dipendenze da installare; i test non scrivono nei dati.'],
+          ['Criterio di accettazione', 'Un caso con dati e un esito che si può eseguire.', 'Lo vediamo tra poco, con un esempio.'],
         ]} />
-        <p className="muted">Test per ogni riga: si può verificare, a lavoro finito, se l'agente l'ha rispettata?</p>
       </div>
     ),
-    notes: `Esempi dalla documentazione di Claude Code (pagina memory): istruzioni abbastanza concrete da poter essere verificate. Il test finale della slide è utile anche per rivedere un file esistente: le righe che non passano il test si riscrivono o si tolgono.`
+    notes: "Quattro livelli che nella richiesta vaga sono mescolati. Il desiderio resta quello di chi chiede; il requisito è la versione controllabile; il vincolo non è negoziabile (si legge nel README della palestra: Node 20, nessuna dipendenza); il criterio permette di dire 'fatto'. L'agente aiuta a sistemarli, ma non sa quali vincoli ha davvero la scuola."
   },
   {
-    block: B + 'Un esempio piccolo',
+    block: B + 'Dalla domanda al criterio',
+    content: () => (
+      <div className="pad">
+        <Tag>Il percorso</Tag>
+        <h2>Si passa per le domande</h2>
+        <div role="group" aria-label="Quattro passaggi: desiderio, domande, requisiti e vincoli, criteri di accettazione">
+          <Flow nodes={[
+            ['1 Desiderio', 'le parole di chi chiede'],
+            ['2 Domande', 'che cosa manca e a chi chiederlo', 'w'],
+            ['3 Requisiti e vincoli', 'scritti, uno per riga'],
+            ['4 Criteri', 'esempi con un esito', 'i'],
+          ]} />
+        </div>
+        <p className="legend">Giallo: qui decide una persona. Verde: dove l'agente aiuta di più.</p>
+        <Box type="info" title="Chi risponde">L'agente può aiutare a formulare le domande. Le risposte le dà chi conosce la scuola e ha fatto la richiesta.</Box>
+      </div>
+    ),
+    notes: "Il passaggio centrale è il secondo. Si scrive la domanda, si porta alla persona giusta, si annota la risposta nella specifica. Il lavoro che l'agente fa bene è il quarto (trasformare una decisione in esempi con un esito), purché le decisioni siano già prese."
+  },
+  {
+    block: B + 'Un buon criterio',
+    content: () => (
+      <div className="pad">
+        <Tag>Criteri di accettazione</Tag>
+        <h2>Che cosa lo rende buono</h2>
+        <div className="grid">
+          <Card title="Un caso solo"><p>Una situazione per criterio. Se ce ne sono due, sono due criteri.</p></Card>
+          <Card title="Dati concreti"><p>Date, orari, nomi, numeri. Non «un giorno festivo»: il 24 dicembre 2026.</p></Card>
+          <Card title="Esito osservabile" kind="i"><p>Un messaggio, un codice, un conteggio. Qualcosa che si legge, non che si intuisce.</p></Card>
+          <Card title="Si può eseguire" kind="i"><p>Un comando o un test lo verifica, senza una persona che giudica.</p></Card>
+        </div>
+        <div className="grid" style={{ marginTop: 14 }}>
+          <Card title="Da evitare" kind="d"><p>«La serie gestisce bene i giorni di chiusura.»</p></Card>
+          <Card title="Meglio"><p>«Se una data della serie è il 24/12/2026, il sistema risponde GIORNO_DI_CHIUSURA e non crea nulla.»</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Il test pratico: un criterio è buono se due persone diverse, leggendolo, prevedono lo stesso esito. 'Gestisce bene' non lo permette. Il secondo esempio però contiene già una decisione (rifiutare, e rifiutare tutto): è il tipo di scelta che qualcuno deve fare e scrivere."
+  },
+  {
+    block: B + 'Esempio dalla palestra',
     content: () => (
       <div className="pad">
         <Tag>Esempio</Tag>
-        <h2>Un file corto che basta</h2>
-        <pre aria-label="Esempio di CLAUDE.md di un progetto inventato">{ESEMPIO}</pre>
-        <p className="muted">Poche righe, quattro sezioni, nessun segreto. Progetto inventato.</p>
+        <h2>Un criterio che si può eseguire</h2>
+        <pre aria-label="Criterio di accettazione e comando di prova">{CRITERIO}</pre>
+        <p className="muted">Questa regola esiste già nella palestra per le prenotazioni singole. Scritta così, è anche la prova che una modifica non l'ha rotta.</p>
+        <Box type="tip" title="Dal criterio al test">Dato, quando, allora diventano le tre parti di un test: preparo i dati, eseguo, controllo l'esito. È il tema dell'argomento 6.</Box>
       </div>
     ),
-    notes: `Esempio inventato di un piccolo progetto. Notare che ogni riga si può verificare e che nessuna riga spiega cose che il codice dice già. Chiedere ai presenti cosa aggiungerebbero e farsi dire perché: è la discussione utile.`
+    notes: "Si può eseguire il comando dal vivo: la risposta è RIFIUTATA (GIORNO_DI_CHIUSURA). Il 24 dicembre 2026 è nell'elenco 'chiusure' del file dei dati. Il punto è la forma: tre righe, dati concreti, un esito che si legge nel terminale."
   },
   {
-    block: B + 'Un esempio vero',
+    block: B + 'Il piano della demo',
     content: () => (
       <div className="pad">
-        <Tag>Esempio reale</Tag>
-        <h2>Le istruzioni di questo corso</h2>
+        <Tag>Un richiamo</Tag>
+        <h2>Il piano che avete visto nella demo</h2>
         <div className="grid">
-          <Card title="Com'è fatto"><p>Sezioni: formato, regole sulle fonti, privacy e segreti, stile dei testi, processo, stato dei lavori.</p></Card>
-          <Card title="Qualche riga" kind="i">
-            <ul>
-              <li>Dati solo inventati, email su <code className="nw">@demo.invalid</code>.</li>
-              <li>I numeri si riverificano con <code className="nw">git log</code> prima di usarli.</li>
-              <li>Mai commit di segreti.</li>
-            </ul>
-          </Card>
-          <Card title="Il difetto" kind="w"><p>Supera le 200 righe consigliate: lavora a più mestieri, ed è il primo candidato a essere spezzato per cartella.</p></Card>
+          <Card title="Compito piccolo, niente piano"><p>Un gioco chiesto in una riga: l'agente parte e in poco tempo c'è qualcosa da provare. Se non va bene, si rifà.</p></Card>
+          <Card title="Compito grande, prima il piano" kind="i"><p>Una dashboard che tocca più servizi e dati personali: prima si legge che cosa intende fare, poi si dà il via. Un errore di impostazione costa molto di più.</p></Card>
         </div>
-        <Box type="info" title="Perché mostrarlo">Un file reale non è mai perfetto. Serve a vedere che cosa ci finisce davvero quando il progetto va avanti.</Box>
+        <Box type="info" title="Che cosa si aggiunge qui">Nella demo il piano si leggeva a occhio. Qui si impara a leggerlo con una lista di controllo e a trasformarlo in una specifica con criteri di accettazione.</Box>
       </div>
     ),
-    notes: `Il file di istruzioni con cui è stato preparato questo stesso corso, in forma riassunta: le sezioni e tre regole. Ha più di 200 righe, cioè oltre l'indicazione della documentazione; lo dico apertamente. Le regole su dati inventati e segreti sono quelle che l'agente deve avere sempre davanti. Non leggere il file per intero.`
+    notes: "Richiamo della demo di apertura con Google AI Studio: due passi con lo stesso strumento, il primo senza pianificazione (un gioco semplice, velocissimo da provare), il secondo con pianificazione (un compito grande, con più servizi coinvolti). Il messaggio era il contrasto. Si può chiedere alla sala che cosa avrebbe voluto controllare nel piano della dashboard prima di dare il via: sono già le domande di questo argomento. Dettagli dell'esempio della demo non servono qui."
   },
   {
-    block: B + 'I livelli',
+    block: B + 'Modalità piano',
     content: () => (
       <div className="pad">
-        <Tag>Livelli</Tag>
-        <h2>Dove vive il file</h2>
-        <DT cols={['Livello', 'Dove', 'Per chi']} rows={[
-          ['Organizzazione', 'percorso di sistema gestito dall\'IT', 'tutti gli utenti'],
-          ['Utente', <code className="nw">~/.claude/CLAUDE.md</code>, 'solo tu, in ogni progetto'],
-          ['Progetto', <><code className="nw">./CLAUDE.md</code> o <code className="nw">./.claude/CLAUDE.md</code></>, 'chi clona il repository'],
-          ['Locale', <><code className="nw">./CLAUDE.local.md</code> (da mettere in .gitignore)</>, 'solo tu, in quel progetto'],
-          ['Cartella', <code className="nw">sotto/CLAUDE.md</code>, 'caricato quando si lavora lì'],
+        <Tag>Claude Code</Tag>
+        <h2>La modalità piano, di nuovo</h2>
+        <div className="grid">
+          <Card title="Dall'argomento 1"><p>Legge, esplora e propone; le modifiche restano bloccate finché non si approva. Si entra con <code className="nw">Shift+Tab</code> o <code className="nw">/plan</code>.</p></Card>
+          <Card title="Usarla per decidere" kind="i"><p>Non per approvare in fretta: per far emergere ipotesi e domande. Il piano non si approva finché la specifica non risponde.</p></Card>
+          <Card title="Correggere prima" kind="i"><p><code className="nw">Ctrl+G</code> apre il piano in un editor; «No, keep planning» lo rimanda indietro con le vostre correzioni.</p></Card>
+        </div>
+        <Box type="warn" title="Il blocco ha un limite">Se la sessione è avviata con i permessi di bypass disponibili, l'agente è solo istruito a non modificare: i blocchi non sono applicati. Dopo il piano si controlla comunque con <code className="nw">git status</code>.</Box>
+        <p className="muted">Verificato il 9/11/2026 su <a className="text-link" href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>code.claude.com/docs/en/permission-modes</a>. Le funzioni cambiano in fretta: riverificare prima di citarle.</p>
+      </div>
+    ),
+    notes: "Fonti: pagine 'Plan mode' (permission-modes) e 'Plan before editing' (common-workflows) della documentazione di Claude Code, lette il 9 novembre 2026. Per uscire dalla modalità senza approvare si preme di nuovo Shift+Tab. Durante la pianificazione l'agente può anche eseguire comandi di sola lettura per esplorare. Il modello dietro l'agente è un Claude, scelto dalla configurazione del laboratorio: la modalità piano è una funzione dello strumento, ma la qualità del piano cambia con il modello. Se la demo non rende, c'è un piano registrato."
+  },
+  {
+    block: B + 'Esplorare il repository',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima il codice, poi il piano</Tag>
+        <h2>Far esplorare, senza modificare</h2>
+        <pre aria-label="Esempio di prompt di esplorazione">{PROMPT_ESPLORA}</pre>
+        <div className="grid">
+          <Card title="Nella risposta controllate" kind="i"><p>Quali file ha letto davvero. Se cita il punto del codice dove sta una regola. Se separa quello che sa da quello che suppone.</p></Card>
+          <Card title="Segnale di allarme" kind="w"><p>«Di solito», «in genere», «probabilmente»: sta indovinando una regola, non l'ha letta.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Prompt di esempio per la palestra; per il progetto personale si cambiano i nomi dei file. La terza domanda (cosa non sai) è quella che conta di più: costringe l'agente a separare ciò che ha letto da ciò che sta supponendo. Un esito pulito: git status senza modifiche."
+  },
+  {
+    block: B + 'Un piano controllabile',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere un piano</Tag>
+        <h2>Cosa deve contenere</h2>
+        <div className="grid">
+          <Card title="File che si toccano"><p>Quali, e perché proprio quelli.</p></Card>
+          <Card title="Passi in ordine"><p>Piccoli, ognuno con un risultato.</p></Card>
+          <Card title="Come si verifica" kind="i"><p>Per ogni passo, la prova: un test, un comando.</p></Card>
+          <Card title="Ipotesi dichiarate" kind="w"><p>Ciò che ha assunto senza che glielo si dicesse.</p></Card>
+          <Card title="Domande aperte" kind="w"><p>Ciò che deve decidere una persona.</p></Card>
+          <Card title="Cosa non si fa" kind="d"><p>I confini: file, dati e comportamenti da non toccare.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Un piano senza le ultime quattro voci è una lista di cose da fare, non un piano da approvare.</p>
+      </div>
+    ),
+    notes: "Lista di lettura per le coppie. Le prime due voci le scrive quasi ogni piano; le ultime quattro sono quelle che mancano più spesso, ed è lì che si nascondono le decisioni prese al posto nostro."
+  },
+  {
+    block: B + 'Un piano da leggere',
+    content: () => (
+      <div className="pad">
+        <Tag>Esercizio di lettura</Tag>
+        <h2>Che cosa manca? Chi l'ha deciso?</h2>
+        <pre aria-label="Piano di esempio per le prenotazioni ricorrenti">{PIANO}</pre>
+        <p>Segnate ogni riga che decide qualcosa che nessuno ha chiesto.</p>
+        <p className="muted">Il piano è scritto per la slide, come potrebbe averlo scritto un agente. Non viene da una sessione reale.</p>
+      </div>
+    ),
+    notes: "Lasciare un momento di lettura silenziosa. Il piano ha un aspetto ordinato e professionale: è proprio per questo che va letto con attenzione. Non anticipare la slide successiva."
+  },
+  {
+    block: B + 'Regole inventate',
+    content: () => (
+      <div className="pad">
+        <Tag>Chi ha deciso?</Tag>
+        <h2>Tre regole che nessuno ha dato</h2>
+        <DT cols={['Riga', 'Che cosa è stato deciso', 'Che cosa andava chiesto']} rows={[
+          ['2', 'Solo una volta a settimana, per un anno intero.', 'Ogni quanto? Fino a quando: un numero di volte o una data?'],
+          ['4', 'Le chiusure si saltano in silenzio.', 'Si avvisa? Si rifiuta tutta la serie?'],
+          ['5', 'I conflitti non fermano la serie.', 'Tutto o niente, oppure si salvano le date libere?'],
         ]} />
+        <Box type="warn" title="Perché è pericoloso">Ognuna è una scelta ragionevole, scritta con sicurezza, e il test sul percorso felice passa. Chi approva senza leggere ha deciso lo stesso, ma senza saperlo.</Box>
       </div>
     ),
-    notes: `Elenco dalla pagina memory della documentazione di Claude Code, 9/11/2026. Il livello organizzazione sta in un percorso di sistema (su Windows C:\\Program Files\\ClaudeCode\\CLAUDE.md). Il file di una sottocartella viene caricato quando l'agente lavora su file di quella cartella. Per le preferenze personali che non si condividono: livello utente o file locale.`
+    notes: "Tre esempi, non l'elenco completo: nella richiesta restano altre domande aperte (chi può annullare o modificare la serie, un massimo di date, il testo degli errori) che le coppie trovano da sole nell'attività. Il punto: l'agente riempie i vuoti con la cosa più probabile. Quasi mai è sbagliata in sé; è sbagliata perché nessuno l'ha scelta."
   },
   {
-    block: B + 'Precedenze',
+    block: B + 'Far uscire le ipotesi',
     content: () => (
       <div className="pad">
-        <Tag>Livelli</Tag>
-        <h2>Si sommano, non si sovrascrivono</h2>
-        <div role="group" aria-label="Ordine di lettura, dal più generale al più vicino">
-          <Flow label="Ordine di lettura" nodes={[
-            ['1 Organizzazione', 'regole aziendali'], ['2 Utente', 'le tue preferenze'], ['3 Progetto', 'la radice del repository', 'i'], ['4 Più vicino', 'cartella di lavoro e locale', 'w'],
+        <Tag>Una richiesta all'agente</Tag>
+        <h2>Chiedere le ipotesi, per iscritto</h2>
+        <pre aria-label="Prompt per far dichiarare le ipotesi">{PROMPT_IPOTESI}</pre>
+        <div className="grid">
+          <Card title="Le risposte vanno nel file" kind="i"><p>Ogni decisione si scrive nella specifica, non solo nella conversazione. Il piano si rigenera dalla specifica.</p></Card>
+          <Card title="Non basta" kind="w"><p>L'elenco non prova di essere completo: un modello non vede le regole che gli sembrano ovvie. Serve una seconda lettura, umana.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Il prompt funziona meglio con i modelli che seguono bene le istruzioni; con altri l'agente scrive comunque il codice. Se succede, è un risultato da raccontare, non un errore dell'esercizio. La seconda lettura è il confronto a coppie dell'attività."
+  },
+  {
+    block: B + 'Passi verificabili',
+    content: () => (
+      <div className="pad">
+        <Tag>Spezzare</Tag>
+        <h2>Una funzionalità, quattro passi</h2>
+        <div role="group" aria-label="Le ricorrenti in quattro passi, ognuno con la sua prova">
+          <Flow nodes={[
+            ['1 Le date', 'prova: partenza, cadenza e numero danno l\'elenco atteso'],
+            ['2 Le regole', 'prova: una data di chiusura dà il rifiuto di sempre'],
+            ['3 Le date occupate', 'decisione vostra; prova su un conflitto', 'w'],
+            ['4 Il comando', 'prova: una riga di terminale, a mano e con un test', 'i'],
           ]} />
         </div>
-        <ul style={{ marginTop: 12 }}>
-          <li>Tutti i file trovati vengono uniti nel contesto; l'ultimo letto è il più vicino a dove lavori.</li>
-          <li>Se si contraddicono, non c'è una regola che vince: l'agente può scegliere a caso. Niente contraddizioni.</li>
-        </ul>
+        <p className="legend">Un commit per passo, come nell'argomento 3: se il passo 3 va storto si torna al 2.</p>
+        <p className="muted">È una divisione possibile, non l'unica: scegliete la vostra.</p>
       </div>
     ),
-    notes: `Dalla documentazione (9/11/2026): i file di CLAUDE.md nelle cartelle sopra quella di lavoro si caricano all'avvio, concatenati dalla radice del filesystem fino alla cartella corrente, quindi le istruzioni più vicine sono lette per ultime. Quelli delle sottocartelle si caricano su richiesta. Non è un meccanismo di override: la precedenza è di ordine di lettura, non di forza. Per questo conviene evitare le contraddizioni invece di contare su chi vince.`
+    notes: "L'ordine conta: ogni passo dipende solo dai precedenti. Il passo 3 è evidenziato perché dipende da una decisione che nella richiesta non c'è. Chi ha già deciso nell'attività può spostarlo."
   },
   {
-    block: B + 'Import e comandi',
+    block: B + 'Un passo verificabile',
     content: () => (
       <div className="pad">
-        <Tag>Strumenti</Tag>
-        <h2>Import, /init e /memory</h2>
-        <div className="grid">
-          <Card title="Import con @"><p><code className="nw">@percorso/file.md</code> dentro un CLAUDE.md carica quel file insieme. Percorsi relativi al file che importa, fino a quattro livelli.</p></Card>
-          <Card title="/init" kind="i"><p>Esplora il progetto e genera un primo file. Se esiste già, propone miglioramenti senza sovrascrivere.</p></Card>
-          <Card title="/memory" kind="i"><p>Elenca i file di istruzioni (anche quelli non ancora creati) e permette di aprirli. Quelli caricati davvero: <code className="nw">/context all</code>.</p></Card>
-        </div>
-        <Box type="warn" title="Un primo giro, non l'ultimo">Ciò che genera <code className="nw">/init</code> va riletto riga per riga: la bozza dell'agente contiene quello che ha dedotto, non quello che sa solo la squadra.</Box>
-      </div>
-    ),
-    notes: `Import con @: relativo al file che importa, ricorsivo fino a quattro livelli (documentazione, 9/11/2026). L'import non riduce il costo di contesto. /init genera un CLAUDE.md di partenza; se c'è già suggerisce modifiche. /memory elenca i file caricati: lo useremo per verificare. La resa dei comandi può variare con la versione di Claude Code e con il modello collegato al proxy del laboratorio: provarla prima.`
-  },
-  {
-    block: B + 'CLAUDE.md e AGENTS.md',
-    content: () => (
-      <div className="pad">
-        <Tag>Due nomi</Tag>
-        <h2>CLAUDE.md e AGENTS.md</h2>
-        <DT cols={['', 'Claude Code', 'OpenCode']} rows={[
-          ['Il file proprio', <code className="nw">CLAUDE.md</code>, <code className="nw">AGENTS.md</code>],
-          ['Se manca', <>legge <code className="nw">AGENTS.md</code></>, <>ripiega su <code className="nw">CLAUDE.md</code></>],
-          ['Se ci sono entrambi', <>legge solo <code className="nw">CLAUDE.md</code></>, <>legge <code className="nw">AGENTS.md</code></>],
-          ['Comando iniziale', <code className="nw">/init</code>, <code className="nw">/init</code>],
+        <Tag>Spezzare</Tag>
+        <h2>Come si riconosce un buon passo</h2>
+        <DT cols={['Domanda', 'Passo da tenere', 'Passo da spezzare']} rows={[
+          ['Si sa quando è finito?', 'Il test X passa.', '«La serie funziona».'],
+          ['Quanto tocca?', 'Una funzione e il suo test.', '«Riscrivere il modulo».'],
+          ['Da che cosa dipende?', 'Dai passi precedenti.', 'Da una decisione ancora aperta.'],
+          ['Si può annullare?', 'Un commit, un git revert.', 'Modifiche sparse in molti file.'],
         ]} />
-        <p className="muted"><code className="nw">AGENTS.md</code> è un formato aperto, usato da molti strumenti. Il comportamento a coppia è quello predefinito: si può cambiare nelle impostazioni.</p>
       </div>
     ),
-    notes: `Fonti, lette il 9/11/2026: agents.md (formato aperto, "README per agenti", supportato da molti strumenti; in un monorepo vale il file più vicino), code.claude.com/docs/en/memory (sezione AGENTS.md: senza CLAUDE.md Claude Code legge AGENTS.md; con entrambi legge solo CLAUDE.md, impostazione predefinita modificabile), docs.opencode.ai/docs/rules (AGENTS.md ha la precedenza, CLAUDE.md come ripiego). Conseguenza pratica: se in un progetto ci sono entrambi i file e non sono allineati, i due strumenti vedono istruzioni diverse. Il ripiego di OpenCode su CLAUDE.md si disattiva con la variabile d'ambiente OPENCODE_DISABLE_CLAUDE_CODE=1. Claude Code legge AGENTS.md da solo dalla versione 2.1.277: con versioni precedenti serve l'import. Verificare sul PC del corso prima di dirlo: le versioni cambiano.`
+    notes: "Quattro domande rapide da fare a ogni passo del piano. Se la risposta sta nella terza colonna, si spezza oppure si torna alla specifica."
   },
   {
-    block: B + 'Tenerli allineati',
+    block: B + 'Dal racconto',
     content: () => (
       <div className="pad">
-        <Tag>Due nomi</Tag>
-        <h2>Una fonte, un rimando</h2>
-        <pre aria-label="AGENTS.md come fonte unica e CLAUDE.md che lo importa">{IMPORT}</pre>
-        <ul>
-          <li>Le istruzioni comuni stanno in un solo file; l'altro lo importa o lo rimanda.</li>
-          <li>Due copie scritte a mano divergono dopo il primo ritocco.</li>
-        </ul>
-        <Box type="info" title="Su Windows">Il collegamento simbolico tra i due file richiede privilegi e può rompersi nei cloni. L'import con <code className="nw">@</code> è la strada più semplice.</Box>
-      </div>
-    ),
-    notes: `La documentazione di Claude Code (9/11/2026) suggerisce proprio questa forma: CLAUDE.md con una riga @AGENTS.md e sotto le sole istruzioni specifiche per Claude. Sul PC del laboratorio, con Windows, evitare i collegamenti simbolici. Per OpenCode il rimando con @ non viene interpretato automaticamente: ciò che sta in AGENTS.md è già la fonte, e CLAUDE.md non serve a lui. Un secondo mezzo, per OpenCode, è il campo instructions di opencode.json.`
-  },
-  {
-    block: B + 'Un fatto sbagliato',
-    content: () => (
-      <div className="pad">
-        <Tag>Il rischio</Tag>
-        <h2>Un'istruzione sbagliata diventa un fatto</h2>
-        <pre aria-label="Esempio: un comando dei test che non esiste">{SBAGLIATO}</pre>
-        <p>L'agente si fida del file e ha ragione di farlo. Se il file sbaglia, o rompe il lavoro, o l'agente ripara in silenzio, nel modo sbagliato.</p>
-        <Box type="warn" title="Come nascono">Un percorso rinominato, un comando cambiato, un file spostato. Il codice si aggiorna, le istruzioni no.</Box>
-      </div>
-    ),
-    notes: `Esempio inventato. L'errore non produce quasi mai un messaggio chiaro, e l'agente non ha motivo di dubitare di ciò che gli è stato dato come regola. Collegamento con il racconto: i dieci agenti che per mesi non venivano caricati perché l'intestazione del file era scritta male. Nessun errore, sembrava tutto funzionare. Le istruzioni sbagliate sono dello stesso tipo: silenziose. Per questo una revisione delle istruzioni, quando cambia il progetto, vale quanto una revisione del codice.`
-  },
-  {
-    block: B + 'Verificare',
-    content: () => (
-      <div className="pad">
-        <Tag>Verifica</Tag>
-        <h2>Come si sa che funziona</h2>
-        <div className="cols">
-          <ol className="steps">
-            <li><b>1 Chiedi cosa ha capito.</b> Quali istruzioni ha caricato, da quali file, che cosa ne deduce.</li>
-            <li><b>2 Controlla i fatti.</b> Ogni percorso e ogni comando del file esiste davvero?</li>
-            <li className="w"><b>3 Prova un compito, prima e dopo.</b> Stesso compito, sessione nuova, file diverso: cosa cambia?</li>
-          </ol>
-          <div>
-            <CommandBox kind="text" label="Prompt 1: cosa ha caricato" cmd="Quali istruzioni di progetto hai caricato? Citale e dimmi, per ognuna, da quale file vengono." />
-            <CommandBox kind="text" label="Prompt 2: i percorsi esistono?" cmd="Dove stanno i dati e come si lanciano i test? Controlla che i percorsi esistano, prima di rispondere." />
-            <CommandBox cmd="/context all" label="Comando: sotto «Memory files» i file caricati" />
-            <CommandBox cmd="/memory" label="Comando: elenca i file di istruzioni e li apre" />
-          </div>
+        <Tag>Il racconto</Tag>
+        <h2>Un portale in cinque tappe</h2>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          <Stat big="5" label="tappe, da M0 a M4" />
+          <Stat big="2 giorni" label="il 15 e il 16 luglio 2026" />
+          <Stat big="105" label="test verdi al termine delle tappe" />
         </div>
+        <p style={{ marginTop: 12 }}>Il portale FSL non è stato scritto in un blocco: il lavoro è stato diviso in tappe numerate. La domanda per noi è come si divide una funzionalità in pezzi di cui si può dire «questo funziona».</p>
+        <p className="muted">Fonte: appunti di progetto di Thomas e storia git del portale FSL.</p>
       </div>
     ),
-    notes: `Tre controlli. Primo: chiedere all'agente quali istruzioni ha e da dove; se non cita il file, non l'ha letto. Secondo: i fatti si controllano a mano, non con l'agente: ls, node cli.js, npm test. Terzo: la prova pratica con lo stesso compito in una sessione nuova (usare /clear tra le prove) prima e dopo la modifica. Il comando /context all mostra, sotto Memory files, i file caricati; /memory li elenca e li apre. Con modelli diversi dal modello di sviluppo la risposta può cambiare: se la prova non regge, ripeterla.`
+    notes: "Qui Thomas racconta come sono nati i requisiti del portale FSL e che cosa conteneva ciascuna tappa. I numeri (cinque tappe, 15 e 16 luglio 2026, 105 test) vengono dagli appunti di progetto e dalla storia git. Dalla storia git: prima della tappa M0 c'è un commit con l'analisi della documentazione e la specifica completa del portale. Il contenuto delle tappe e il modo in cui sono emersi i requisiti lo dice a voce chi racconta. Nessun dato reale, nessun nome."
   },
   {
-    block: B + 'Attività: la palestra',
+    block: B + 'Attività al PC',
     content: () => (
       <div className="pad">
         <Tag>Attività</Tag>
-        <h2>Sistemare le istruzioni della palestra</h2>
+        <h2>Ora tocca a voi</h2>
         <ol className="timeline">
-          <li><time>1</time>Dal punto <code className="nw">partenza-a4</code>: chiedi all'agente un compito, lo stesso che ripeterai dopo.</li>
-          <li><time>2</time>Leggi <code className="nw">CLAUDE.md</code> e <code className="nw">AGENTS.md</code>. Trova gli errori confrontandoli con il repository.</li>
-          <li><time>3</time>Migliorali: comandi, convenzioni, divieti. Un file solo come fonte.</li>
-          <li><time>4</time>Ripeti il compito in una sessione nuova e confronta.</li>
+          <li><time>1</time>A coppie: riscrivete la specifica delle sovrapposizioni finché un'altra coppia la capisce senza domande.</li>
+          <li><time>2</time>Dalla richiesta sulle ricorrenti alla specifica con i criteri di accettazione.</li>
+          <li><time>3</time>Il piano in modalità piano, con <code className="nw">git status</code> pulito.</li>
+          <li><time>4</time>Confronto a coppie: che cosa manca, che cosa è stato deciso al posto vostro.</li>
         </ol>
-        <ActivityBadge n="4" file="istruzioni-palestra.html" label="Scheda: istruzioni della palestra" />
-        <p className="muted" style={{ marginTop: 10 }}>Una checklist per scrivere un buon file è nella <a className="text-link" href="../materiali/argomento-4/checklist-claude-md.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>pagina dei materiali</a>.</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          <ActivityBadge n="4" file="scheda-attivita.html" label="Scheda dell'attività" />
+          <ActivityBadge n="4" file="modello-specifica.html" label="Modello di specifica" />
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Poi lo stesso percorso sul vostro progetto personale.</p>
       </div>
     ),
-    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a4 (git switch -c lavoro-a4 partenza-a4). Non dire dove sia l'errore: è parte dell'esercizio. Il compito è lo stesso prima e dopo: così si misura l'effetto delle istruzioni. Chi finisce prima prova anche a verificare con OpenCode cosa legge. Le istruzioni sono lette dall'agente come fatti: far ragionare sul perché un errore in un file così corto pesa tanto.`
-  },
-  {
-    block: B + 'Attività: il progetto',
-    content: () => (
-      <div className="pad">
-        <Tag>Il progetto personale</Tag>
-        <h2>Il primo CLAUDE.md del tuo progetto</h2>
-        <ol className="timeline">
-          <li><time>1</time>Parti dalla scheda del progetto e dal piano: comandi, cartelle, divieti.</li>
-          <li><time>2</time>Scrivi tu la bozza. Poi, se vuoi, <code className="nw">/init</code> per confrontare.</li>
-          <li><time>3</time>Passa la checklist: nessun segreto, nessuna regola ovvia, tutto controllabile.</li>
-          <li><time>4</time>Prova con un compito reale e correggi la riga che non ha funzionato.</li>
-        </ol>
-        <ActivityBadge n="4" file="checklist-claude-md.html" label="Checklist: un buon CLAUDE.md" />
-        <p className="muted" style={{ marginTop: 10 }}>Il file va nella cartella del tuo progetto, mai in quella del corso.</p>
-      </div>
-    ),
-    notes: `Sul progetto personale: il primo CLAUDE.md. Il file nasce da quello che il progetto ha già: scheda, requisiti, piano dell'argomento 3. Meglio corto: si allunga solo quando l'agente sbaglia due volte la stessa cosa. Solo dati inventati anche nei progetti personali. Ricordare di non scrivere segreti o indirizzi interni.`
+    notes: "Partenza: git switch -c lavoro-a4 partenza-a4. I due file di partenza stanno in docs/. Il confronto a coppie conta quanto la scrittura: scambiarsi le specifiche e i piani e cercare cosa manca."
   },
   {
     block: B + 'Domanda di verifica',
@@ -645,28 +648,29 @@ const slides = [
       <div className="pad">
         <Tag>Quiz</Tag>
         <h2>Una domanda per voi</h2>
-        <Quiz domanda="In un progetto ci sono sia CLAUDE.md sia AGENTS.md, e non dicono la stessa cosa. Cosa succede con le impostazioni predefinite?" opzioni={[
-          { t: 'Claude Code li legge entrambi e unisce le istruzioni', ok: false, perche: 'Non per impostazione predefinita: se c\'è un CLAUDE.md, l\'AGENTS.md non viene letto da Claude Code.' },
-          { t: 'Claude Code segue CLAUDE.md, OpenCode segue AGENTS.md: i due strumenti vedono istruzioni diverse', ok: true, perche: 'Per questo conviene una fonte unica, con l\'altro file che la importa.' },
-          { t: 'Vince il file modificato per ultimo', ok: false, perche: 'La data del file non conta: conta il nome e lo strumento che lo legge.' },
+        <Quiz domanda="Nel piano proposto dall'agente c'è scritto: «se una data della serie cade in un giorno di chiusura, la salto». Che cosa conviene fare?" opzioni={[
+          { t: 'Lasciarla: è ragionevole e il piano non modifica ancora nulla.', ok: false, perche: 'Il piano non scrive file, ma se lo approvate la regola entra nel codice. La scelta spetta a chi conosce la scuola.' },
+          { t: 'Segnarla come decisione aperta, chiedere a chi ha fatto la richiesta e scrivere la risposta nella specifica con un criterio.', ok: true, perche: 'La regola diventa la scelta di una persona e un caso che si può eseguire.' },
+          { t: 'Chiedere all\'agente perché l\'ha scelta e fidarsi della spiegazione.', ok: false, perche: 'La spiegazione sarà plausibile qualunque sia la regola: non è una fonte.' },
         ]} />
       </div>
     ),
-    notes: `Domanda sul punto più facile da sbagliare. Se qualcuno risponde A, rimandare alla slide sulle due convenzioni. Il comportamento si può cambiare in /config, impostazione «Project instructions», valore claude-md-and-agents-md; non è il valore predefinito.`
+    notes: "Domanda di comprensione. Il punto non è se saltare o rifiutare: è chi decide e dove resta scritto."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Il contesto utile è quello pertinente: comandi, posizioni, convenzioni, divieti. Poche righe, tutte controllabili.',
-          'I file si sommano per livello; un\'istruzione che ne contraddice un\'altra può essere scartata a caso.',
-          'Una fonte unica (AGENTS.md) e un rimando (@AGENTS.md) tengono allineati i due strumenti.',
-          'Un\'istruzione sbagliata diventa un fatto: si verifica chiedendo cosa ha capito e ripetendo un compito.',
+          'Una richiesta vaga contiene desideri. Requisiti, vincoli e criteri si chiedono e si scrivono.',
+          'Un criterio di accettazione è un caso con dati concreti e un esito che si può eseguire.',
+          'Esplorare e pianificare in modalità piano, poi controllare con git status.',
+          'Ogni regola del piano che nessuno ha dato è una domanda aperta, non un dettaglio.',
+          'Ogni passo del piano si chiude con una prova.',
         ]}
-        dopo="Argomento 7 (skill e subagenti: le istruzioni che l'agente legge solo quando servono) e argomento 9 (OpenCode, dove AGENTS.md è il file di partenza)." />
+        dopo="Argomento 5: le istruzioni persistenti (CLAUDE.md e AGENTS.md), dove restano scritte le regole decise qui. Argomento 6: i criteri di accettazione diventano test che l'agente esegue." />
     ),
-    notes: `Riprendere i quattro punti. Lasciare domande. Anticipare che le istruzioni sono il primo strato; le skill sono lo strato che l'agente legge solo quando serve (argomento 7), e in OpenCode lo stesso ruolo lo ha AGENTS.md (argomento 9).`
+    notes: "Ripresa dei cinque punti e domande. Le decisioni prese qui vanno scritte in un file del progetto: è il collegamento con l'argomento 5. I criteri di accettazione sono la materia prima dei test dell'argomento 6."
   },
 ];
 

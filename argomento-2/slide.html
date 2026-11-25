@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 2 · Git come rete di sicurezza · Coding agentico</title>
+<title>Argomento 2 · Installare l'agente · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -328,352 +328,552 @@ function CommandBox({ cmd, label, tall, kind }) {
 /* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
-const B = 'Argomento 2 — Git come rete di sicurezza · ';
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 2 — Installare l\'agente · ';
 
-const CODICE_STATUS = String.raw`$ git status
-On branch lavoro-a2
-Changes not staged for commit:
-        modified:   src/logica.js
-        modified:   cli.js
-Untracked files:
-        APPUNTI.md`;
+const CMD = {
+  claudeInstall: String.raw`irm https://claude.ai/install.ps1 | iex`,
+  claudeVersion: 'claude --version',
+  setUrl: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "http://<indirizzo del server>", "User")`,
+  varName: 'ANTHROPIC_AUTH_TOKEN',
+  checkKey: String.raw`if ($env:ANTHROPIC_AUTH_TOKEN) { "chiave presente" } else { "chiave mancante" }`,
+  showUrl: String.raw`$env:ANTHROPIC_BASE_URL`,
+  last4: String.raw`$env:ANTHROPIC_AUTH_TOKEN.Substring($env:ANTHROPIC_AUTH_TOKEN.Length-4)`,
+  curlModels: String.raw`curl.exe "$env:ANTHROPIC_BASE_URL/v1/models" -H "Authorization: Bearer $env:ANTHROPIC_AUTH_TOKEN"`,
+  mkTest: String.raw`New-Item -ItemType Directory -Force "$env:USERPROFILE\prova-agente" | Out-Null`,
+  cdTest: String.raw`cd "$env:USERPROFILE\prova-agente"`,
+  claudeManual: 'claude --permission-mode manual',
+  claudeModel: 'claude --permission-mode manual --model claude-sonnet-5-5',
+  ocInstall: 'npm install -g opencode-ai@1.19.5',
+  ocVersion: 'opencode --version',
+  mkOc: String.raw`New-Item -ItemType Directory -Force "$env:USERPROFILE\.config\opencode" | Out-Null`,
+  notepadOc: String.raw`notepad "$env:USERPROFILE\.config\opencode\opencode.json"`,
+  stopOc: String.raw`Get-Process opencode* -ErrorAction SilentlyContinue | Stop-Process -Force`,
+  ocModels: 'opencode models',
+  oc: 'opencode',
+  uvInstall: String.raw`powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`,
+  uvVersion: 'uv --version',
+  mdHelp: String.raw`uvx --from "markitdown[all]" markitdown --help`,
+  uvxTest: String.raw`Test-Path "$env:USERPROFILE\.local\bin\uvx.exe"`,
+  uvxRun: String.raw`& "$env:USERPROFILE\.local\bin\uvx.exe" --version`,
+  pathUser: String.raw`[Environment]::GetEnvironmentVariable("Path", "User")`,
+  notepadClaude: String.raw`notepad "$env:USERPROFILE\.claude\CLAUDE.md"`,
+  notepadAgents: String.raw`notepad "$env:USERPROFILE\.config\opencode\AGENTS.md"`,
+  copyPdf: String.raw`Copy-Item "$env:USERPROFILE\Downloads\prova-markitdown.pdf" "$env:USERPROFILE\prova-agente\"`,
+  req1: 'Rispondi con una parola: collegato.',
+  reqPdf: 'Leggi prova-markitdown.pdf e dimmi quante ore sono prenotate in totale per ciascun laboratorio.',
+  unsetKey: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_AUTH_TOKEN", $null, "User")`,
+  unsetUrl: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", $null, "User")`,
+};
 
-const CODICE_DIFF = String.raw`$ git diff src/formato.js
-@@ -3,3 +3,3 @@ const { etichetta } = require('./util');
- 
--const LARGHEZZA_ID = 8;
-+const LARGHEZZA_ID = 10;
- function riga(p) {`;
+const OPENCODE_JSON = `{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": ["anthropic"],
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "http://<indirizzo del server>/v1",
+        "apiKey": "{env:ANTHROPIC_AUTH_TOKEN}",
+        "headers": {
+          "Authorization": "Bearer {env:ANTHROPIC_AUTH_TOKEN}"
+        }
+      },
+      "whitelist": ["claude-sonnet-5-5", "claude-haiku-5-5"]
+    }
+  },
+  "model": "anthropic/claude-sonnet-5-5",
+  "small_model": "anthropic/claude-haiku-5-5",
+  "share": "disabled",
+  "autoupdate": false,
+  "permission": {
+    "*": "ask",
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "rm *": "deny",
+      "git push *": "deny"
+    },
+    "task": "ask",
+    "skill": "ask",
+    "webfetch": "deny",
+    "websearch": "deny",
+    "external_directory": "deny"
+  }
+}`;
 
-const CODICE_REMOTE = String.raw`$ git remote -v
-(nessun output: il repository non ha un remote, quindi non si può fare push)`;
+const ISTRUZIONI = `# Istruzioni per l'agente
+
+Lavori per un docente di informatica. Rispondi in italiano, con frasi brevi.
+
+## Leggere i documenti
+
+Per leggere un PDF, un file Word, Excel o PowerPoint non aprirlo come testo: convertilo con MarkItDown, con questo comando (sostituisci il nome del file):
+
+uvx --from "markitdown[all]" markitdown nome-del-file.pdf
+
+Poi lavora sul testo ottenuto. Se il comando scrive avvisi sui caratteri del PDF, ignorali. Se una tabella esce con righe spezzate o colonne mescolate, dillo e non indovinare i valori mancanti.
+
+## Calcoli e tabelle
+
+Per conteggi, percentuali e confronti tra valori usa Python con le librerie caricate al volo, per esempio:
+
+uv run --with pandas python nome-dello-script.py
+
+Per leggere o scrivere file Excel usa uv run --with openpyxl python nome-dello-script.py. Non fare i conti a mente: calcolali.
+
+## Risultati
+
+Scrivi i risultati in file nella cartella di lavoro (Markdown, CSV o Excel), non solo nella chat.
+
+## Cosa non fare
+
+- Non installare programmi. I comandi uvx e uv run scritti qui sopra sono permessi.
+- Non modificare i documenti originali (PDF, Word, Excel): scrivi i risultati in file nuovi.
+- Non cancellare file senza chiedere.
+- Non inviare niente a nessuno (email, messaggi, caricamenti) senza chiedere prima.
+- Alla fine scrivi che cosa non hai potuto verificare.`;
+
+/* Componenti propri dell'argomento */
+const Passo = ({ n, titolo, children }) => (
+  <div className="pad">
+    <Tag>{'Passo ' + n}</Tag>
+    <h2>{titolo}</h2>
+    {children}
+  </div>
+);
+const Controllo = ({ children }) => <Box type="tip" title="Punto di controllo">{children}</Box>;
+
+const PERCORSO = [
+  ['1', 'Installare Claude Code', <><code className="nw">claude --version</code> stampa un numero di versione</>],
+  ['2', 'Indirizzo e chiave, come variabili dell\'utente', 'in una finestra nuova: «chiave presente» e l\'indirizzo senza /v1'],
+  ['3', 'Prima prova di connessione', 'il server elenca i modelli; /status mostra il suo indirizzo'],
+  ['4', 'OpenCode sul server', <><code className="nw">opencode models</code> elenca solo i due modelli del corso</>],
+  ['5', 'Il kit minimo: uv e MarkItDown', 'la prima esecuzione arriva in fondo senza errori'],
+  ['6', 'Le istruzioni globali', 'due file con il nome giusto, sessione nuova'],
+  ['7', 'Prova su un PDF', <>tra le azioni compare <code className="nw">uvx ... markitdown</code></>],
+  ['8', 'Pronti per la prima esercitazione', 'la cartella di lavoro è aperta nell\'agente'],
+];
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="2" titolo="Git come rete di sicurezza"
-        sottotitolo="Leggere cosa ha fatto l'agente prima di accettarlo, e saper tornare indietro senza rovinare niente."
-        caso="Un episodio dal racconto: un subagente che, durante un test, ha fatto push sul repository vero."
-        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
+      <Apertura n="2" titolo="Installare l'agente"
+        sottotitolo="Claude Code e OpenCode sul PC del laboratorio, collegati al server del corso con la vostra chiave, più un kit minimo per leggere i documenti."
+        caso="Un agente senza gli strumenti giusti, davanti a un PDF, si ferma o improvvisa. Per questo l'installazione comprende anche il kit." />
     ),
-    notes: "Apertura. Un agente modifica più file in pochi secondi e riassume a parole quello che ha fatto. Il riassunto non è una prova: git mostra le righe che sono cambiate davvero. L'argomento insegna due abilità: leggere il diff e tornare indietro. Chi usa git ogni giorno può saltare i comandi base, ma tutti fanno l'esercizio sul repository della palestra."
+    notes: "Argomento pratico, tutto al PC del laboratorio (Windows). Si procede un passo alla volta, con un punto di controllo per ciascuno: non si passa al successivo finché non torna. Le slide hanno un comando per riquadro, con il tasto Copia. Sull'esperienza dietro il kit: nel corso per il personale, a novembre 2026, l'agente davanti a PDF, Word ed Excel leggeva il file come testo o inventava, finché non gli si è detto che gli strumenti per convertirli erano installati."
   },
   {
-    block: B + 'Perché git',
+    block: B + 'Prima di cominciare',
     content: () => (
       <div className="pad">
-        <Tag>Il motivo</Tag>
-        <h2>L'agente cambia più cose di quelle che racconta</h2>
-        <div className="grid">
-          <Card title="Cosa fa l'agente" kind="i">
-            <p>Legge, modifica diversi file, lancia comandi, riprova. Con una richiesta può toccare dieci file.</p>
-          </Card>
-          <Card title="Cosa riferisce" kind="w">
-            <p>Un riassunto di poche righe. Può essere incompleto, o dire «fatto» su una cosa fatta a metà.</p>
-          </Card>
-          <Card title="Cosa vi dà git">
-            <p>L'elenco esatto dei file cambiati, le righe prima e dopo, e un punto a cui tornare.</p>
-          </Card>
-        </div>
-        <Box type="info" title="Regola di lavoro">Prima di accettare un lavoro dell'agente si guarda lo stato del repository, non il suo riassunto. Una modifica che non è in un commit si può perdere; una già committata si recupera quasi sempre.</Box>
-      </div>
-    ),
-    notes: "Il punto è la differenza tra ciò che l'agente dice e ciò che c'è nei file. Git è lo strumento neutro che le confronta. La frase sul commit va detta con calma: un lavoro committato si recupera quasi sempre, uno solo sul disco no. Per questo, prima di ogni richiesta rischiosa, si salva con un commit."
-  },
-  {
-    block: B + 'Le tre zone',
-    content: () => (
-      <div className="pad">
-        <Tag>Come funziona</Tag>
-        <h2>Dove stanno le modifiche</h2>
-        <div role="group" aria-label="Le tre zone di git: cartella di lavoro, area di preparazione, repository">
-          <Flow nodes={[
-            ['Cartella di lavoro', 'i file come sono ora; l\'agente scrive qui', 'w'],
-            ['Area di preparazione', 'quello che entrerà nel prossimo commit (staging)', 'i'],
-            ['Repository', 'i commit: fotografie salvate dello stato dei file', ''],
-          ]} />
-        </div>
-        <DT cols={['Comando', 'Sposta', 'Perché']} rows={[
-          [<code className="nw">git add file</code>, 'dalla cartella all\'area di preparazione', 'scegliete voi cosa entra'],
-          [<code className="nw">git commit -m "..."</code>, 'dall\'area di preparazione al repository', 'crea il punto a cui tornare'],
-        ]} />
-      </div>
-    ),
-    notes: "Tre zone, due comandi. Un commit è una fotografia dei file tracciati, con un messaggio. L'area di preparazione serve a decidere cosa entra: l'agente potrebbe aver cambiato cinque file e voi ne volete committare due. Se la sala usa git ogni giorno, questa slide si passa in fretta."
-  },
-  {
-    block: B + 'git status',
-    content: () => (
-      <div className="pad">
-        <Tag>Leggere il lavoro dell'agente</Tag>
-        <h2>Primo sguardo: git status</h2>
-        <pre aria-label="Esempio di git status">{CODICE_STATUS}</pre>
+        <Tag>Prima di cominciare</Tag>
+        <h2>Cosa serve</h2>
         <ul>
-          <li><code>modified</code>: il file esisteva ed è cambiato.</li>
-          <li><code>Untracked</code>: file nuovo che git non conosceva. Se non l'avete chiesto voi, chiedetevi perché c'è.</li>
-          <li>Sapere quali file sono cambiati è già metà del controllo.</li>
+          <li>Il PC del laboratorio, con il vostro utente. Non servono permessi di amministratore.</li>
+          <li>Git e Node.js, già installati dall'ufficio tecnico.</li>
+          <li>Il <b>foglio consegnato in aula</b>, con l'indirizzo del server del corso e la vostra chiave personale.</li>
+          <li>Una connessione a internet per scaricare i programmi.</li>
         </ul>
-      </div>
-    ),
-    notes: "Esempio inventato. Mostrare sempre prima git status e poi git diff. La domanda da fare ai partecipanti: tra questi file, quali mi aspettavo? Un file in più, o uno che non c'entra con la richiesta, è il primo campanello. L'output è in inglese perché è quello che stampa git; se un PC lo mostra in italiano cambiano le parole, non il senso."
-  },
-  {
-    block: B + 'git diff',
-    content: () => (
-      <div className="pad">
-        <Tag>Leggere il lavoro dell'agente</Tag>
-        <h2>Poi le righe: git diff</h2>
-        <pre aria-label="Esempio di git diff">{CODICE_DIFF}</pre>
+        <p>Tutti i comandi si incollano in PowerShell, uno alla volta. Nei comandi compaiono due segnaposto, da sostituire con i dati del foglio prima di premere Invio:</p>
         <ul>
-          <li>Riga con <code>-</code>: tolta. Riga con <code>+</code>: aggiunta. Le righe senza segno sono contesto.</li>
-          <li><code>@@ ... @@</code> dice dove siamo nel file; un blocco di modifiche si chiama «hunk».</li>
-          <li>Non serve capire tutto: serve chiedersi se ogni riga cambiata ha a che fare con la richiesta.</li>
+          <li><code className="nw">{'<indirizzo del server>'}</code> è l'indirizzo con la porta, come sta sul foglio.</li>
+          <li><code className="nw">{'<la tua chiave>'}</code> è la chiave personale: vale come una password.</li>
         </ul>
+        <ActivityBadge n="2" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
       </div>
     ),
-    notes: "Esempio inventato. Insistere su una domanda sola per ogni blocco: questa modifica serve a quello che ho chiesto? Se no, è una modifica non richiesta e si annulla. Un diff con un solo numero cambiato è facile da non vedere in un riassunto e facile da vedere qui."
+    notes: "Consegnate ora il foglio con l'indirizzo e le chiavi, uno per PC. Indirizzo e chiavi non compaiono nelle slide e non si mostrano sul proiettore. Windows, nella documentazione di Claude Code (code.claude.com/docs/en/setup, letta il 25/11/2026), richiede Windows 10 1809 o successivo; l'installazione nativa non richiede di essere amministratore e Git for Windows è consigliato ma facoltativo: con Git Claude Code usa Bash, senza usa PowerShell. Il foglio con gli stessi passi serve a chi resta indietro."
   },
   {
-    block: B + 'Le varianti di diff',
+    block: B + 'Perché così',
     content: () => (
       <div className="pad">
-        <Tag>Leggere il lavoro dell'agente</Tag>
-        <h2>Quattro modi di chiedere «cosa è cambiato»</h2>
-        <DT cols={['Comando', 'Confronta', 'Quando']} rows={[
-          [<code className="nw">git diff</code>, 'cartella di lavoro e area di preparazione', 'subito dopo che l\'agente ha lavorato'],
-          [<code className="nw">git diff --staged</code>, 'area di preparazione e ultimo commit', 'prima di fare il commit'],
-          [<code className="nw">git diff main</code>, 'cartella di lavoro e il ramo main', 'quanto ho cambiato dalla partenza'],
-          [<code className="nw">git diff --stat</code>, 'riepilogo per file, senza le righe', 'colpo d\'occhio prima del dettaglio'],
-        ]} />
-        <Box type="warn" title="File nuovi">Un file mai aggiunto a git non compare in <code>git diff</code>: lo trovate con <code>git status</code>.</Box>
-      </div>
-    ),
-    notes: "Le opzioni si combinano (git diff main --stat). Il caso dei file nuovi fa cadere chi si fida solo di git diff: git status li elenca tra gli Untracked. Documentazione: https://git-scm.com/docs/git-diff e https://git-scm.com/docs/git-status."
-  },
-  {
-    block: B + 'Il test verde non basta',
-    content: () => (
-      <div className="pad">
-        <Tag>Leggere il lavoro dell'agente</Tag>
-        <h2>«I test passano» non vuol dire «ha fatto solo quello che chiedevo»</h2>
+        <Tag>Le scelte</Tag>
+        <h2>Perché si fa in questo modo</h2>
         <div className="grid">
-          <Card title="Cosa vede un test" kind="i"><p>Solo i casi per cui qualcuno lo ha scritto. Il resto del codice può cambiare senza che nulla diventi rosso.</p></Card>
-          <Card title="Cosa vede il diff" kind="i"><p>Ogni riga cambiata, anche quelle senza test.</p></Card>
-          <Card title="Cosa può fare l'agente" kind="w"><p>Adattare i test alle sue modifiche: allora sono verdi per costruzione.</p></Card>
+          <Card title="Variabili dell'utente"><p>La chiave sta nell'ambiente del vostro utente: la leggono i programmi che aprite dopo, e non finisce in un file di progetto che potreste versionare.</p></Card>
+          <Card title="Una chiave per PC" kind="i"><p>Ogni chiave ha budget in dollari, scadenza e solo i modelli del corso. Se finisce dove non deve, si blocca quella e le altre restano.</p></Card>
+          <Card title="Il kit"><p>L'agente non sa da solo che sul PC ci sono strumenti per i documenti. Si installano e una riga di istruzioni gli dice di usarli.</p></Card>
+          <Card title="Due indirizzi" kind="w"><p>Claude Code vuole l'indirizzo del server senza <code className="nw">/v1</code>. OpenCode vuole <code className="nw">/v1</code> in fondo, scritto nel suo file.</p></Card>
         </div>
-        <p className="muted" style={{ marginTop: 12 }}>Servono tutti e due i controlli. Nell'esercizio di questo argomento i test sono verdi e ci sono comunque modifiche da annullare.</p>
+        <p className="muted" style={{ marginTop: 10 }}>Cos'è il proxy che sta in mezzo e come si gestisce: argomento 10.</p>
       </div>
     ),
-    notes: "Anticipa l'argomento 5 (test) senza svolgerlo. Passa un messaggio solo: il diff controlla cose che i test non coprono, e i test cambiati dall'agente si leggono come qualunque altra modifica. Nell'esercizio non anticipare cosa c'è da trovare."
+    notes: "Il perché dei passi, per un pubblico tecnico. Variabili: Claude Code accetta anche un blocco env in settings.json; nel file di progetto sarebbe condiviso con chiunque cloni il repository, la documentazione lo sconsiglia per la credenziale (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). Con ANTHROPIC_AUTH_TOKEN valorizzato Claude Code non mostra la schermata di accesso e non serve un account personale (stessa pagina). Una variabile della shell vale solo per quella finestra; una variabile dell'utente vale per tutte le finestre aperte dopo. Budget, scadenza e modelli sono propri della chiave virtuale del server LiteLLM (docs.litellm.ai/docs/proxy/virtual_keys). L'indirizzo è http: il server è raggiungibile solo dalle reti consentite della scuola; se si passasse a https cambierebbe solo l'indirizzo."
   },
   {
-    block: B + 'Commit piccoli',
+    block: B + 'Il percorso',
     content: () => (
       <div className="pad">
-        <Tag>Salvare</Tag>
-        <h2>Commit piccoli, con i nomi dei file</h2>
-        <div className="cols">
-          <div>
-            <ul>
-              <li>Un commit per un passo che avete verificato: se il passo dopo va male, tornate lì.</li>
-              <li>I file si aggiungono per nome. <code>git add .</code> e <code>git add -A</code> portano dentro anche quello che non avete guardato.</li>
-              <li>Il messaggio dice cosa è cambiato, in una riga.</li>
-            </ul>
-          </div>
-          <div>
-            <CommandBox cmd="git add src/logica.js test/logica.test.js" label="1. Aggiungi i file per nome" />
-            <CommandBox cmd="git diff --staged" label="2. Ultima lettura di ciò che entra nel commit" />
-            <CommandBox cmd={'git commit -m "Elenco: filtro per laboratorio"'} label="3. Il commit, con un messaggio di una riga" />
-            <CommandBox cmd="git log --oneline -3" label="4. I tre commit più recenti" />
-          </div>
-        </div>
+        <Tag>Il percorso</Tag>
+        <h2>Otto passi, ognuno con un controllo</h2>
+        <DT cols={['Passo', 'Che cosa', 'Punto di controllo']} rows={PERCORSO} />
+        <ActivityBadge n="2" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
       </div>
     ),
-    notes: "Il commit per percorsi espliciti è la stessa disciplina del caso di studio dell'argomento 11. git diff --staged è l'ultima lettura prima di committare. Messaggi: «Elenco: filtro per laboratorio» è meglio di «modifiche». Se l'agente committa da solo, leggere i suoi messaggi e confrontarli con i file. Documentazione: https://git-scm.com/docs/git-commit."
+    notes: "Otto passi. I primi tre portano Claude Code a parlare con il server; il quarto fa lo stesso per OpenCode; il quinto e il sesto danno a entrambi gli strumenti per leggere i documenti e le istruzioni per usarli; il settimo prova tutto su un PDF; l'ottavo prepara il passaggio alla prima esercitazione. Chi ha finito un passo prima degli altri aspetta il punto di controllo del vicino: il giro tra i banchi parte dalle variabili."
   },
   {
-    block: B + 'Il ramo di lavoro',
+    block: B + 'Passo 1 · Claude Code',
     content: () => (
-      <div className="pad">
-        <Tag>Salvare</Tag>
-        <h2>Un ramo per ogni lavoro</h2>
-        <CommandBox cmd="git switch -c lavoro-filtro" label="1. Nuovo ramo, parte da dove siete. Poi l'agente lavora, voi leggete e fate commit" />
-        <CommandBox cmd="git switch main" label="2. Tornate alla versione di partenza, intatta" />
-        <CommandBox cmd="git branch" label="3. I rami che esistono" />
-        <p>Un ramo è una linea di commit separata. Su <code>lavoro-filtro</code> l'agente può sbagliare quanto vuole: <code>main</code> resta com'era.</p>
-        <Box type="tip" title="Abitudine">Prima di dare un lavoro all'agente: <code>git status</code> pulito, ramo nuovo, un commit di partenza. Se il risultato non vi piace tornate a <code>main</code> e il ramo si abbandona.</Box>
-      </div>
+      <Passo n="1" titolo="Installare Claude Code">
+        <p>Aprite PowerShell dal menu Start: il prompt comincia con <code className="nw">PS</code>. Incollate il comando. Mentre scarica non mostra avanzamento.</p>
+        <CommandBox cmd={CMD.claudeInstall} label="1. Installa Claude Code" />
+        <p>Quando il prompt torna, chiudete la finestra e apritene una nuova: il percorso dei programmi si aggiorna solo nelle finestre aperte dopo.</p>
+        <CommandBox cmd={CMD.claudeVersion} label="2. Controlla la versione" />
+        <Controllo>Esce un numero di versione seguito da <code className="nw">(Claude Code)</code>. Se dice che <code className="nw">claude</code> non è riconosciuto, chiudete e riaprite ancora la finestra, poi chiamate il docente.</Controllo>
+      </Passo>
     ),
-    notes: "git switch è il comando per cambiare ramo (git checkout fa lo stesso ma ha troppi usi). L'opzione -c crea il ramo. Non si cancellano rami che non sono vostri. Documentazione: https://git-scm.com/docs/git-switch."
+    notes: "Comando ufficiale per PowerShell, code.claude.com/docs/en/setup (25/11/2026): irm https://claude.ai/install.ps1 | iex. La pagina dice che l'installatore non mostra avanzamento, che per verificare si apre una finestra nuova e si lancia claude --version, e che un 'comando non trovato' indica che la cartella di installazione non è ancora nel PATH. Se la versione di Claude Code per il corso è fissata dal file gestito del PC, il docente dice quale installare (la pagina documenta l'installazione di una versione precisa). Gli avvisi di Windows durante l'installazione non sono ancora stati provati sui PC del laboratorio: da verificare a schermo."
   },
   {
-    block: B + 'Tornare indietro',
+    block: B + 'Passo 2 · L\'indirizzo',
     content: () => (
-      <div className="pad">
-        <Tag>Tornare indietro</Tag>
-        <h2>Strumenti diversi per situazioni diverse</h2>
-        <DT cols={['Situazione', 'Comando', 'Cosa succede']} rows={[
-          ['Modifica non committata, su un file', <code className="nw">git restore file</code>, 'il file torna come nell\'ultimo commit'],
-          ['Voglio il file com\'era in un altro punto', <code className="nw">git restore --source=main file</code>, 'il file torna come nel ramo main'],
-          ['Voglio guardare un altro stato senza perdere nulla', <code className="nw">git switch ramo</code>, 'cambiate ramo, i commit restano'],
-          ['Un commit già fatto è sbagliato', <code className="nw">git revert ID</code>, 'nuovo commit che annulla quello vecchio'],
-        ]} />
-        <Box type="warn" title="Anche restore cancella">Le modifiche non committate di quel file spariscono. Leggete prima il <code>git diff</code> e nominate sempre il file: mai un punto per «tutto».</Box>
-      </div>
+      <Passo n="2" titolo="L'indirizzo del server, come variabile">
+        <p>Sul foglio l'indirizzo ha la forma indirizzo:porta. Sostituite <code className="nw">{'<indirizzo del server>'}</code> nel comando con quello del foglio, <b>senza</b> <code className="nw">/v1</code> e senza barra in fondo, poi premete Invio.</p>
+        <CommandBox cmd={CMD.setUrl} label="Variabile ANTHROPIC_BASE_URL, valida per il vostro utente" />
+        <p>Il valore <code className="nw">User</code> la rende una variabile dell'utente: non serve l'amministratore e la vedono tutte le finestre aperte da ora in poi, non quelle già aperte.</p>
+        <Box type="warn" title="Niente /v1 qui">Claude Code aggiunge da solo il percorso delle richieste. Un <code className="nw">/v1</code> in più manda le richieste a un indirizzo che non esiste.</Box>
+      </Passo>
     ),
-    notes: "Comandi verificati con git 2.39. git restore e git switch esistono da git 2.23. revert non riscrive la storia: aggiunge un commit che fa l'operazione inversa, quindi è sicuro anche se il commit è stato condiviso. Per annullare solo una parte di un file: git restore -p --source=main file, che chiede blocco per blocco (y per annullare, n per tenere). Documentazione: https://git-scm.com/docs/git-restore e https://git-scm.com/docs/git-revert."
+    notes: "ANTHROPIC_BASE_URL punta Claude Code al gateway; negli esempi della documentazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026) l'indirizzo non ha /v1 e la richiesta di prova usa $ANTHROPIC_BASE_URL/v1/messages. Una variabile impostata solo nella finestra vale solo per quella finestra (stessa pagina), per questo si usa la variabile dell'utente. Se l'ufficio tecnico ha già copiato il file delle impostazioni gestite, l'indirizzo è imposto da lì e questa variabile non cambia nulla: va comunque creata, perché serve ai comandi di prova e a OpenCode. Che Claude Code legga le variabili create con SetEnvironmentVariable nelle finestre successive è il comportamento normale di Windows; il controllo del passo seguente lo verifica sul PC reale."
   },
   {
-    block: B + 'Cosa non si usa in aula',
+    block: B + 'Passo 2 · La chiave',
     content: () => (
-      <div className="pad">
-        <Tag>Tornare indietro</Tag>
-        <h2>Due comandi che in aula non si usano</h2>
-        <div className="grid">
-          <Card title="git reset --hard" kind="d"><p>Riporta tutto allo stato di un commit e butta le modifiche non salvate di tutti i file. Non si recuperano.</p></Card>
-          <Card title="git stash" kind="d"><p>Mette da parte tutte le modifiche non salvate, anche quelle che non sono vostre. Poi qualcuno deve ricordarsi di riprenderle.</p></Card>
-        </div>
-        <Box type="danger" title="Il principio dell'argomento 11">Niente operazioni distruttive sul lavoro condiviso. Se la cartella contiene lavoro che non avete creato voi, questi comandi lo toccano senza chiedere. Vale anche per <code>git clean -fd</code>.</Box>
-        <p className="muted">Al loro posto: un ramo nuovo, <code>git restore</code> su un file nominato, <code>git revert</code> su un commit.</p>
-      </div>
-    ),
-    notes: "Non sono comandi vietati in assoluto: il divieto vale in aula e sul lavoro condiviso, dove nessuno sa cosa c'è di non salvato. Vale anche per l'agente: se la richiesta dice «ripulisci» o «torna come prima», può proporre reset --hard; il permesso si nega (argomento 1) e si chiede un git revert o un git restore su file nominati. Documentazione: https://git-scm.com/docs/git-reset e https://git-scm.com/docs/git-stash."
-  },
-  {
-    block: B + 'I punti di partenza',
-    content: () => (
-      <div className="pad">
-        <Tag>La palestra</Tag>
-        <h2>Ripartire da uno stato noto</h2>
-        <div className="cols">
-          <div>
-            <ul>
-              <li>Un tag è un nome fisso dato a un commit: <code>partenza-a2</code> è il punto di partenza di questo esercizio.</li>
-              <li><code>-c</code> crea il ramo <code>lavoro-a2</code> (il nome è a scelta); il tag non si sposta.</li>
-              <li>Se un esercizio viene male, si riparte con un altro nome di ramo. Il lavoro vecchio resta dov'è.</li>
-            </ul>
-          </div>
-          <div>
-            <CommandBox cmd="git tag" label="1. I punti di partenza: partenza-a2, partenza-a5 ..." />
-            <CommandBox cmd="git status" label="2. Prima: niente modifiche da perdere?" />
-            <CommandBox cmd="git switch -c lavoro-a2 partenza-a2" label="3. Il ramo di lavoro, dal punto di partenza" />
-            <CommandBox cmd="git log --oneline" label="4. I commit di questo punto di partenza" />
-          </div>
-        </div>
-      </div>
-    ),
-    notes: "Tutti gli esercizi della palestra seguono lo stesso schema, con tag partenza-aN. Il PC è preparato prima e non ha remote. Senza -c, git switch su un tag lascia in «detached HEAD», dove i commit non appartengono a nessun ramo: da evitare. Documentazione: https://git-scm.com/docs/git-tag."
-  },
-  {
-    block: B + 'Un episodio dal racconto',
-    content: () => (
-      <div className="pad">
-        <Tag>Dal racconto</Tag>
-        <h2>Il subagente che ha fatto push sul repository vero</h2>
-        <div className="grid">
-          <Card title="Cos'è successo" kind="w"><p>Durante un test, un subagente ha fatto push sul repository vero invece che su una copia.</p></Card>
-          <Card title="Cosa ne è nato" kind="i"><p>Una regola nel gruppo di agenti: i test che toccano git girano in una sandbox git, obbligatoria.</p></Card>
-        </div>
-        <pre aria-label="Controllo del remote">{CODICE_REMOTE}</pre>
-        <p className="muted">I repository di esercizio del corso sono fatti così: copia nuova, nessun remote, nessun push possibile.</p>
-      </div>
-    ),
-    notes: "Episodio dal racconto di Thomas; i dettagli (quale progetto, quale test) si raccontano a voce. Per il corso conta questo: un comando git eseguito da un agente ha effetti fuori dalla cartella solo se esiste un remote. Per questo esercizi e progetti personali non ne hanno. Invitare i partecipanti a controllare con git remote -v sul proprio repository."
-  },
-  {
-    block: B + 'Git nel CLAUDE.md',
-    content: () => (
-      <div className="pad">
-        <Tag>Dire all'agente come usare git</Tag>
-        <h2>Le regole sull'uso di git vanno scritte</h2>
-        <ul>
-          <li>Prima di una modifica ampia: commit di partenza e ramo nuovo.</li>
-          <li>Commit con i file per nome, mai «aggiungi tutto».</li>
-          <li>Niente <code>git push</code>, <code>git reset --hard</code>, <code>git stash</code>, <code>git clean</code> senza chiedere.</li>
-          <li>Per annullare: <code>git restore</code> su un file nominato, o <code>git revert</code>.</li>
-          <li>A fine lavoro: elenco dei file cambiati, da confrontare con <code>git status</code>.</li>
-        </ul>
-        <ActivityBadge n="2" file="promemoria-git.html" label="Promemoria dei comandi git per l'agente" />
-        <p className="muted" style={{ marginTop: 10 }}>Come si scrive un file di istruzioni di progetto: argomento 4.</p>
-      </div>
-    ),
-    notes: "Il foglio è un promemoria da adattare nel file di istruzioni del progetto. Non è una garanzia: un'istruzione scritta può essere ignorata, per questo il permesso resta su «chiedi conferma» (argomento 1). Il controllo vero è leggere il diff."
-  },
-  {
-    block: B + 'Attività al PC',
-    content: () => (
-      <div className="pad">
-        <Tag>Attività</Tag>
-        <h2>Trovate le modifiche non richieste</h2>
-        <p>Un agente ha aggiunto il filtro per laboratorio all'elenco delle prenotazioni, come richiesto. Ha fatto anche altro. I test passano.</p>
-        <ol className="timeline">
-          <li><time>1</time>Partite da <code>partenza-a2</code> con un ramo vostro e lanciate i test.</li>
-          <li><time>2</time>Con <code>git show --stat</code> e <code>git diff</code> elencate cosa è cambiato e dividetelo in «richiesto» e «non richiesto».</li>
-          <li><time>3</time>Annullate le modifiche non richieste una per una, un commit ciascuna, senza toccare il filtro.</li>
-          <li><time>4</time>Confrontate con <code>main</code>: devono restare solo le righe del filtro. Poi confrontate l'elenco con quello di un collega.</li>
+      <Passo n="2" titolo="La chiave, nella finestra delle variabili">
+        <ol>
+          <li>Menu Start: scrivete <code className="nw">variabili</code> e scegliete la voce che finisce con <i>relative all'account</i>, non quella di sistema.</li>
+          <li>Nella lista <b>in alto</b> premete <i>Nuova</i>.</li>
+          <li>Nome: incollate il nome qui sotto. Valore: incollate la chiave dal foglio. Confermate con OK su tutte le finestre.</li>
         </ol>
-        <ActivityBadge n="2" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" />
-      </div>
+        <CommandBox cmd={CMD.varName} label="Nome della variabile" />
+        <Box type="danger" title="La chiave non si scrive in un comando">Per la chiave si usa la finestra, non PowerShell: così non resta tra i comandi digitati. Non va mai nei file di un progetto, e il foglio non si fotografa.</Box>
+      </Passo>
     ),
-    notes: "Il foglio guida i passi senza dire cosa c'è da trovare. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
+    notes: "ANTHROPIC_AUTH_TOKEN manda la chiave nell'intestazione Authorization: Bearer, quella che il server LiteLLM legge; ANTHROPIC_API_KEY userebbe x-api-key e in modalità interattiva chiede una conferma la prima volta (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). Motivo della finestra al posto del comando: prudenza, per non lasciare la chiave in una riga di comando; se PowerShell registri quella riga nella cronologia dei comandi non è stato verificato. Se la finestra delle variabili non si apre sul PC del laboratorio: da verificare a schermo, si chiama il docente."
   },
   {
-    block: B + 'Sul vostro progetto',
+    block: B + 'Passo 2 · Controllo',
     content: () => (
-      <div className="pad">
-        <Tag>Il progetto personale</Tag>
-        <h2>La cartella del progetto è un repository</h2>
-        <CommandBox cmd="cd progetto-mio" label="1. Entrate nella cartella del progetto" />
-        <CommandBox cmd="git init -b main" label="2. Create il repository" />
-        <CommandBox cmd={'git config user.name "Nome a scelta"'} label="3. Il nome, solo per questo repository" />
-        <CommandBox cmd={'git config user.email "nome@demo.invalid"'} label="4. L'indirizzo, inventato" />
-        <p className="muted">Nome ed email restano solo in questo repository, sul PC della scuola. Non si collega nessun remote.</p>
-      </div>
+      <Passo n="2" titolo="Controllare le due variabili">
+        <p>Aprite una finestra PowerShell <b>nuova</b>, un comando alla volta. Il primo non mostra la chiave:</p>
+        <CommandBox cmd={CMD.checkKey} label="1. La chiave c'è?" />
+        <CommandBox cmd={CMD.showUrl} label="2. Quale indirizzo vede?" />
+        <Controllo>Il primo scrive <b>chiave presente</b>. Il secondo scrive l'indirizzo del foglio, con <code className="nw">http://</code> davanti e senza <code className="nw">/v1</code> in fondo. Se manca qualcosa, ripetete il passo.</Controllo>
+      </Passo>
     ),
-    notes: "La cartella del progetto personale diventa un repository, con nome e indirizzo inventati e validi solo lì. Il nome della cartella è quello deciso con il docente: progetto-mio è un esempio. Documentazione: https://git-scm.com/docs/git-init."
+    notes: "Il controllo è fatto in una finestra nuova perché le variabili si leggono quando la finestra parte. Questo è il punto dove si perde più tempo: chi ha creato la variabile dopo aver aperto la finestra vede 'chiave mancante'. Il giro tra i banchi comincia da qui."
   },
   {
-    block: B + 'Il primo commit del progetto',
+    block: B + 'Passo 3 · Il server risponde',
+    content: () => (
+      <Passo n="3" titolo="Prima prova: una richiesta diretta">
+        <p>Prima di avviare l'agente, una richiesta al server con le due variabili appena create. Si scrive <code className="nw">curl.exe</code> con l'estensione, perché <code className="nw">curl</code> da solo in PowerShell è un altro comando.</p>
+        <CommandBox cmd={CMD.curlModels} label="Elenco dei modelli che la vostra chiave può usare" tall />
+        <Controllo>Esce una riga di testo con <code className="nw">claude-sonnet-5-5</code> e <code className="nw">claude-haiku-5-5</code>. Se nell'elenco manca uno dei due, o ce ne sono altri, avvisate il docente.</Controllo>
+        <Box type="info" title="Se non esce niente di utile">Una risposta con «401» o «invalid» dice che la chiave è sbagliata. Nessuna risposta o un errore di connessione dice che l'indirizzo o la porta sono sbagliati, oppure che il PC è fuori dalla rete consentita.</Box>
+      </Passo>
+    ),
+    notes: "La richiesta usa le stesse variabili di Claude Code, quindi se va, indirizzo e chiave sono giusti. La documentazione propone una richiesta di prova diretta prima di avviare Claude Code, per distinguere un problema del gateway da uno della configurazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). L'elenco dei modelli da /v1/models con la chiave del PC è stato provato sul server del corso per il personale; con le chiavi di questo corso: da verificare a schermo. L'uso di curl.exe al posto dell'alias di PowerShell è la stessa precauzione del corso per il personale."
+  },
+  {
+    block: B + 'Passo 3 · Avviare Claude Code',
+    content: () => (
+      <Passo n="3" titolo="Avviare Claude Code in una cartella di prova">
+        <p>Una cartella nuova, per non lavorare in un posto a caso. Tre comandi, uno alla volta:</p>
+        <CommandBox cmd={CMD.mkTest} label="1. Crea la cartella" />
+        <CommandBox cmd={CMD.cdTest} label="2. Entra nella cartella" />
+        <CommandBox cmd={CMD.claudeManual} label="3. Avvia l'agente, con conferma prima di ogni modifica" />
+        <Controllo>Claude Code si apre <b>senza schermata di accesso</b>. Se chiede di accedere con un account, la variabile della chiave non è arrivata: <code className="nw">/exit</code>, finestra nuova, controllo del passo 2.</Controllo>
+      </Passo>
+    ),
+    notes: "Con la credenziale del gateway attiva Claude Code non mostra il login (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026: se si apre sulla schermata di accesso, nessuna credenziale è arrivata). L'opzione --permission-mode manual fa partire l'agente chiedendo conferma: è la stessa che usa il foglio della prima esercitazione. Sui PC con il file delle impostazioni gestite la modalità con conferma è già imposta; l'opzione la rende esplicita anche altrove. Eventuali domande al primo avvio (tema, fiducia nella cartella) non sono ancora state provate sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 3 · /status',
+    content: () => (
+      <Passo n="3" titolo="La prima richiesta e /status">
+        <p>Dentro Claude Code incollate questa richiesta:</p>
+        <CommandBox cmd={CMD.req1} label="Prima richiesta" kind="text" />
+        <p>Poi scrivete <code className="nw">/status</code> e leggete due righe:</p>
+        <ul>
+          <li><b>Anthropic base URL</b>: deve essere il vostro server. Se la riga non c'è, la variabile non è arrivata.</li>
+          <li><b>Auth token</b>: deve nominare <code className="nw">ANTHROPIC_AUTH_TOKEN</code>. Se compare un account claude.ai, la chiave non è attiva.</li>
+        </ul>
+        <Controllo>L'agente risponde e le due righe sono quelle. Uscite con <code className="nw">/exit</code>.</Controllo>
+        <Box type="warn" title="Se dice che il modello non è disponibile">Riavviate con il modello scritto per esteso:</Box>
+        <CommandBox cmd={CMD.claudeModel} label="Ripiego con il modello per esteso" />
+      </Passo>
+    ),
+    notes: "Il controllo di /status è quello indicato dalla documentazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026): la riga Anthropic base URL compare solo se è impostato un indirizzo; una riga Auth token o API key che nomina la variabile conferma che la credenziale del gateway è attiva, mentre una riga Login method con un account claude.ai significa che non lo è. Il modello iniziale dipende dal file delle impostazioni gestite, che mappa gli alias sonnet e haiku sugli ID del server; senza quel file l'alias punta a un ID che il server può non offrire. Per questo c'è il ripiego con --model (documentato in code.claude.com/docs/en/model-config). Il testo esatto dell'errore sul modello: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · OpenCode',
+    content: () => (
+      <Passo n="4" titolo="Installare OpenCode">
+        <p>Node.js c'è già, quindi si usa npm, nella versione fissata per il corso. In una finestra PowerShell:</p>
+        <CommandBox cmd={CMD.ocInstall} label="1. Installa OpenCode" />
+        <CommandBox cmd={CMD.ocVersion} label="2. Controlla la versione" />
+        <Controllo>Esce <code className="nw">1.19.5</code>. Se Windows chiede la password di amministratore, fermatevi e chiamate il docente.</Controllo>
+        <Box type="info" title="La serie">Questa è la serie 1 di OpenCode. Esiste una serie 2 con altre chiavi nel file di configurazione: qui e nell'argomento 10 si mostra la 1.</Box>
+        <Box type="danger" title="Non usate /connect">Salverebbe la chiave in un file di OpenCode. La chiave arriva dalla variabile.</Box>
+      </Passo>
+    ),
+    notes: "Comando per la serie 1, dal README della versione 1.19.5 (github.com/anomalyco/opencode, tag v1.19.5, letto il 25/11/2026): npm install -g opencode-ai. La versione 1.19.5 è del 28/10/2026 e resta da confermare dopo la prova sul PC di Thomas: se cambia, cambia solo il numero. Il sito opencode.ai/docs descrive la serie 2 (pacchetto @opencode/cli, file con chiavi diverse); le configurazioni di esempio hanno una variante per ciascuna serie. Le guide della serie 1 consigliano WSL per l'esperienza migliore su Windows e offrono anche Scoop e Chocolatey; qui si usa npm perché Node c'è già. Se npm scrive in una cartella che richiede amministratore: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · Il file di configurazione',
+    content: () => (
+      <Passo n="4" titolo="Creare opencode.json">
+        <p>Due comandi, uno alla volta. Il primo crea la cartella di configurazione personale, il secondo apre il file in Blocco note; se chiede di crearlo, rispondete di sì.</p>
+        <CommandBox cmd={CMD.mkOc} label="1. Crea la cartella" />
+        <CommandBox cmd={CMD.notepadOc} label="2. Apre il file" />
+        <Box type="warn" title="Al salvataggio">Il nome deve restare <code className="nw">opencode.json</code>, non <code className="nw">opencode.json.txt</code>: nel menu del tipo di file scegliete «Tutti i file».</Box>
+      </Passo>
+    ),
+    notes: "La configurazione personale di OpenCode sta in ~/.config/opencode/opencode.json (documentazione della serie 1, packages/web/src/content/docs/config.mdx al tag v1.19.5, 25/11/2026); su Windows corrisponde alla cartella .config dentro il profilo utente: da verificare a schermo che OpenCode la legga proprio lì. Un file nella cartella dell'utente è sotto la configurazione gestita dall'ufficio tecnico, se presente (%ProgramData%\\opencode): in quel caso il gestito vince sulle chiavi che hanno in comune."
+  },
+  {
+    block: B + 'Passo 4 · Il testo del file',
+    content: () => (
+      <Passo n="4" titolo="Il testo di opencode.json">
+        <p>Incollate tutto il testo nel Blocco note. Sostituite <code className="nw">{'<indirizzo del server>'}</code> con quello del foglio, <b>con</b> il <code className="nw">/v1</code> già scritto in fondo. Non c'è nessuna chiave: il file legge la variabile.</p>
+        <CommandBox cmd={OPENCODE_JSON} label="Contenuto di opencode.json" kind="text" tall />
+        <p className="muted" style={{ marginTop: 8 }}>Dentro: un solo fornitore, condivisione spenta, aggiornamenti spenti, modifiche e comandi con conferma, accesso al web e alle cartelle esterne negati.</p>
+      </Passo>
+    ),
+    notes: "Configurazione di esempio del laboratorio, sintassi della serie 1 (permission come oggetto, provider.anthropic.options.baseURL, whitelist). Il fornitore è quello anthropic già incluso in OpenCode, con baseURL verso il server; la documentazione della serie 1 mostra il baseURL del fornitore nella pagina dei provider e la chiave da variabile con la sintassi {env:NOME} (providers.mdx, tag v1.19.5, 25/11/2026). Le intestazioni Authorization sono una precauzione: il pacchetto anthropic manda la chiave in x-api-key e il server legge Authorization. Che il server accetti anche x-api-key e che questo file funzioni con il fornitore anthropic sono ancora da provare sul server: da verificare a schermo. Le impostazioni: share disabled evita i link pubblici delle conversazioni (valori manual, auto, disabled, config.mdx), autoupdate false spegne il controllo degli aggiornamenti."
+  },
+  {
+    block: B + 'Passo 4 · Fermare e controllare',
+    content: () => (
+      <Passo n="4" titolo="Fermare i processi, poi controllare">
+        <p>Dopo aver cambiato variabili o file, OpenCode va chiuso del tutto: un processo rimasto in secondo piano non vede le variabili create dopo la sua partenza.</p>
+        <CommandBox cmd={CMD.stopOc} label="1. Ferma i processi rimasti (se non scrive niente, non ce n'erano)" />
+        <CommandBox cmd={CMD.ocModels} label="2. Elenca i modelli che OpenCode vede" />
+        <Controllo>L'elenco ha due righe: <code className="nw">anthropic/claude-sonnet-5-5</code> e <code className="nw">anthropic/claude-haiku-5-5</code>. Se ce ne sono altre, il file non è stato letto: ricontrollate virgole, virgolette e nome del file.</Controllo>
+      </Passo>
+    ),
+    notes: "Il comando opencode models elenca i modelli dei fornitori configurati nel formato fornitore/modello (docs della serie 1, cli.mdx, tag v1.19.5, 25/11/2026). Il problema del servizio in background è stato osservato con l'app desktop di OpenCode nel corso per il personale (24/11/2026): il servizio non vedeva variabili e PATH creati dopo la sua partenza e restava acceso anche chiudendo la finestra. Con la sola riga di comando il caso è meno probabile; il comando costa poco e si tiene. Che la whitelist del file riduca davvero l'elenco a due righe: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · Prima richiesta',
+    content: () => (
+      <Passo n="4" titolo="La prima richiesta con OpenCode">
+        <p>Nella cartella di prova di prima. Due comandi, poi la richiesta dentro OpenCode:</p>
+        <CommandBox cmd={CMD.cdTest} label="1. Entra nella cartella" />
+        <CommandBox cmd={CMD.oc} label="2. Avvia OpenCode" />
+        <CommandBox cmd={CMD.req1} label="3. Dentro OpenCode: la richiesta" kind="text" />
+        <Controllo>OpenCode risponde. Se resta fermo senza errori, quasi sempre l'indirizzo o la porta nel file sono sbagliati: aprite «Se qualcosa non va». Per uscire: <code className="nw">/exit</code>.</Controllo>
+      </Passo>
+    ),
+    notes: "Silenzio senza errori: nelle prove del corso per il personale una porta sbagliata non produce alcun messaggio, l'agente resta fermo. Il comando /exit per uscire dalla schermata di OpenCode non è nella pagina CLI della serie 1: da verificare a schermo (in alternativa Ctrl+C). La modalità di partenza di OpenCode con questo file chiede conferma per modifiche e comandi."
+  },
+  {
+    block: B + 'Passo 5 · uv',
+    content: () => (
+      <Passo n="5" titolo="Il kit minimo: uv">
+        <p>Il kit ha due pezzi. <b>uv</b> esegue programmi Python al volo e si porta Python da solo. <b>MarkItDown</b> (Microsoft) trasforma PDF, Word, Excel e PowerPoint in testo Markdown, tabelle comprese. Si parte da uv:</p>
+        <CommandBox cmd={CMD.uvInstall} label="1. Installa uv, solo per il vostro utente" tall />
+        <p>Chiudete la finestra e aprite una nuova, poi:</p>
+        <CommandBox cmd={CMD.uvVersion} label="2. Controlla la versione" />
+        <Controllo>Esce <code className="nw">uv</code> seguito da un numero di versione. Se dice che non è riconosciuto, aprite «Se qualcosa non va».</Controllo>
+      </Passo>
+    ),
+    notes: "Comando ufficiale per Windows, docs.astral.sh/uv/getting-started/installation (25/11/2026): powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\". La pagina elenca i file uv.exe, uvx.exe e uvw.exe in $HOME\\.local\\bin e dice che il programma di installazione può modificare i profili della shell (UV_NO_MODIFY_PATH=1 lo impedisce). MarkItDown è il convertitore open source di Microsoft (github.com/microsoft/markitdown): da riga di comando si lancia come markitdown file.pdf, con l'opzione [all] per tutte le dipendenze. L'installazione di uv senza amministratore sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 5 · MarkItDown',
+    content: () => (
+      <Passo n="5" titolo="La prima esecuzione di MarkItDown">
+        <p>Con <code className="nw">uvx</code> MarkItDown non si installa: uv lo scarica la prima volta e lo tiene in una cache. Quella prima volta è lenta e scrive molte righe. Lanciatela adesso, così non capita davanti a un PDF.</p>
+        <CommandBox cmd={CMD.mdHelp} label="Prima esecuzione: mostra l'aiuto di MarkItDown" tall />
+        <Controllo>Alla fine compare il testo di aiuto di <code className="nw">markitdown</code> e il prompt torna. Non interrompetelo prima. Le volte dopo parte subito.</Controllo>
+        <Box type="info" title="Gli avvisi sui caratteri">Con i PDF possono comparire righe su <i>FontBBox</i>: sono innocue.</Box>
+      </Passo>
+    ),
+    notes: "uvx è l'alias di uv tool run: esegue il programma in un ambiente isolato e temporaneo, senza installarlo (docs.astral.sh/uv/guides/tools, 25/11/2026). Il pacchetto con le dipendenze opzionali si indica tra virgolette con --from, come nell'esempio della pagina per gli extra. Nelle prove del corso per il personale (24/11/2026) la prima esecuzione scaricava una cinquantina di pacchetti e richiedeva internet; l'aiuto con --help come modo di scaldare la cache non è ancora stato provato: da verificare a schermo, in alternativa si lancia il comando su un PDF qualunque. Gli avvisi FontBBox sono su stderr."
+  },
+  {
+    block: B + 'Passo 6 · Il testo',
+    content: () => (
+      <Passo n="6" titolo="Le istruzioni globali: il testo">
+        <p>Un file di istruzioni che l'agente legge a ogni avvio. Dice che gli strumenti del kit ci sono e si possono usare. Senza, davanti a un PDF prova strade peggiori. Dice anche che una tabella spezzata va dichiarata, non indovinata.</p>
+        <CommandBox cmd={ISTRUZIONI} label="Testo delle istruzioni (uguale per i due agenti)" kind="text" tall />
+      </Passo>
+    ),
+    notes: "Il testo è lo stesso per i due strumenti. Le due frasi che contano: gli strumenti uvx e uv run sono permessi (senza, l'agente tende a rifiutarli come 'installazione di programmi') e una tabella che esce spezzata si dichiara. Nelle prove del corso per il personale i PDF generati da pagine web davano tabelle spezzate, mentre il testo corrente usciva pulito: l'istruzione serve a questo. Il comportamento del modello davanti alle istruzioni va riprovato a ogni cambio di modello."
+  },
+  {
+    block: B + 'Passo 6 · I due file',
+    content: () => (
+      <Passo n="6" titolo="Le istruzioni globali: dove salvarle">
+        <p>Lo stesso testo in due file, uno per agente. Aprite il primo, incollate, salvate; poi il secondo.</p>
+        <CommandBox cmd={CMD.notepadClaude} label="1. File per Claude Code" />
+        <CommandBox cmd={CMD.notepadAgents} label="2. File per OpenCode" />
+        <Box type="warn" title="Al salvataggio">Il nome resta <code className="nw">CLAUDE.md</code> e <code className="nw">AGENTS.md</code>, non <code className="nw">.txt</code>: scegliete «Tutti i file». I file si leggono quando parte la sessione: dopo averli salvati, aprite una sessione nuova.</Box>
+        <Controllo>Entrambi i comandi aprono un file con il testo incollato dentro, e il Blocco note non dice «.txt» nel titolo.</Controllo>
+      </Passo>
+    ),
+    notes: "Claude Code legge ~/.claude/CLAUDE.md all'inizio di ogni sessione (code.claude.com/docs/en/memory, 25/11/2026). OpenCode legge ~/.config/opencode/AGENTS.md e, se manca, usa ~/.claude/CLAUDE.md; se esistono tutti e due vince AGENTS.md (rules.mdx della serie 1 al tag v1.19.5, e opencode.ai/docs/rules, 25/11/2026). Scriverli entrambi evita di dipendere dal ripiego. La cartella .claude esiste dopo il primo avvio di Claude Code (passo 3); se il Blocco note dice che il percorso non esiste, si è saltato quel passo. Se un file con quel nome esiste già sul PC, si aggiunge il testo in fondo."
+  },
+  {
+    block: B + 'Passo 7 · Il PDF',
+    content: () => (
+      <Passo n="7" titolo="Un PDF su cui provare">
+        <p>Scaricate il PDF di prova: sono poche righe di prenotazioni di laboratorio inventate. Poi copiatelo nella cartella di prova.</p>
+        <ActivityBadge n="2" file="prova-markitdown.pdf" label="Scarica il PDF di prova" />
+        <CommandBox cmd={CMD.copyPdf} label="Copia il PDF nella cartella di prova" tall />
+        <Box type="warn" title="Se il comando non trova il file">Il browser può averlo salvato altrove o con un altro nome, per esempio con un numero tra parentesi. Cercatelo in Esplora file e adattate il percorso, o chiamate il docente.</Box>
+      </Passo>
+    ),
+    notes: "Il PDF è generato dal foglio prova-markitdown (materiali dell'argomento) e contiene una tabella inventata di prenotazioni. Una tabella in un PDF nato da una pagina web è il caso difficile per MarkItDown: può uscire spezzata, ed è per questo che le istruzioni chiedono di dichiararlo. La cartella Downloads è quella predefinita del browser: se sui PC del laboratorio è un'altra, da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 7 · La prova',
+    content: () => (
+      <Passo n="7" titolo="La prova: l'agente usa il kit">
+        <p>Sessione <b>nuova</b>, nella cartella di prova (<code className="nw">cd</code> come al passo 3). Avviate Claude Code e incollate la richiesta:</p>
+        <CommandBox cmd={CMD.claudeManual} label="1. Avvia Claude Code" />
+        <CommandBox cmd={CMD.reqPdf} label="2. Dentro l'agente: la richiesta" kind="text" />
+        <Controllo>Tra le azioni compare <code className="nw">uvx ... markitdown</code>. L'agente ve ne chiede il permesso: leggete il comando e rispondete sì solo se è quello. Poi ripetete con OpenCode, stessa richiesta.</Controllo>
+        <Box type="warn" title="Se non compare">Il file delle istruzioni non è stato letto: nome, posizione, sessione nuova.</Box>
+      </Passo>
+    ),
+    notes: "La prova dice che il kit, le istruzioni e i permessi lavorano insieme. L'agente chiede conferma prima di lanciare uvx (modalità con conferma): l'abitudine da prendere è leggere il comando, non premere sì a ripetizione. Se la tabella esce spezzata, l'agente deve dirlo; se dà comunque dei totali, vanno controllati a mano sul PDF. Verificate che il comando uvx proposto sia quello atteso e non un altro."
+  },
+  {
+    block: B + 'Passo 8 · Pronti',
+    content: () => (
+      <Passo n="8" titolo="Siete pronti">
+        <div className="grid">
+          <Card title="Sul PC adesso"><p>Claude Code e OpenCode collegati al server con la vostra chiave. Il kit per leggere i documenti. Le istruzioni globali per tutti e due.</p></Card>
+          <Card title="Un PC solo" kind="i"><p>Il lavoro resta su questo PC: usate sempre lo stesso, perché chiave e configurazione sono qui.</p></Card>
+        </div>
+        <Controllo>Siete in una cartella di lavoro con l'agente aperto e funzionante.</Controllo>
+        <p>Si prosegue con l'<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>argomento 1</a> e il foglio della prima esercitazione.</p>
+        <ActivityBadge n="2" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
+      </Passo>
+    ),
+    notes: "Passaggio all'argomento 1: il foglio della prima esercitazione dice come aprire l'agente nella cartella di lavoro. Chi non ha finito un passo prosegue dal foglio dell'installazione mentre gli altri vanno avanti."
+  },
+  {
+    block: B + 'Se qualcosa non va · Claude Code',
     content: () => (
       <div className="pad">
-        <Tag>Il progetto personale</Tag>
-        <h2>Il primo commit e il controllo del remote</h2>
-        <CommandBox cmd="git add README.md .gitignore" label="1. Aggiungete i file per nome" />
-        <CommandBox cmd={'git commit -m "Primo commit: scheda del progetto"'} label="2. Il primo commit" />
-        <CommandBox cmd="git remote -v" label="3. Non deve scrivere nulla: nessun remote, quindi nessun push" />
+        <Tag>Se qualcosa non va</Tag>
+        <h2>Claude Code: chiave, indirizzo, modello</h2>
+        <DT cols={['Che cosa vedete', 'Causa probabile', 'Che cosa fare']} rows={[
+          ['Claude Code chiede di accedere con un account', 'La variabile è stata creata dopo aver aperto la finestra, o il nome è scritto diverso', 'Finestra nuova, controllo «chiave presente» del passo 2'],
+          ['Errore 401, token non valido', 'Chiave copiata male, spazio in fondo, o chiave di un altro PC', <>Confrontate le ultime quattro lettere con il foglio, poi ricopiate la chiave nella variabile</>],
+          ['Il modello non è disponibile per la chiave', 'Modello diverso dai due del corso', <>Avviate con <code className="nw">--model claude-sonnet-5-5</code></>],
+          ['Pausa lunga, poi errore di connessione', 'Indirizzo o porta sbagliati, o PC fuori dalla rete consentita', 'Prova diretta del passo 3; se non risponde, il docente'],
+        ]} />
+        <CommandBox cmd={CMD.last4} label="Ultime quattro lettere della chiave che vede il PC" />
       </div>
     ),
-    notes: "Stessa disciplina dell'esercizio: ramo di lavoro per ogni modifica ampia, git diff prima di accettare. Il file .gitignore tiene fuori dal repository i file generati e qualsiasi cosa che somigli a un segreto. Se git remote -v scrive qualcosa, si ferma tutto e si chiede al docente."
+    notes: "Casi dalla pagina di risoluzione dei problemi del gateway (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026): un 401 indica una credenziale non emessa dal gateway o nell'intestazione sbagliata; 'Connection refused' o 'ENOTFOUND' con una pausa silenziosa mentre Claude Code ritenta indicano indirizzo o rete; la richiesta di accesso nonostante un indirizzo raggiungibile indica che non c'è una credenziale che Claude Code legge prima della configurazione iniziale. Le ultime quattro lettere si possono leggere ad alta voce al vicino, la chiave intera mai."
+  },
+  {
+    block: B + 'Se qualcosa non va · OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>Se qualcosa non va</Tag>
+        <h2>OpenCode: il file e i processi</h2>
+        <DT cols={['Che cosa vedete', 'Causa probabile', 'Che cosa fare']} rows={[
+          ['L\'elenco dei modelli ha altre righe, o nessuna del corso', 'File non letto: errore di sintassi o cartella sbagliata', <>Il file è <code className="nw">opencode.json</code> in <code className="nw">.config\opencode</code>; ricontrollate le virgole</>],
+          ['Il file si chiama opencode.json.txt', 'Salvato con il tipo «Documenti di testo»', 'Salvate di nuovo con «Tutti i file» e cancellate il .txt'],
+          ['Errore sulla chiave anche se la chiave è giusta', 'Un processo di OpenCode è rimasto acceso con le variabili vecchie', 'Il comando del passo 4 che ferma i processi, poi riaprire'],
+          ['OpenCode resta fermo, senza errori', 'Indirizzo o porta nel file sbagliati', <>Controllate <code className="nw">baseURL</code>: indirizzo del foglio, porta, <code className="nw">/v1</code> in fondo</>],
+        ]} />
+        <CommandBox cmd={CMD.stopOc} label="Ferma i processi di OpenCode" />
+      </div>
+    ),
+    notes: "Il file salvato come .json.txt e il servizio rimasto acceso sono i due problemi più frequenti osservati con OpenCode nel corso per il personale (24/11/2026). Nelle prove una porta sbagliata non dava nessun messaggio. Se la variabile non viene vista nemmeno dopo aver fermato i processi, uscire da Windows e rientrare con il proprio utente: da verificare a schermo."
+  },
+  {
+    block: B + 'Se qualcosa non va · uv',
+    content: () => (
+      <div className="pad">
+        <Tag>Se qualcosa non va</Tag>
+        <h2>uvx installato ma non trovato</h2>
+        <p>Il messaggio dice che <code className="nw">uvx</code> o <code className="nw">uv</code> non è riconosciuto, dopo che l'installazione è finita senza errori. Un passo alla volta:</p>
+        <ol className="steps">
+          <li>Chiudete la finestra e apritene una nuova: il percorso dei programmi si aggiorna solo lì.</li>
+          <li>Se non basta, controllate che il file esista:</li>
+        </ol>
+        <CommandBox cmd={CMD.uvxTest} label="Il file c'è? Deve scrivere True" />
+        <CommandBox cmd={CMD.pathUser} label="Il percorso dell'utente contiene .local\bin?" tall />
+        <p className="muted">Se il file c'è ma il percorso non lo contiene, avvisate il docente: nel frattempo <code className="nw">uvx</code> si può lanciare scrivendo il percorso intero.</p>
+        <CommandBox cmd={CMD.uvxRun} label="Prova diretta, con il percorso intero" />
+      </div>
+    ),
+    notes: "Il programma di installazione di uv scrive in $HOME\\.local\\bin e può modificare il percorso dell'utente (docs.astral.sh/uv/getting-started/installation, 25/11/2026). La causa per cui sui PC della scuola il comando non risulta trovato anche dopo un terminale nuovo non è ancora confermata: ipotesi da verificare a schermo sono un profilo utente che si azzera, una regola che blocca la modifica del percorso, o un avvio di PowerShell che non rilegge la variabile. Se il file esiste, l'agente può comunque usare il percorso intero, ma le istruzioni globali parlano di uvx: in quel caso il docente corregge il percorso."
+  },
+  {
+    block: B + 'Cosa non fare',
+    content: () => (
+      <div className="pad">
+        <Tag>Regole</Tag>
+        <h2>Cosa non fare</h2>
+        <div className="grid">
+          <Card title="La chiave in un file" kind="d"><p>Non va in un file di progetto, in <code className="nw">opencode.json</code>, in <code className="nw">CLAUDE.md</code> o in un commit. Resta solo nella variabile.</p></Card>
+          <Card title="La chiave a schermo" kind="d"><p>Non sul proiettore, non in foto, non in chat. Del foglio si leggono ad alta voce, al massimo, le ultime quattro lettere.</p></Card>
+          <Card title="Le scorciatoie di OpenCode" kind="w"><p>Né <code className="nw">/connect</code> (salva la chiave in un file) né <code className="nw">/share</code> (crea un link pubblico alla conversazione).</p></Card>
+          <Card title="A fine corso" kind="i"><p>Togliete le due variabili dal vostro utente, con i due comandi qui sotto.</p></Card>
+        </div>
+        <CommandBox cmd={CMD.unsetKey} label="1. Toglie la chiave" />
+        <CommandBox cmd={CMD.unsetUrl} label="2. Toglie l'indirizzo" />
+      </div>
+    ),
+    notes: "Il comando che toglie le variabili le rimuove dall'utente; le finestre già aperte le vedono ancora finché non si chiudono. A fine corso il docente blocca e cancella anche le chiavi sul server, quindi una chiave rimasta su un PC non funziona più. La documentazione di Claude Code sconsiglia la credenziale nel settings.json di progetto, perché viene versionato (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026); la raccomandazione su /connect e /share viene dai rischi noti di OpenCode (chiave in chiaro nel file auth.json, link pubblici di /share)."
   },
   {
     block: B + 'Domanda di verifica',
     content: () => (
       <div className="pad">
         <Tag>Quiz</Tag>
-        <h2>L'agente scrive: «Ho annullato le modifiche non richieste»</h2>
-        <Quiz domanda="Cosa fate prima di crederci?" opzioni={[
-          { t: 'Lancio i test: se passano, è tutto a posto', ok: false, perche: 'I test verdi non dicono nulla sulle modifiche che nessun test copre, né sul fatto che il filtro sia ancora lì.' },
-          { t: 'Guardo git status e git diff main', ok: true, perche: 'Mostrano file e righe diversi dalla partenza. È l\'unico controllo che non dipende dal racconto dell\'agente.' },
-          { t: 'Chiedo all\'agente di ripetere che ha ripulito tutto', ok: false, perche: 'Lo stesso riassunto ripetuto non è una verifica.' },
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Avete creato la variabile della chiave, ma Claude Code, avviato dalla finestra PowerShell che avevate già aperta, chiede di accedere con un account. Perché?" opzioni={[
+          { t: 'La chiave è scaduta', ok: false, perche: 'Una chiave scaduta darebbe un errore del server, non la richiesta di accesso.' },
+          { t: 'La finestra legge le variabili quando parte, e questa è partita prima', ok: true, perche: 'Una variabile dell\'utente vale per le finestre aperte dopo. Con una finestra nuova Claude Code vede la credenziale del server e non chiede l\'accesso.' },
+          { t: 'Serve l\'indirizzo con /v1 in fondo', ok: false, perche: 'Con /v1 in più le richieste andrebbero a un percorso sbagliato, ma l\'accesso non verrebbe chiesto per questo.' },
         ]} />
       </div>
     ),
-    notes: "Domanda di comprensione, non il testo dell'esercizio. Si può discutere cosa cambia se l'agente avesse usato git reset --hard: avrebbe cancellato anche il filtro richiesto."
+    notes: "Domanda di comprensione sul punto che fa perdere più tempo. La spiegazione sta nelle slide del passo 2 e nella pagina di Claude Code sul collegamento a un gateway (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026)."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Il riassunto dell\'agente non è una prova: si leggono git status e git diff.',
-          'Ramo e commit di partenza prima di ogni lavoro ampio; commit piccoli, con i file per nome.',
-          'Si torna indietro con git restore su file nominati, git switch e git revert. Non con reset --hard né stash sul lavoro che non è vostro.',
-          'Il repository di esercizio non ha remote: un push per sbaglio non è possibile.',
+          'Chiave e indirizzo stanno nelle variabili del vostro utente, mai nei file di un progetto.',
+          'Claude Code vuole l\'indirizzo senza /v1; OpenCode lo vuole nel suo file, con /v1.',
+          'Dopo ogni cambio di variabile: finestra nuova, e per OpenCode anche i processi fermati.',
+          'Senza il kit e le istruzioni, l\'agente davanti a un PDF improvvisa.',
+          'A fine corso le due variabili si tolgono.',
         ]}
-        dopo="argomento 3 (dalla richiesta vaga ai requisiti) e argomento 5 (test e debugging con l'agente), dove un commit per passo diventa il modo di lavorare." />
+        dopo={<>L'argomento 1 usa l'agente appena installato per una prima esercitazione sul progetto di prova. L'argomento 10 spiega il proxy che sta dietro all'indirizzo e confronta i due agenti. Il progetto personale parte dalla <a className="text-link" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>scheda del progetto</a>, da compilare dopo la prima esercitazione: con l'agente installato si arriva fino al progetto finito.</>} />
     ),
-    notes: "Chiusura. Riprendere i tre gesti: leggere, salvare, tornare indietro. Collegamenti: nell'argomento 3 si lavora per passi verificabili, nell'argomento 5 i checkpoint con git servono quando un test fallisce."
+    notes: "Ultima slide: riprendere i punti, rimandare all'argomento 1 e ricordare la scheda del progetto personale, che si compila dopo la prima esercitazione. Fonti usate, tutte lette il 25/11/2026: code.claude.com/docs/en/setup, llm-gateway-connect, model-config, memory; opencode.ai/docs e, per la serie 1, i sorgenti della documentazione al tag v1.19.5 (github.com/anomalyco/opencode); docs.astral.sh/uv; github.com/microsoft/markitdown."
   },
 ];
 

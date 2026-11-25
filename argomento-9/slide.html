@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 9 · OpenCode e LiteLLM · Coding agentico</title>
+<title>Argomento 9 · Hook e MCP · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -329,359 +329,372 @@ function CommandBox({ cmd, label, tall, kind }) {
 
 /* ---------- le slide di questo argomento ---------- */
 /* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
-const B = 'Argomento 9 — OpenCode e LiteLLM · ';
+const B = 'Argomento 9 — Hook e MCP · ';
 
-const AGENTE = String.raw`# .opencode/agents/revisore.md
----
-description: Rilegge un diff e segnala i problemi, senza modificare nulla
-mode: subagent
-permission:
-  edit: deny
-  bash:
-    "*": ask
-    "git diff*": allow
----
-Sei un revisore. Leggi il diff, separa i problemi
-confermati dai dubbi, non toccare i file.`;
+const EVENTO = String.raw`{
+  "hook_event_name": "PreToolUse",
+  "session_id": "abc123",
+  "cwd": "C:\\palestra",
+  "tool_name": "Bash",
+  "tool_input": { "command": "git push origin main" }
+}`;
 
-const PLUGIN = String.raw`// .opencode/plugins/proteggi-env.js
-export const ProteggiEnv = async () => {
-  return {
-    "tool.execute.before": async (input, output) => {
-      if (input.tool === "read" &&
-          output.args.filePath.includes(".env")) {
-        throw new Error("Lettura dei file .env non consentita")
+const CONFIG = String.raw`{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteggi-file.js\"" }
+        ]
       }
-    },
+    ]
   }
 }`;
 
-const CONF = String.raw`{
-  "share": "disabled",
-  "autoupdate": false,
-  "enabled_providers": ["anthropic"],
-  "permission": {
-    "bash": { "*": "ask", "git status*": "allow", "rm *": "deny" },
-    "edit": "ask", "webfetch": "deny", "external_directory": "deny"
-  },
-  "provider": { "anthropic": {
-    "options": { "baseURL": "http://<indirizzo del server>/v1",
-                 "apiKey": "{env:ANTHROPIC_AUTH_TOKEN}" },
-    "whitelist": ["claude-sonnet-5-5", "claude-haiku-5-5"]
-  } }
+const HOOK_PROTEGGI = String.raw`// proteggi-file.js: PreToolUse su Edit e Write
+let testo = '';
+process.stdin.on('data', (d) => (testo += d));
+process.stdin.on('end', () => {
+  const evento = JSON.parse(testo);
+  const file = (evento.tool_input.file_path || '').replace(/\\/g, '/');
+  if (/(^|\/)(\.env|package-lock\.json)$/.test(file)) {
+    console.error('Bloccato: ' + file + ' non si modifica.');
+    process.exit(2);   // 2 = blocca, e lo stderr arriva all'agente
+  }
+  process.exit(0);     // 0 = nessuna obiezione
+});`;
+
+const HOOK_TEST = String.raw`// lancia-test.js: PostToolUse su Edit e Write
+const { spawnSync } = require('node:child_process');
+
+const r = spawnSync('node', ['--test'], { encoding: 'utf8' });
+if (r.status !== 0) {
+  console.error('Dopo la modifica i test falliscono:\n' + r.stdout.slice(-1500));
+  process.exit(2);     // la modifica c'è già: l'agente legge e corregge
 }`;
 
-const PROVA_1 = String.raw`curl.exe -i -X POST http://<indirizzo del server>/v1/messages -H "content-type: application/json" -H "anthropic-version: 2023-06-01" -d '{"model":"claude-haiku-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}'`;
+const PROVA_EVENTO = String.raw`echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | node .claude/hooks/blocca-comandi.js`;
 
-const PROVA_2 = String.raw`curl.exe -X POST http://<indirizzo del server>/v1/messages -H "Authorization: Bearer <la tua chiave>" -H "content-type: application/json" -H "anthropic-version: 2023-06-01" -d '{"model":"claude-opus-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}'`;
+const MCP_ADD = String.raw`claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova`;
+
+const MCP_JSON = String.raw`{
+  "mcpServers": {
+    "documenti": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem",
+               "--read-only", "./cartella-prova"]
+    }
+  }
+}`;
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="9" titolo="OpenCode e LiteLLM" sottotitolo="Gli stessi concetti in un secondo strumento, e il proxy che collega gli agenti ai modelli."
-        caso="Da dove nasce: un assistente ha consumato quasi 80 milioni di token perché una riserva a pagamento scattava in silenzio."
-        prima="argomenti 1 e 4, e l'argomento 13 (installazione dei due agenti e collegamento al proxy)." />
+      <Apertura n="9" titolo="Hook e MCP"
+        sottotitolo="Un controllo che gira sempre, e un modo standard per collegare strumenti e dati all'agente."
+        prima="argomenti 1 e 5." />
     ),
-    notes: `Apertura. Vedere due strumenti aiuta a separare il metodo dallo strumento: contesto, permessi, agenti e controlli automatici ci sono in tutti e due, con nomi e default diversi. Il secondo tema è il proxy, cioè il programma che sta fra gli agenti e il fornitore dei modelli: nel laboratorio è LiteLLM, su un PC dedicato, e dà a tutti la stessa configurazione senza mettere la vera chiave del fornitore sui PC dei partecipanti. L'episodio di apertura è l'incidente dei costi di Argo Briefing, che riprendiamo a metà argomento e nell'argomento 10. L'installazione dei due agenti e il collegamento al proxy si fanno nell'argomento 13: qui non si ripetono i passi, si approfondiscono i motivi, i default e i rischi. Funzioni lette sulla documentazione ufficiale tra il 9 e l'11 novembre 2026: nomi, comandi e valori predefiniti cambiano in fretta, quindi si riverificano sulla versione che si usa.`
+    notes: "Due strumenti diversi per due problemi diversi. Gli hook fanno rispettare una regola ogni volta, senza chiedere all'agente di ricordarla. MCP collega l'agente a strumenti e dati che non ha. Funzioni verificate sulla documentazione ufficiale a novembre 2026: https://code.claude.com/docs/en/hooks , https://code.claude.com/docs/en/hooks-guide , https://code.claude.com/docs/en/mcp , https://modelcontextprotocol.io . Nomi e dettagli cambiano in fretta: ricontrollare prima di usarli."
   },
   {
-    block: B + 'Gli stessi concetti',
+    block: B + 'Istruzioni e controlli',
     content: () => (
       <div className="pad">
-        <Tag>Il confronto</Tag>
-        <h2>Cambiano i nomi, non il metodo</h2>
-        <DT cols={['Concetto', 'Claude Code', 'OpenCode']} rows={[
-          ['Istruzioni di progetto', <><code className="nw">CLAUDE.md</code></>, <><code className="nw">AGENTS.md</code> (ripiego su CLAUDE.md)</>],
-          ['Permessi', 'chiede per modifiche e comandi; regole allow, ask, deny', 'regole allow, ask, deny; quasi tutto consentito di default'],
-          ['Piano prima di agire', 'modalità piano', 'agente Plan (tasto Tab)'],
-          ['Subagenti', 'sì, anche personalizzati', 'sì: General, Explore e i propri'],
-          ['Controlli automatici', 'hook: comandi di shell su eventi', 'plugin: moduli JavaScript su eventi'],
-          ['Skill e MCP', 'sì', 'sì (legge anche .claude/skills)'],
-        ]} />
-        <p className="muted">Argomenti 7 e 8 per skill, subagenti, hook e MCP.</p>
-      </div>
-    ),
-    notes: `Tabella di partenza. Fonti, lette il 9/11/2026: code.claude.com/docs/en/permissions (in modalità manuale Claude Code chiede prima di modificare file e di eseguire comandi, tranne una serie di comandi di sola lettura); opencode.ai/docs e le pagine rules, agents, permissions, plugins. Nell'argomento 4 abbiamo già visto AGENTS.md contro CLAUDE.md: qui lo richiamiamo soltanto. Il punto da far notare è la riga dei permessi: lo stesso concetto, ma con default opposti. Il resto è questione di sintassi.`
-  },
-  {
-    block: B + 'Agenti e subagenti',
-    content: () => (
-      <div className="pad">
-        <Tag>Agenti</Tag>
-        <h2>Primari e subagenti in OpenCode</h2>
+        <Tag>Il problema</Tag>
+        <h2>Un consiglio non è un controllo</h2>
         <div className="grid">
-          <Card title="Primari"><p><b>Build</b> ha tutti gli strumenti. <b>Plan</b> analizza e non modifica i file del progetto. Si passa dall'uno all'altro con Tab.</p></Card>
-          <Card title="Subagenti" kind="i"><p><b>General</b> per lavori in più passi, <b>Explore</b> in sola lettura. Si chiamano con @ o li lancia l'agente primario.</p></Card>
+          <Card title="Istruzione (CLAUDE.md)" kind="i">
+            <p>Testo che l'agente legge e di solito rispetta. Se lo dimentica, o il contesto si riempie, la regola sparisce senza avvisare.</p>
+          </Card>
+          <Card title="Hook">
+            <p>Un programma che Claude Code lancia a un evento preciso. Non chiede il parere del modello: gira, e il suo esito conta.</p>
+          </Card>
         </div>
-        <pre aria-label="Esempio di subagente revisore in OpenCode">{AGENTE}</pre>
-        <p className="muted">Un file Markdown per agente: l'intestazione dà modalità e permessi, il testo è il prompt.</p>
+        <Box type="tip" title="Come scegliere">Una regola da seguire «di solito»: istruzione. Una regola che non deve mai essere violata: controllo deterministico.</Box>
       </div>
     ),
-    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il subagente revisore dell'argomento 7, scritto in questo formato. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che con Claude Code gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno mappati nel file di configurazione del proxy.`
+    notes: "Si riprende l'argomento 5: le istruzioni di progetto sono testo nel contesto, quindi influenzano il modello ma non lo vincolano. Un hook è codice eseguito da Claude Code, fuori dal modello. La documentazione lo descrive come controllo deterministico: certe azioni avvengono sempre, invece di affidarsi a una scelta del modello (https://code.claude.com/docs/en/hooks-guide , novembre 2026)."
   },
   {
-    block: B + 'Plugin al posto degli hook',
+    block: B + 'Perché non si dimentica',
     content: () => (
       <div className="pad">
-        <Tag>Controlli automatici</Tag>
-        <h2>Un plugin fa il lavoro di un hook</h2>
-        <pre aria-label="Esempio di plugin che blocca la lettura dei file .env">{PLUGIN}</pre>
-        <ul>
-          <li>Un hook di Claude Code è un comando di shell che riceve l'evento. Un plugin è codice JavaScript che gira dentro OpenCode.</li>
-          <li>Eventi come <code className="nw">tool.execute.before</code> permettono di guardare, cambiare o fermare una chiamata prima che parta.</li>
-        </ul>
-        <Box type="warn" title="Un plugin è codice che esegue">Si installa solo quello che si è letto. I plugin npm si fissano a una versione.</Box>
-      </div>
-    ),
-    notes: `Fonte: opencode.ai/docs/plugins, 9/11/2026 (l'esempio è adattato da quello della documentazione, che protegge i file .env). I plugin si mettono in .opencode/plugins/ o si indicano per nome nella configurazione. La documentazione elenca gli eventi (tool.execute.before e after, file.edited, session.idle, permission.asked e altri). Sul sito la documentazione della serie 2 descrive anche un'interfaccia diversa, con Plugin.define: vedi la slide sulle due generazioni. La differenza di fondo con gli hook: un hook è un processo separato, un plugin vive nel programma e ne vede lo stato. Più potenza, più fiducia da dare. Si riprende l'idea dell'argomento 8: ciò che deve valere sempre non si scrive in AGENTS.md, si fa controllare da un meccanismo.`
-  },
-  {
-    block: B + 'Due generazioni',
-    content: () => (
-      <div className="pad">
-        <Tag>La versione conta</Tag>
-        <h2>OpenCode ha due serie di rilasci</h2>
-        <DT cols={['', 'Serie 1', 'Serie 2']} rows={[
-          ['Permessi', <><code className="nw">permission</code>: oggetto per strumento</>, <><code className="nw">permissions</code>: elenco di regole azione, risorsa, effetto</>],
-          ['Plugin', <><code className="nw">plugin</code>, funzioni che restituiscono hook</>, <><code className="nw">plugins</code>, moduli con <code className="nw">Plugin.define</code></>],
-          ['Aggiornamenti', <code className="nw">autoupdate</code>, <code className="nw">update</code>],
-          ['Fuori dal progetto', 'chiede prima di uscire dalla cartella', 'nessuna regola predefinita: consentito'],
-        ]} />
-        <Box type="warn" title="Una versione sola">La configurazione si scrive e si prova sulla versione fissata dal laboratorio. Una guida trovata in rete può descrivere l'altra serie.</Box>
-      </div>
-    ),
-    notes: `Rilievo dell'11/11/2026. Ultimo rilascio su GitHub: 2.2.7 del 10 novembre 2026 (github.com/anomalyco/opencode/releases), mentre il badge Latest della stessa pagina è su 1.19.5 del 28 ottobre 2026: le due serie escono in parallelo. Quale delle due si installa sui PC si decide dopo una prova; questa slide mostra la serie 1 e lo dichiara. Le pagine di opencode.ai/docs descrivono la serie 2 (permissions come elenco, plugins, update, riferimento esplicito a OpenCode 1 per le versioni precedenti); la documentazione nel repository descrive la serie 1 (permission come oggetto, autoupdate). Lo schema della configurazione pubblicato accetta entrambe le forme e segna le vecchie come deprecate. Il punto che conta in aula: la riga sul controllo delle cartelle esterne. Nella serie 1 la regola predefinita chiede conferma, nella serie 2 la documentazione dice che nessuna regola predefinita chiede e l'accesso fuori dal progetto passa senza domande. Questo è un motivo in più per fissare la versione e provare la configurazione su quella.`
-  },
-  {
-    block: B + 'I default da cambiare',
-    content: () => (
-      <div className="pad">
-        <Tag>Permessi</Tag>
-        <h2>OpenCode parte permissivo</h2>
-        <DT cols={['Default', 'Rischio', 'Cosa fare']} rows={[
-          ['Quasi tutto consentito, senza chiedere', 'comandi e modifiche partono da soli', <>regole <code className="nw">ask</code> e <code className="nw">deny</code> scritte a mano</>],
-          ['Cartelle fuori dal progetto', 'letture e scritture dove non devono', <><code className="nw">external_directory</code> su deny</>],
-          ['Condivisione della sessione', 'un link con il contenuto della conversazione', <><code className="nw">share</code> su disabled</>],
-          ['Controllo aggiornamenti', 'versione che cambia, traffico verso l\'esterno', <><code className="nw">autoupdate</code> su false</>],
-          ['Fornitori caricati da sé', 'modelli e chiavi che non hai scelto tu', <><code className="nw">enabled_providers</code>: solo il fornitore del proxy</>],
-        ]} />
-        <p className="muted">I file .env sono l'eccezione: la lettura chiede conferma.</p>
-      </div>
-    ),
-    notes: `Fonti, 9/11/2026: documentazione della serie 1 nel repository, pagina permissions (nella serie 1: la maggior parte dei permessi è allow; external_directory e doom_loop chiedono; i file .env chiedono) e lo schema pubblicato opencode.ai/config.json (contiene share con valori manual, auto e disabled; enabled_providers e disabled_providers; autoupdate). Rispetto agli appunti di ottobre è cambiato un punto: la documentazione attuale dice che gli aggiornamenti non vengono mai installati da soli, OpenCode avvisa e basta; autoupdate su false spegne anche il controllo. Nella serie 2 esiste il valore auto per update: non va usato. Sulla condivisione: la pagina dedicata non era raggiungibile durante la verifica; la descrizione si basa sullo schema e va riverificata sulla versione fissata. Le chiavi dei fornitori OpenCode le salva in un file auth.json nella cartella dei dati dell'utente: in laboratorio la chiave virtuale del PC passa da una variabile d'ambiente.`
-  },
-  {
-    block: B + 'Una configurazione per il laboratorio',
-    content: () => (
-      <div className="pad">
-        <Tag>Configurazione</Tag>
-        <h2>opencode.json con i default corretti</h2>
-        <pre aria-label="Esempio di opencode.json per il laboratorio">{CONF}</pre>
-        <p className="muted">Sintassi della serie 1. Indirizzo e chiave sono segnaposto: la chiave sta in una variabile d'ambiente, mai nel file.</p>
-      </div>
-    ),
-    notes: `Esempio inventato di configurazione di progetto, sintassi della serie 1 (permission come oggetto). Mostra: condivisione spenta, controllo aggiornamenti spento, un solo fornitore ammesso, comandi di shell che chiedono tranne pochi sicuri e rm vietato, modifiche che chiedono, accesso al web e alle cartelle esterne negati. Il fornitore è quello anthropic già incluso in OpenCode, con baseURL verso il proxy (che parla il formato Anthropic su /v1/messages), così passano anche la cache e i dati dei modelli; la chiave arriva dalla variabile d'ambiente. Gli identificativi dei modelli devono coincidere con quelli del file di configurazione del proxy. Fonti: opencode.ai/docs/providers e documentazione della serie 1 nel repository, 11/11/2026. Se il fornitore anthropic non regge sul proxy, il ripiego è il pacchetto @ai-sdk/openai-compatible sulla rotta /v1/chat/completions. Il punto di accesso <indirizzo del server> è un segnaposto. Con la serie 2 la parte dei permessi diventa un elenco di regole con azione, risorsa ed effetto (per esempio azione shell, risorsa git push con asterisco, effetto deny). Il file di progetto si versiona: nessuna chiave dentro. Il file sul PC si crea nell'argomento 13; qui si leggono i valori uno per uno.`
-  },
-  {
-    block: B + 'Il proxy',
-    content: () => (
-      <div className="pad">
-        <Tag>Il proxy</Tag>
-        <h2>Un centralino fra gli agenti e il modello</h2>
-        <div role="group" aria-label="Schema: gli agenti parlano con il proxy, che parla con il fornitore del modello">
-          <Flow label="Un'unica strada" nodes={[
-            ['1 Agenti', 'Claude Code (formato Anthropic) e OpenCode, con la chiave virtuale del PC'], ['2 Proxy LiteLLM', 'chiave, budget, modelli ammessi', 'w'], ['3 Fornitore', 'la vera chiave sta solo qui', 'i'],
+        <Tag>Come funziona</Tag>
+        <h2>Un hook si aggancia a un evento</h2>
+        <div role="group" aria-label="Schema: l'agente decide, Claude Code lancia l'hook, l'hook risponde, l'azione parte o viene fermata">
+          <Flow nodes={[
+            ['1 Agente', 'vuole eseguire un comando', ''],
+            ['2 Evento', 'PreToolUse: prima che parta', 'i'],
+            ['3 Hook', 'il tuo script legge e decide', 'w'],
+            ['4 Esito', 'parte, oppure è fermato', ''],
           ]} />
         </div>
         <ul style={{ marginTop: 12 }}>
-          <li>Gli agenti conoscono un indirizzo e una chiave del proprio PC. La vera chiave del fornitore sta solo sul PC proxy.</li>
-          <li>LiteLLM è un proxy open source: espone il formato Anthropic che serve a Claude Code, con chiavi virtuali, budget e registro della spesa.</li>
+          <li>Lo hook è codice tuo: stesso input, stessa risposta, ogni volta.</li>
+          <li>Il modello non può «scegliere» di saltarlo.</li>
+          <li>Un <code className="nw">deny</code> da hook vale in ogni modalità di permessi, anche con i permessi saltati.</li>
         </ul>
       </div>
     ),
-    notes: `Fonti, lette l'11/11/2026: docs.litellm.ai/docs/proxy/virtual_keys (chiavi virtuali, budget, scadenza, modelli ammessi, richiedono un database), docs.litellm.ai/docs/anthropic_unified (rotta /v1/messages in formato Anthropic, con streaming e campi di cache) e code.claude.com/docs/en/llm-gateway (come collegare Claude Code a un gateway; Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli). Un proxy o gateway sta fra il client e il fornitore: la chiave vera resta lato server, i client hanno una chiave virtuale, l'uso si attribuisce per chiave, limiti e registrazioni stanno in un posto solo. Il progetto cambia in fretta: la versione si fissa (una LTS) e si aggiorna solo dopo una prova. Il PC proxy sta nella rete del laboratorio e non è raggiungibile da fuori; indirizzo e porta non compaiono in queste slide.`
+    notes: "Dalla documentazione (hooks-guide, novembre 2026): un hook che restituisce deny blocca lo strumento anche in bypassPermissions e con --dangerously-skip-permissions, perché PreToolUse scatta prima di ogni controllo di modalità. Per questo è la barriera giusta per le regole non negoziabili (vedi anche la barriera dell'argomento 13). Nota onesta: lo hook vede solo ciò che sa riconoscere, ne parliamo più avanti."
   },
   {
-    block: B + 'Perché il laboratorio lo usa',
+    block: B + 'Gli eventi',
     content: () => (
       <div className="pad">
-        <Tag>Il motivo</Tag>
-        <h2>Perché un proxy in laboratorio</h2>
-        <div className="grid">
-          <Card title="La chiave vera resta lì"><p>Sui PC dei partecipanti non c'è la chiave del fornitore: c'è una chiave virtuale, revocabile in un attimo.</p></Card>
-          <Card title="Un tetto per ogni PC" kind="i"><p>Ogni chiave ha un budget di pochi dollari, una scadenza e un elenco di modelli ammessi. Finito il budget, la chiave smette di funzionare.</p></Card>
-          <Card title="Nessun account personale"><p>I partecipanti non si registrano e non pagano. Una configurazione sola per tutti i PC.</p></Card>
-          <Card title="Il prezzo da pagare" kind="w"><p>È un servizio in più da tenere acceso, aggiornare e proteggere. Se si ferma, si fermano tutti gli agenti.</p></Card>
-        </div>
-        <Box type="info" title="I modelli">Sono modelli Claude, scelti dalla configurazione del proxy.</Box>
-      </div>
-    ),
-    notes: `Perché non un account personale per ciascuno: costi non controllabili, chiavi sui PC della scuola, dati che escono verso servizi non scelti. Con il proxy c'è un punto solo da configurare e da guardare. Una chiave virtuale si limita per modelli ammessi, budget (in dollari, tetto totale), scadenza e numero di richieste (docs.litellm.ai/docs/proxy/virtual_keys, 11/11/2026). Attenzione: il costo che il proxy registra è calcolato da un listino; se un modello mancasse dal listino conterebbe zero e il budget non scatterebbe mai. Il tetto vero si mette anche sulla console del fornitore, sul workspace del corso. Il prezzo da pagare è quello che la documentazione di Claude Code chiama infrastruttura da gestire: il gateway va tenuto aggiornato e deve inoltrare le funzioni nuove dei client (code.claude.com/docs/en/llm-gateway-rollout). Con modelli Claude non c'è più il problema di uno strumento pensato per un modello e usato con un altro.`
-  },
-  {
-    block: B + 'Collegare gli agenti',
-    content: () => (
-      <div className="pad">
-        <Tag>Collegamento</Tag>
-        <h2>Due agenti, un solo proxy</h2>
-        <div className="grid">
-          <Card title="Come si fa" kind="i"><p>Installazione dei due agenti, indirizzo del proxy e chiave del PC: <b>argomento 13</b>, passo per passo e con un punto di controllo a ogni passo.</p></Card>
-          <Card title="Da ricordare qui"><p>Le due configurazioni non sono uguali: l'indirizzo di Claude Code è senza <code className="nw">/v1</code>, quello di OpenCode lo vuole. La chiave sta in una variabile d'ambiente, mai in un file versionato.</p></Card>
-        </div>
-        <Box type="tip" title="Se qualcosa non risponde">Con <code className="nw">/status</code> Claude Code mostra a quale indirizzo sta parlando: è il primo controllo, prima di sospettare del proxy.</Box>
-      </div>
-    ),
-    notes: `Rimando all'argomento 13: lì i partecipanti installano Claude Code e OpenCode e li collegano al proxy, con le variabili d'ambiente, il file di impostazioni e i punti di controllo. Qui non si ripetono i passi. Fonti per il motivo: code.claude.com/docs/en/llm-gateway-rollout e env-vars (11/11/2026): ANTHROPIC_BASE_URL e ANTHROPIC_AUTH_TOKEN, con /status che mostra la riga Anthropic base URL. Con la credenziale del gateway attiva, Claude Code non mostra la schermata di accesso e non serve un account personale. La chiave non va nel file settings.json di progetto, che si versiona. Un errore classico: mettere /v1 dove non va, o dimenticarlo dove serve. Sui PC del laboratorio le impostazioni gestite impongono anche la partenza in modalità con conferma. I segnaposto <indirizzo del server> e <porta> sono voluti: nelle slide non compaiono indirizzi reali.`
-  },
-  {
-    block: B + 'Il proxy: master key e registri',
-    content: () => (
-      <div className="pad">
-        <Tag>LiteLLM</Tag>
-        <h2>Quattro impostazioni da controllare</h2>
-        <DT cols={['Impostazione', 'Rischio se la lasci', 'Cosa mettere']} rows={[
-          ['Master key', 'chi la ha è amministratore: crea chiavi, legge la spesa', <>lunga e casuale, solo sul PC proxy, mai sui PC dei partecipanti</>],
-          ['Interfaccia di amministrazione', 'accesa; senza una password propria vale la master key', <><code className="nw">DISABLE_ADMIN_UI</code> a true</>],
-          ['Documentazione API (Swagger)', 'pubblica sulla pagina principale del proxy', <><code className="nw">NO_DOCS</code> e <code className="nw">NO_REDOC</code></>],
-          ['Testi delle richieste nei registri', 'prompt e file letti finiscono nel database', <><code className="nw">store_prompts_in_spend_logs</code> false, e non cambiarlo dall'interfaccia</>],
+        <Tag>Gli eventi</Tag>
+        <h2>Gli eventi che si usano di più</h2>
+        <DT cols={['Evento', 'Quando scatta', 'Esempio d\'uso']} rows={[
+          [<code className="nw">PreToolUse</code>, 'Prima che l\'agente usi uno strumento', 'Fermare un comando pericoloso'],
+          [<code className="nw">PostToolUse</code>, 'Dopo che lo strumento ha girato', 'Lanciare i test dopo una modifica'],
+          [<code className="nw">UserPromptSubmit</code>, 'Quando invii un messaggio', 'Aggiungere contesto, o fermare il messaggio'],
+          [<code className="nw">Stop</code>, 'Quando l\'agente finisce di rispondere', 'Chiedere di continuare se manca qualcosa'],
+          [<code className="nw">SessionStart</code>, 'All\'avvio o alla ripresa della sessione', 'Aggiungere contesto fisso'],
+          [<code className="nw">Notification</code>, 'Quando l\'agente aspetta te', 'Avvisarti con una notifica'],
         ]} />
-        <p className="muted">La chiave del fornitore e la master key stanno nel file .env del PC proxy, mai nel repository.</p>
+        <p className="muted">Gli eventi sono molti di più (compattazione, subagenti, cambi di file...): l'elenco completo è nel riferimento.</p>
       </div>
     ),
-    notes: `Fonti, lette l'11/11/2026: docs.litellm.ai/docs/proxy/config_settings (la master key deve iniziare con sk-; DISABLE_ADMIN_UI, NO_DOCS e NO_REDOC; UI_PASSWORD, in mancanza della quale la password dell'interfaccia è la master key) e docs.litellm.ai/docs/proxy/ui_spend_log_settings (i testi delle richieste nei registri sono spenti di default, ma l'interfaccia può accenderli e il valore dell'interfaccia vince su quello del file). La master key serve solo a chi amministra: le chiavi dei partecipanti sono virtuali. Il progetto ha avuto avvisi di sicurezza critici nel 2026 (pagina security del repository): per questo la versione è fissata, la rete è chiusa e si aggiorna solo a una versione successiva già provata. Altri registri da spegnere nel file di configurazione: indirizzo di chi chiede, messaggi di errore, conservazione limitata della spesa.`
+    notes: "Elenco tratto dal riferimento https://code.claude.com/docs/en/hooks (novembre 2026), che oggi conta oltre trenta eventi. Qui solo i sei più utili. PostToolUse non può annullare ciò che lo strumento ha già fatto. Stop scatta ogni volta che l'agente finisce di rispondere, non solo a fine lavoro."
   },
   {
-    block: B + 'Il proxy: ripieghi e chiavi',
+    block: B + 'Cosa riceve',
     content: () => (
       <div className="pad">
-        <Tag>LiteLLM</Tag>
-        <h2>Nessuna riserva silenziosa, chiavi con un tetto</h2>
-        <DT cols={['Impostazione', 'Cosa succede', 'Cosa mettere']} rows={[
-          [<>ripieghi (<code className="nw">fallbacks</code>)</>, 'a un errore la richiesta passa a un altro modello, che nessuno ha scelto', <>nessun ripiego nel file; <code className="nw">disable_fallbacks</code> nei metadati di ogni chiave</>],
-          ['Tentativi del proxy', 'si sommano a quelli di Claude Code, che già ripete da solo', <><code className="nw">num_retries</code> a 0</>],
-          ['Modelli ammessi', 'una chiave senza elenco chiama anche il modello più costoso', <>solo i modelli del corso, con <code className="nw">models</code> sulla chiave</>],
-          ['Budget e scadenza', 'una chiave senza tetto spende finché qualcuno se ne accorge', <><code className="nw">max_budget</code> e <code className="nw">duration</code> su ogni chiave</>],
+        <Tag>L'input</Tag>
+        <h2>Cosa riceve uno hook</h2>
+        <p>Claude Code lancia il programma e gli scrive un JSON sullo standard input. Per gli eventi sugli strumenti c'è <code className="nw">tool_name</code> e <code className="nw">tool_input</code>.</p>
+        <pre aria-label="Esempio di evento PreToolUse">{EVENTO}</pre>
+        <Box type="info" title="Campi dell'evento">L'esempio è accorciato: l'evento vero ha altri campi, tra cui la modalità di permessi. Il contenuto di <code className="nw">tool_input</code> dipende dallo strumento: per Bash c'è <code className="nw">command</code>, per Edit e Write c'è <code className="nw">file_path</code>.</Box>
+      </div>
+    ),
+    notes: "Campi comuni documentati: session_id, cwd, hook_event_name, permission_mode e altri; per gli eventi sugli strumenti anche tool_name, tool_input, tool_use_id (https://code.claude.com/docs/en/hooks , novembre 2026). Il percorso nell'esempio ha il backslash raddoppiato perché in JSON è così: su Windows capita che file_path arrivi con i backslash, e le regex vanno scritte di conseguenza."
+  },
+  {
+    block: B + 'Cosa risponde',
+    content: () => (
+      <div className="pad">
+        <Tag>L'output</Tag>
+        <h2>Il codice di uscita decide</h2>
+        <DT cols={['Uscita', 'Effetto su PreToolUse']} rows={[
+          [<b>0</b>, 'Nessuna obiezione: il comando prosegue il suo normale percorso (i permessi si applicano comunque).'],
+          [<b>2</b>, 'Bloccato. Quello che scrivi sullo standard error arriva all\'agente come motivo.'],
+          [<b>qualsiasi altro</b>, 'Errore che non blocca: il comando parte, con un avviso nella trascrizione.'],
         ]} />
-        <p className="muted">Il budget è in dollari ed è un tetto totale. Una chiave per PC.</p>
+        <Box type="danger" title="Il trabocchetto">Uscire con 1 non blocca niente. Anche uno script che si rompe per un errore sul JSON esce con un codice diverso da 2: il comando passa, in silenzio.</Box>
+        <p className="muted">In alternativa si può uscire con 0 e stampare un JSON con <code className="nw">permissionDecision</code>: serve a decisioni più fini (consenti, nega, chiedi).</p>
       </div>
     ),
-    notes: `Fonti, 11/11/2026: docs.litellm.ai/docs/proxy/reliability (fallbacks, default_fallbacks, context_window_fallbacks; disable_fallbacks nei metadati della chiave spegne i ripieghi per quella chiave; num_retries) e docs.litellm.ai/docs/proxy/virtual_keys (models, max_budget, budget_duration, duration, upperbound_key_generate_params: oltre il tetto la richiesta è rifiutata, non ridotta). Claude Code ripete fino a dieci volte con attesa crescente (code.claude.com/docs/en/llm-gateway-rollout), quindi il proxy non ne aggiunge. La riga dei ripieghi è la più insidiosa: nessun messaggio, un altro modello, un'altra spesa. È la stessa lezione del caso che segue. Il budget conta se il listino del proxy conosce il prezzo del modello: si controlla con una prova.`
+    notes: "Dalla documentazione (novembre 2026): exit 2 blocca e lo stderr è il motivo che vede l'agente; altri codici non bloccano, a meno di impostare onFailure a block. Su PreToolUse un hook che va in timeout non blocca la chiamata, salvo onFailure block. La forma JSON usa hookSpecificOutput con permissionDecision (allow, deny, ask, defer); un campo al livello sbagliato viene ignorato senza errore. Per le regole semplici bastano i codici di uscita."
   },
   {
-    block: B + 'Il caso',
+    block: B + 'Configurazione',
     content: () => (
       <div className="pad">
-        <Tag>Il caso</Tag>
-        <h2>Argo Briefing: la riserva silenziosa</h2>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
-          <Stat big="1.140" label="richieste in un periodo" />
-          <Stat big="79,4 M" label="token consumati" />
-          <Stat big="$1,55" label="il costo totale" />
-        </div>
-        <ul style={{ marginTop: 12 }}>
-          <li>Un assistente usava una catena di modelli gratuiti. Quando la catena ha smesso di rispondere, un fornitore a pagamento ha fatto da riserva, senza avvisare.</li>
-          <li>La conversazione non veniva mai compattata, e i tentativi ripetuti rimandavano ogni volta tutta la storia.</li>
-        </ul>
-        <Box type="warn" title="Stesso tipo di meccanismo">Un ripiego configurato nel proxy fa la stessa cosa: a un errore la richiesta va a un modello che nessuno ha scelto, e nessuno lo vede.</Box>
-      </div>
-    ),
-    notes: `Incidente di Argo Briefing, agosto-settembre 2026: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. La cifra in dollari è bassa; il problema era il meccanismo. Un fornitore a pagamento faceva da riserva silenziosa a una catena di modelli gratuiti che non rispondeva più, la storia della conversazione non veniva compattata e i tentativi ripetuti la rimandavano per intero. Il caso è raccontabile in pubblico (autorizzazione di Thomas del 21/10/2026). Non dico che Argo Briefing usasse LiteLLM: dico che un ripiego configurato nel proxy (fallbacks, default_fallbacks) è una riserva silenziosa dello stesso tipo, e che per questo nel laboratorio non ce ne sono e ogni chiave porta anche disable_fallbacks. Lì la riserva costava; qui il rischio sarebbe una richiesta che passa a un modello più caro o a un fornitore non previsto. La lezione: ogni riserva automatica va resa visibile o spenta, e un tetto di spesa vale più di una buona intenzione. Contesto, token e costi sono l'argomento 10.`
-  },
-  {
-    block: B + 'Come si verifica',
-    content: () => (
-      <div className="pad">
-        <Tag>Verifica</Tag>
-        <h2>Il proxy è chiuso davvero?</h2>
-        <CommandBox tall label="Prova 1: senza chiave, su una rotta che fa inferenza. Deve rispondere 401" cmd={PROVA_1} />
-        <CommandBox tall label="Prova 2: con la chiave del PC e un modello che non è tra i suoi. Deve essere rifiutato" cmd={PROVA_2} />
+        <Tag>Configurazione</Tag>
+        <h2>Dove si dichiara</h2>
+        <pre aria-label="Esempio di configurazione di uno hook in settings.json">{CONFIG}</pre>
         <ul>
-          <li>Un 401 sulla prima prova dice che la chiave è richiesta. Una risposta del modello dice il contrario.</li>
-          <li>Sulla seconda prova deve arrivare un errore, non una risposta: la chiave non può chiamare altro che i suoi modelli.</li>
+          <li>Tre livelli: evento, gruppo con il <b>matcher</b>, gestori.</li>
+          <li>Il matcher sceglie lo strumento: <code className="nw">Bash</code>, <code className="nw">Edit|Write</code>, <code className="nw">mcp__server__.*</code>. Distingue maiuscole e minuscole.</li>
+          <li><code className="nw">.claude/settings.json</code> è del progetto e si condivide con git; <code className="nw">.claude/settings.local.json</code> no.</li>
         </ul>
       </div>
     ),
-    notes: `Le prove sono quelle della preparazione dei PC (il docente le fa il giorno prima). Si prova una rotta che fa inferenza, /v1/messages, perché è quella che costa. Non si prova mai la master key dai PC dei partecipanti: non esce dal PC proxy. Per il budget c'è una terza prova: una chiave di prova con un tetto minimo deve essere rifiutata dopo la prima o la seconda richiesta, senza passare ad altri modelli. Su Windows va usato curl.exe, non l'alias di PowerShell. Codici e messaggi esatti si annotano durante la prova. Fonti: docs.litellm.ai/docs/anthropic_unified e docs.litellm.ai/docs/proxy/virtual_keys, 11/11/2026. Segnaposto al posto di indirizzo e chiave.`
+    notes: "Struttura e ambiti dal riferimento https://code.claude.com/docs/en/hooks (novembre 2026): file utente ~/.claude/settings.json, file di progetto .claude/settings.json, file locale .claude/settings.local.json, politiche gestite. La variabile CLAUDE_PROJECT_DIR indica la radice del progetto, così lo script si trova anche se l'agente cambia cartella. Con /hooks dentro Claude Code si vede l'elenco degli hook attivi."
   },
   {
-    block: B + 'Rischi dei collegamenti',
+    block: B + 'Hook che blocca',
     content: () => (
       <div className="pad">
-        <Tag>Permessi e rischi</Tag>
-        <h2>Ogni collegamento esterno ha un conto</h2>
-        <DT cols={['Collegamento', 'Cosa esce o cosa entra', 'Cosa si controlla']} rows={[
-          ['Proxy', 'prompt e file letti, verso il fornitore', 'chiave per PC, budget, scadenza, dati solo inventati'],
-          ['Fornitore dietro il proxy', 'gli stessi contenuti, con i suoi termini', 'termini d\'uso e conservazione dei dati letti prima'],
-          ['MCP e plugin', 'codice eseguito sul PC', 'solo ciò che si è letto, versione fissata'],
-          ['Web e link di condivisione', 'testo da fuori entra nel contesto; la sessione esce', 'webfetch su ask o deny, share disabilitato'],
-          ['Aggiornamenti e telemetria', 'richieste verso l\'esterno', 'autoupdate false, traffico non essenziale spento'],
-        ]} />
+        <Tag>Esempio 1</Tag>
+        <h2>Un hook che blocca</h2>
+        <p>Su <code className="nw">Edit</code> e <code className="nw">Write</code> (configurazione della slide precedente): niente modifiche a <code className="nw">.env</code> né a <code className="nw">package-lock.json</code>.</p>
+        <pre aria-label="Script di hook che blocca la modifica di file protetti">{HOOK_PROTEGGI}</pre>
+        <p className="muted">Nell'attività scrivete lo stesso schema, ma per i comandi di shell.</p>
       </div>
     ),
-    notes: `Riepilogo dei permessi e dei rischi. Sul fornitore: prompt e file letti dall'agente arrivano al fornitore dei modelli attraverso il proxy; i termini d'uso si leggono prima di aprire l'accesso a un gruppo di persone, e per questo in laboratorio solo dati inventati. Sul web: ciò che una pagina scrive entra nel contesto dell'agente e può contenere istruzioni; l'argomento 6 ne parla. Sui plugin: la documentazione di OpenCode dice che i pacchetti npm non fissati a una versione vengono controllati all'avvio. Per Claude Code le impostazioni gestite dell'amministratore possono imporre un solo indirizzo di destinazione (allowedProviders con ANTHROPIC_BASE_URL, code.claude.com/docs/en/llm-gateway, 11/11/2026).`
+    notes: "Lo schema è quello della guida ufficiale (hooks-guide, «Block edits to protected files», novembre 2026), qui riscritto in Node.js perché il PC del laboratorio ha già Node e la guida usa jq, che potrebbe mancare. Lo script legge tutto lo stdin, decide, esce con 2 o con 0. Nota: se JSON.parse fallisse, lo script uscirebbe con un errore diverso da 2 e la modifica passerebbe; per una barriera vera si gestisce l'errore in modo esplicito."
   },
   {
-    block: B + 'Il gateway cambia qualcosa',
+    block: B + 'Hook che lancia i test',
     content: () => (
       <div className="pad">
-        <Tag>Il collegamento</Tag>
-        <h2>Anche con modelli Claude il proxy conta</h2>
+        <Tag>Esempio 2</Tag>
+        <h2>Un hook che lancia i test</h2>
+        <p>Evento <code className="nw">PostToolUse</code>, matcher <code className="nw">Edit|Write</code>: dopo ogni modifica girano i test.</p>
+        <pre aria-label="Script di hook che lancia i test dopo una modifica">{HOOK_TEST}</pre>
+        <Box type="warn" title="Due cautele">La modifica è già avvenuta: l'uscita 2 non la annulla, avvisa l'agente. E se la suite è lenta, ogni modifica la paga.</Box>
+      </div>
+    ),
+    notes: "Con PostToolUse l'uscita 2 mostra lo stderr all'agente ma non annulla l'azione già eseguita (https://code.claude.com/docs/en/hooks , novembre 2026). Sulla palestra la suite è veloce; su un progetto vero conviene restringere il controllo ai soli file di codice, per esempio con il campo if, oppure lanciare i test solo all'evento Stop. L'esempio ufficiale analogo formatta i file con Prettier dopo ogni modifica."
+  },
+  {
+    block: B + 'Provare uno hook',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima di fidarsene</Tag>
+        <h2>Come si prova uno hook</h2>
+        <ol className="timeline">
+          <li><time>1</time>A mano, senza agente: gli si manda un evento finto e si guarda il codice di uscita.</li>
+          <li><time>2</time>Con una batteria di casi: comandi da bloccare <b>e</b> comandi che devono passare.</li>
+          <li><time>3</time>Dentro Claude Code: <code className="nw">/hooks</code> per vederlo, poi si chiede all'agente il comando vietato.</li>
+        </ol>
+        <CommandBox cmd={PROVA_EVENTO} label="1. Mandate allo hook un evento finto" />
+        <CommandBox cmd="$LASTEXITCODE" label="2. Il codice di uscita (in bash: echo $?)" />
+        <p className="muted">Se qualcosa non va: <code className="nw">Ctrl+O</code> apre la trascrizione, <code className="nw">claude --debug</code> mostra uscite e messaggi.</p>
+      </div>
+    ),
+    notes: "Il comando di prova a mano è quello suggerito dalla guida ufficiale (hooks-guide, risoluzione dei problemi, novembre 2026). Il secondo passo è il più importante: uno hook troppo largo che blocca anche i comandi buoni (per esempio git commit con un messaggio che contiene una parola vietata) è un guaio pari a uno che non blocca. Matcher con maiuscole sbagliate e hook non eseguibili sono le cause più comuni di «non scatta»."
+  },
+  {
+    block: B + 'I limiti',
+    content: () => (
+      <div className="pad">
+        <Tag>I limiti</Tag>
+        <h2>Cosa uno hook non fa</h2>
         <div className="grid">
-          <Card title="Può andare storto" kind="w">
-            <ul>
-              <li>Campi sperimentali che il proxy non inoltra: errori 400.</li>
-              <li>Alias dei modelli (haiku, sonnet, opus) non mappati sui nomi del proxy.</li>
-              <li>Richieste in background con un modello che la chiave non ha.</li>
-              <li>Cache non inoltrata: i token costano di più.</li>
-            </ul>
+          <Card title="Vede solo ciò che riconosce" kind="w">
+            <p>Una regola contro <code className="nw">rm -rf</code> lascia passare <code className="nw">rm -fr</code> se nessuno ci ha pensato. È una lista di casi, non un'intelligenza.</p>
           </Card>
-          <Card title="Non cambia" kind="i">
-            <ul>
-              <li>I file di istruzioni caricati.</li>
-              <li>I permessi e gli hook: li applica lo strumento.</li>
-              <li>Il tuo compito di leggere il diff.</li>
-            </ul>
+          <Card title="Non sostituisce i permessi" kind="i">
+            <p>Si aggiunge alle regole allow e deny e al modello di permessi. Una barriera sola non basta.</p>
           </Card>
         </div>
-        <Box type="warn" title="Supporto">Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli.</Box>
+        <Box type="danger" title="È codice che si esegue">Un hook gira con i tuoi permessi. Un repository di altri con hook già dentro le impostazioni va letto prima di fidarsi.</Box>
       </div>
     ),
-    notes: `Fonti: code.claude.com/docs/en/llm-gateway, llm-gateway-rollout e llm-gateway-protocol, 11/11/2026. Dichiarazione della documentazione: Anthropic non sostiene né verifica i gateway di terzi. Sintomi noti: errori 400 su campi sperimentali o intestazioni beta che il gateway non inoltra (CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1 come ripiego), alias dei modelli (ANTHROPIC_DEFAULT_SONNET_MODEL, _HAIKU_ e _OPUS_ si mappano sui nomi del proxy; per i partecipanti il nome opus punta a Sonnet perché la loro chiave non ha Opus), richieste in background che chiedono un ID predefinito qualunque sia la mappatura, cache non inoltrata (si vede dai token letti dalla cache sempre a zero). Rispetto a un proxy con modelli di altri fornitori, qui i modelli sono quelli per cui lo strumento è pensato, quindi skill, subagenti e uso degli strumenti non dipendono più dal modello. Resta il lavoro di prova prima del corso.`
+    notes: "Il rischio di fondo è l'illusione di sicurezza: «c'è l'hook» non vuol dire «tutto è coperto». Gli hook di un progetto stanno in .claude/settings.json, che si condivide con git: chi clona un repository porta con sé quelle impostazioni. La documentazione prevede anche politiche gestite per le organizzazioni (https://code.claude.com/docs/en/hooks , novembre 2026). Gli hook non dipendono dal modello scelto: gli stessi funzionano con qualunque modello collegato a Claude Code."
   },
   {
-    block: B + 'Attività: due strumenti',
+    block: B + 'MCP: il problema',
+    content: () => (
+      <div className="pad">
+        <Tag>MCP</Tag>
+        <h2>Che problema risolve MCP</h2>
+        <p>L'agente conosce il repository e il terminale. Non conosce il tuo calendario, il tuo database, il tuo sistema di segnalazioni.</p>
+        <p><b>MCP (Model Context Protocol)</b> è uno standard aperto per collegare un'applicazione di IA a sistemi esterni: dati, strumenti, flussi di lavoro. La documentazione lo paragona a una presa USB-C: un solo formato, tanti dispositivi.</p>
+        <Box type="info" title="Perché uno standard">Senza, ogni strumento dovrebbe essere collegato a ogni agente con un adattatore fatto su misura. Con MCP si scrive un server una volta, e lo usano tutti i programmi che parlano MCP.</Box>
+      </div>
+    ),
+    notes: "Definizione e paragone dalla pagina introduttiva https://modelcontextprotocol.io (novembre 2026). Il protocollo si occupa solo dello scambio di contesto: non stabilisce come l'applicazione usa il modello. Claude Code è uno dei programmi che lo supportano; altri editor e assistenti fanno lo stesso (la pagina cita per esempio Visual Studio Code e Cursor). Nell'argomento 10 si vede come lo stesso concetto si presenta in un secondo strumento."
+  },
+  {
+    block: B + 'Architettura',
+    content: () => (
+      <div className="pad">
+        <Tag>Architettura</Tag>
+        <h2>Host, client, server</h2>
+        <div role="group" aria-label="Schema: l'host contiene un client per ogni server; ogni server dà accesso a un sistema">
+          <Flow nodes={[
+            ['1 Host', 'l\'applicazione: Claude Code', 'w'],
+            ['2 Client', 'uno per ogni server, tiene la connessione', ''],
+            ['3 Server MCP', 'un programma che espone strumenti', 'i'],
+            ['4 Sistema', 'file, database, servizio', ''],
+          ]} />
+        </div>
+        <DT cols={['Il server può offrire', 'Che cos\'è']} rows={[
+          [<b>Strumenti</b>, 'Funzioni che l\'agente può chiamare (cerca, leggi, crea)'],
+          [<b>Risorse</b>, 'Dati da leggere come contesto (un file, un record)'],
+          [<b>Prompt</b>, 'Modelli di richiesta già pronti'],
+        ]} />
+        <p className="muted">Due modi di collegarsi: <b>stdio</b> (un programma locale lanciato dall'agente) e <b>HTTP</b> (un servizio remoto).</p>
+      </div>
+    ),
+    notes: "Dalla pagina Architecture di https://modelcontextprotocol.io (novembre 2026): l'host crea un client per ogni server; i server espongono tre primitive, strumenti, risorse e prompt; i trasporti sono stdio per i server locali e HTTP per quelli remoti. Il lavoro dell'agente con un server comincia sempre da un elenco degli strumenti disponibili, che il modello legge per decidere cosa chiamare."
+  },
+  {
+    block: B + 'Esempi per una scuola',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempi plausibili</Tag>
+        <h2>Che cosa si potrebbe collegare</h2>
+        <DT cols={['Server (ipotetico)', 'Che cosa darebbe all\'agente', 'Rischio']} rows={[
+          ['Cartella di documenti di prova', 'Leggere i verbali inventati di una cartella, senza scrivere', 'Basso: sola lettura, una cartella'],
+          ['Registro delle prenotazioni', 'Interrogare le prenotazioni dei laboratori', 'Medio: dati veri se non sono di prova'],
+          ['Segnalazioni dei guasti', 'Leggere e commentare le richieste di assistenza', 'Medio: testo scritto da altri'],
+          ['Database del registro', 'Fare query direttamente', 'Alto: dati personali, scritture possibili'],
+        ]} />
+        <p className="muted">Esempi inventati per ragionare: non sono servizi installati a scuola.</p>
+      </div>
+    ),
+    notes: "Tutti gli esempi sono ipotetici e a dati inventati. Il criterio per scegliere è chiedersi quanto danno può fare il server se l'agente sbaglia o se un testo letto lo inganna: per questo si parte da sola lettura e da una cartella sola. Il server di riferimento per i file (modelcontextprotocol/servers, filesystem) ha un'opzione --read-only che non offre gli strumenti di scrittura."
+  },
+  {
+    block: B + 'Collegare un server',
+    content: () => (
+      <div className="pad">
+        <Tag>In pratica</Tag>
+        <h2>Collegare un server a Claude Code</h2>
+        <CommandBox cmd={MCP_ADD} label="Aggiungere un server MCP" />
+        <p>Con <code className="nw">--scope project</code> il comando scrive invece un file <code className="nw">.mcp.json</code> nella radice del progetto, di questo tipo:</p>
+        <pre aria-label="File .mcp.json">{MCP_JSON}</pre>
+        <p className="muted">Ambiti: <b>local</b> (solo tu, solo questo progetto), <b>project</b> (<code className="nw">.mcp.json</code>, condiviso con git), <b>user</b> (tutti i tuoi progetti). Dentro la sessione: <code className="nw">/mcp</code>.</p>
+      </div>
+    ),
+    notes: "Sintassi dalla pagina https://code.claude.com/docs/en/mcp (novembre 2026): claude mcp add [opzioni] nome -- comando argomenti; il doppio trattino separa le opzioni di Claude dal comando del server. Il server filesystem è @modelcontextprotocol/server-filesystem; il README di modelcontextprotocol/servers indica Node.js 24 o più recente e l'opzione --read-only, che a una prova nostra espone solo gli strumenti di lettura. I server di progetto in .mcp.json richiedono una approvazione esplicita nelle sessioni interattive. Con /mcp si vede lo stato dei server."
+  },
+  {
+    block: B + 'Rischi e permessi',
+    content: () => (
+      <div className="pad">
+        <Tag>Rischi</Tag>
+        <h2>Ogni server porta con sé dei permessi</h2>
+        <div className="grid">
+          <Card title="È codice che gira da te" kind="d">
+            <p>Un server locale parte come programma sul tuo PC. Uno di terzi può leggere file, rete e variabili d'ambiente.</p>
+          </Card>
+          <Card title="Il testo che arriva è un input non fidato" kind="w">
+            <p>Pagine, segnalazioni, documenti letti da un server possono contenere istruzioni travestite da dati (argomento 7).</p>
+          </Card>
+        </div>
+        <ul>
+          <li>Si collega solo ciò che serve, in sola lettura quando basta, su una cartella sola.</li>
+          <li>I permessi si decidono per strumento: nome <code className="nw">mcp__server__strumento</code>.</li>
+          <li>Token e chiavi nelle variabili d'ambiente, mai dentro <code className="nw">.mcp.json</code>.</li>
+        </ul>
+      </div>
+    ),
+    notes: "La documentazione di Claude Code avverte di verificare che ci si fidi di ogni server prima di collegarlo, e che i server che leggono contenuti esterni espongono al rischio di prompt injection (https://code.claude.com/docs/en/mcp , novembre 2026). La guida alla sicurezza di MCP (https://modelcontextprotocol.io , sezione sicurezza) descrive i server locali come programmi con gli stessi privilegi del client, e consiglia di limitare i permessi e di eseguirli, dove si può, in un ambiente isolato. Un hook PreToolUse con matcher mcp__server__.* può fare da barriera in più."
+  },
+  {
+    block: B + 'Quando non serve',
+    content: () => (
+      <div className="pad">
+        <Tag>Giudizio</Tag>
+        <h2>Quando un MCP non serve</h2>
+        <DT cols={['Se basta...', 'allora non serve MCP']} rows={[
+          ['Un comando da terminale (git, curl, un tuo script)', 'L\'agente lo lancia già con Bash'],
+          ['Un file nel repository', 'Si legge con gli strumenti normali'],
+          ['Una procedura che si ripete', 'Una skill o un file di istruzioni (argomenti 5 e 8)'],
+          ['Una regola da far rispettare', 'Un hook, non un server'],
+        ]} />
+        <Box type="warn" title="Il costo">Ogni server aggiunge strumenti che l'agente deve conoscere, un programma da tenere aggiornato e una superficie in più da difendere. Si aggiunge quando manca davvero qualcosa.</Box>
+      </div>
+    ),
+    notes: "Regola pratica: prima si prova con gli strumenti che l'agente già ha. MCP si giustifica quando c'è un sistema che l'agente non raggiunge in altro modo o quando serve un'interfaccia stabile e controllata verso di esso. La documentazione di Claude Code descrive anche una ricerca degli strumenti (tool search) per non caricare tutti gli strumenti di tutti i server in una volta: segno che il numero di strumenti ha un costo."
+  },
+  {
+    block: B + 'Attività al PC',
     content: () => (
       <div className="pad">
         <Tag>Attività</Tag>
-        <h2>Lo stesso compito, due agenti</h2>
+        <h2>Ora tocca a voi</h2>
         <ol className="timeline">
-          <li><time>1</time>Dalla palestra, punto <code className="nw">partenza-a9</code>: stesse istruzioni per tutti e due gli agenti.</li>
-          <li><time>2</time>Lo stesso compito a Claude Code, in una sessione nuova. Annota cosa chiede, cosa fa da solo.</li>
-          <li><time>3</time>Scarta le modifiche e ripeti con OpenCode, con i permessi del laboratorio.</li>
-          <li><time>4</time>Confronta: richieste di conferma, comandi lanciati, file toccati, configurazione letta.</li>
+          <li><time>1</time>Scrivete lo hook che blocca i comandi indicati nell'esercizio, sulla palestra.</li>
+          <li><time>2</time>Provatelo con lo script di prova: dieci casi su dieci.</li>
+          <li><time>3</time>Collegatelo a Claude Code e chiedete all'agente un comando vietato.</li>
+          <li><time>4</time>Facoltativo: collegate un server MCP di sola lettura su una cartella di prova.</li>
         </ol>
-        <ActivityBadge n="9" file="confronto-claude-code-opencode.html" label="Scheda: il confronto fra i due strumenti" />
+        <ActivityBadge n="9" file="attivita-hook.html" label="Uno hook che blocca un comando" />
+        <ActivityBadge n="9" file="promemoria-hook-mcp.html" label="Promemoria: eventi, formato, comandi MCP" />
+        <p className="muted" style={{ marginTop: 10 }}>Le soluzioni le ha il docente.</p>
       </div>
     ),
-    notes: `Attività sulla palestra, a coppie. Il compito è semplice e già noto: aggiungere all'elenco delle prenotazioni il filtro per laboratorio, con un test. Perché il confronto valga, i due agenti devono vedere le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 4. Il modello dietro il proxy è lo stesso per tutti e due (Claude), quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
-  },
-  {
-    block: B + 'Attività: trova l\'errore',
-    content: () => (
-      <div className="pad">
-        <Tag>Attività</Tag>
-        <h2>Una configurazione con i default sbagliati</h2>
-        <ol className="timeline">
-          <li><time>1</time>Leggi il file di OpenCode e la configurazione del proxy LiteLLM, inventati.</li>
-          <li><time>2</time>Segna ogni riga pericolosa e scrivi cosa rischia chi lavora con quel PC.</li>
-          <li><time>3</time>Scrivi la versione corretta e l'ordine dei controlli prima di aprire l'agente.</li>
-        </ol>
-        <ActivityBadge n="9" file="trova-l-errore-configurazione.html" label="Scheda: trova l'errore nella configurazione" />
-        <p className="muted" style={{ marginTop: 10 }}>Indirizzi, chiavi e nomi nella scheda sono tutti inventati.</p>
-      </div>
-    ),
-    notes: `Scheda con una configurazione inventata di OpenCode e di un proxy LiteLLM, con più righe sbagliate: permessi aperti, condivisione attiva, plugin non fissato, chiave scritta nel file, tutti i modelli ammessi, ripiego verso un modello più caro, testi delle richieste nei registri, una sola chiave per tutti senza tetto, interfaccia di amministrazione lasciata accesa. Una delle righe non produce nessun errore, ed è la più difficile da vedere. Le risposte attese sono del docente. Per chi finisce prima: scrivere i quattro controlli, in ordine, da fare sul proprio PC prima di cominciare.`
+    notes: "Il punto di partenza della palestra è il tag partenza-a9 (la scheda dice come ottenerlo). Si lavora in coppia. Anche il progetto personale riceve lo stesso hook. Chi finisce prima prova a far passare un comando che aggira la regola (un altro modo di scrivere lo stesso comando) e corregge lo hook."
   },
   {
     block: B + 'Domanda di verifica',
@@ -689,28 +702,28 @@ const slides = [
       <div className="pad">
         <Tag>Quiz</Tag>
         <h2>Una domanda per voi</h2>
-        <Quiz domanda="La chiave di un PC non ha Opus tra i modelli ammessi, e Claude Code chiede Opus. Cosa deve fare il proxy?" opzioni={[
-          { t: 'Rifiutare la richiesta con un errore', ok: true, perche: 'Così il limite si vede. La chiave chiama solo i suoi modelli e nessuno spende senza saperlo.' },
-          { t: 'Passare a Sonnet senza dire nulla, così il lavoro continua', ok: false, perche: 'È un ripiego silenzioso: funziona oggi e domani nessuno sa quale modello ha risposto. È la stessa famiglia dell\'incidente di Argo Briefing.' },
-          { t: 'Passare a Opus con la master key, per non bloccare chi lavora', ok: false, perche: 'La master key non esce dal PC proxy, e un tetto che si scavalca da solo non è un tetto.' },
+        <Quiz domanda="Il tuo hook PreToolUse stampa un messaggio di errore e poi esce con codice 1. Che cosa succede al comando dell'agente?" opzioni={[
+          { t: 'Viene bloccato, e l\'agente legge il messaggio', ok: false, perche: 'Per bloccare serve il codice 2. Il messaggio c\'è, ma il comando non è fermato.' },
+          { t: 'Parte lo stesso: il codice 1 è un errore che non blocca', ok: true, perche: 'Solo l\'uscita 2 (o un JSON con deny) ferma un PreToolUse. Con 1 compare un avviso e l\'azione prosegue.' },
+          { t: 'Claude Code chiede a te se proseguire', ok: false, perche: 'Questo lo fa la decisione "ask" in un JSON, non un codice di uscita.' },
         ]} />
       </div>
     ),
-    notes: `Domanda sul punto più facile da sbagliare: la comodità di un ripiego automatico contro la visibilità di un errore. Se qualcuno risponde B, rimandare alla slide sui ripieghi e al caso di Argo Briefing. Nei PC del laboratorio il nome opus è mappato su Sonnet in modo esplicito: la scelta è scritta e visibile nella configurazione, non decisa in silenzio dal proxy.`
+    notes: "Domanda di comprensione sul punto più frainteso: l'errore classico è usare exit 1, che è l'abitudine di ogni script di shell, mentre qui il valore che blocca è 2. Dopo la risposta si può chiedere perché è pericoloso per una barriera: se lo script si rompe, la barriera sparisce senza far rumore."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Contesto, agenti, permessi e controlli automatici ci sono in entrambi gli strumenti. Cambiano nomi, sintassi e soprattutto i default.',
-          'OpenCode parte permissivo: permessi, condivisione, aggiornamenti e fornitori si configurano a mano, sulla versione fissata.',
-          'Il proxy dà una configurazione sola e tiene la chiave vera lontana dai PC, ma va configurato: master key, interfaccia, registri, nessun ripiego, chiavi con budget e scadenza.',
-          'Ogni collegamento esterno ha un conto. Anche con modelli Claude, il gateway va provato: alias, campi inoltrati, cache.',
+          'Le istruzioni sono consigli, gli hook sono controlli: le regole che non si possono violare vanno in un hook.',
+          'PreToolUse blocca con l\'uscita 2 e il motivo sullo stderr; PostToolUse arriva dopo e non annulla.',
+          'Uno hook si prova prima, con casi da bloccare e casi da lasciar passare, e vede solo ciò che sa riconoscere.',
+          'MCP collega strumenti e dati con uno standard comune; ogni server porta permessi e rischi, e si aggiunge solo se serve.',
         ]}
-        dopo="Argomento 10 (costi e contesto: l'incidente di Argo Briefing in dettaglio, con i listini)." />
+        dopo="Argomento 10: gli stessi concetti in OpenCode, dove al posto degli hook ci sono i plugin in JavaScript. Argomento 13: l'hook PreToolUse come barriera di un agente che legge posta non fidata." />
     ),
-    notes: `Riprendere i quattro punti. Collegare con l'argomento 10: lì si vede cosa succede ai token quando il contesto si riempie e come si stima il costo di una sessione. Lasciare spazio alle domande.`
+    notes: "Riprendere i quattro punti. Collegamenti: l'argomento 10 mostra il plugin come equivalente dell'hook; l'argomento 13 usa un hook PreToolUse come barriera e mostra perché le regole vanno sia nei permessi sia in un controllo deterministico."
   },
 ];
 

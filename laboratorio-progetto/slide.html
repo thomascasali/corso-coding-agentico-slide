@@ -368,7 +368,7 @@ const slides = [
       <AperturaLab titolo="Laboratorio-progetto" sottotitolo="Portare il proprio progetto a un risultato che funziona, documentato e revisionato."
         caso="Qui non c'è un esercizio da seguire: il ciclo lo applicate voi, il docente passa tra i banchi." />
     ),
-    notes: "Non ha argomenti nuovi: è il laboratorio in cui si mette insieme quello che è venuto prima. Il progetto sta sul PC della scuola, nella cartella creata con l'argomento 2, con la skill e l'hook scritti con gli argomenti 7 e 8. Ricordare che i dati restano inventati e che non c'è nessun remote."
+    notes: "Non ha argomenti nuovi: è il laboratorio in cui si mette insieme quello che è venuto prima. Il progetto sta sul PC della scuola, nella cartella creata con l'argomento 3, con la skill e l'hook scritti con gli argomenti 8 e 9. Ricordare che i dati restano inventati e che non c'è nessun remote."
   },
   {
     block: B + 'Obiettivo',
@@ -408,14 +408,14 @@ const slides = [
         <Tag>Il metodo</Tag>
         <h2>Da dove arriva ogni pezzo del vostro progetto</h2>
         <DT cols={['Nel progetto', 'Da dove arriva']} rows={[
-          ['La scheda, con i primi criteri', 'Argomenti 13 e 1: l\'agente installato e la prima richiesta con un piano letto prima di approvarlo'],
-          ['Cartella, repository, un commit per passo', 'Argomento 2: Git come rete di sicurezza'],
-          ['Specifica, criteri di accettazione e piano', 'Argomento 3: dalla richiesta vaga ai requisiti'],
-          ['Il file CLAUDE.md', 'Argomento 4: istruzioni persistenti'],
-          ['I test, uno per criterio', 'Argomento 5: test e debugging con l\'agente'],
-          ['La checklist di sicurezza', 'Argomento 6: segreti, dipendenze, comandi distruttivi'],
-          ['La skill di revisione e l\'hook', 'Argomenti 7 e 8: skill, subagenti, hook'],
-          ['Lo strumento a scelta, i costi sotto controllo', 'Argomenti 9 e 10: OpenCode, proxy, contesto'],
+          ['La scheda, con i primi criteri', 'Argomenti 1 e 2: l\'agente installato e la prima richiesta con un piano letto prima di approvarlo'],
+          ['Cartella, repository, un commit per passo', 'Argomento 3: Git come rete di sicurezza'],
+          ['Specifica, criteri di accettazione e piano', 'Argomento 4: dalla richiesta vaga ai requisiti'],
+          ['Il file CLAUDE.md', 'Argomento 5: istruzioni persistenti'],
+          ['I test, uno per criterio', 'Argomento 6: test e debugging con l\'agente'],
+          ['La checklist di sicurezza', 'Argomento 7: segreti, dipendenze, comandi distruttivi'],
+          ['La skill di revisione e l\'hook', 'Argomenti 8 e 9: skill, subagenti, hook'],
+          ['Lo strumento a scelta, i costi sotto controllo', 'Argomenti 10 e 11: OpenCode, proxy, contesto'],
         ]} />
         <p className="muted" style={{ marginTop: 10 }}>Quello che manca viene da questo laboratorio: README, nota sui limiti, revisione di un collega, presentazione.</p>
       </div>
@@ -451,7 +451,7 @@ const slides = [
         <Box type="info" title="Il giudizio di un agente non è una prova">Una revisione che dice "va bene" non sostituisce un test che passa. Alla fine contano i test e quello che avete letto voi.</Box>
       </div>
     ),
-    notes: "La skill e l'hook sono quelli scritti nel proprio progetto con gli argomenti 7 e 8. Se qualcuno non li ha, li sistema subito e senza insistere: il progetto viene prima. Ricordare che in OpenCode il lavoro equivalente dell'hook si fa con un plugin."
+    notes: "La skill e l'hook sono quelli scritti nel proprio progetto con gli argomenti 8 e 9. Se qualcuno non li ha, li sistema subito e senza insistere: il progetto viene prima. Ricordare che in OpenCode il lavoro equivalente dell'hook si fa con un plugin."
   },
   {
     block: B + 'Documentare',
@@ -566,14 +566,14 @@ const slides = [
         <Tag>Dopo il corso</Tag>
         <h2>Dove continuare</h2>
         <div className="grid">
-          <Card title="Argomento 11"><p>Il rilascio mobile in autopilota: una catena con cancelli di verifica, letta come esempio di agenti e revisione messi insieme.</p></Card>
-          <Card title="Argomento 12" kind="i"><p>L'helpdesk email in autopilota: un agente che lavora su input non fidati. Prompt injection, superficie d'azione stretta, prova a secco.</p></Card>
+          <Card title="Argomento 12"><p>Il rilascio mobile in autopilota: una catena con cancelli di verifica, letta come esempio di agenti e revisione messi insieme.</p></Card>
+          <Card title="Argomento 13" kind="i"><p>L'helpdesk email in autopilota: un agente che lavora su input non fidati. Prompt injection, superficie d'azione stretta, prova a secco.</p></Card>
         </div>
-        <p className="muted" style={{ marginTop: 12 }}>Sono due approfondimenti fuori dal percorso fisso: l'11 conviene dopo gli argomenti 7-10, il 12 dopo il 6, l'8 e l'11. Ogni argomento ha slide ed esercizi propri.</p>
+        <p className="muted" style={{ marginTop: 12 }}>Sono due approfondimenti fuori dal percorso fisso: il 12 conviene dopo gli argomenti 8-11, il 13 dopo il 7, il 9 e il 12. Ogni argomento ha slide ed esercizi propri.</p>
         <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
       </div>
     ),
-    notes: "Gli argomenti 11 e 12 non fanno parte del percorso fisso: sono casi di studio per chi vuole andare oltre. L'argomento 12 conviene dopo il 6, l'8 e l'11. Costruire agenti da zero con le API o collegarli a sistemi reali della scuola resta fuori da questo corso e può diventare un secondo corso."
+    notes: "Gli argomenti 12 e 13 non fanno parte del percorso fisso: sono casi di studio per chi vuole andare oltre. L'argomento 13 conviene dopo il 7, il 9 e il 12. Costruire agenti da zero con le API o collegarli a sistemi reali della scuola resta fuori da questo corso e può diventare un secondo corso."
   },
 ];
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 3 · Dalla richiesta ai requisiti · Coding agentico</title>
+<title>Argomento 3 · Git come rete di sicurezza · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -328,349 +328,352 @@ function CommandBox({ cmd, label, tall, kind }) {
 /* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
-/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
-const B = 'Argomento 3 — Dalla richiesta ai requisiti · ';
+const B = 'Argomento 3 — Git come rete di sicurezza · ';
 
-const CRITERIO = String.raw`Dato:    il 2026-12-24 è un giorno di chiusura (elenco "chiusure" in dati/dati.json)
-Quando:  si prenota LAB-INF1 il 2026-12-24, dalle 09:00 alle 11:00
-Allora:  la richiesta è rifiutata con il codice GIORNO_DI_CHIUSURA
-         e nessuna prenotazione viene aggiunta
+const CODICE_STATUS = String.raw`$ git status
+On branch lavoro-a3
+Changes not staged for commit:
+        modified:   src/logica.js
+        modified:   cli.js
+Untracked files:
+        APPUNTI.md`;
 
-$ node cli.js prenota --lab LAB-INF1 --docente d01 --classe 3A-INF --data 2026-12-24 --inizio 09:00 --fine 11:00
-RIFIUTATA (GIORNO_DI_CHIUSURA): Il 2026-12-24 la scuola è chiusa.`;
+const CODICE_DIFF = String.raw`$ git diff src/formato.js
+@@ -3,3 +3,3 @@ const { etichetta } = require('./util');
+ 
+-const LARGHEZZA_ID = 8;
++const LARGHEZZA_ID = 10;
+ function riga(p) {`;
 
-const PROMPT_ESPLORA = String.raw`Siamo in modalità piano: non modificare nulla.
-Leggi il README, src/logica.js e i test. Poi dimmi:
-1. quali regole di prenotazione esistono già e in quale file stanno;
-2. cosa dovrebbe cambiare per aggiungere le prenotazioni ricorrenti;
-3. cosa non sai e dovrei decidere io.
-Non proporre ancora codice.`;
-
-const PIANO = String.raw`Piano: prenotazioni ricorrenti (esempio scritto per questa slide)
-1. Aggiungere a prenota() un parametro "ricorrenza".
-2. Generare una data a settimana per 52 settimane.
-3. Per ogni data chiamare controllaRichiesta() e salvare.
-4. Se la data cade in un giorno di chiusura, passare alla successiva.
-5. Se una data è occupata, saltarla e continuare.
-6. Aggiungere un test per la serie settimanale.
-7. Aggiornare il README.`;
-
-const PROMPT_IPOTESI = String.raw`Prima di scrivere codice:
-- elenca come IPOTESI ogni regola che stai assumendo e che io non ti ho dato;
-- per ogni ipotesi fai una domanda, con le risposte possibili;
-- non andare avanti finché non ti rispondo.`;
+const CODICE_REMOTE = String.raw`$ git remote -v
+(nessun output: il repository non ha un remote, quindi non si può fare push)`;
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="3" titolo="Dalla richiesta ai requisiti"
-        sottotitolo="Prima di far scrivere codice all'agente si decide che cosa deve fare e come si saprà che l'ha fatto."
-        caso="Il caso: un portale costruito in cinque tappe, e una richiesta di due righe."
+      <Apertura n="3" titolo="Git come rete di sicurezza"
+        sottotitolo="Leggere cosa ha fatto l'agente prima di accettarlo, e saper tornare indietro senza rovinare niente."
+        caso="Un episodio dal racconto: un subagente che, durante un test, ha fatto push sul repository vero."
         prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
     ),
-    notes: "Si parte da una richiesta di due righe, come ne arrivano davvero a un ufficio tecnico. Un agente la eseguirebbe subito. Il lavoro di questo argomento sta prima: capire che cosa si sta chiedendo e come si controllerà il risultato. Tutto si prova sulla palestra, l'app di prenotazione dei laboratori con dati inventati."
+    notes: "Apertura. Un agente modifica più file in pochi secondi e riassume a parole quello che ha fatto. Il riassunto non è una prova: git mostra le righe che sono cambiate davvero. L'argomento insegna due abilità: leggere il diff e tornare indietro. Chi usa git ogni giorno può saltare i comandi base, ma tutti fanno l'esercizio sul repository della palestra."
   },
   {
-    block: B + 'La richiesta',
+    block: B + 'Perché git',
     content: () => (
       <div className="pad">
-        <Tag>Il punto di partenza</Tag>
-        <h2>Due righe e un grazie</h2>
-        <blockquote style={{ borderLeft: '5px solid var(--accent)', padding: '6px 16px', margin: '8px 0 14px', maxWidth: 'none' }}>
-          <p style={{ maxWidth: 'none' }}>«Buongiorno, i docenti ci chiedono di poter prenotare i laboratori in modo ricorrente, perché ogni settimana ripetono la stessa cosa. Potete aggiungere le prenotazioni ricorrenti? Grazie.»</p>
-          <p className="muted">Messaggio inventato per l'esercizio. Dice tutto quello che la vicepresidenza ha da dire.</p>
-        </blockquote>
+        <Tag>Il motivo</Tag>
+        <h2>L'agente cambia più cose di quelle che racconta</h2>
         <div className="grid">
-          <Card title="Che cosa farebbe l'agente" kind="w"><p>Scrive il codice in pochi minuti. Funziona. E decide da solo tutto quello che il messaggio non dice.</p></Card>
-          <Card title="Provate voi" kind="i"><p>Scrivete su un foglio tre domande che fareste alla vicepresidenza prima di toccare il codice.</p></Card>
+          <Card title="Cosa fa l'agente" kind="i">
+            <p>Legge, modifica diversi file, lancia comandi, riprova. Con una richiesta può toccare dieci file.</p>
+          </Card>
+          <Card title="Cosa riferisce" kind="w">
+            <p>Un riassunto di poche righe. Può essere incompleto, o dire «fatto» su una cosa fatta a metà.</p>
+          </Card>
+          <Card title="Cosa vi dà git">
+            <p>L'elenco esatto dei file cambiati, le righe prima e dopo, e un punto a cui tornare.</p>
+          </Card>
         </div>
+        <Box type="info" title="Regola di lavoro">Prima di accettare un lavoro dell'agente si guarda lo stato del repository, non il suo riassunto. Una modifica che non è in un commit si può perdere; una già committata si recupera quasi sempre.</Box>
       </div>
     ),
-    notes: "Lasciare qualche istante perché ognuno scriva le sue tre domande: servono dopo, per il confronto con quello che l'agente chiede o non chiede. Non anticipare le risposte. Il messaggio è inventato, come tutti i dati della palestra."
+    notes: "Il punto è la differenza tra ciò che l'agente dice e ciò che c'è nei file. Git è lo strumento neutro che le confronta. La frase sul commit va detta con calma: un lavoro committato si recupera quasi sempre, uno solo sul disco no. Per questo, prima di ogni richiesta rischiosa, si salva con un commit."
   },
   {
-    block: B + 'Quattro cose diverse',
+    block: B + 'Le tre zone',
     content: () => (
       <div className="pad">
-        <Tag>Concetti</Tag>
-        <h2>Desideri, requisiti, vincoli, criteri</h2>
-        <DT cols={['Livello', 'A che serve', 'Esempio dalle ricorrenti']} rows={[
-          ['Desiderio', 'Quello che la persona vuole, con le sue parole.', '«Non voglio riscrivere ogni settimana la stessa prenotazione.»'],
-          ['Requisito', 'Che cosa deve fare il sistema, in modo che si possa rispondere sì o no.', 'Una serie crea una prenotazione per ogni data, e ognuna rispetta le regole di sempre.'],
-          ['Vincolo', 'Un limite che viene da fuori e non si discute.', 'Node.js senza dipendenze da installare; i test non scrivono nei dati.'],
-          ['Criterio di accettazione', 'Un caso con dati e un esito che si può eseguire.', 'Lo vediamo tra poco, con un esempio.'],
-        ]} />
-      </div>
-    ),
-    notes: "Quattro livelli che nella richiesta vaga sono mescolati. Il desiderio resta quello di chi chiede; il requisito è la versione controllabile; il vincolo non è negoziabile (si legge nel README della palestra: Node 20, nessuna dipendenza); il criterio permette di dire 'fatto'. L'agente aiuta a sistemarli, ma non sa quali vincoli ha davvero la scuola."
-  },
-  {
-    block: B + 'Dalla domanda al criterio',
-    content: () => (
-      <div className="pad">
-        <Tag>Il percorso</Tag>
-        <h2>Si passa per le domande</h2>
-        <div role="group" aria-label="Quattro passaggi: desiderio, domande, requisiti e vincoli, criteri di accettazione">
+        <Tag>Come funziona</Tag>
+        <h2>Dove stanno le modifiche</h2>
+        <div role="group" aria-label="Le tre zone di git: cartella di lavoro, area di preparazione, repository">
           <Flow nodes={[
-            ['1 Desiderio', 'le parole di chi chiede'],
-            ['2 Domande', 'che cosa manca e a chi chiederlo', 'w'],
-            ['3 Requisiti e vincoli', 'scritti, uno per riga'],
-            ['4 Criteri', 'esempi con un esito', 'i'],
+            ['Cartella di lavoro', 'i file come sono ora; l\'agente scrive qui', 'w'],
+            ['Area di preparazione', 'quello che entrerà nel prossimo commit (staging)', 'i'],
+            ['Repository', 'i commit: fotografie salvate dello stato dei file', ''],
           ]} />
         </div>
-        <p className="legend">Giallo: qui decide una persona. Verde: dove l'agente aiuta di più.</p>
-        <Box type="info" title="Chi risponde">L'agente può aiutare a formulare le domande. Le risposte le dà chi conosce la scuola e ha fatto la richiesta.</Box>
-      </div>
-    ),
-    notes: "Il passaggio centrale è il secondo. Si scrive la domanda, si porta alla persona giusta, si annota la risposta nella specifica. Il lavoro che l'agente fa bene è il quarto (trasformare una decisione in esempi con un esito), purché le decisioni siano già prese."
-  },
-  {
-    block: B + 'Un buon criterio',
-    content: () => (
-      <div className="pad">
-        <Tag>Criteri di accettazione</Tag>
-        <h2>Che cosa lo rende buono</h2>
-        <div className="grid">
-          <Card title="Un caso solo"><p>Una situazione per criterio. Se ce ne sono due, sono due criteri.</p></Card>
-          <Card title="Dati concreti"><p>Date, orari, nomi, numeri. Non «un giorno festivo»: il 24 dicembre 2026.</p></Card>
-          <Card title="Esito osservabile" kind="i"><p>Un messaggio, un codice, un conteggio. Qualcosa che si legge, non che si intuisce.</p></Card>
-          <Card title="Si può eseguire" kind="i"><p>Un comando o un test lo verifica, senza una persona che giudica.</p></Card>
-        </div>
-        <div className="grid" style={{ marginTop: 14 }}>
-          <Card title="Da evitare" kind="d"><p>«La serie gestisce bene i giorni di chiusura.»</p></Card>
-          <Card title="Meglio"><p>«Se una data della serie è il 24/12/2026, il sistema risponde GIORNO_DI_CHIUSURA e non crea nulla.»</p></Card>
-        </div>
-      </div>
-    ),
-    notes: "Il test pratico: un criterio è buono se due persone diverse, leggendolo, prevedono lo stesso esito. 'Gestisce bene' non lo permette. Il secondo esempio però contiene già una decisione (rifiutare, e rifiutare tutto): è il tipo di scelta che qualcuno deve fare e scrivere."
-  },
-  {
-    block: B + 'Esempio dalla palestra',
-    content: () => (
-      <div className="pad">
-        <Tag>Esempio</Tag>
-        <h2>Un criterio che si può eseguire</h2>
-        <pre aria-label="Criterio di accettazione e comando di prova">{CRITERIO}</pre>
-        <p className="muted">Questa regola esiste già nella palestra per le prenotazioni singole. Scritta così, è anche la prova che una modifica non l'ha rotta.</p>
-        <Box type="tip" title="Dal criterio al test">Dato, quando, allora diventano le tre parti di un test: preparo i dati, eseguo, controllo l'esito. È il tema dell'argomento 5.</Box>
-      </div>
-    ),
-    notes: "Si può eseguire il comando dal vivo: la risposta è RIFIUTATA (GIORNO_DI_CHIUSURA). Il 24 dicembre 2026 è nell'elenco 'chiusure' del file dei dati. Il punto è la forma: tre righe, dati concreti, un esito che si legge nel terminale."
-  },
-  {
-    block: B + 'Il piano della demo',
-    content: () => (
-      <div className="pad">
-        <Tag>Un richiamo</Tag>
-        <h2>Il piano che avete visto nella demo</h2>
-        <div className="grid">
-          <Card title="Compito piccolo, niente piano"><p>Un gioco chiesto in una riga: l'agente parte e in poco tempo c'è qualcosa da provare. Se non va bene, si rifà.</p></Card>
-          <Card title="Compito grande, prima il piano" kind="i"><p>Una dashboard che tocca più servizi e dati personali: prima si legge che cosa intende fare, poi si dà il via. Un errore di impostazione costa molto di più.</p></Card>
-        </div>
-        <Box type="info" title="Che cosa si aggiunge qui">Nella demo il piano si leggeva a occhio. Qui si impara a leggerlo con una lista di controllo e a trasformarlo in una specifica con criteri di accettazione.</Box>
-      </div>
-    ),
-    notes: "Richiamo della demo di apertura con Google AI Studio: due passi con lo stesso strumento, il primo senza pianificazione (un gioco semplice, velocissimo da provare), il secondo con pianificazione (un compito grande, con più servizi coinvolti). Il messaggio era il contrasto. Si può chiedere alla sala che cosa avrebbe voluto controllare nel piano della dashboard prima di dare il via: sono già le domande di questo argomento. Dettagli dell'esempio della demo non servono qui."
-  },
-  {
-    block: B + 'Modalità piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Claude Code</Tag>
-        <h2>La modalità piano, di nuovo</h2>
-        <div className="grid">
-          <Card title="Dall'argomento 1"><p>Legge, esplora e propone; le modifiche restano bloccate finché non si approva. Si entra con <code className="nw">Shift+Tab</code> o <code className="nw">/plan</code>.</p></Card>
-          <Card title="Usarla per decidere" kind="i"><p>Non per approvare in fretta: per far emergere ipotesi e domande. Il piano non si approva finché la specifica non risponde.</p></Card>
-          <Card title="Correggere prima" kind="i"><p><code className="nw">Ctrl+G</code> apre il piano in un editor; «No, keep planning» lo rimanda indietro con le vostre correzioni.</p></Card>
-        </div>
-        <Box type="warn" title="Il blocco ha un limite">Se la sessione è avviata con i permessi di bypass disponibili, l'agente è solo istruito a non modificare: i blocchi non sono applicati. Dopo il piano si controlla comunque con <code className="nw">git status</code>.</Box>
-        <p className="muted">Verificato il 9/11/2026 su <a className="text-link" href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>code.claude.com/docs/en/permission-modes</a>. Le funzioni cambiano in fretta: riverificare prima di citarle.</p>
-      </div>
-    ),
-    notes: "Fonti: pagine 'Plan mode' (permission-modes) e 'Plan before editing' (common-workflows) della documentazione di Claude Code, lette il 9 novembre 2026. Per uscire dalla modalità senza approvare si preme di nuovo Shift+Tab. Durante la pianificazione l'agente può anche eseguire comandi di sola lettura per esplorare. Il modello dietro l'agente è un Claude, scelto dalla configurazione del laboratorio: la modalità piano è una funzione dello strumento, ma la qualità del piano cambia con il modello. Se la demo non rende, c'è un piano registrato."
-  },
-  {
-    block: B + 'Esplorare il repository',
-    content: () => (
-      <div className="pad">
-        <Tag>Prima il codice, poi il piano</Tag>
-        <h2>Far esplorare, senza modificare</h2>
-        <pre aria-label="Esempio di prompt di esplorazione">{PROMPT_ESPLORA}</pre>
-        <div className="grid">
-          <Card title="Nella risposta controllate" kind="i"><p>Quali file ha letto davvero. Se cita il punto del codice dove sta una regola. Se separa quello che sa da quello che suppone.</p></Card>
-          <Card title="Segnale di allarme" kind="w"><p>«Di solito», «in genere», «probabilmente»: sta indovinando una regola, non l'ha letta.</p></Card>
-        </div>
-      </div>
-    ),
-    notes: "Prompt di esempio per la palestra; per il progetto personale si cambiano i nomi dei file. La terza domanda (cosa non sai) è quella che conta di più: costringe l'agente a separare ciò che ha letto da ciò che sta supponendo. Un esito pulito: git status senza modifiche."
-  },
-  {
-    block: B + 'Un piano controllabile',
-    content: () => (
-      <div className="pad">
-        <Tag>Leggere un piano</Tag>
-        <h2>Cosa deve contenere</h2>
-        <div className="grid">
-          <Card title="File che si toccano"><p>Quali, e perché proprio quelli.</p></Card>
-          <Card title="Passi in ordine"><p>Piccoli, ognuno con un risultato.</p></Card>
-          <Card title="Come si verifica" kind="i"><p>Per ogni passo, la prova: un test, un comando.</p></Card>
-          <Card title="Ipotesi dichiarate" kind="w"><p>Ciò che ha assunto senza che glielo si dicesse.</p></Card>
-          <Card title="Domande aperte" kind="w"><p>Ciò che deve decidere una persona.</p></Card>
-          <Card title="Cosa non si fa" kind="d"><p>I confini: file, dati e comportamenti da non toccare.</p></Card>
-        </div>
-        <p className="muted" style={{ marginTop: 10 }}>Un piano senza le ultime quattro voci è una lista di cose da fare, non un piano da approvare.</p>
-      </div>
-    ),
-    notes: "Lista di lettura per le coppie. Le prime due voci le scrive quasi ogni piano; le ultime quattro sono quelle che mancano più spesso, ed è lì che si nascondono le decisioni prese al posto nostro."
-  },
-  {
-    block: B + 'Un piano da leggere',
-    content: () => (
-      <div className="pad">
-        <Tag>Esercizio di lettura</Tag>
-        <h2>Che cosa manca? Chi l'ha deciso?</h2>
-        <pre aria-label="Piano di esempio per le prenotazioni ricorrenti">{PIANO}</pre>
-        <p>Segnate ogni riga che decide qualcosa che nessuno ha chiesto.</p>
-        <p className="muted">Il piano è scritto per la slide, come potrebbe averlo scritto un agente. Non viene da una sessione reale.</p>
-      </div>
-    ),
-    notes: "Lasciare un momento di lettura silenziosa. Il piano ha un aspetto ordinato e professionale: è proprio per questo che va letto con attenzione. Non anticipare la slide successiva."
-  },
-  {
-    block: B + 'Regole inventate',
-    content: () => (
-      <div className="pad">
-        <Tag>Chi ha deciso?</Tag>
-        <h2>Tre regole che nessuno ha dato</h2>
-        <DT cols={['Riga', 'Che cosa è stato deciso', 'Che cosa andava chiesto']} rows={[
-          ['2', 'Solo una volta a settimana, per un anno intero.', 'Ogni quanto? Fino a quando: un numero di volte o una data?'],
-          ['4', 'Le chiusure si saltano in silenzio.', 'Si avvisa? Si rifiuta tutta la serie?'],
-          ['5', 'I conflitti non fermano la serie.', 'Tutto o niente, oppure si salvano le date libere?'],
-        ]} />
-        <Box type="warn" title="Perché è pericoloso">Ognuna è una scelta ragionevole, scritta con sicurezza, e il test sul percorso felice passa. Chi approva senza leggere ha deciso lo stesso, ma senza saperlo.</Box>
-      </div>
-    ),
-    notes: "Tre esempi, non l'elenco completo: nella richiesta restano altre domande aperte (chi può annullare o modificare la serie, un massimo di date, il testo degli errori) che le coppie trovano da sole nell'attività. Il punto: l'agente riempie i vuoti con la cosa più probabile. Quasi mai è sbagliata in sé; è sbagliata perché nessuno l'ha scelta."
-  },
-  {
-    block: B + 'Far uscire le ipotesi',
-    content: () => (
-      <div className="pad">
-        <Tag>Una richiesta all'agente</Tag>
-        <h2>Chiedere le ipotesi, per iscritto</h2>
-        <pre aria-label="Prompt per far dichiarare le ipotesi">{PROMPT_IPOTESI}</pre>
-        <div className="grid">
-          <Card title="Le risposte vanno nel file" kind="i"><p>Ogni decisione si scrive nella specifica, non solo nella conversazione. Il piano si rigenera dalla specifica.</p></Card>
-          <Card title="Non basta" kind="w"><p>L'elenco non prova di essere completo: un modello non vede le regole che gli sembrano ovvie. Serve una seconda lettura, umana.</p></Card>
-        </div>
-      </div>
-    ),
-    notes: "Il prompt funziona meglio con i modelli che seguono bene le istruzioni; con altri l'agente scrive comunque il codice. Se succede, è un risultato da raccontare, non un errore dell'esercizio. La seconda lettura è il confronto a coppie dell'attività."
-  },
-  {
-    block: B + 'Passi verificabili',
-    content: () => (
-      <div className="pad">
-        <Tag>Spezzare</Tag>
-        <h2>Una funzionalità, quattro passi</h2>
-        <div role="group" aria-label="Le ricorrenti in quattro passi, ognuno con la sua prova">
-          <Flow nodes={[
-            ['1 Le date', 'prova: partenza, cadenza e numero danno l\'elenco atteso'],
-            ['2 Le regole', 'prova: una data di chiusura dà il rifiuto di sempre'],
-            ['3 Le date occupate', 'decisione vostra; prova su un conflitto', 'w'],
-            ['4 Il comando', 'prova: una riga di terminale, a mano e con un test', 'i'],
-          ]} />
-        </div>
-        <p className="legend">Un commit per passo, come nell'argomento 2: se il passo 3 va storto si torna al 2.</p>
-        <p className="muted">È una divisione possibile, non l'unica: scegliete la vostra.</p>
-      </div>
-    ),
-    notes: "L'ordine conta: ogni passo dipende solo dai precedenti. Il passo 3 è evidenziato perché dipende da una decisione che nella richiesta non c'è. Chi ha già deciso nell'attività può spostarlo."
-  },
-  {
-    block: B + 'Un passo verificabile',
-    content: () => (
-      <div className="pad">
-        <Tag>Spezzare</Tag>
-        <h2>Come si riconosce un buon passo</h2>
-        <DT cols={['Domanda', 'Passo da tenere', 'Passo da spezzare']} rows={[
-          ['Si sa quando è finito?', 'Il test X passa.', '«La serie funziona».'],
-          ['Quanto tocca?', 'Una funzione e il suo test.', '«Riscrivere il modulo».'],
-          ['Da che cosa dipende?', 'Dai passi precedenti.', 'Da una decisione ancora aperta.'],
-          ['Si può annullare?', 'Un commit, un git revert.', 'Modifiche sparse in molti file.'],
+        <DT cols={['Comando', 'Sposta', 'Perché']} rows={[
+          [<code className="nw">git add file</code>, 'dalla cartella all\'area di preparazione', 'scegliete voi cosa entra'],
+          [<code className="nw">git commit -m "..."</code>, 'dall\'area di preparazione al repository', 'crea il punto a cui tornare'],
         ]} />
       </div>
     ),
-    notes: "Quattro domande rapide da fare a ogni passo del piano. Se la risposta sta nella terza colonna, si spezza oppure si torna alla specifica."
+    notes: "Tre zone, due comandi. Un commit è una fotografia dei file tracciati, con un messaggio. L'area di preparazione serve a decidere cosa entra: l'agente potrebbe aver cambiato cinque file e voi ne volete committare due. Se la sala usa git ogni giorno, questa slide si passa in fretta."
   },
   {
-    block: B + 'Dal racconto',
+    block: B + 'git status',
     content: () => (
       <div className="pad">
-        <Tag>Il racconto</Tag>
-        <h2>Un portale in cinque tappe</h2>
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
-          <Stat big="5" label="tappe, da M0 a M4" />
-          <Stat big="2 giorni" label="il 15 e il 16 luglio 2026" />
-          <Stat big="105" label="test verdi al termine delle tappe" />
-        </div>
-        <p style={{ marginTop: 12 }}>Il portale FSL non è stato scritto in un blocco: il lavoro è stato diviso in tappe numerate. La domanda per noi è come si divide una funzionalità in pezzi di cui si può dire «questo funziona».</p>
-        <p className="muted">Fonte: appunti di progetto di Thomas e storia git del portale FSL.</p>
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Primo sguardo: git status</h2>
+        <pre aria-label="Esempio di git status">{CODICE_STATUS}</pre>
+        <ul>
+          <li><code>modified</code>: il file esisteva ed è cambiato.</li>
+          <li><code>Untracked</code>: file nuovo che git non conosceva. Se non l'avete chiesto voi, chiedetevi perché c'è.</li>
+          <li>Sapere quali file sono cambiati è già metà del controllo.</li>
+        </ul>
       </div>
     ),
-    notes: "Qui Thomas racconta come sono nati i requisiti del portale FSL e che cosa conteneva ciascuna tappa. I numeri (cinque tappe, 15 e 16 luglio 2026, 105 test) vengono dagli appunti di progetto e dalla storia git. Dalla storia git: prima della tappa M0 c'è un commit con l'analisi della documentazione e la specifica completa del portale. Il contenuto delle tappe e il modo in cui sono emersi i requisiti lo dice a voce chi racconta. Nessun dato reale, nessun nome."
+    notes: "Esempio inventato. Mostrare sempre prima git status e poi git diff. La domanda da fare ai partecipanti: tra questi file, quali mi aspettavo? Un file in più, o uno che non c'entra con la richiesta, è il primo campanello. L'output è in inglese perché è quello che stampa git; se un PC lo mostra in italiano cambiano le parole, non il senso."
+  },
+  {
+    block: B + 'git diff',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Poi le righe: git diff</h2>
+        <pre aria-label="Esempio di git diff">{CODICE_DIFF}</pre>
+        <ul>
+          <li>Riga con <code>-</code>: tolta. Riga con <code>+</code>: aggiunta. Le righe senza segno sono contesto.</li>
+          <li><code>@@ ... @@</code> dice dove siamo nel file; un blocco di modifiche si chiama «hunk».</li>
+          <li>Non serve capire tutto: serve chiedersi se ogni riga cambiata ha a che fare con la richiesta.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Esempio inventato. Insistere su una domanda sola per ogni blocco: questa modifica serve a quello che ho chiesto? Se no, è una modifica non richiesta e si annulla. Un diff con un solo numero cambiato è facile da non vedere in un riassunto e facile da vedere qui."
+  },
+  {
+    block: B + 'Le varianti di diff',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>Quattro modi di chiedere «cosa è cambiato»</h2>
+        <DT cols={['Comando', 'Confronta', 'Quando']} rows={[
+          [<code className="nw">git diff</code>, 'cartella di lavoro e area di preparazione', 'subito dopo che l\'agente ha lavorato'],
+          [<code className="nw">git diff --staged</code>, 'area di preparazione e ultimo commit', 'prima di fare il commit'],
+          [<code className="nw">git diff main</code>, 'cartella di lavoro e il ramo main', 'quanto ho cambiato dalla partenza'],
+          [<code className="nw">git diff --stat</code>, 'riepilogo per file, senza le righe', 'colpo d\'occhio prima del dettaglio'],
+        ]} />
+        <Box type="warn" title="File nuovi">Un file mai aggiunto a git non compare in <code>git diff</code>: lo trovate con <code>git status</code>.</Box>
+      </div>
+    ),
+    notes: "Le opzioni si combinano (git diff main --stat). Il caso dei file nuovi fa cadere chi si fida solo di git diff: git status li elenca tra gli Untracked. Documentazione: https://git-scm.com/docs/git-diff e https://git-scm.com/docs/git-status."
+  },
+  {
+    block: B + 'Il test verde non basta',
+    content: () => (
+      <div className="pad">
+        <Tag>Leggere il lavoro dell'agente</Tag>
+        <h2>«I test passano» non vuol dire «ha fatto solo quello che chiedevo»</h2>
+        <div className="grid">
+          <Card title="Cosa vede un test" kind="i"><p>Solo i casi per cui qualcuno lo ha scritto. Il resto del codice può cambiare senza che nulla diventi rosso.</p></Card>
+          <Card title="Cosa vede il diff" kind="i"><p>Ogni riga cambiata, anche quelle senza test.</p></Card>
+          <Card title="Cosa può fare l'agente" kind="w"><p>Adattare i test alle sue modifiche: allora sono verdi per costruzione.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 12 }}>Servono tutti e due i controlli. Nell'esercizio di questo argomento i test sono verdi e ci sono comunque modifiche da annullare.</p>
+      </div>
+    ),
+    notes: "Anticipa l'argomento 6 (test) senza svolgerlo. Passa un messaggio solo: il diff controlla cose che i test non coprono, e i test cambiati dall'agente si leggono come qualunque altra modifica. Nell'esercizio non anticipare cosa c'è da trovare."
+  },
+  {
+    block: B + 'Commit piccoli',
+    content: () => (
+      <div className="pad">
+        <Tag>Salvare</Tag>
+        <h2>Commit piccoli, con i nomi dei file</h2>
+        <div className="cols">
+          <div>
+            <ul>
+              <li>Un commit per un passo che avete verificato: se il passo dopo va male, tornate lì.</li>
+              <li>I file si aggiungono per nome. <code>git add .</code> e <code>git add -A</code> portano dentro anche quello che non avete guardato.</li>
+              <li>Il messaggio dice cosa è cambiato, in una riga.</li>
+            </ul>
+          </div>
+          <div>
+            <CommandBox cmd="git add src/logica.js test/logica.test.js" label="1. Aggiungi i file per nome" />
+            <CommandBox cmd="git diff --staged" label="2. Ultima lettura di ciò che entra nel commit" />
+            <CommandBox cmd={'git commit -m "Elenco: filtro per laboratorio"'} label="3. Il commit, con un messaggio di una riga" />
+            <CommandBox cmd="git log --oneline -3" label="4. I tre commit più recenti" />
+          </div>
+        </div>
+      </div>
+    ),
+    notes: "Il commit per percorsi espliciti è la stessa disciplina del caso di studio dell'argomento 12. git diff --staged è l'ultima lettura prima di committare. Messaggi: «Elenco: filtro per laboratorio» è meglio di «modifiche». Se l'agente committa da solo, leggere i suoi messaggi e confrontarli con i file. Documentazione: https://git-scm.com/docs/git-commit."
+  },
+  {
+    block: B + 'Il ramo di lavoro',
+    content: () => (
+      <div className="pad">
+        <Tag>Salvare</Tag>
+        <h2>Un ramo per ogni lavoro</h2>
+        <CommandBox cmd="git switch -c lavoro-filtro" label="1. Nuovo ramo, parte da dove siete. Poi l'agente lavora, voi leggete e fate commit" />
+        <CommandBox cmd="git switch main" label="2. Tornate alla versione di partenza, intatta" />
+        <CommandBox cmd="git branch" label="3. I rami che esistono" />
+        <p>Un ramo è una linea di commit separata. Su <code>lavoro-filtro</code> l'agente può sbagliare quanto vuole: <code>main</code> resta com'era.</p>
+        <Box type="tip" title="Abitudine">Prima di dare un lavoro all'agente: <code>git status</code> pulito, ramo nuovo, un commit di partenza. Se il risultato non vi piace tornate a <code>main</code> e il ramo si abbandona.</Box>
+      </div>
+    ),
+    notes: "git switch è il comando per cambiare ramo (git checkout fa lo stesso ma ha troppi usi). L'opzione -c crea il ramo. Non si cancellano rami che non sono vostri. Documentazione: https://git-scm.com/docs/git-switch."
+  },
+  {
+    block: B + 'Tornare indietro',
+    content: () => (
+      <div className="pad">
+        <Tag>Tornare indietro</Tag>
+        <h2>Strumenti diversi per situazioni diverse</h2>
+        <DT cols={['Situazione', 'Comando', 'Cosa succede']} rows={[
+          ['Modifica non committata, su un file', <code className="nw">git restore file</code>, 'il file torna come nell\'ultimo commit'],
+          ['Voglio il file com\'era in un altro punto', <code className="nw">git restore --source=main file</code>, 'il file torna come nel ramo main'],
+          ['Voglio guardare un altro stato senza perdere nulla', <code className="nw">git switch ramo</code>, 'cambiate ramo, i commit restano'],
+          ['Un commit già fatto è sbagliato', <code className="nw">git revert ID</code>, 'nuovo commit che annulla quello vecchio'],
+        ]} />
+        <Box type="warn" title="Anche restore cancella">Le modifiche non committate di quel file spariscono. Leggete prima il <code>git diff</code> e nominate sempre il file: mai un punto per «tutto».</Box>
+      </div>
+    ),
+    notes: "Comandi verificati con git 2.39. git restore e git switch esistono da git 2.23. revert non riscrive la storia: aggiunge un commit che fa l'operazione inversa, quindi è sicuro anche se il commit è stato condiviso. Per annullare solo una parte di un file: git restore -p --source=main file, che chiede blocco per blocco (y per annullare, n per tenere). Documentazione: https://git-scm.com/docs/git-restore e https://git-scm.com/docs/git-revert."
+  },
+  {
+    block: B + 'Cosa non si usa in aula',
+    content: () => (
+      <div className="pad">
+        <Tag>Tornare indietro</Tag>
+        <h2>Due comandi che in aula non si usano</h2>
+        <div className="grid">
+          <Card title="git reset --hard" kind="d"><p>Riporta tutto allo stato di un commit e butta le modifiche non salvate di tutti i file. Non si recuperano.</p></Card>
+          <Card title="git stash" kind="d"><p>Mette da parte tutte le modifiche non salvate, anche quelle che non sono vostre. Poi qualcuno deve ricordarsi di riprenderle.</p></Card>
+        </div>
+        <Box type="danger" title="Il principio dell'argomento 12">Niente operazioni distruttive sul lavoro condiviso. Se la cartella contiene lavoro che non avete creato voi, questi comandi lo toccano senza chiedere. Vale anche per <code>git clean -fd</code>.</Box>
+        <p className="muted">Al loro posto: un ramo nuovo, <code>git restore</code> su un file nominato, <code>git revert</code> su un commit.</p>
+      </div>
+    ),
+    notes: "Non sono comandi vietati in assoluto: il divieto vale in aula e sul lavoro condiviso, dove nessuno sa cosa c'è di non salvato. Vale anche per l'agente: se la richiesta dice «ripulisci» o «torna come prima», può proporre reset --hard; il permesso si nega (argomento 1) e si chiede un git revert o un git restore su file nominati. Documentazione: https://git-scm.com/docs/git-reset e https://git-scm.com/docs/git-stash."
+  },
+  {
+    block: B + 'I punti di partenza',
+    content: () => (
+      <div className="pad">
+        <Tag>La palestra</Tag>
+        <h2>Ripartire da uno stato noto</h2>
+        <div className="cols">
+          <div>
+            <ul>
+              <li>Un tag è un nome fisso dato a un commit: <code>partenza-a3</code> è il punto di partenza di questo esercizio.</li>
+              <li><code>-c</code> crea il ramo <code>lavoro-a3</code> (il nome è a scelta); il tag non si sposta.</li>
+              <li>Se un esercizio viene male, si riparte con un altro nome di ramo. Il lavoro vecchio resta dov'è.</li>
+            </ul>
+          </div>
+          <div>
+            <CommandBox cmd="git tag" label="1. I punti di partenza: partenza-a3, partenza-a6 ..." />
+            <CommandBox cmd="git status" label="2. Prima: niente modifiche da perdere?" />
+            <CommandBox cmd="git switch -c lavoro-a3 partenza-a3" label="3. Il ramo di lavoro, dal punto di partenza" />
+            <CommandBox cmd="git log --oneline" label="4. I commit di questo punto di partenza" />
+          </div>
+        </div>
+      </div>
+    ),
+    notes: "Tutti gli esercizi della palestra seguono lo stesso schema, con tag partenza-aN. Il PC è preparato prima e non ha remote. Senza -c, git switch su un tag lascia in «detached HEAD», dove i commit non appartengono a nessun ramo: da evitare. Documentazione: https://git-scm.com/docs/git-tag."
+  },
+  {
+    block: B + 'Un episodio dal racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal racconto</Tag>
+        <h2>Il subagente che ha fatto push sul repository vero</h2>
+        <div className="grid">
+          <Card title="Cos'è successo" kind="w"><p>Durante un test, un subagente ha fatto push sul repository vero invece che su una copia.</p></Card>
+          <Card title="Cosa ne è nato" kind="i"><p>Una regola nel gruppo di agenti: i test che toccano git girano in una sandbox git, obbligatoria.</p></Card>
+        </div>
+        <pre aria-label="Controllo del remote">{CODICE_REMOTE}</pre>
+        <p className="muted">I repository di esercizio del corso sono fatti così: copia nuova, nessun remote, nessun push possibile.</p>
+      </div>
+    ),
+    notes: "Episodio dal racconto di Thomas; i dettagli (quale progetto, quale test) si raccontano a voce. Per il corso conta questo: un comando git eseguito da un agente ha effetti fuori dalla cartella solo se esiste un remote. Per questo esercizi e progetti personali non ne hanno. Invitare i partecipanti a controllare con git remote -v sul proprio repository."
+  },
+  {
+    block: B + 'Git nel CLAUDE.md',
+    content: () => (
+      <div className="pad">
+        <Tag>Dire all'agente come usare git</Tag>
+        <h2>Le regole sull'uso di git vanno scritte</h2>
+        <ul>
+          <li>Prima di una modifica ampia: commit di partenza e ramo nuovo.</li>
+          <li>Commit con i file per nome, mai «aggiungi tutto».</li>
+          <li>Niente <code>git push</code>, <code>git reset --hard</code>, <code>git stash</code>, <code>git clean</code> senza chiedere.</li>
+          <li>Per annullare: <code>git restore</code> su un file nominato, o <code>git revert</code>.</li>
+          <li>A fine lavoro: elenco dei file cambiati, da confrontare con <code>git status</code>.</li>
+        </ul>
+        <ActivityBadge n="3" file="promemoria-git.html" label="Promemoria dei comandi git per l'agente" />
+        <p className="muted" style={{ marginTop: 10 }}>Come si scrive un file di istruzioni di progetto: argomento 5.</p>
+      </div>
+    ),
+    notes: "Il foglio è un promemoria da adattare nel file di istruzioni del progetto. Non è una garanzia: un'istruzione scritta può essere ignorata, per questo il permesso resta su «chiedi conferma» (argomento 1). Il controllo vero è leggere il diff."
   },
   {
     block: B + 'Attività al PC',
     content: () => (
       <div className="pad">
         <Tag>Attività</Tag>
-        <h2>Ora tocca a voi</h2>
+        <h2>Trovate le modifiche non richieste</h2>
+        <p>Un agente ha aggiunto il filtro per laboratorio all'elenco delle prenotazioni, come richiesto. Ha fatto anche altro. I test passano.</p>
         <ol className="timeline">
-          <li><time>1</time>A coppie: riscrivete la specifica delle sovrapposizioni finché un'altra coppia la capisce senza domande.</li>
-          <li><time>2</time>Dalla richiesta sulle ricorrenti alla specifica con i criteri di accettazione.</li>
-          <li><time>3</time>Il piano in modalità piano, con <code className="nw">git status</code> pulito.</li>
-          <li><time>4</time>Confronto a coppie: che cosa manca, che cosa è stato deciso al posto vostro.</li>
+          <li><time>1</time>Partite da <code>partenza-a3</code> con un ramo vostro e lanciate i test.</li>
+          <li><time>2</time>Con <code>git show --stat</code> e <code>git diff</code> elencate cosa è cambiato e dividetelo in «richiesto» e «non richiesto».</li>
+          <li><time>3</time>Annullate le modifiche non richieste una per una, un commit ciascuna, senza toccare il filtro.</li>
+          <li><time>4</time>Confrontate con <code>main</code>: devono restare solo le righe del filtro. Poi confrontate l'elenco con quello di un collega.</li>
         </ol>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          <ActivityBadge n="3" file="scheda-attivita.html" label="Scheda dell'attività" />
-          <ActivityBadge n="3" file="modello-specifica.html" label="Modello di specifica" />
-        </div>
-        <p className="muted" style={{ marginTop: 10 }}>Poi lo stesso percorso sul vostro progetto personale.</p>
+        <ActivityBadge n="3" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" />
       </div>
     ),
-    notes: "Partenza: git switch -c lavoro-a3 partenza-a3. I due file di partenza stanno in docs/. Il confronto a coppie conta quanto la scrittura: scambiarsi le specifiche e i piani e cercare cosa manca."
+    notes: "Il foglio guida i passi senza dire cosa c'è da trovare. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
+  },
+  {
+    block: B + 'Sul vostro progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il progetto personale</Tag>
+        <h2>La cartella del progetto è un repository</h2>
+        <CommandBox cmd="cd progetto-mio" label="1. Entrate nella cartella del progetto" />
+        <CommandBox cmd="git init -b main" label="2. Create il repository" />
+        <CommandBox cmd={'git config user.name "Nome a scelta"'} label="3. Il nome, solo per questo repository" />
+        <CommandBox cmd={'git config user.email "nome@demo.invalid"'} label="4. L'indirizzo, inventato" />
+        <p className="muted">Nome ed email restano solo in questo repository, sul PC della scuola. Non si collega nessun remote.</p>
+      </div>
+    ),
+    notes: "La cartella del progetto personale diventa un repository, con nome e indirizzo inventati e validi solo lì. Il nome della cartella è quello deciso con il docente: progetto-mio è un esempio. Documentazione: https://git-scm.com/docs/git-init."
+  },
+  {
+    block: B + 'Il primo commit del progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il progetto personale</Tag>
+        <h2>Il primo commit e il controllo del remote</h2>
+        <CommandBox cmd="git add README.md .gitignore" label="1. Aggiungete i file per nome" />
+        <CommandBox cmd={'git commit -m "Primo commit: scheda del progetto"'} label="2. Il primo commit" />
+        <CommandBox cmd="git remote -v" label="3. Non deve scrivere nulla: nessun remote, quindi nessun push" />
+      </div>
+    ),
+    notes: "Stessa disciplina dell'esercizio: ramo di lavoro per ogni modifica ampia, git diff prima di accettare. Il file .gitignore tiene fuori dal repository i file generati e qualsiasi cosa che somigli a un segreto. Se git remote -v scrive qualcosa, si ferma tutto e si chiede al docente."
   },
   {
     block: B + 'Domanda di verifica',
     content: () => (
       <div className="pad">
         <Tag>Quiz</Tag>
-        <h2>Una domanda per voi</h2>
-        <Quiz domanda="Nel piano proposto dall'agente c'è scritto: «se una data della serie cade in un giorno di chiusura, la salto». Che cosa conviene fare?" opzioni={[
-          { t: 'Lasciarla: è ragionevole e il piano non modifica ancora nulla.', ok: false, perche: 'Il piano non scrive file, ma se lo approvate la regola entra nel codice. La scelta spetta a chi conosce la scuola.' },
-          { t: 'Segnarla come decisione aperta, chiedere a chi ha fatto la richiesta e scrivere la risposta nella specifica con un criterio.', ok: true, perche: 'La regola diventa la scelta di una persona e un caso che si può eseguire.' },
-          { t: 'Chiedere all\'agente perché l\'ha scelta e fidarsi della spiegazione.', ok: false, perche: 'La spiegazione sarà plausibile qualunque sia la regola: non è una fonte.' },
+        <h2>L'agente scrive: «Ho annullato le modifiche non richieste»</h2>
+        <Quiz domanda="Cosa fate prima di crederci?" opzioni={[
+          { t: 'Lancio i test: se passano, è tutto a posto', ok: false, perche: 'I test verdi non dicono nulla sulle modifiche che nessun test copre, né sul fatto che il filtro sia ancora lì.' },
+          { t: 'Guardo git status e git diff main', ok: true, perche: 'Mostrano file e righe diversi dalla partenza. È l\'unico controllo che non dipende dal racconto dell\'agente.' },
+          { t: 'Chiedo all\'agente di ripetere che ha ripulito tutto', ok: false, perche: 'Lo stesso riassunto ripetuto non è una verifica.' },
         ]} />
       </div>
     ),
-    notes: "Domanda di comprensione. Il punto non è se saltare o rifiutare: è chi decide e dove resta scritto."
+    notes: "Domanda di comprensione, non il testo dell'esercizio. Si può discutere cosa cambia se l'agente avesse usato git reset --hard: avrebbe cancellato anche il filtro richiesto."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Una richiesta vaga contiene desideri. Requisiti, vincoli e criteri si chiedono e si scrivono.',
-          'Un criterio di accettazione è un caso con dati concreti e un esito che si può eseguire.',
-          'Esplorare e pianificare in modalità piano, poi controllare con git status.',
-          'Ogni regola del piano che nessuno ha dato è una domanda aperta, non un dettaglio.',
-          'Ogni passo del piano si chiude con una prova.',
+          'Il riassunto dell\'agente non è una prova: si leggono git status e git diff.',
+          'Ramo e commit di partenza prima di ogni lavoro ampio; commit piccoli, con i file per nome.',
+          'Si torna indietro con git restore su file nominati, git switch e git revert. Non con reset --hard né stash sul lavoro che non è vostro.',
+          'Il repository di esercizio non ha remote: un push per sbaglio non è possibile.',
         ]}
-        dopo="Argomento 4: le istruzioni persistenti (CLAUDE.md e AGENTS.md), dove restano scritte le regole decise qui. Argomento 5: i criteri di accettazione diventano test che l'agente esegue." />
+        dopo="argomento 4 (dalla richiesta vaga ai requisiti) e argomento 6 (test e debugging con l'agente), dove un commit per passo diventa il modo di lavorare." />
     ),
-    notes: "Ripresa dei cinque punti e domande. Le decisioni prese qui vanno scritte in un file del progetto: è il collegamento con l'argomento 4. I criteri di accettazione sono la materia prima dei test dell'argomento 5."
+    notes: "Chiusura. Riprendere i tre gesti: leggere, salvare, tornare indietro. Collegamenti: nell'argomento 4 si lavora per passi verificabili, nell'argomento 6 i checkpoint con git servono quando un test fallisce."
   },
 ];
 

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 14 · Il racconto · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+const B = 'Argomento 14 — Il racconto · ';
+
+/* Testi da incollare nell'attività (gli stessi del foglio «Il primo prompt») */
+const PROMPT_VIAGGI = `voglio informatizzare e automatizzare completamente il sistema di gestione delle pratiche viaggi e uscite didattiche della mia scuola.
+
+il portale sviluppato con tecnologia nodejs con frontend a tutta discrezione (in base alle info nella nostra KB) con database posgres dovrà essere conteneirizzato su docker e posizionato sul portale della scuola. nel frattempo per tutta la fase di test possiamo utilizzare il nostro server su contabo nel quale abbiamo gli altri progetti.
+
+per capire il funzionamento del sistema ti metto a disposizione il regolamento scolastico e i moduli per le uscite (in allegato due di esempio compilati).
+
+facciamo una ragionata insieme su come rimuovere completamente tutto il cartaceo, quindi consentire a studenti, genitori e docenti di firmare e prendere visione dei moduli di autorizzazione tramite il riconoscimento digitale (suggeriscimi come).
+
+il portale dovrà servire oltre a docenti che organizzano le uscite, alla commissione viaggi che le dovrà approvare, alla segreteria scolastica che dovrà seguire l'iter del viaggio e gestire eventuali preventivi e richieste di preventivo.
+
+per autenticare gli utenti scolastici possiamo utilizzare autenticazione Google sul dominio ittsrimini.edu.it.
+
+la dirigenza potrà vedere tutte le pratiche e porre un visto per ok, una richiesta di revisione con motivazione o un diniego.
+
+analizza tutti i documenti ed estrapola tutte le info necessarie per la produzione dettagliata del sistema. sfrutta tutta la potenza agentica per svolgere il lavoro in modo parallelo e attento.
+
+per questo progetto crea un repo github provato sul mio git (trovi tutte ne info in kb)
+
+in base alla tua esperienza suggeriscimi anche l'implementazione di funzionalità che non ti ho elencato ma che possono esse utili per il nostro scopo.`;
+
+const PROMPT_ATTIVITA = `Qui sotto c'è il primo messaggio con cui è nato un portale della scuola. Non scrivere codice e non creare file. Rispondi in tre parti: 1) che cosa hai capito che voglio ottenere; 2) quali requisiti mancano o sono ambigui; 3) le domande che mi faresti prima di cominciare, ciascuna con la risposta che raccomanderesti. Il regolamento e i due moduli citati nel messaggio non li hai: dimmi che cosa cercheresti in ciascuno.
+
+MESSAGGIO
+
+` + PROMPT_VIAGGI;
+
+const REGOLAMENTO_ATTIVITA = `Ecco il regolamento, inventato. Aggiorna le tue domande. Poi elenca le regole di validazione che ne ricavi, numerate, e per ciascuna dimmi se si può controllare in automatico.
+
+Regolamento delle uscite didattiche, Istituto Demo
+1. Le classi prime fanno solo uscite di una giornata.
+2. Serve la partecipazione di almeno due terzi degli alunni frequentanti della classe.
+3. Un docente accompagnatore ogni quindici alunni, e almeno uno è della classe. Se c'è un alunno con disabilità, c'è anche il docente di sostegno.
+4. La richiesta si presenta almeno quindici giorni prima, sette se l'uscita è a piedi o con mezzi pubblici.
+5. Dopo il 30 aprile non si organizzano uscite, salvo deroga del Consiglio d'istituto.
+6. Il costo per alunno di un'uscita di una giornata non supera 40 euro.
+7. Un docente non accompagna per più di dieci giorni all'anno.
+8. Il dirigente approva, chiede una revisione motivata oppure nega.`;
+
+const PROMPT_SCHEDA = `Ti incollo la scheda del mio progetto personale. Confrontala con gli ingredienti del primo messaggio con cui è nato un portale della scuola: obiettivo, vincoli tecnici, documenti di partenza, chi lo usa e con quali permessi, come si entra, come voglio che tu lavori. Dimmi quali mancano o sono vaghi. Non scrivere codice e non modificare file.
+
+[sostituisci questa riga con il testo della tua scheda]`;
+
+/* Citazione del prompt: testo reale, refusi compresi */
+const Citazione = ({ righe, sub }) => (
+  <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderLeft: '5px solid var(--accent)', borderRadius: '0 8px 8px 0', padding: '8px 16px', margin: '4px 0 12px' }}>
+    {sub && <div className="muted" style={{ fontSize: 'var(--fs-xs)', marginBottom: 4 }}>{sub}</div>}
+    {righe.map((r, i) => <p key={i} style={{ color: 'var(--text)', fontSize: 'var(--fs-sm)', marginBottom: i === righe.length - 1 ? 0 : 6 }}>{r}</p>)}
+  </div>
+);
+
+/* Un pezzo del prompt letto a quattro voci */
+const Pezzo = ({ n, nome, righe, sub, chiede, scontato, vincolo, manca, extra }) => (
+  <div className="pad">
+    <Tag>Il primo prompt · pezzo {n} di 7 · {nome}</Tag>
+    <Citazione righe={righe} sub={sub} />
+    <div className="grid g2">
+      <Card title="Cosa chiede">{chiede}</Card>
+      <Card title="Cosa dà per scontato" kind="i">{scontato}</Card>
+      <Card title="Vincoli che fissa">{vincolo}</Card>
+      <Card title="Cosa manca, e chi ha deciso" kind="w">{manca}</Card>
+    </div>
+    {extra}
+  </div>
+);
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="14" titolo="Il racconto" sottotitolo="Il primo messaggio con cui è nato un portale della scuola, letto a pezzi, e il lavoro che ne è seguito."
+        caso="Argomento facoltativo. Testo reale, ripulito solo per la privacy; gli errori contano quanto i successi."
+        prima="nessun obbligo. Aiutano l'argomento 1 (come lavora un agente) e l'argomento 4 (dalla richiesta vaga ai requisiti)." />
+    ),
+    notes: "Argomento facoltativo e autonomo. Racconta in prima persona come sono nati il Portale Viaggi e il Portale FSL a partire da due messaggi reali, poi che cosa è successo dopo. Si usano solo fatti documentati nei repository, nei registri di lavoro e nelle sessioni. Nessun dato di persone, nessun nome di colleghi, nessun dettaglio della rete della scuola. Il testo dei prompt è quello vero, con i refusi: sono stati tolti solo i percorsi sul computer, i link privati e i nomi di classi."
+  },
+  {
+    block: B + 'Come si legge',
+    content: () => (
+      <div className="pad">
+        <Tag>Orientamento</Tag>
+        <h2>Tre parti</h2>
+        <div className="grid">
+          <Card title="1. Il terreno"><p>Che cosa c'era prima del messaggio: un problema di contesto, una base di conoscenza, un gruppo di agenti.</p></Card>
+          <Card title="2. Il prompt" kind="i"><p>Il primo messaggio del Portale Viaggi in sette pezzi, poi il secondo, del Portale FSL, che riparte dal primo.</p></Card>
+          <Card title="3. Il lavoro" kind="w"><p>Le fasi, i requisiti nati dopo, gli errori, il passaggio dal server personale a quello della scuola, lo stato attuale.</p></Card>
+        </div>
+        <Box type="tip" title="Per ogni pezzo del prompt">Cosa chiede, cosa dà per scontato, quali vincoli tecnici fissa, che cosa manca e chi ha deciso. Alla fine un'attività al PC: date il messaggio al vostro agente e confrontate.</Box>
+      </div>
+    ),
+    notes: "La parte centrale è il prompt letto pezzo per pezzo. Le altre due parti servono a capire perché un messaggio così breve ha potuto funzionare (il terreno) e che cosa non bastava (il lavoro). Gli episodi del racconto non legati ai portali stanno negli argomenti 7, 8 e 11: la penultima slide dice dove."
+  },
+  {
+    block: B + 'Il problema',
+    content: () => (
+      <div className="pad">
+        <Tag>Il terreno · il problema</Tag>
+        <h2>Ciò che impari su un progetto non passa agli altri</h2>
+        <div role="group" aria-label="Tre progetti e un computer nuovo: lo stesso errore si ripete">
+          <Flow label="Un errore, più volte" nodes={[
+            ['Progetto A', 'si paga l\'errore e si scrive una nota', 'w'], ['Progetto B', 'la nota di A non c\'è: lo stesso errore'], ['Progetto C', 'ancora lo stesso errore'], ['Nuovo computer', 'si riparte da zero', 'i'],
+          ]} />
+        </div>
+        <p style={{ marginTop: 12 }}>La memoria automatica di Claude Code funziona bene, ma vale per un progetto su una macchina.</p>
+        <Box type="info" title="Un esempio concreto">Una cartella condivisa con Docker che sovrascrive i permessi del contenitore: un'ora persa ogni volta che qualcuno la incontra senza trovarla scritta.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Tema: contesto. Torna negli argomenti 1 e 5.</p>
+      </div>
+    ),
+    notes: "Il problema da cui nasce il metodo. La memoria automatica di Claude Code è per progetto e per macchina; su un computer nuovo si riparte da zero (documentazione ufficiale, code.claude.com/docs/en/memory, verificata a novembre 2026). L'esempio della cartella condivisa con Docker è uno dei modelli di errore raccolti nel toolkit."
+  },
+  {
+    block: B + 'La base di conoscenza',
+    content: () => (
+      <div className="pad">
+        <Tag>Il terreno · la risposta</Tag>
+        <h2>Base di conoscenza e LLM Wiki</h2>
+        <div role="group" aria-label="Tre livelli: sessione, wiki, base di conoscenza stabile">
+          <Flow nodes={[
+            ['1 Sessione', 'commit, chat, appunti sparsi: dura quanto la sessione', 'w'], ['2 Wiki', 'l\'agente trasforma le sessioni in pagine collegate'], ['3 Base stabile', 'poche guide: ci entra solo ciò che supera un esame', 'i'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>L'idea della wiki compilata dall'agente è di Karpathy (aprile 2026). Il livello stabile è un'aggiunta.</li>
+          <li>Esame di promozione: usato da due o più progetti, oppure un errore che costa un'ora a chi lo ripete, oppure uno standard dichiarato.</li>
+          <li>La wiki è privata e può contenere dettagli di progetto; la base stabile è ripulita.</li>
+        </ul>
+        <p className="legend">Tema: istruzioni persistenti e contesto. Torna negli argomenti 1 e 5.</p>
+      </div>
+    ),
+    notes: "La wiki è nata nell'aprile 2026 con l'ingest di dodici progetti. Tre livelli: sessione (memoria di lavoro), wiki (memoria episodica), base stabile (memoria semantica). L'esame di promozione è la regola del toolkit dalla versione 0.4: basta una delle tre condizioni, e in ogni caso il modello va verificato in produzione o su un dispositivo reale. Se un'informazione cita un sistema reale, resta in wiki e sale solo dopo essere stata generalizzata. Questa base è quella che il primo prompt chiama «KB»."
+  },
+  {
+    block: B + 'Il gruppo di agenti',
+    content: () => (
+      <div className="pad">
+        <Tag>Il terreno · il toolkit</Tag>
+        <h2>Un lead che delega, un revisore che controlla</h2>
+        <div className="grid">
+          <Card title="Il lead"><p>Pianifica, mostra il piano, delega ai subagenti e mette insieme il risultato. I compiti banali li fa da solo.</p></Card>
+          <Card title="Tre livelli di modello" kind="i"><p>Si parte dal modello più economico e si sale per un motivo che si sa dire: causa sconosciuta, scelta che conta, decisione difficile da annullare.</p></Card>
+          <Card title="Gli specialisti" kind="i"><p>Agenti per backend, mobile, database, sicurezza, infrastruttura. Il lead sceglie leggendo la descrizione di ciascuno.</p></Card>
+          <Card title="Il revisore" kind="w"><p>Niente conta come finito prima che il revisore l'abbia visto. Ogni revisione lascia una riga in un registro.</p></Card>
+        </div>
+        <p className="legend" style={{ marginTop: 10 }}>Tema: subagenti e revisione. Tornano nell'argomento 8.</p>
+      </div>
+    ),
+    notes: "Il toolkit è nato a maggio 2026 (versione 0.1: dieci agenti, ventidue modelli di errore, sei skill) ed è cresciuto; i numeri cambiano a ogni versione, per questo qui non si fissano. Il punto è la divisione dei ruoli: chi pianifica non è chi controlla. Nelle due sessioni di luglio che raccontiamo i subagenti lanciati sono di tipo generico; il difetto che aveva escluso gli specialisti dal caricamento è stato scoperto il 20 luglio (episodio nell'argomento 8)."
+  },
+  {
+    block: B + 'Il contesto del primo messaggio',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · il contesto</Tag>
+        <h2>Il messaggio del 5 luglio non parte da zero</h2>
+        <div role="group" aria-label="Allegati e base di conoscenza arrivano all'agente insieme al messaggio">
+          <Flow nodes={[
+            ['3 allegati', 'il regolamento in PDF e due moduli compilati', 'i'], ['La KB', 'stack preferito, server di prova, account del repository'], ['Il messaggio', '5 luglio 2026, 18:49: poche righe, con refusi', 'w'], ['L\'agente', 'legge, cerca, poi fa domande'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Il messaggio rimanda alla KB due volte: «in base alle info nella nostra KB» e «trovi tutte ne info in kb».</li>
+          <li>Indica anche un server già in uso, quello dove stanno gli altri progetti.</li>
+          <li>Il Portale Viaggi nasce dopo la wiki (aprile) e dopo il toolkit (maggio): tre mesi di lavoro stanno sotto queste righe.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Il messaggio è delle 18:49 del 5 luglio 2026 (ora italiana). Gli allegati erano il regolamento delle uscite approvato nel 2025 e due moduli compilati come esempio, un'uscita e un viaggio. Nei primi minuti l'agente legge i tre documenti e interroga la base di conoscenza per stack, server di prova e account del repository: lo si ricava dal registro della sessione."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 1',
+    content: () => (
+      <Pezzo n="1" nome="l'obiettivo" righe={['voglio informatizzare e automatizzare completamente il sistema di gestione delle pratiche viaggi e uscite didattiche della mia scuola.']}
+        chiede={<p>Sostituire un'intera procedura, dal modulo cartaceo alla circolare, non aggiungere una funzione.</p>}
+        scontato={<p>Che l'agente sappia che cos'è una pratica di uscita in una scuola italiana, e che «completamente» valga per ogni passaggio.</p>}
+        vincolo={<p>Nessuno tecnico. È la parola «completamente» a fissare l'ampiezza.</p>}
+        manca={<p>Dove fermarsi. L'agente ha posto tre domande a scelta prima del codice: firma dei genitori, anagrafica, ampiezza della prima versione. Sull'ampiezza ha raccomandato di cominciare da pratiche e firme. Thomas ha risposto «Tutto subito».</p>} />
+    ),
+    notes: "Fonte: registro della sessione del 5 luglio 2026. L'agente ha fatto le tre domande alle 18:55; le risposte sono arrivate alle 18:59. Per la firma e per l'anagrafica Thomas ha scelto l'opzione raccomandata, per l'ampiezza no. Domanda per la sala: chi aveva ragione, e come si sarebbe potuto saperlo?"
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 2',
+    content: () => (
+      <Pezzo n="2" nome="stack e server" righe={['il portale sviluppato con tecnologia nodejs con frontend a tutta discrezione (in base alle info nella nostra KB) con database posgres dovrà essere conteneirizzato su docker e posizionato sul portale della scuola. nel frattempo per tutta la fase di test possiamo utilizzare il nostro server su contabo nel quale abbiamo gli altri progetti.']}
+        chiede={<p>Uno stack: Node.js, PostgreSQL, contenitori Docker. La scelta del frontend è lasciata all'agente, purché segua la KB.</p>}
+        scontato={<p>Che la KB dica già quale frontend usa Thomas e come si accede al server di prova. L'agente lo ha cercato nei primi minuti.</p>}
+        vincolo={<p>Tre: Node.js con Postgres, tutto in contenitori, prove sul server personale. Il «portale della scuola» è una destinazione futura.</p>}
+        manca={<p>Versioni, backup, chi mantiene il servizio in produzione, che cosa voglia dire «posizionato sul portale della scuola». L'agente ha scelto React, Vite e Tailwind. Il resto è arrivato mesi dopo, con il server della scuola.</p>} />
+    ),
+    notes: "Il frontend scelto dall'agente (React, Vite, Tailwind) risulta dal repository del 5 luglio. Il server della scuola è del 23 agosto in poi: lo si vede nelle slide sulle fasi. Il punto per la sala: un vincolo lasciato «a discrezione» funziona solo se esiste un posto dove l'agente trova le preferenze di chi scrive."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 3',
+    content: () => (
+      <Pezzo n="3" nome="i documenti" righe={['per capire il funzionamento del sistema ti metto a disposizione il regolamento scolastico e i moduli per le uscite (in allegato due di esempio compilati).']}
+        chiede={<p>Imparare le regole dai documenti, non da una descrizione a voce.</p>}
+        scontato={<p>Che il regolamento sia completo e che due moduli compilati, un'uscita e un viaggio, mostrino un caso semplice e uno complesso.</p>}
+        vincolo={<p>Le regole vengono dal testo. L'agente le ha trasformate in dieci regole di validazione automatica: quorum dei due terzi, un accompagnatore ogni quindici alunni, tetti di spesa per anno di corso e altre.</p>}
+        manca={<p>Le prassi non scritte. Compaiono anche ruoli che il prompt non nomina, come l'ufficio che gestisce le gare: nel prompt sei figure, nella specifica dieci ruoli.</p>} />
+    ),
+    notes: "Dalla specifica del 5 luglio (requisiti, schema del database, contratto delle API): le dieci regole sono nella sezione sulla validazione automatica, i ruoli nella tabella degli attori. Collegare con l'argomento 4: il documento di partenza è la parte migliore di una richiesta."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 4',
+    content: () => (
+      <Pezzo n="4" nome="la firma" righe={['facciamo una ragionata insieme su come rimuovere completamente tutto il cartaceo, quindi consentire a studenti, genitori e docenti di firmare e prendere visione dei moduli di autorizzazione tramite il riconoscimento digitale (suggeriscimi come).']}
+        chiede={<p>Una proposta da discutere («ragionata insieme», «suggeriscimi come»), non una soluzione già scelta.</p>}
+        scontato={<p>Che esista un modo di firmare accettabile per una scuola e che l'agente sappia confrontarlo con le alternative.</p>}
+        vincolo={<p>Uno solo, ma forte: niente carta. Non dice nulla su valore legale e costi.</p>}
+        manca={<p>L'agente ha confrontato tre strade: codice monouso via email con registro delle firme, SPID o CIE, account con password. Ha raccomandato la prima e Thomas l'ha scelta. Il giudizio sul valore probatorio è dell'agente, non un parere legale.</p>}
+        extra={<Box type="info" title="Cosa ne è uscito nella specifica">Codice di sei cifre valido dieci minuti, cinque tentativi, impronta SHA-256 del documento al momento della firma, ricevuta in PDF, doppia firma se i genitori sono separati.</Box>} />
+    ),
+    notes: "Le tre opzioni e la raccomandazione sono nel registro della sessione (18:55). I parametri del codice sono nella sezione sulla firma della specifica del 5 luglio. Sulla slide non si dice che la soluzione sia giusta: si dice che è stata proposta, scelta e poi scritta. Chi la adotta in un altro contesto la fa valutare da chi ne risponde."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 5',
+    content: () => (
+      <Pezzo n="5" nome="ruoli e accesso"
+        righe={[
+          'il portale dovrà servire oltre a docenti che organizzano le uscite, alla commissione viaggi che le dovrà approvare, alla segreteria scolastica che dovrà seguire l\'iter del viaggio e gestire eventuali preventivi e richieste di preventivo.',
+          'per autenticare gli utenti scolastici possiamo utilizzare autenticazione Google sul dominio ittsrimini.edu.it.',
+          'la dirigenza potrà vedere tutte le pratiche e porre un visto per ok, una richiesta di revisione con motivazione o un diniego.',
+        ]}
+        chiede={<p>Chi usa il portale, con quali permessi e come entra. Il visto della dirigenza ha già tre esiti.</p>}
+        scontato={<p>Che il login Google sul dominio della scuola sia configurabile. Era già in uso in un altro portale: poco dopo mezzanotte Thomas chiede all'agente di guardare come era stato fatto lì.</p>}
+        vincolo={<p>Accesso solo con account del dominio della scuola; un flusso con un visto a tre esiti.</p>}
+        manca={<p>Studenti e genitori non hanno lo stesso tipo di account. L'agente ha chiesto come popolare l'anagrafica; la scelta è stata un elenco esportato dal registro elettronico e importato in CSV.</p>} />
+    ),
+    notes: "Il dominio è quello pubblico della scuola, già presente negli altri materiali del corso collegato. Il collegamento con l'altro portale è nel registro della sessione, alle 00:18 del 6 luglio. Per i genitori il prompt non dice come entrano: la firma per codice monouso risolve il problema senza account."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 6',
+    content: () => (
+      <Pezzo n="6" nome="il modo di lavorare"
+        righe={[
+          'analizza tutti i documenti ed estrapola tutte le info necessarie per la produzione dettagliata del sistema. sfrutta tutta la potenza agentica per svolgere il lavoro in modo parallelo e attento.',
+          'per questo progetto crea un repo github provato sul mio git (trovi tutte ne info in kb)',
+        ]}
+        chiede={<p>Prima analisi e specifica, poi il lavoro diviso tra più agenti. Un repository privato.</p>}
+        scontato={<p>Che «potenza agentica» e «in parallelo» significhino subagenti, e che la KB contenga l'account e il modo di creare il repository.</p>}
+        vincolo={<p>Repository privato. La documentazione precede il codice: requisiti, schema del database e contratto delle API sono il primo commit.</p>}
+        manca={<p>Un criterio per dire «fatto». Il prompt non dice come si controlla il risultato. I controlli sono venuti dopo: 49 test il primo giorno, poi la revisione indipendente.</p>} />
+    ),
+    notes: "Il primo commit del repository è delle 19:06 e contiene i tre documenti. Subito dopo l'agente lancia due subagenti in parallelo, backend e frontend. Il parallelismo c'è, il criterio di accettazione no: è il tema dell'argomento 4."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 7',
+    content: () => (
+      <Pezzo n="7" nome="le funzioni non richieste" righe={['in base alla tua esperienza suggeriscimi anche l\'implementazione di funzionalità che non ti ho elencato ma che possono esse utili per il nostro scopo.']}
+        chiede={<p>Proposte non richieste, da valutare.</p>}
+        scontato={<p>Che l'agente abbia qualcosa da mettere in gioco: i documenti e la KB che ha letto, più ciò che ha appreso in addestramento.</p>}
+        vincolo={<p>Nessuno. Ogni proposta la accetta o la scarta una persona.</p>}
+        manca={<p>Un criterio per scegliere. Nel Portale FSL, dove la richiesta è identica, la specifica ha una sezione di sedici funzioni aggiuntive, ciascuna marcata [PROPOSTA] per non confonderla con ciò che era stato chiesto. Banca dei posti e questionari di gradimento sono tra quelle realizzate.</p>} />
+    ),
+    notes: "Le sedici proposte sono nella specifica del Portale FSL del 15 luglio. L'etichetta [PROPOSTA] è un'idea dell'agente, utile da copiare: separa ciò che l'utente ha chiesto da ciò che l'agente ha aggiunto. Banca dei posti e questionari sono nella fase M4 della roadmap."
+  },
+  {
+    block: B + 'Il 5 luglio',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · che cosa succede dopo</Tag>
+        <h2>Il 5 luglio, dal messaggio alla consegna</h2>
+        <ol className="timeline">
+          <li><time>18:49</time>Il messaggio arriva con tre allegati.</li>
+          <li><time>18:53</time>L'agente ha letto i documenti e interroga la KB: stack, server di prova, account del repository.</li>
+          <li><time>18:55</time>Tre domande a scelta, ciascuna con una raccomandazione. Risposte alle 18:59, approvazione del design alle 19:01.</li>
+          <li><time>19:06</time>Nel repository: requisiti, schema del database, contratto delle API.</li>
+          <li><time>19:07</time>Due subagenti in parallelo: backend e frontend.</li>
+          <li><time>19:52</time>Backend completo. Il frontend era finito alle 19:36 e aveva segnalato tre lacune nel contratto delle API, chiuse in integrazione.</li>
+          <li><time>20:00</time>Consegna: 49 test, flusso completo provato su un database vero, nove commit.</li>
+        </ol>
+        <p className="legend">Fonte: registro della sessione e git del repository (nove commit tra le 19:06 e le 19:57).</p>
+      </div>
+    ),
+    notes: "Orari italiani, ricavati dal registro della sessione e dalle date dei commit. Il sistema era completo in locale, non in produzione: il deploy di prova su un server personale è della notte, dopo mezzanotte. Un'osservazione per la sala: la parte lenta non è stata scrivere il codice, è stata decidere (le tre domande) e leggere (il regolamento)."
+  },
+  {
+    block: B + 'Cosa il prompt non diceva',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · i vuoti</Tag>
+        <h2>Quello che non c'era nel messaggio</h2>
+        <div className="cols">
+          <div>
+            <Card title="Venuto dai documenti">
+              <ul>
+                <li>La macchina a stati della pratica, con ogni transizione registrata.</li>
+                <li>Le dieci regole di validazione.</li>
+                <li>Il quorum dei due terzi, il tetto di dieci giorni di accompagnamento per docente.</li>
+                <li>I moduli da generare in PDF.</li>
+              </ul>
+            </Card>
+          </div>
+          <div>
+            <Card title="Venuto dalle scelte dell'agente" kind="i">
+              <ul>
+                <li>La firma con codice monouso e ricevuta.</li>
+                <li>I dati sanitari degli alunni cifrati.</li>
+                <li>Un link di caricamento per le agenzie, senza account.</li>
+                <li>L'importazione dell'elenco dal registro elettronico.</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+        <Box type="warn" title="Non c'era nemmeno">Nessuna schermata, nessun menu, nessun pulsante. Quel livello è nato dopo, con i requisiti scritti, le revisioni e il collaudo.</Box>
+      </div>
+    ),
+    notes: "Gli elenchi vengono dalla specifica dei requisiti del 5 luglio. Il tetto di dieci giorni è una regola del regolamento sulle assenze dei docenti accompagnatori. La cifratura dei dati sanitari è una scelta dell'agente, non richiesta nel prompt: un esempio di funzione non elencata che vale la pena di tenere."
+  },
+  {
+    block: B + 'Il secondo prompt',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · il secondo messaggio</Tag>
+        <h2>Il Portale FSL riparte dal primo</h2>
+        <DT cols={['Aspetto', 'Viaggi (5 luglio)', 'FSL (15 luglio)']} rows={[
+          ['Apertura', 'solo il testo', 'comincia con /goal'],
+          ['Stack', '«frontend a tutta discrezione»', 'nominato: React, Vite, Tailwind'],
+          ['Riferimento', 'la KB', '«esattamente come il portale che abbiamo già realizzato»'],
+          ['Documenti', 'regolamento e due moduli', 'cartella di modelli e documenti, più il foglio di calcolo con cui il docente seguiva la classe'],
+          ['Ruoli', 'sei figure', 'otto, con una regola: gli esterni vedono solo le pratiche assegnate a loro'],
+          ['Novità', 'nessuna', 'proposta di usare Documenti e Fogli Google come modelli'],
+        ]} />
+        <ActivityBadge n="14" file="il-secondo-prompt.html" label="Il testo completo del secondo messaggio" />
+      </div>
+    ),
+    notes: "Il secondo messaggio ripete quasi alla lettera il metodo del primo («ragionata insieme», «analizza tutti i documenti», «suggeriscimi»). Cambia ciò che il primo progetto ha già risolto: lo stack è nominato, il riferimento è un progetto esistente, la firma e il login non si ridiscutono. Il testo completo è nel foglio dei materiali."
+  },
+  {
+    block: B + 'Il comando /goal',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · /goal</Tag>
+        <h2>Che cosa ha fatto davvero /goal</h2>
+        <div className="grid">
+          <Card title="Come funziona"><p>Il comando dichiara un obiettivo per la sessione. Nel registro compare come un controllo a fine turno: quando l'agente prova a fermarsi, la condizione viene valutata e, se non è soddisfatta, il lavoro riprende.</p></Card>
+          <Card title="Il primo stop" kind="i"><p>15 luglio, dopo la specifica: «il portale non è ancora stato sviluppato». L'agente riparte con la prima fase (M0).</p></Card>
+          <Card title="In tutto" kind="i"><p>Trenta richiami tra il 15 luglio e il 21 settembre. Il 21 settembre l'agente verifica il servizio in produzione e dichiara raggiunto l'obiettivo.</p></Card>
+          <Card title="Il limite" kind="w"><p>La condizione era il testo del prompt: una direzione più che un criterio verificabile. A decidere se era finito era un controllo automatico, non una persona.</p></Card>
+        </div>
+        <p className="legend" style={{ marginTop: 10 }}>Tema: obiettivi verificabili. Torna nell'argomento 4.</p>
+      </div>
+    ),
+    notes: "Dal registro della sessione del Portale FSL: il comando installa un controllo valido per la sessione, che riporta la condizione scritta; il numero di richiami (30) è un conteggio dei messaggi di quel controllo. Il 21 settembre l'agente controlla lo stato di salute del servizio e il certificato in produzione, poi dichiara raggiunto l'obiettivo. Funzione recente: nomi e comportamento da riverificare sulla documentazione ufficiale prima di usarla in aula. Domanda per la sala: come avreste scritto una condizione verificabile?"
+  },
+  {
+    block: B + 'Dal messaggio alla specifica (FSL)',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · il secondo giorno</Tag>
+        <h2>FSL: dal messaggio alla specifica, 15 luglio</h2>
+        <ol className="timeline">
+          <li><time>08:56</time>Il messaggio, con /goal.</li>
+          <li><time>08:58</time>Tre agenti di analisi in parallelo: i modelli ufficiali (sedici documenti e due procedure), i fascicoli compilati di una classe, l'architettura del portale Viaggi.</li>
+          <li><time>09:07</time>Un quarto agente scrive la specifica: requisiti, schema, API, roadmap.</li>
+          <li><time>09:17</time>Commit della specifica. Alle 09:18 il controllo del /goal la giudica insufficiente.</li>
+          <li><time>09:20</time>Partono backend e frontend. Subito dopo la sessione raggiunge il limite d'uso e si ferma.</li>
+          <li><time>12:25</time>«riprendi e completa il goal».</li>
+          <li><time>20:49</time>Nel repository c'è anche la quinta fase (M4); i test sono 105 il giorno dopo.</li>
+        </ol>
+        <p className="legend">Fonte: registro della sessione e git del repository.</p>
+      </div>
+    ),
+    notes: "Orari italiani. Il limite d'uso è un fatto della sessione (si resetta a ore fisse): il lavoro non è andato perso perché la specifica era già nel repository. Le cinque fasi M0-M4 sono nei commit del 15 luglio, M0 e M1 insieme alle 12:58, M4 alle 20:49. I 105 test sono il dato del 16 luglio dalle note di progetto, riverificato a novembre con il conteggio nel codice."
+  },
+  {
+    block: B + 'Le fasi',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · le fasi</Tag>
+        <h2>Dal prompt al servizio in uso</h2>
+        <ol className="timeline">
+          <li><time>5 lug</time>Portale Viaggi completo in locale. Nella notte, deploy di prova su un server personale.</li>
+          <li><time>15 lug</time>Portale FSL: specifica e cinque fasi (M0-M4).</li>
+          <li><time>23-26 ago</time>Repository del server della scuola. Il 26 funziona a casa; Prenota Risorse viene riscritta da capo.</li>
+          <li><time>10 set</time>I tre portali sono installati sul Raspberry Pi 5 a scuola.</li>
+          <li><time>21 set</time>Chiuso il /goal di FSL. Da qui ogni deploy di Prenota Risorse passa dal revisore.</li>
+          <li><time>27 ott</time>Accesso anche con il dominio degli studenti (Viaggi).</li>
+          <li><time>14 nov</time>Viaggi adeguato al regolamento 2026, in due lotti, ciascuno rivisto prima del deploy.</li>
+        </ol>
+        <p className="legend">Fonti: git dei repository, note di progetto, registro delle revisioni.</p>
+      </div>
+    ),
+    notes: "Le date vengono dai repository (prime commit: Viaggi 5 luglio, FSL 15 luglio, server 23 agosto) e dalle note di progetto. Il passaggio dal server di casa alla rete della scuola non si racconta nei dettagli: si dice solo che è stato preparato e poi portato a scuola. L'origine dichiarata da Thomas il 21 ottobre 2026: prove sui server personali, poi il Raspberry Pi preparato e portato a scuola."
+  },
+  {
+    block: B + 'Requisiti nati dopo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · requisiti nati dopo</Tag>
+        <h2>Nati usando il sistema, non scrivendolo</h2>
+        <div className="grid">
+          <Card title="La mail alle agenzie"><p>6 luglio, mattina: «troppo generica per consentire all'agenzia di fare un'offerta». Servono periodo, percorso, mezzo, pernotti, ingressi, guide.</p></Card>
+          <Card title="Un documento per la dirigenza" kind="i"><p>6 luglio: descrizione del progetto, scelte di sicurezza e di conformità, con una prima parte in linguaggio semplice.</p></Card>
+          <Card title="Il portale a scuola" kind="i"><p>14 luglio: «vorrei portare il portale a scuola in un raspberry con container. Cosa ne pensi? è fattibile?».</p></Card>
+          <Card title="Un solo accesso Google" kind="i"><p>14-15 luglio: il progetto di accesso già esistente viene riusato e rinominato per i tre portali.</p></Card>
+          <Card title="Gli studenti"><p>27 ottobre: login anche con il dominio degli studenti.</p></Card>
+          <Card title="Il regolamento 2026"><p>14 novembre: scadenze per anno scolastico e altre regole nuove, in due lotti.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Le prime quattro voci sono messaggi di Thomas nella sessione del Portale Viaggi (6 e 14-15 luglio). Le ultime due vengono dalle note di progetto. Il messaggio sulla mail alle agenzie è del tipo «guardo il risultato e vedo che manca»: nessun prompt iniziale poteva prevederlo."
+  },
+  {
+    block: B + 'Il revisore',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · revisione</Tag>
+        <h2>Che cosa ha trovato il revisore</h2>
+        <div className="cols">
+          <div>
+            <Card title="20 luglio" kind="i"><p>Riparata l'orchestrazione, il flusso lead, esecutore, revisore gira per la prima volta davvero: 26 osservazioni, 4 bloccanti. Una è un'affermazione sbagliata scritta dal lead.</p></Card>
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginTop: 12 }}>
+              <Stat big="26" label="osservazioni" /><Stat big="4" label="bloccanti" />
+            </div>
+          </div>
+          <div>
+            <Card title="Sui portali">
+              <ul>
+                <li>21 settembre, Prenota Risorse: un giorno di scarto nelle date per il fuso orario.</li>
+                <li>23 settembre: email retroattive a prenotazioni già in attesa (bloccante).</li>
+                <li>14 novembre, Viaggi: nell'elenco delle firme mancanti gli studenti vedevano i nomi di altri alunni.</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+        <p className="legend" style={{ marginTop: 8 }}>Tema: revisione indipendente. Torna nell'argomento 8.</p>
+      </div>
+    ),
+    notes: "Le 26 osservazioni sono dal registro del 20 luglio (versione 0.2 del toolkit). Le altre tre dal registro delle revisioni delle note di progetto: tutte corrette prima del rilascio. Tra il 21 e il 28 settembre ci sono quattro revisioni di Prenota Risorse."
+  },
+  {
+    block: B + 'Cosa è andato storto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · errori</Tag>
+        <h2>Cosa è andato storto</h2>
+        <div className="grid">
+          <Card title="Contratto tra le due metà" kind="w"><p>Viaggi: tre lacune segnalate dal subagente del frontend. FSL: un commit di «allineamento del contratto» diciotto minuti dopo la prima implementazione.</p></Card>
+          <Card title="Limite d'uso" kind="w"><p>15 luglio: la sessione si ferma subito dopo il lancio degli agenti di implementazione e riparte tre ore dopo.</p></Card>
+          <Card title="Tre bug in produzione" kind="d"><p>Una colonna del database mai creata sul server; telefoni con la vecchia versione in cache e richieste respinte in silenzio; una data sbagliata di un giorno.</p></Card>
+          <Card title="Un obiettivo troppo largo" kind="d"><p>Il /goal chiedeva «completamente»: ha tenuto l'agente al lavoro per due mesi, senza dire quando fermarsi davvero.</p></Card>
+        </div>
+        <Box type="info" title="Come sono stati chiusi">Aggiornamento automatico del database all'avvio, server che accetta anche il formato vecchio, errore mostrato all'utente, revisore prima di ogni rilascio.</Box>
+      </div>
+    ),
+    notes: "Il commit di allineamento del contratto di FSL è del 15 luglio alle 13:16, diciotto minuti dopo la prima implementazione (12:58). I tre bug sono dalle note di Prenota Risorse (26 agosto e 21 settembre). L'ultima voce è una lettura: il registro dice che l'obiettivo è stato richiamato trenta volte; l'interpretazione («troppo largo») è di chi racconta."
+  },
+  {
+    block: B + 'Dal server personale alla scuola',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · il server</Tag>
+        <h2>Dal prototipo veloce alla parte lenta</h2>
+        <div role="group" aria-label="Server personale, server della scuola preparato a casa, installazione a scuola">
+          <Flow nodes={[
+            ['Server personale', 'prove dei portali, da luglio', 'i'], ['Repository del server', 'dal 23 agosto: proxy, backup, monitoraggio, runbook'], ['Funziona a casa', '26 agosto'], ['A scuola', '10 settembre: tre portali su un Raspberry Pi 5', 'w'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Il prototipo è la parte veloce: il primo portale in una sera. Backup, ripristino, guida alla messa in produzione e manuali hanno richiesto più tempo.</li>
+          <li>L'ambiente di prova sul server personale è stato dismesso il 13 settembre.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Origine dichiarata da Thomas il 21 ottobre 2026: sviluppo e prove sui server personali, poi il Raspberry Pi preparato e portato a scuola. Non si entra nella rete della scuola e non si citano indirizzi. Il passaggio dal server di casa alla rete della scuola non è documentato nei dettagli."
+  },
+  {
+    block: B + 'I numeri',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · i numeri</Tag>
+        <h2>Commit e test</h2>
+        <DT cols={['Progetto', 'Prima commit', 'Commit al 24/09', 'Commit al 25/11']} rows={[
+          ['Prenota Risorse', '29/09/2025', '61', '75'],
+          ['Portale FSL', '15/07/2026', '57', '75'],
+          ['Portale Viaggi', '05/07/2026', '49', '101'],
+          ['Server della scuola', '23/08/2026', '16', '27'],
+        ]} />
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', marginTop: 10 }}>
+          <Stat big="49" label="test di Viaggi il 5 luglio" />
+          <Stat big="532" label="test di Viaggi il 14 novembre" />
+          <Stat big="105" label="test di FSL il 16 luglio" />
+        </div>
+        <p className="legend" style={{ marginTop: 8 }}>Commit: ramo principale, conteggio con git, dato al 25 novembre 2026. Test: dai registri di progetto, non ricalcolati.</p>
+      </div>
+    ),
+    notes: "Il conteggio dei commit è stato rifatto con git il 25 novembre 2026 sul ramo principale di ciascun repository (per Prenota Risorse il ramo master, ultima commit dell'11 novembre). La colonna del 24 settembre viene dall'inventario del corso collegato. I test sono dai registri: 49 nel messaggio di consegna del 5 luglio, 532 nell'ultima revisione del 14 novembre, 105 nelle note del Portale FSL. Sono dati, non obiettivi."
+  },
+  {
+    block: B + 'Stato dei portali',
+    content: () => (
+      <div className="pad">
+        <Tag>Il risultato</Tag>
+        <h2>Come stanno i tre portali</h2>
+        <div className="grid">
+          <Card title="Prenota Risorse"><p><strong>Online e in uso</strong> alla scuola, da ottobre.</p></Card>
+          <Card title="Portale FSL" kind="w"><p><strong>In prova.</strong></p></Card>
+          <Card title="Viaggi di istruzione" kind="w"><p><strong>In prova.</strong></p></Card>
+        </div>
+        <Box type="info" title="Per i numeri">I conteggi cambiano a ogni sessione di lavoro: si leggono dal repository, con la data.</Box>
+        <p className="muted" style={{ marginTop: 10 }}>Stato al 21 ottobre 2026, indicazione di Thomas.</p>
+      </div>
+    ),
+    notes: "Stato confermato da Thomas il 25 novembre 2026: Prenota Risorse online e in uso; FSL e Viaggi in fase di test, finché il codice non passa su un server con infrastruttura di rete certificata."
+  },
+  {
+    block: B + 'Altri episodi',
+    content: () => (
+      <div className="pad">
+        <Tag>Altri episodi</Tag>
+        <h2>Raccontati negli altri argomenti</h2>
+        <DT cols={['Episodio', 'Tema', 'Dove']} rows={[
+          ['Gli agenti che non c\'erano', 'verificare lo stato reale', 'argomento 8'],
+          ['Dieci agenti in parallelo', 'subagenti con contesto proprio', 'argomento 8'],
+          ['Le 47 righe prima della pubblicazione', 'segreti e dati nel codice', 'argomento 7'],
+          ['Il subagente che scrive sul repository vero', 'permessi, comandi distruttivi', 'argomento 7'],
+          ['1,55 dollari e 79 milioni di token', 'costi e contesto', 'argomento 11'],
+        ]} />
+        <p className="legend">Hook e MCP (argomento 9) e OpenCode (argomento 10) non hanno un episodio: si provano direttamente.</p>
+      </div>
+    ),
+    notes: "Gli episodi non legati ai portali sono stati spostati dove illustrano il loro tema. Chi segue solo l'argomento 14 può ignorarli."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Il prompt chiedeva «una ragionata insieme» sulla firma. Che cosa ha fatto l'agente?" opzioni={[
+          { t: 'Ha scelto una soluzione e ha scritto il codice', ok: false, perche: 'Il codice è venuto solo dopo l\'approvazione del design.' },
+          { t: 'Ha messo a confronto tre strade, ne ha raccomandata una e ha aspettato la scelta', ok: true, perche: 'Codice monouso via email, SPID o CIE, account con password: la scelta è stata di Thomas.' },
+          { t: 'Ha chiesto a Thomas di scrivere prima un documento dei requisiti', ok: false, perche: 'I requisiti li ha scritti l\'agente, a partire dai documenti allegati.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione sul quarto pezzo del prompt. Il punto: la frase «suggeriscimi come» ha ottenuto una proposta con alternative, non una decisione al posto dell'utente."
+  },
+  {
+    block: B + 'Attività al PC (1)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 1 di 4</Tag>
+        <h2>Una cartella vuota e l'agente in modalità piano</h2>
+        <p>Si lavora in una cartella nuova: nessun file e nessun rischio per il resto del PC.</p>
+        <CommandBox cmd="mkdir prova-prompt" label="Crea la cartella" />
+        <CommandBox cmd="cd prova-prompt" label="Entra nella cartella" />
+        <CommandBox cmd="claude --permission-mode plan" label="Avvia Claude Code in modalità piano" />
+        <p className="muted">Se non parte in modalità piano, premete Maiusc+Tab finché compare «plan». In OpenCode il tasto Tab passa all'agente di piano.</p>
+        <ActivityBadge n="14" file="il-primo-prompt.html" label="Il foglio con i testi da incollare" />
+      </div>
+    ),
+    notes: "La modalità piano è quella dell'argomento 4: l'agente può leggere e proporre, non modificare. Sui PC del laboratorio la partenza in modalità con conferma è imposta dal file delle impostazioni gestite: se il comando con il parametro non ha effetto, si passa alla modalità piano con Maiusc+Tab."
+  },
+  {
+    block: B + 'Attività al PC (2)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 2 di 4</Tag>
+        <h2>Date all'agente il primo messaggio</h2>
+        <p>Incollate questo testo: contiene la richiesta e, in fondo, il messaggio vero.</p>
+        <CommandBox kind="text" tall label="Richiesta e primo messaggio (Portale Viaggi)" cmd={PROMPT_ATTIVITA} />
+        <p className="muted">Leggete le tre parti della risposta. Quante domande fa? Quante sono sui documenti, quante sulle scelte?</p>
+      </div>
+    ),
+    notes: "Il messaggio è quello vero del 5 luglio, ripulito: stesso testo del foglio. Gli allegati citati non ci sono e l'agente lo dirà: è voluto. Le risposte cambiano da una sessione all'altra: si confrontano le categorie di domande, non le parole."
+  },
+  {
+    block: B + 'Attività al PC (3)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 3 di 4</Tag>
+        <h2>Aggiungete il regolamento</h2>
+        <p>Il regolamento qui sotto è inventato. Incollatelo nella stessa conversazione.</p>
+        <CommandBox kind="text" tall label="Regolamento inventato e nuova richiesta" cmd={REGOLAMENTO_ATTIVITA} />
+        <p className="muted">Confrontate con il racconto: l'agente reale ne ha ricavato dieci regole e ha fatto tre domande sulle scelte (firma, anagrafica, ampiezza). Che cosa ha chiesto in più o in meno il vostro?</p>
+      </div>
+    ),
+    notes: "Il regolamento è inventato e ricalca solo la forma di quello reale (soglie, scadenze, ruoli). Sono otto articoli. Il confronto con le dieci regole reali è di forma, non di contenuto."
+  },
+  {
+    block: B + 'Attività al PC (4)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 4 di 4</Tag>
+        <h2>Rileggete la scheda del vostro progetto</h2>
+        <p>Aprite la scheda del progetto personale e incollatela al posto della riga tra parentesi quadre.</p>
+        <CommandBox kind="text" tall label="Scheda del progetto confrontata con il primo prompt" cmd={PROMPT_SCHEDA} />
+        <a className="activity" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+          <span className="k">Attività al PC</span>
+          <span className="l">La scheda del progetto personale</span>
+          <span aria-hidden="true">&#8599;</span>
+        </a>
+      </div>
+    ),
+    notes: "La scheda del progetto personale sta nei materiali del laboratorio-progetto: il collegamento è scritto a mano con lo stesso aspetto del componente. Serve a usare il racconto per migliorare la propria scheda, non a ricopiare il prompt dei portali."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={['Un messaggio corto, con refusi, è bastato per partire: lo reggevano i documenti allegati e la base di conoscenza.', 'Conta quello che l\'agente fa dopo: legge, chiede con alternative, scrive la specifica, aspetta l\'approvazione, poi il codice.', 'Il prompt non diceva come controllare il risultato: sono serviti test, revisore e collaudo.', 'Molti requisiti sono nati usando il sistema, non scrivendolo.']}
+        dopo="L'argomento 4 (dalla richiesta vaga ai requisiti) riprende il criterio di «fatto»; l'argomento 8 (skill e subagenti revisori) chi controlla; l'argomento 5 (CLAUDE.md) le istruzioni che restano." />
+    ),
+    notes: "Chiusura: riprendere i quattro punti e lasciare spazio alle domande. Chi vuole proseguire sceglie l'argomento 4, 5 o 8."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

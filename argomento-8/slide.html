@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Argomento 8 · Hook e MCP · Coding agentico</title>
+<title>Argomento 8 · Skill e subagenti · Coding agentico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -329,372 +329,480 @@ function CommandBox({ cmd, label, tall, kind }) {
 
 /* ---------- le slide di questo argomento ---------- */
 /* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
-const B = 'Argomento 8 — Hook e MCP · ';
+const B = 'Argomento 8 — Skill e subagenti · ';
 
-const EVENTO = String.raw`{
-  "hook_event_name": "PreToolUse",
-  "session_id": "abc123",
-  "cwd": "C:\\palestra",
-  "tool_name": "Bash",
-  "tool_input": { "command": "git push origin main" }
-}`;
+const ALBERO = String.raw`.claude/
+  skills/
+    note-di-rilascio/
+      SKILL.md        <- obbligatorio
+      esempi.md       <- letto se serve
+      scripts/
+        raggruppa.js  <- eseguito, non letto
+  agents/
+    revisore.md       <- un subagente`;
 
-const CONFIG = String.raw`{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          { "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteggi-file.js\"" }
-        ]
-      }
-    ]
-  }
-}`;
+const SKILLMD = String.raw`---
+name: note-di-rilascio
+description: Prepara le note di rilascio a partire dai commit
+  dall'ultimo tag. Usala quando si chiede changelog o release.
+---
 
-const HOOK_PROTEGGI = String.raw`// proteggi-file.js: PreToolUse su Edit e Write
-let testo = '';
-process.stdin.on('data', (d) => (testo += d));
-process.stdin.on('end', () => {
-  const evento = JSON.parse(testo);
-  const file = (evento.tool_input.file_path || '').replace(/\\/g, '/');
-  if (/(^|\/)(\.env|package-lock\.json)$/.test(file)) {
-    console.error('Bloccato: ' + file + ' non si modifica.');
-    process.exit(2);   // 2 = blocca, e lo stderr arriva all'agente
-  }
-  process.exit(0);     // 0 = nessuna obiezione
-});`;
+# Note di rilascio
 
-const HOOK_TEST = String.raw`// lancia-test.js: PostToolUse su Edit e Write
-const { spawnSync } = require('node:child_process');
+1. Trova l'ultimo tag: git describe --tags --abbrev=0
+2. Leggi i commit da lì: git log <tag>..HEAD --oneline
+3. Raggruppa in Novità, Correzioni, Altro.
+4. Una riga per voce, in italiano, senza hash.
+5. Scrivi NOTE-RILASCIO.md. Non toccare altro.`;
 
-const r = spawnSync('node', ['--test'], { encoding: 'utf8' });
-if (r.status !== 0) {
-  console.error('Dopo la modifica i test falliscono:\n' + r.stdout.slice(-1500));
-  process.exit(2);     // la modifica c'è già: l'agente legge e corregge
-}`;
+const AGENTMD = String.raw`---
+name: revisore
+description: Rivede codice scritto da altri, dopo
+  una modifica, prima di darla per finita.
+tools: Read, Glob, Grep, Bash
+disallowedTools: Write, Edit
+model: inherit
+---
 
-const PROVA_EVENTO = String.raw`echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | node .claude/hooks/blocca-comandi.js`;
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica, esegui un controllo
+e riporta comando ed esito. Non modificare i file.`;
 
-const MCP_ADD = String.raw`claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova`;
+const AMBIGUA = String.raw`# docs/istruzioni-revisore.md  (versione 1)
 
-const MCP_JSON = String.raw`{
-  "mcpServers": {
-    "documenti": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem",
-               "--read-only", "./cartella-prova"]
-    }
-  }
-}`;
+Guarda il codice che ti passo. Se i test passano e il
+codice sembra corretto, rispondi APPROVATO.
+Se trovi dei problemi, elencali.`;
+
+const AGENTEOC = String.raw`# .opencode/agents/revisore.md
+---
+description: Rivede una funzione rispetto alla sua
+  specifica, eseguendo controlli. Usalo prima di
+  darla per finita. Non modifica il codice.
+mode: subagent
+permission:
+  edit: deny
+  task: deny
+  bash:
+    "*": ask
+    "node --test*": allow
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica esegui un controllo
+e riporta comando ed esito. Non modificare i file.`;
+
+const CMD_OC = {
+  elenco: String.raw`opencode agent list | Select-String "subagent"`,
+  richiesta: 'Controlla che prenotaSettimanale rispetti la specifica, prima di darla per buona.',
+};
+
+/* Link a pagine esterne, con l'aspetto del pulsante delle attività. */
+const ApriSlide = ({ href, kicker, label }) => (
+  <a className="activity" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">{kicker}</span>
+    <span className="l">{label}</span>
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
 
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="8" titolo="Hook e MCP"
-        sottotitolo="Un controllo che gira sempre, e un modo standard per collegare strumenti e dati all'agente."
-        prima="argomenti 1 e 4." />
+      <Apertura n="8" titolo="Skill e subagenti" sottotitolo="Procedure che l'agente legge solo quando servono, e collaboratori con un contesto tutto loro: come scriverli, e come accorgersi che non stanno facendo ciò che credi."
+        caso="Da dove nasce: dieci subagenti scritti con un frontmatter sbagliato, mai caricati per mesi."
+        prima="argomento 5." />
     ),
-    notes: "Due strumenti diversi per due problemi diversi. Gli hook fanno rispettare una regola ogni volta, senza chiedere all'agente di ricordarla. MCP collega l'agente a strumenti e dati che non ha. Funzioni verificate sulla documentazione ufficiale a novembre 2026: https://code.claude.com/docs/en/hooks , https://code.claude.com/docs/en/hooks-guide , https://code.claude.com/docs/en/mcp , https://modelcontextprotocol.io . Nomi e dettagli cambiano in fretta: ricontrollare prima di usarli."
+    notes: `Apertura. Nell'argomento 5 abbiamo visto le istruzioni che l'agente ha sempre davanti. Qui due strumenti che stanno fuori dal contesto finché non servono: le skill (procedure) e i subagenti (collaboratori con contesto proprio). Il filo dell'argomento è uno solo: uno strumento che sembra funzionare non è uno strumento che funziona. Funzioni verificate sulla documentazione ufficiale il 9 novembre 2026: code.claude.com/docs/en/skills e code.claude.com/docs/en/sub-agents. Le date invecchiano. Annunciare l'attività sulla palestra.`
   },
   {
-    block: B + 'Istruzioni e controlli',
+    block: B + 'Quando conviene',
     content: () => (
       <div className="pad">
-        <Tag>Il problema</Tag>
-        <h2>Un consiglio non è un controllo</h2>
-        <div className="grid">
-          <Card title="Istruzione (CLAUDE.md)" kind="i">
-            <p>Testo che l'agente legge e di solito rispetta. Se lo dimentica, o il contesto si riempie, la regola sparisce senza avvisare.</p>
-          </Card>
-          <Card title="Hook">
-            <p>Un programma che Claude Code lancia a un evento preciso. Non chiede il parere del modello: gira, e il suo esito conta.</p>
-          </Card>
-        </div>
-        <Box type="tip" title="Come scegliere">Una regola da seguire «di solito»: istruzione. Una regola che non deve mai essere violata: controllo deterministico.</Box>
+        <Tag>Il principio</Tag>
+        <h2>Una procedura che spieghi sempre uguale</h2>
+        <DT cols={['Strumento', 'Quando l\'agente lo legge', 'Per che cosa']} rows={[
+          ['CLAUDE.md', 'sempre, a ogni sessione', 'fatti e regole del progetto'],
+          ['Skill', <>la descrizione sempre; il resto <strong>quando serve</strong></>, 'una procedura in più passi, ripetuta'],
+          ['Subagente', 'quando l\'agente gli delega un compito', 'un compito chiuso, con contesto e strumenti propri'],
+          ['Hook', 'a ogni evento previsto, senza chiedere al modello', 'controlli che devono valere sempre (argomento 9)'],
+        ]} />
+        <Box type="tip" title="Il segnale">Hai spiegato la stessa procedura per la terza volta, in più passi, con comandi precisi? È una skill. Una regola che vale sempre, in una riga, resta nel CLAUDE.md.</Box>
       </div>
     ),
-    notes: "Si riprende l'argomento 4: le istruzioni di progetto sono testo nel contesto, quindi influenzano il modello ma non lo vincolano. Un hook è codice eseguito da Claude Code, fuori dal modello. La documentazione lo descrive come controllo deterministico: certe azioni avvengono sempre, invece di affidarsi a una scelta del modello (https://code.claude.com/docs/en/hooks-guide , novembre 2026)."
+    notes: `Quattro strumenti, quattro momenti in cui entrano nel contesto. CLAUDE.md è sempre presente e va tenuto corto. Una skill tiene fuori dal contesto il testo della procedura finché non serve. Il subagente lavora in un contesto separato. L'hook non passa dal modello: è l'argomento 9. Esempi dal lavoro: preparare le note di una release, controllare un registro dei guasti con una procedura fissa, aggiungere una nuova rotta al server con la stessa sequenza di file da toccare. Se la procedura sta in due righe è meglio una riga nel file di istruzioni.`
   },
   {
-    block: B + 'Perché non si dimentica',
+    block: B + 'Cos\'è una skill',
     content: () => (
       <div className="pad">
-        <Tag>Come funziona</Tag>
-        <h2>Un hook si aggancia a un evento</h2>
-        <div role="group" aria-label="Schema: l'agente decide, Claude Code lancia l'hook, l'hook risponde, l'azione parte o viene fermata">
-          <Flow nodes={[
-            ['1 Agente', 'vuole eseguire un comando', ''],
-            ['2 Evento', 'PreToolUse: prima che parta', 'i'],
-            ['3 Hook', 'il tuo script legge e decide', 'w'],
-            ['4 Esito', 'parte, oppure è fermato', ''],
-          ]} />
+        <Tag>Skill</Tag>
+        <h2>Una cartella con un SKILL.md</h2>
+        <div className="cols">
+          <pre aria-label="Struttura di una cartella di skill">{ALBERO}</pre>
+          <ul>
+            <li><strong>SKILL.md</strong>: un frontmatter tra <code className="nw">---</code> e le istruzioni in Markdown.</li>
+            <li>Il frontmatter comincia alla <strong>prima riga</strong> del file.</li>
+            <li><code className="nw">name</code> è il comando <code className="nw">/nome</code>; <code className="nw">description</code> dice quando usarla.</li>
+            <li>Il resto della cartella è opzionale: documenti di dettaglio e script.</li>
+          </ul>
         </div>
+      </div>
+    ),
+    notes: `Struttura dalla pagina skills della documentazione di Claude Code (9/11/2026). Tutti i campi del frontmatter sono opzionali, ma la description è consigliata: è ciò che l'agente usa per decidere. Un campo sconosciuto viene ignorato senza errori, quindi un nome scritto male non fa rumore. Il frontmatter deve cominciare alla prima riga: un frontmatter YAML non valido fa caricare la skill senza i suoi campi, ed è un errore silenzioso che si vede con claude --debug. Tenere a mente questa frase: torna nel racconto.`
+  },
+  {
+    block: B + 'Cosa vede l\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Caricamento progressivo</Tag>
+        <h2>Che cosa entra nel contesto, e quando</h2>
+        <Flow nodes={[
+          ['Sempre', 'nome e descrizione di ogni skill disponibile', ''],
+          ['Quando serve la skill', 'il corpo di SKILL.md, che poi resta nel contesto', 'i'],
+          ['Quando il testo lo chiede', 'i file di dettaglio della cartella', 'i'],
+          ['Mai come testo', 'gli script: vengono eseguiti', 'w'],
+        ]} />
         <ul style={{ marginTop: 12 }}>
-          <li>Lo hook è codice tuo: stesso input, stessa risposta, ogni volta.</li>
-          <li>Il modello non può «scegliere» di saltarlo.</li>
-          <li>Un <code className="nw">deny</code> da hook vale in ogni modalità di permessi, anche con i permessi saltati.</li>
+          <li>La descrizione è l'unico punto di contatto: se è scritta male, la skill non viene scelta.</li>
+          <li>Per questo il corpo può essere lungo senza costare nulla finché la skill non serve. Meglio sotto le 500 righe, con i dettagli in file a parte.</li>
         </ul>
       </div>
     ),
-    notes: "Dalla documentazione (hooks-guide, novembre 2026): un hook che restituisce deny blocca lo strumento anche in bypassPermissions e con --dangerously-skip-permissions, perché PreToolUse scatta prima di ogni controllo di modalità. Per questo è la barriera giusta per le regole non negoziabili (vedi anche la barriera dell'argomento 12). Nota onesta: lo hook vede solo ciò che sa riconoscere, ne parliamo più avanti."
+    notes: `Dalla documentazione (9/11/2026): nome e descrizione sono nel contesto per decidere se caricare la skill; descrizione e when_to_use insieme vengono troncate a 1.536 caratteri nell'elenco, quindi il caso principale va all'inizio. Il corpo di SKILL.md entra quando la skill viene usata e poi resta nel contesto per i turni successivi; il file non viene riletto. I file di supporto si leggono solo se il SKILL.md dice quando. Gli script vengono eseguiti, non caricati come testo. Dopo una compattazione del contesto l'ultima invocazione di ogni skill viene riallegata, con un tetto per skill. Una skill con disable-model-invocation: true non compare nell'elenco che l'agente vede: la lancia solo l'utente con /nome.`
   },
   {
-    block: B + 'Gli eventi',
+    block: B + 'Dove stanno',
     content: () => (
       <div className="pad">
-        <Tag>Gli eventi</Tag>
-        <h2>Gli eventi che si usano di più</h2>
-        <DT cols={['Evento', 'Quando scatta', 'Esempio d\'uso']} rows={[
-          [<code className="nw">PreToolUse</code>, 'Prima che l\'agente usi uno strumento', 'Fermare un comando pericoloso'],
-          [<code className="nw">PostToolUse</code>, 'Dopo che lo strumento ha girato', 'Lanciare i test dopo una modifica'],
-          [<code className="nw">UserPromptSubmit</code>, 'Quando invii un messaggio', 'Aggiungere contesto, o fermare il messaggio'],
-          [<code className="nw">Stop</code>, 'Quando l\'agente finisce di rispondere', 'Chiedere di continuare se manca qualcosa'],
-          [<code className="nw">SessionStart</code>, 'All\'avvio o alla ripresa della sessione', 'Aggiungere contesto fisso'],
-          [<code className="nw">Notification</code>, 'Quando l\'agente aspetta te', 'Avvisarti con una notifica'],
+        <Tag>Posizioni</Tag>
+        <h2>Dove vive una skill, e come la trovi</h2>
+        <DT cols={['Dove', 'Percorso', 'Chi la vede']} rows={[
+          ['Personale', <code className="nw">~/.claude/skills/nome/SKILL.md</code>, 'tu, in ogni progetto'],
+          ['Progetto', <code className="nw">.claude/skills/nome/SKILL.md</code>, 'chi clona il repository'],
+          ['Plugin', <code className="nw">plugin/skills/nome/SKILL.md</code>, 'dove il plugin è attivo, come /plugin:nome'],
         ]} />
-        <p className="muted">Gli eventi sono molti di più (compattazione, subagenti, cambi di file...): l'elenco completo è nel riferimento.</p>
-      </div>
-    ),
-    notes: "Elenco tratto dal riferimento https://code.claude.com/docs/en/hooks (novembre 2026), che oggi conta oltre trenta eventi. Qui solo i sei più utili. PostToolUse non può annullare ciò che lo strumento ha già fatto. Stop scatta ogni volta che l'agente finisce di rispondere, non solo a fine lavoro."
-  },
-  {
-    block: B + 'Cosa riceve',
-    content: () => (
-      <div className="pad">
-        <Tag>L'input</Tag>
-        <h2>Cosa riceve uno hook</h2>
-        <p>Claude Code lancia il programma e gli scrive un JSON sullo standard input. Per gli eventi sugli strumenti c'è <code className="nw">tool_name</code> e <code className="nw">tool_input</code>.</p>
-        <pre aria-label="Esempio di evento PreToolUse">{EVENTO}</pre>
-        <Box type="info" title="Campi dell'evento">L'esempio è accorciato: l'evento vero ha altri campi, tra cui la modalità di permessi. Il contenuto di <code className="nw">tool_input</code> dipende dallo strumento: per Bash c'è <code className="nw">command</code>, per Edit e Write c'è <code className="nw">file_path</code>.</Box>
-      </div>
-    ),
-    notes: "Campi comuni documentati: session_id, cwd, hook_event_name, permission_mode e altri; per gli eventi sugli strumenti anche tool_name, tool_input, tool_use_id (https://code.claude.com/docs/en/hooks , novembre 2026). Il percorso nell'esempio ha il backslash raddoppiato perché in JSON è così: su Windows capita che file_path arrivi con i backslash, e le regex vanno scritte di conseguenza."
-  },
-  {
-    block: B + 'Cosa risponde',
-    content: () => (
-      <div className="pad">
-        <Tag>L'output</Tag>
-        <h2>Il codice di uscita decide</h2>
-        <DT cols={['Uscita', 'Effetto su PreToolUse']} rows={[
-          [<b>0</b>, 'Nessuna obiezione: il comando prosegue il suo normale percorso (i permessi si applicano comunque).'],
-          [<b>2</b>, 'Bloccato. Quello che scrivi sullo standard error arriva all\'agente come motivo.'],
-          [<b>qualsiasi altro</b>, 'Errore che non blocca: il comando parte, con un avviso nella trascrizione.'],
-        ]} />
-        <Box type="danger" title="Il trabocchetto">Uscire con 1 non blocca niente. Anche uno script che si rompe per un errore sul JSON esce con un codice diverso da 2: il comando passa, in silenzio.</Box>
-        <p className="muted">In alternativa si può uscire con 0 e stampare un JSON con <code className="nw">permissionDecision</code>: serve a decisioni più fini (consenti, nega, chiedi).</p>
-      </div>
-    ),
-    notes: "Dalla documentazione (novembre 2026): exit 2 blocca e lo stderr è il motivo che vede l'agente; altri codici non bloccano, a meno di impostare onFailure a block. Su PreToolUse un hook che va in timeout non blocca la chiamata, salvo onFailure block. La forma JSON usa hookSpecificOutput con permissionDecision (allow, deny, ask, defer); un campo al livello sbagliato viene ignorato senza errore. Per le regole semplici bastano i codici di uscita."
-  },
-  {
-    block: B + 'Configurazione',
-    content: () => (
-      <div className="pad">
-        <Tag>Configurazione</Tag>
-        <h2>Dove si dichiara</h2>
-        <pre aria-label="Esempio di configurazione di uno hook in settings.json">{CONFIG}</pre>
-        <ul>
-          <li>Tre livelli: evento, gruppo con il <b>matcher</b>, gestori.</li>
-          <li>Il matcher sceglie lo strumento: <code className="nw">Bash</code>, <code className="nw">Edit|Write</code>, <code className="nw">mcp__server__.*</code>. Distingue maiuscole e minuscole.</li>
-          <li><code className="nw">.claude/settings.json</code> è del progetto e si condivide con git; <code className="nw">.claude/settings.local.json</code> no.</li>
+        <ul style={{ marginTop: 10 }}>
+          <li>A parità di nome vince la personale su quella di progetto.</li>
+          <li><code className="nw">/skills</code> le elenca; <code className="nw">/context</code> mostra quanto contesto occupano; <code className="nw">/nome</code> la invoca a mano.</li>
+          <li>Le modifiche a un file esistente si vedono in sessione; per una cartella <code className="nw">skills</code> nuova serve <code className="nw">/reload-skills</code>.</li>
         </ul>
       </div>
     ),
-    notes: "Struttura e ambiti dal riferimento https://code.claude.com/docs/en/hooks (novembre 2026): file utente ~/.claude/settings.json, file di progetto .claude/settings.json, file locale .claude/settings.local.json, politiche gestite. La variabile CLAUDE_PROJECT_DIR indica la radice del progetto, così lo script si trova anche se l'agente cambia cartella. Con /hooks dentro Claude Code si vede l'elenco degli hook attivi."
+    notes: `Dalla pagina skills della documentazione di Claude Code, 9/11/2026. Esistono anche livello organizzazione (impostazioni gestite) e skill in sottocartelle, che si caricano quando si lavora lì. Per il corso: la skill dell'attività sta nel repository della palestra, in .claude/skills. Una skill di progetto con lo stesso nome di una personale viene ignorata: capita quando si prova una versione nuova senza accorgersi che ce n'è una vecchia nella cartella personale. /skill-doctor, dove disponibile, mostra il costo in contesto e la frequenza d'uso di ogni skill.`
   },
   {
-    block: B + 'Hook che blocca',
+    block: B + 'La descrizione',
     content: () => (
       <div className="pad">
-        <Tag>Esempio 1</Tag>
-        <h2>Un hook che blocca</h2>
-        <p>Su <code className="nw">Edit</code> e <code className="nw">Write</code> (configurazione della slide precedente): niente modifiche a <code className="nw">.env</code> né a <code className="nw">package-lock.json</code>.</p>
-        <pre aria-label="Script di hook che blocca la modifica di file protetti">{HOOK_PROTEGGI}</pre>
-        <p className="muted">Nell'attività scrivete lo stesso schema, ma per i comandi di shell.</p>
+        <Tag>Scrittura</Tag>
+        <h2>La descrizione è l'unica parte che l'agente legge sempre</h2>
+        <DT cols={['Vaga', 'Concreta']} rows={[
+          ['Aiuta con i test', 'Esegue la suite di test e riassume i fallimenti. Usala quando si chiede di lanciare i test o di capire perché falliscono.'],
+          ['Utility per git', 'Prepara le note di rilascio dai commit dall\'ultimo tag. Usala per changelog e release.'],
+          ['Revisione', 'Rivede una funzione rispetto alla sua specifica, eseguendo controlli. Usala dopo una modifica, prima di darla per finita.'],
+        ]} />
+        <ul style={{ marginTop: 10 }}>
+          <li>Due parti: <strong>che cosa fa</strong> e <strong>quando usarla</strong>, con le parole che userebbe un collega nella richiesta.</li>
+          <li>Il caso principale per primo: oltre i 1.536 caratteri il testo viene tagliato.</li>
+        </ul>
       </div>
     ),
-    notes: "Lo schema è quello della guida ufficiale (hooks-guide, «Block edits to protected files», novembre 2026), qui riscritto in Node.js perché il PC del laboratorio ha già Node e la guida usa jq, che potrebbe mancare. Lo script legge tutto lo stdin, decide, esce con 2 o con 0. Nota: se JSON.parse fallisse, lo script uscirebbe con un errore diverso da 2 e la modifica passerebbe; per una barriera vera si gestisce l'errore in modo esplicito."
+    notes: `La descrizione fa da indice: con dieci skill l'agente sceglie leggendo dieci descrizioni. Una descrizione vaga non viene scelta quando serve, o viene scelta quando non serve. Una prova pratica: leggere la descrizione senza vedere il resto e dire in quale richiesta si aspetterebbe di essere attivata. La documentazione suggerisce di includere nella descrizione anche le frasi tipiche con cui si chiede il compito, nel campo when_to_use, che viene accodato alla descrizione. Limite di 1.536 caratteri dalla pagina skills, 9/11/2026.`
   },
   {
-    block: B + 'Hook che lancia i test',
+    block: B + 'Un esempio',
     content: () => (
       <div className="pad">
-        <Tag>Esempio 2</Tag>
-        <h2>Un hook che lancia i test</h2>
-        <p>Evento <code className="nw">PostToolUse</code>, matcher <code className="nw">Edit|Write</code>: dopo ogni modifica girano i test.</p>
-        <pre aria-label="Script di hook che lancia i test dopo una modifica">{HOOK_TEST}</pre>
-        <Box type="warn" title="Due cautele">La modifica è già avvenuta: l'uscita 2 non la annulla, avvisa l'agente. E se la suite è lenta, ogni modifica la paga.</Box>
+        <Tag>Esempio</Tag>
+        <h2>Una skill piccola che basta</h2>
+        <pre aria-label="Esempio di SKILL.md di un progetto inventato">{SKILLMD}</pre>
+        <p className="muted">Passi numerati, comandi esatti, un confine («non toccare altro»). Nessuna spiegazione di cose che l'agente sa già.</p>
       </div>
     ),
-    notes: "Con PostToolUse l'uscita 2 mostra lo stderr all'agente ma non annulla l'azione già eseguita (https://code.claude.com/docs/en/hooks , novembre 2026). Sulla palestra la suite è veloce; su un progetto vero conviene restringere il controllo ai soli file di codice, per esempio con il campo if, oppure lanciare i test solo all'evento Stop. L'esempio ufficiale analogo formatta i file con Prettier dopo ogni modifica."
+    notes: `Esempio inventato. Notare: la descrizione dice che cosa fa e quando; ogni passo è un'azione controllabile; c'è un confine dichiarato. Si può chiedere alla sala quale passo l'agente potrebbe saltare senza che nessuno se ne accorga, e come si farebbe accorgersene (il file NOTE-RILASCIO.md ha le tre sezioni? ci sono hash?). Una skill che si lancia a mano con /note-di-rilascio è più prevedibile di una scelta dal modello.`
   },
   {
-    block: B + 'Provare uno hook',
+    block: B + 'I subagenti',
     content: () => (
       <div className="pad">
-        <Tag>Prima di fidarsene</Tag>
-        <h2>Come si prova uno hook</h2>
-        <ol className="timeline">
-          <li><time>1</time>A mano, senza agente: gli si manda un evento finto e si guarda il codice di uscita.</li>
-          <li><time>2</time>Con una batteria di casi: comandi da bloccare <b>e</b> comandi che devono passare.</li>
-          <li><time>3</time>Dentro Claude Code: <code className="nw">/hooks</code> per vederlo, poi si chiede all'agente il comando vietato.</li>
-        </ol>
-        <CommandBox cmd={PROVA_EVENTO} label="1. Mandate allo hook un evento finto" />
-        <CommandBox cmd="$LASTEXITCODE" label="2. Il codice di uscita (in bash: echo $?)" />
-        <p className="muted">Se qualcosa non va: <code className="nw">Ctrl+O</code> apre la trascrizione, <code className="nw">claude --debug</code> mostra uscite e messaggi.</p>
+        <Tag>Subagenti</Tag>
+        <h2>Un collaboratore con un contesto tutto suo</h2>
+        <Flow nodes={[
+          ['Agente principale', 'la conversazione intera', ''],
+          ['Messaggio di delega', 'tutto ciò che il subagente sa del compito', 'i'],
+          ['Subagente', 'contesto nuovo, strumenti e modello suoi', 'i'],
+          ['Riassunto', 'è l\'unica cosa che torna indietro', 'w'],
+        ]} />
+        <div className="grid" style={{ marginTop: 12 }}>
+          <Card title="Perché serve"><p>Letture, log e prove restano nel suo contesto: quello principale non si riempie.</p></Card>
+          <Card title="Che cosa non ha" kind="i"><p>La cronologia della conversazione e i file già letti. Riceve i CLAUDE.md e le skill che gli indichi.</p></Card>
+          <Card title="Che cosa costa" kind="w"><p>Richieste proprie al modello, che contano negli stessi limiti d'uso.</p></Card>
+        </div>
       </div>
     ),
-    notes: "Il comando di prova a mano è quello suggerito dalla guida ufficiale (hooks-guide, risoluzione dei problemi, novembre 2026). Il secondo passo è il più importante: uno hook troppo largo che blocca anche i comandi buoni (per esempio git commit con un messaggio che contiene una parola vietata) è un guaio pari a uno che non blocca. Matcher con maiuscole sbagliate e hook non eseguibili sono le cause più comuni di «non scatta»."
+    notes: `Dalla pagina sub-agents della documentazione (9/11/2026). Ogni subagente parte con una finestra di contesto nuova: non vede la conversazione. Riceve il suo prompt di sistema, il messaggio di delega scritto dall'agente principale, i CLAUDE.md (salvo i subagenti integrati Explore e Plan o chi imposta omitClaudeMd), le skill elencate. Alla fine torna solo il riassunto. Per la sala: ciò che l'agente principale scrive nel messaggio di delega è tutto quello che il subagente saprà. Un compito mal descritto produce una revisione del compito sbagliato. Nella versione attuale il comando /agents stampa un promemoria; nelle versioni fino alla 2.1.197 apriva una procedura guidata. I subagenti si creano chiedendo all'agente, oppure scrivendo il file in .claude/agents.`
   },
   {
-    block: B + 'I limiti',
+    block: B + 'Il file di un subagente',
     content: () => (
       <div className="pad">
-        <Tag>I limiti</Tag>
-        <h2>Cosa uno hook non fa</h2>
+        <Tag>Subagenti</Tag>
+        <h2>Un file in .claude/agents</h2>
+        <div className="cols">
+          <pre aria-label="Esempio di file di un subagente revisore">{AGENTMD}</pre>
+          <ul>
+            <li><code className="nw">name</code> e <code className="nw">description</code>: gli unici campi obbligatori. La descrizione dice all'agente <strong>quando delegare</strong>.</li>
+            <li><code className="nw">tools</code> è l'elenco di ciò che può usare; <code className="nw">disallowedTools</code> toglie.</li>
+            <li><code className="nw">model</code>: <code className="nw">inherit</code> usa il modello della conversazione.</li>
+            <li><code className="nw">skills</code>: skill da caricare nel suo contesto.</li>
+          </ul>
+        </div>
+        <p className="muted">Il testo dopo il frontmatter è il suo prompt di sistema.</p>
+      </div>
+    ),
+    notes: `Campi dalla pagina sub-agents, 9/11/2026. Altri campi utili: maxTurns, permissionMode, mcpServers, hooks, memory, isolation: worktree. Un campo sconosciuto viene ignorato in silenzio, quindi anche qui un nome scritto male non genera errori. I subagenti si possono tenere nel repository (.claude/agents, condivisi con chi clona) o nella cartella personale. In un revisore la scelta degli strumenti è parte del progetto: Bash serve per eseguire i test e le prove, ma permette anche di scrivere; Write ed Edit tolti non bastano da soli, la regola di non modificare i file va scritta anche nelle istruzioni. Per invocarlo a mano: @agent-nome, oppure chiedere esplicitamente nella richiesta.`
+  },
+  {
+    block: B + 'Cosa restituiscono',
+    content: () => (
+      <div className="pad">
+        <Tag>Subagenti</Tag>
+        <h2>Il lead legge un riassunto, non il lavoro</h2>
         <div className="grid">
-          <Card title="Vede solo ciò che riconosce" kind="w">
-            <p>Una regola contro <code className="nw">rm -rf</code> lascia passare <code className="nw">rm -fr</code> se nessuno ci ha pensato. È una lista di casi, non un'intelligenza.</p>
-          </Card>
-          <Card title="Non sostituisce i permessi" kind="i">
-            <p>Si aggiunge alle regole allow e deny e al modello di permessi. Una barriera sola non basta.</p>
-          </Card>
+          <Card title="Torna il riassunto finale"><p>Il lavoro lungo resta nel contesto del subagente. È il vantaggio, e anche il rischio.</p></Card>
+          <Card title="Il riassunto può omettere" kind="w"><p>Una riga del lavoro integrale può non comparire nel riassunto. Il verdetto «nessun problema» non dice quali controlli sono stati fatti.</p></Card>
+          <Card title="Come leggere tutto" kind="i"><p>Chiedere la risposta integrale del subagente. Le trascrizioni stanno in <code className="nw">~/.claude/projects/…/subagents/</code>.</p></Card>
         </div>
-        <Box type="danger" title="È codice che si esegue">Un hook gira con i tuoi permessi. Un repository di altri con hook già dentro le impostazioni va letto prima di fidarsi.</Box>
+        <Box type="info" title="Dal racconto">16 luglio: dieci agenti in parallelo leggono le trascrizioni delle sessioni di quindici progetti. Quindici progetti censiti in circa un'ora. Il parallelismo aiuta quando il compito è chiuso e il risultato si può controllare.</Box>
       </div>
     ),
-    notes: "Il rischio di fondo è l'illusione di sicurezza: «c'è l'hook» non vuol dire «tutto è coperto». Gli hook di un progetto stanno in .claude/settings.json, che si condivide con git: chi clona un repository porta con sé quelle impostazioni. La documentazione prevede anche politiche gestite per le organizzazioni (https://code.claude.com/docs/en/hooks , novembre 2026). Gli hook non dipendono dal modello scelto: gli stessi funzionano con qualunque modello collegato a Claude Code."
+    notes: `Dalla documentazione (9/11/2026): al lead arriva il report finale del subagente, sotto un'intestazione che lo identifica come output del subagente; non ha l'autorità di un'approvazione dell'utente. Il report viene anche scansionato per avvisare di testo che imita tag di sistema. Fonte dell'episodio: il censimento retroattivo del 16 luglio 2026, dieci agenti che leggono le trascrizioni, quindici progetti in circa un'ora. Racconto a parole di Thomas, senza nomi di colleghi né dati interni. Il punto tecnico: tre cose rendono il parallelismo utile, un compito chiuso, una forma uguale per tutti i risultati, un controllo a campione. Per la sala: chi legge il riassunto di un subagente deve sapere come arrivare al testo integrale.`
   },
   {
-    block: B + 'MCP: il problema',
+    block: B + 'Il revisore',
     content: () => (
       <div className="pad">
-        <Tag>MCP</Tag>
-        <h2>Che problema risolve MCP</h2>
-        <p>L'agente conosce il repository e il terminale. Non conosce il tuo calendario, il tuo database, il tuo sistema di segnalazioni.</p>
-        <p><b>MCP (Model Context Protocol)</b> è uno standard aperto per collegare un'applicazione di IA a sistemi esterni: dati, strumenti, flussi di lavoro. La documentazione lo paragona a una presa USB-C: un solo formato, tanti dispositivi.</p>
-        <Box type="info" title="Perché uno standard">Senza, ogni strumento dovrebbe essere collegato a ogni agente con un adattatore fatto su misura. Con MCP si scrive un server una volta, e lo usano tutti i programmi che parlano MCP.</Box>
-      </div>
-    ),
-    notes: "Definizione e paragone dalla pagina introduttiva https://modelcontextprotocol.io (novembre 2026). Il protocollo si occupa solo dello scambio di contesto: non stabilisce come l'applicazione usa il modello. Claude Code è uno dei programmi che lo supportano; altri editor e assistenti fanno lo stesso (la pagina cita per esempio Visual Studio Code e Cursor). Nell'argomento 9 si vede come lo stesso concetto si presenta in un secondo strumento."
-  },
-  {
-    block: B + 'Architettura',
-    content: () => (
-      <div className="pad">
-        <Tag>Architettura</Tag>
-        <h2>Host, client, server</h2>
-        <div role="group" aria-label="Schema: l'host contiene un client per ogni server; ogni server dà accesso a un sistema">
-          <Flow nodes={[
-            ['1 Host', 'l\'applicazione: Claude Code', 'w'],
-            ['2 Client', 'uno per ogni server, tiene la connessione', ''],
-            ['3 Server MCP', 'un programma che espone strumenti', 'i'],
-            ['4 Sistema', 'file, database, servizio', ''],
-          ]} />
-        </div>
-        <DT cols={['Il server può offrire', 'Che cos\'è']} rows={[
-          [<b>Strumenti</b>, 'Funzioni che l\'agente può chiamare (cerca, leggi, crea)'],
-          [<b>Risorse</b>, 'Dati da leggere come contesto (un file, un record)'],
-          [<b>Prompt</b>, 'Modelli di richiesta già pronti'],
-        ]} />
-        <p className="muted">Due modi di collegarsi: <b>stdio</b> (un programma locale lanciato dall'agente) e <b>HTTP</b> (un servizio remoto).</p>
-      </div>
-    ),
-    notes: "Dalla pagina Architecture di https://modelcontextprotocol.io (novembre 2026): l'host crea un client per ogni server; i server espongono tre primitive, strumenti, risorse e prompt; i trasporti sono stdio per i server locali e HTTP per quelli remoti. Il lavoro dell'agente con un server comincia sempre da un elenco degli strumenti disponibili, che il modello legge per decidere cosa chiamare."
-  },
-  {
-    block: B + 'Esempi per una scuola',
-    content: () => (
-      <div className="pad">
-        <Tag>Esempi plausibili</Tag>
-        <h2>Che cosa si potrebbe collegare</h2>
-        <DT cols={['Server (ipotetico)', 'Che cosa darebbe all\'agente', 'Rischio']} rows={[
-          ['Cartella di documenti di prova', 'Leggere i verbali inventati di una cartella, senza scrivere', 'Basso: sola lettura, una cartella'],
-          ['Registro delle prenotazioni', 'Interrogare le prenotazioni dei laboratori', 'Medio: dati veri se non sono di prova'],
-          ['Segnalazioni dei guasti', 'Leggere e commentare le richieste di assistenza', 'Medio: testo scritto da altri'],
-          ['Database del registro', 'Fare query direttamente', 'Alto: dati personali, scritture possibili'],
-        ]} />
-        <p className="muted">Esempi inventati per ragionare: non sono servizi installati a scuola.</p>
-      </div>
-    ),
-    notes: "Tutti gli esempi sono ipotetici e a dati inventati. Il criterio per scegliere è chiedersi quanto danno può fare il server se l'agente sbaglia o se un testo letto lo inganna: per questo si parte da sola lettura e da una cartella sola. Il server di riferimento per i file (modelcontextprotocol/servers, filesystem) ha un'opzione --read-only che non offre gli strumenti di scrittura."
-  },
-  {
-    block: B + 'Collegare un server',
-    content: () => (
-      <div className="pad">
-        <Tag>In pratica</Tag>
-        <h2>Collegare un server a Claude Code</h2>
-        <CommandBox cmd={MCP_ADD} label="Aggiungere un server MCP" />
-        <p>Con <code className="nw">--scope project</code> il comando scrive invece un file <code className="nw">.mcp.json</code> nella radice del progetto, di questo tipo:</p>
-        <pre aria-label="File .mcp.json">{MCP_JSON}</pre>
-        <p className="muted">Ambiti: <b>local</b> (solo tu, solo questo progetto), <b>project</b> (<code className="nw">.mcp.json</code>, condiviso con git), <b>user</b> (tutti i tuoi progetti). Dentro la sessione: <code className="nw">/mcp</code>.</p>
-      </div>
-    ),
-    notes: "Sintassi dalla pagina https://code.claude.com/docs/en/mcp (novembre 2026): claude mcp add [opzioni] nome -- comando argomenti; il doppio trattino separa le opzioni di Claude dal comando del server. Il server filesystem è @modelcontextprotocol/server-filesystem; il README di modelcontextprotocol/servers indica Node.js 24 o più recente e l'opzione --read-only, che a una prova nostra espone solo gli strumenti di lettura. I server di progetto in .mcp.json richiedono una approvazione esplicita nelle sessioni interattive. Con /mcp si vede lo stato dei server."
-  },
-  {
-    block: B + 'Rischi e permessi',
-    content: () => (
-      <div className="pad">
-        <Tag>Rischi</Tag>
-        <h2>Ogni server porta con sé dei permessi</h2>
+        <Tag>Revisione</Tag>
+        <h2>Un revisore come subagente</h2>
         <div className="grid">
-          <Card title="È codice che gira da te" kind="d">
-            <p>Un server locale parte come programma sul tuo PC. Uno di terzi può leggere file, rete e variabili d'ambiente.</p>
-          </Card>
-          <Card title="Il testo che arriva è un input non fidato" kind="w">
-            <p>Pagine, segnalazioni, documenti letti da un server possono contenere istruzioni travestite da dati (argomento 6).</p>
-          </Card>
+          <Card title="Non ha scritto il codice"><p>Parte senza la conversazione in cui il codice è nato: non eredita le giustificazioni di chi l'ha scritto.</p></Card>
+          <Card title="Rivede e non corregge" kind="i"><p>Strumenti di lettura e di esecuzione, niente scrittura. Chi ha chiamato il revisore decide che cosa fare dei rilievi.</p></Card>
+          <Card title="Ha un compito chiuso" kind="i"><p>Riceve codice e specifica, restituisce un rapporto in una forma fissa.</p></Card>
         </div>
-        <ul>
-          <li>Si collega solo ciò che serve, in sola lettura quando basta, su una cartella sola.</li>
-          <li>I permessi si decidono per strumento: nome <code className="nw">mcp__server__strumento</code>.</li>
-          <li>Token e chiavi nelle variabili d'ambiente, mai dentro <code className="nw">.mcp.json</code>.</li>
-        </ul>
+        <Box type="warn" title="Il limite">Se la specifica non è nel messaggio di delega o in un file, il revisore non la conosce: rivede il codice contro la sua idea del compito.</Box>
       </div>
     ),
-    notes: "La documentazione di Claude Code avverte di verificare che ci si fidi di ogni server prima di collegarlo, e che i server che leggono contenuti esterni espongono al rischio di prompt injection (https://code.claude.com/docs/en/mcp , novembre 2026). La guida alla sicurezza di MCP (https://modelcontextprotocol.io , sezione sicurezza) descrive i server locali come programmi con gli stessi privilegi del client, e consiglia di limitare i permessi e di eseguirli, dove si può, in un ambiente isolato. Un hook PreToolUse con matcher mcp__server__.* può fare da barriera in più."
+    notes: `Perché separare chi scrive e chi controlla: il revisore non vede il percorso fatto per arrivare al codice, quindi non ne eredita le scelte. Ma ciò che sa lo sa dalla delega: se il lead gli passa un riassunto del compito, il revisore rivede il riassunto. Meglio passare i file originali: la specifica, il codice, i test. La decisione finale resta a una persona.`
   },
   {
-    block: B + 'Quando non serve',
+    block: B + 'Due che concordano',
     content: () => (
       <div className="pad">
-        <Tag>Giudizio</Tag>
-        <h2>Quando un MCP non serve</h2>
-        <DT cols={['Se basta...', 'allora non serve MCP']} rows={[
-          ['Un comando da terminale (git, curl, un tuo script)', 'L\'agente lo lancia già con Bash'],
-          ['Un file nel repository', 'Si legge con gli strumenti normali'],
-          ['Una procedura che si ripete', 'Una skill o un file di istruzioni (argomenti 4 e 7)'],
-          ['Una regola da far rispettare', 'Un hook, non un server'],
-        ]} />
-        <Box type="warn" title="Il costo">Ogni server aggiunge strumenti che l'agente deve conoscere, un programma da tenere aggiornato e una superficie in più da difendere. Si aggiunge quando manca davvero qualcosa.</Box>
+        <Tag>Revisione</Tag>
+        <h2>Due agenti d'accordo non sono una prova</h2>
+        <div className="grid">
+          <Card title="Stesso modello" kind="w"><p>Chi ha scritto il codice e chi lo rivede hanno spesso gli stessi punti ciechi.</p></Card>
+          <Card title="Stessa lettura" kind="w"><p>Se la specifica ha un punto ambiguo, entrambi lo leggono allo stesso modo.</p></Card>
+          <Card title="Stessa fonte" kind="w"><p>Il revisore rivede ciò che il lead gli ha passato, nel modo in cui glielo ha descritto.</p></Card>
+        </div>
+        <Box type="tip" title="Che cosa cambia l'esito">Un accordo è un'opinione condivisa. Una prova è un comando eseguito che poteva fallire. Il revisore utile riporta le seconde.</Box>
+        <Box type="info" title="Dal racconto">Il lavoro del lead sulla versione 0.2 del toolkit passa dal reviewer: 26 errori, 4 bloccanti.</Box>
       </div>
     ),
-    notes: "Regola pratica: prima si prova con gli strumenti che l'agente già ha. MCP si giustifica quando c'è un sistema che l'agente non raggiunge in altro modo o quando serve un'interfaccia stabile e controllata verso di esso. La documentazione di Claude Code descrive anche una ricerca degli strumenti (tool search) per non caricare tutti gli strumenti di tutti i server in una volta: segno che il numero di strumenti ha un costo."
+    notes: `Il punto centrale dell'argomento. Due agenti che dicono la stessa cosa sembrano due conferme; spesso sono una lettura sola ripetuta. Un controllo ha valore se avrebbe potuto dare un altro esito. Per questo i revisori non vanno scelti solo per essere indipendenti: vanno istruiti a produrre prove (comandi, esiti, righe citate). Episodio documentato: nel luglio 2026, dopo la correzione dell'orchestrazione, la versione 0.2 del toolkit passa dal reviewer, che trova 26 errori di cui 4 bloccanti nel lavoro del lead. Raccontarlo con le parole di Thomas; qui solo i numeri documentati.`
   },
   {
-    block: B + 'Attività al PC',
+    block: B + 'Istruzioni ambigue',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Come si scrive un revisore che approva sempre</h2>
+        <pre aria-label="Istruzioni ambigue per un revisore">{AMBIGUA}</pre>
+        <DT cols={['Nel testo', 'Il problema', 'Più controllabile']} rows={[
+          ['«i test passano»', 'già noto prima di chiamarlo', 'per ogni punto della specifica, un controllo eseguito'],
+          ['«sembra corretto»', 'è un\'impressione, non una verifica', 'comando ed esito per ogni controllo'],
+          ['«APPROVATO»', 'unica uscita positiva', 'confermati, da verificare, non controllati'],
+        ]} />
+      </div>
+    ),
+    notes: `Queste sono le istruzioni che troverete nella palestra, nel punto di partenza dell'attività. Le leggete e vi sembrano ragionevoli: è il punto. Un revisore che le segue ha una via facile: i test sono verdi, il codice sembra a posto, risponde APPROVATO. Nulla lo obbliga a eseguire qualcosa. Le istruzioni migliori trasformano ogni impressione in un'azione di cui resta traccia. La terza colonna non è una soluzione da copiare: è il tipo di riscrittura da cui partire nell'attività. Lo stesso errore, istruzione ambigua letta allo stesso modo da due agenti, si può vedere nella demo del corso sull'organizzazione scolastica.`
+  },
+  {
+    block: B + 'Come si vede',
+    content: () => (
+      <div className="pad">
+        <Tag>Revisione</Tag>
+        <h2>Come accorgersi che il revisore non rivede</h2>
+        <div className="grid">
+          <Card title="Segnali nella risposta" kind="w">
+            <ul>
+              <li>Nessun comando eseguito citato.</li>
+              <li>Nessuna riga di codice citata.</li>
+              <li>Risponde subito, in poche righe.</li>
+              <li>Stessa forma di risposta per codice diverso.</li>
+            </ul>
+          </Card>
+          <Card title="Prove che puoi fare" kind="i">
+            <ul>
+              <li>Dagli un pezzo con un difetto noto: lo trova?</li>
+              <li>Ripeti la richiesta: l'esito è lo stesso?</li>
+              <li>Chiedi comandi ed esiti, uno per controllo.</li>
+              <li>Rifai a mano un controllo che ha riportato.</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="tip" title="Prima del verdetto">Tre elenchi, sempre: confermato con la prova, da verificare, non controllato. Un «non controllato» onesto vale più di un «approvato» vago.</Box>
+      </div>
+    ),
+    notes: `Un revisore si collauda come qualsiasi strumento: gli si dà un caso di cui si conosce l'esito. Il difetto noto può essere un difetto piantato apposta in un pezzo di codice di prova. Se lo approva, le istruzioni non servono, qualunque sia il modello. Ripetere la richiesta mostra quanto l'esito dipende dal caso. La forma a tre elenchi serve a rendere visibile anche ciò che non è stato guardato, che è la parte che di solito manca nei rapporti.`
+  },
+  {
+    block: B + 'Il racconto',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal racconto</Tag>
+        <h2>Sembrava funzionare</h2>
+        <div className="grid">
+          <Card title="Dieci agenti fantasma" kind="w"><p>Maggio 2026, versione 0.1 del toolkit: dieci agenti. Nel frontmatter c'era <code className="nw">\---</code> al posto di <code className="nw">---</code>. Per mesi i subagenti non sono stati caricati.</p></Card>
+          <Card title="L'orchestrazione mai avvenuta" kind="w"><p>20 luglio: si scopre che l'orchestrazione non era mai avvenuta. Correzione, un reviewer come passaggio obbligato, versione 0.2.</p></Card>
+        </div>
+        <Box type="info" title="Che cosa insegna">Un frontmatter sbagliato non produce un errore chiaro: lo strumento semplicemente non c'è. Si smaschera guardando se è stato caricato e se è stato usato, non leggendo la risposta.</Box>
+      </div>
+    ),
+    notes: `Fonti: il racconto di Thomas (frontmatter con backslash, subagenti mai caricati per mesi; scoperta del 20 luglio, correzione, passaggio dal reviewer, versione 0.2). Raccontare con le parole di Thomas e con gli errori quanto i successi. Il collegamento tecnico: la documentazione dice che un frontmatter YAML non valido fa caricare la skill senza i suoi campi e che un campo sconosciuto viene ignorato senza errori. Le difese: elencare gli strumenti caricati (/skills, /agents o la cartella), usarli a mano una volta, controllare che la delega compaia davvero.`
+  },
+  {
+    block: B + 'Proxy e modelli',
+    content: () => (
+      <div className="pad">
+        <Tag>Nel nostro ambiente</Tag>
+        <h2>Un modello può non usarli, un alias può non esistere</h2>
+        <DT cols={['Che cosa verifichi', 'Dove guardi']} rows={[
+          ['La skill è caricata?', <><code className="nw">/skills</code>, <code className="nw">/context</code>; con <code className="nw">claude --debug</code> un frontmatter rotto</>],
+          ['Il subagente è partito?', 'la riga della delega a schermo (la dicitura va vista sul PC del corso)'],
+          ['Il modello li ha scelti?', <>provali a mano: <code className="nw">/nome-skill</code>, <code className="nw">@agent-nome</code></>],
+          ['Ha eseguito davvero?', 'nel riassunto: comandi ed esiti, non solo il verdetto'],
+          ['Gli alias del modello?', <>con un proxy davanti, <code className="nw">sonnet</code>, <code className="nw">opus</code>, <code className="nw">haiku</code> vanno mappati sui nomi del proxy; <code className="nw">inherit</code> evita il problema</>],
+        ]} />
+        <Box type="warn" title="Il rischio">Un modello può rispondere senza avere usato né la skill né il subagente: la risposta c'è, la verifica no. Se la risposta non mostra prove, è così finché non si dimostra il contrario.</Box>
+      </div>
+    ),
+    notes: `Nel laboratorio Claude Code parla con modelli Claude attraverso il proxy LiteLLM, quindi il rischio che il modello usi male gli strumenti è molto ridotto rispetto a un modello di un altro fornitore; resta il principio. Skill e subagenti dipendono da come il modello li sceglie: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano; il piano B serve anche per un guasto di rete o del proxy. Gli hook invece non dipendono dal modello (argomento 9). Il proxy espone l'endpoint in formato Anthropic (docs.litellm.ai/docs/anthropic_unified, 11/11/2026); gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno comunque mappati nel file config.yaml del proxy e nelle variabili ANTHROPIC_DEFAULT_*_MODEL del file gestito, altrimenti la delega fallisce o è rifiutata (la chiave dei partecipanti non ha Opus): verificare prima dell'aula (code.claude.com/docs/en/llm-gateway-rollout).`
+  },
+  {
+    block: B + 'Memoteca: la squadra',
+    content: () => (
+      <div className="pad">
+        <Tag>Una squadra di agenti</Tag>
+        <h2>Subagenti e revisore, messi insieme: Memoteca</h2>
+        <p>Un toolkit pubblico per Claude Code che mette per iscritto come lavora una squadra di agenti: chi pianifica, chi esegue, chi controlla, che cosa resta alla sessione dopo.</p>
+        <div className="grid">
+          <Card title="Orchestrazione"><p>Un lead che pianifica, delega e sintetizza. Tre livelli di modello, con rilancio al livello sopra.</p></Card>
+          <Card title="Qualità" kind="i"><p>Un revisore con contesto pulito prima di dire «finito». Si rivede solo ciò che è cambiato.</p></Card>
+          <Card title="Conoscenza" kind="i"><p>Ciò che si impara in un progetto non si perde: sessione, wiki, base stabile.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Nelle slide cerca: «Il lead», «Tre livelli di modello», «Gli specialisti», «Il gate», «Fonte unica».</p>
+        <ApriSlide href="https://thomascasali.github.io/presentazione-memoteca/" kicker="Slide pubbliche" label="Presentazione di Memoteca (si apre in una nuova scheda)" />
+      </div>
+    ),
+    notes: `Passaggio alle slide vere di Memoteca: il link si apre in una nuova scheda, poi si torna qui. Non si rifanno le slide: si usa la presentazione pubblica (thomascasali.github.io/presentazione-memoteca/), nel mazzo «Presentazione» le slide Il lead, Tre livelli di modello, Gli specialisti, Il gate e Fonte unica; per la memoria condivisa anche I tre livelli. Fonti, lette il 25/11/2026 e tutte pubbliche: README del toolkit (github.com/thomascasali/memoteca, tre parti: conoscenza, orchestrazione, qualità), docs/orchestrazione.md, CHANGELOG (versione 0.4.1 del 5 novembre 2026) e la presentazione. Memoteca è scritta per chi mantiene da solo molti progetti non collegati: è un esempio da leggere, non un prodotto da installare in laboratorio, e la slide dei limiti dice che cosa non è stato provato. Domande da lasciare a chi guarda: chi può delegare e chi no? Su che cosa sceglie il lead l'agente? Che cosa impedisce al revisore di approvare per abitudine?`
+  },
+  {
+    block: B + 'Memoteca: cosa portarsi via',
+    content: () => (
+      <div className="pad">
+        <Tag>Il collegamento</Tag>
+        <h2>Dalla squadra al revisore che hai scritto</h2>
+        <DT cols={['In Memoteca', 'Nel revisore di questo argomento']} rows={[
+          ['La description dell\'agente è l\'unico criterio con cui il lead lo sceglie', 'La riga che riscrivi finché l\'agente principale delega da solo'],
+          ['Delega piatta: solo il lead delega', <><code className="nw">task: deny</code> nel revisore: non delega a sua volta</>],
+          ['Il gate: il revisore rilegge con contesto pulito', 'Parte senza la conversazione e riporta comandi ed esiti'],
+          ['Il livello più basso ha limiti scritti: niente produzione, niente segreti, mai il gate finale', <>I limiti stanno nei permessi: <code className="nw">edit: deny</code>, comandi che chiedono conferma</>],
+          ['Fonte unica: ogni informazione ha una sola casa', 'La procedura sta in un posto solo, non copiata in tre'],
+        ]} />
+        <Box type="info" title="Il modo di lavorare di Thomas (non è testo di Memoteca)">Una sola sessione salva e pubblica. I segreti non passano a schermo. Una persona dice sì alle azioni difficili da annullare: nel laboratorio è il <code className="nw">ask</code> che leggi prima di rispondere.</Box>
+      </div>
+    ),
+    notes: `Il ritorno dalle slide di Memoteca: ogni riga collega una regola della squadra a qualcosa che si è appena scritto. Fonti pubbliche, 25/11/2026: docs/orchestrazione.md di Memoteca (delega piatta, description come unico criterio di selezione, limiti del livello più basso, gate obbligatorio) e presentazione (Il gate, Fonte unica). Il riquadro sul modo di lavorare riporta indicazioni di Thomas sul proprio lavoro, non testo di Memoteca: una sola sessione salva e pubblica, i segreti non passano a schermo, una persona approva le azioni difficili da annullare. Ricordare che per verificare una squadra Memoteca stessa propone di chiedere al lead quali subagenti ha a disposizione: se i propri non compaiono, il frontmatter non è valido. È la stessa prova dell'episodio dei dieci agenti fantasma.`
+  },
+  {
+    block: B + 'Attività: la palestra',
     content: () => (
       <div className="pad">
         <Tag>Attività</Tag>
-        <h2>Ora tocca a voi</h2>
+        <h2>Una skill e un revisore per prenotaSettimanale</h2>
         <ol className="timeline">
-          <li><time>1</time>Scrivete lo hook che blocca i comandi indicati nell'esercizio, sulla palestra.</li>
-          <li><time>2</time>Provatelo con lo script di prova: dieci casi su dieci.</li>
-          <li><time>3</time>Collegatelo a Claude Code e chiedete all'agente un comando vietato.</li>
-          <li><time>4</time>Facoltativo: collegate un server MCP di sola lettura su una cartella di prova.</li>
+          <li><time>1</time>Dal punto <code className="nw">partenza-a8</code>: rivedi a mano la funzione contro la specifica.</li>
+          <li><time>2</time>Prova il revisore con le istruzioni del collega e annota che cosa ha eseguito.</li>
+          <li><time>3</time>Scrivi la skill di revisione, partendo dal modello.</li>
+          <li><time>4</time>Scrivi il subagente revisore: strumenti di lettura, rimando alla skill.</li>
+          <li><time>5</time>Fai girare tutto, controlla che sia stato usato, confronta con la revisione a mano.</li>
         </ol>
-        <ActivityBadge n="8" file="attivita-hook.html" label="Uno hook che blocca un comando" />
-        <ActivityBadge n="8" file="promemoria-hook-mcp.html" label="Promemoria: eventi, formato, comandi MCP" />
-        <p className="muted" style={{ marginTop: 10 }}>Le soluzioni le ha il docente.</p>
+        <ActivityBadge n="8" file="scheda-revisione.html" label="Scheda: skill e subagente revisore" />
+        <p className="muted" style={{ marginTop: 8 }}>Modelli da completare: <a className="text-link" href="../materiali/argomento-8/modello-skill-revisione.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>skill</a> e <a className="text-link" href="../materiali/argomento-8/modello-subagente-revisore.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente</a>.</p>
       </div>
     ),
-    notes: "Il punto di partenza della palestra è il tag partenza-a8 (la scheda dice come ottenerlo). Si lavora in coppia. Anche il progetto personale riceve lo stesso hook. Chi finisce prima prova a far passare un comando che aggira la regola (un altro modo di scrivere lo stesso comando) e corregge lo hook."
+    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a8 (git switch -c lavoro-a8 partenza-a8). I test sono tutti verdi: la funzione prenotaSettimanale ha un solo test. Non dire se e dove ci siano problemi: è parte dell'esercizio. La revisione a mano viene prima, così c'è un termine di confronto. Il passo 2 è volutamente fatto con le istruzioni ambigue. Alla fine ogni coppia confronta tre colonne: a mano, revisore del collega, il proprio revisore. Se il modello non usa la skill o il subagente: invocarli a mano, e annotarlo come risultato.`
+  },
+  {
+    block: B + 'Il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Lo stesso revisore, in un altro file</h2>
+        <div className="cols">
+          <pre aria-label="Esempio di file di un subagente revisore per OpenCode">{AGENTEOC}</pre>
+          <ul>
+            <li>Cartella <code className="nw">.opencode/agents/</code>. Il <strong>nome del file</strong> è il nome dell'agente.</li>
+            <li><code className="nw">description</code> è obbligatoria: è ciò che l'agente principale legge per scegliere.</li>
+            <li><code className="nw">mode: subagent</code>. Senza, vale <code className="nw">all</code>.</li>
+            <li>Niente <code className="nw">tools</code>: i limiti stanno in <code className="nw">permission</code>. L'ultima regola che corrisponde vince.</li>
+            <li>Niente <code className="nw">skills</code>: la procedura sta nel testo.</li>
+          </ul>
+        </div>
+        <p className="muted">Si chiama con <code className="nw">@revisore</code>, oppure lo sceglie l'agente principale.</p>
+      </div>
+    ),
+    notes: `Fonte: opencode.ai/docs/agents, pagina della serie 1 al tag v1.19.5 (packages/web/src/content/docs/agents.mdx), letta il 25/11/2026. Gli agenti in Markdown stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/; il nome del file diventa il nome dell'agente; description è obbligatoria; mode vale all se manca; tools è deprecato in favore di permission; i subagenti usano il modello dell'agente che li chiama se model non è indicato. Con permission.bash l'ultima regola che corrisponde vince, quindi il "*" va per primo. Nella configurazione del laboratorio lo strumento che lancia i subagenti (task) chiede conferma: la delega parte solo dopo un sì. Rispetto al file di Claude Code: stessa idea (descrizione, strumenti limitati, istruzioni nel testo), campi diversi. Lo scheletro da completare è nel foglio «Modello: subagente revisore per OpenCode». Provato su OpenCode 1.19.5 il 25/11/2026: il file viene letto e l'elenco degli agenti lo mostra come subagente; non provato con il modello del corso. Da verificare a schermo: la chiamata con @ e l'ingresso nella sessione del subagente.`
+  },
+  {
+    block: B + 'OpenCode: è stato letto?',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Un errore nel file non sempre si sente</h2>
+        <DT cols={['Che cosa scrivi', 'Che cosa succede']} rows={[
+          [<><code className="nw">permision:</code> al posto di <code className="nw">permission:</code></>, <>Nessun errore. Il campo finisce tra le opzioni del modello e <code className="nw">edit</code> resta permesso.</>],
+          ['Una riga vuota prima del primo ---', 'Nessun errore. Il frontmatter non vale: l\'agente compare come «all» e senza description.'],
+          [<><code className="nw">name:</code> diverso dal nome del file</>, 'Nessun errore. L\'agente prende il nome di name.'],
+          [<><code className="nw">tools: Read, Grep</code> come in Claude Code</>, <>Errore: «Configuration is invalid». Nessun agente viene elencato.</>],
+        ]} />
+        <CommandBox cmd={CMD_OC.elenco} label="Controllo: l'agente è nell'elenco come subagent?" />
+        <p className="muted" style={{ marginTop: 8 }}>Con <code className="nw">opencode debug agent revisore</code> vedi description, modalità e permessi come li ha letti OpenCode.</p>
+      </div>
+    ),
+    notes: `Prove fatte il 25/11/2026 su OpenCode 1.19.5 con file di agenti scritti apposta: un permesso scritto male viene passato come opzione del modello (il comando debug agent lo mostra tra le options) e il permesso di scrittura non c'è; con una riga vuota prima del primo --- l'agente compare come all e senza description; un campo name nel frontmatter rinomina l'agente (comportamento osservato, non descritto nella pagina agents); un campo tools con un elenco in stile Claude Code (Read, Grep) rende invalida l'intera configurazione e il comando che elenca gli agenti stampa solo l'errore. Stesso principio dell'episodio dei dieci agenti fantasma: un file sbagliato non sempre fa rumore, si smaschera guardando che cosa è stato caricato. Il comando per l'elenco è opencode agent list; filtrato con Select-String in PowerShell mostra solo i subagenti. Le versioni di OpenCode cambiano in fretta: riprovare sulla versione installata.`
+  },
+  {
+    block: B + 'Attività: il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Un subagente revisore per OpenCode</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dal punto <code className="nw">partenza-a8</code>: la tua lettura di <code className="nw">prenotaSettimanale</code>, a mano.</li>
+          <li><time>2</time>Scrivi <code className="nw">.opencode/agents/revisore.md</code> dal modello e controlla che sia stato letto.</li>
+          <li><time>3</time>Chiamalo con <code className="nw">@revisore</code> e leggi che cosa ha eseguito.</li>
+          <li><time>4</time>Confronta il suo rapporto con la tua lettura.</li>
+          <li><time>5</time>Chiedi la revisione senza nominarlo: riscrivi la description finché l'agente principale lo sceglie.</li>
+        </ol>
+        <CommandBox cmd={CMD_OC.richiesta} label="Richiesta del passo 5, senza nominare il revisore" kind="text" />
+        <ActivityBadge n="8" file="scheda-subagente-opencode.html" label="Scheda: subagente revisore per OpenCode" />
+        <p className="muted" style={{ marginTop: 8 }}>Modello da completare: <a className="text-link" href="../materiali/argomento-8/modello-subagente-opencode.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente per OpenCode</a>. Se OpenCode non parte, la stessa cosa con Claude Code come nell'attività precedente.</p>
+      </div>
+    ),
+    notes: `Attività a coppie, dallo stesso punto di partenza della precedente (git switch -c lavoro-a8-opencode partenza-a8); si usa la stessa funzione, quindi chi ha già fatto la lettura a mano riprende quella tabella. Non dire se e dove ci siano problemi. Il confronto è fra la lettura a mano e il rapporto del revisore: che cosa ha eseguito, che cosa ha riportato, che cosa si riproduce. Nell'ultimo passo la richiesta non nomina il revisore: nella configurazione del laboratorio l'agente principale chiede il permesso prima di lanciare un subagente, ed è quella richiesta che dice che la delega è partita; se invece rivede da solo o delega a un altro agente, la description va riscritta. Se OpenCode non parte, il piano B è Claude Code con .claude/agents, già visto in questo argomento. Da verificare a schermo, perché non provato con il modello del corso: la chiamata con @ da testo incollato (in caso scegliere il nome dall'elenco che si apre scrivendo @), i tasti per entrare nella sessione del subagente (documentazione della serie 1: session_child_first, di norma Leader più Giù), se la modifica della description si vede senza riaprire OpenCode, e quale shell usa lo strumento bash su Windows. Fonte: opencode.ai/docs/agents, serie 1 al tag v1.19.5, 25/11/2026.`
   },
   {
     block: B + 'Domanda di verifica',
@@ -702,30 +810,33 @@ const slides = [
       <div className="pad">
         <Tag>Quiz</Tag>
         <h2>Una domanda per voi</h2>
-        <Quiz domanda="Il tuo hook PreToolUse stampa un messaggio di errore e poi esce con codice 1. Che cosa succede al comando dell'agente?" opzioni={[
-          { t: 'Viene bloccato, e l\'agente legge il messaggio', ok: false, perche: 'Per bloccare serve il codice 2. Il messaggio c\'è, ma il comando non è fermato.' },
-          { t: 'Parte lo stesso: il codice 1 è un errore che non blocca', ok: true, perche: 'Solo l\'uscita 2 (o un JSON con deny) ferma un PreToolUse. Con 1 compare un avviso e l\'azione prosegue.' },
-          { t: 'Claude Code chiede a te se proseguire', ok: false, perche: 'Questo lo fa la decisione "ask" in un JSON, non un codice di uscita.' },
+        <Quiz domanda="Il revisore risponde APPROVATO e anche chi ha scritto il codice è d'accordo. Che cosa dimostra?" opzioni={[
+          { t: 'Che due verifiche indipendenti hanno dato lo stesso esito: il codice è giusto', ok: false, perche: 'Indipendenti fino a un certo punto: stesso modello, stessa specifica, stessa delega. Un accordo non è una prova.' },
+          { t: 'Che condividono la stessa lettura del compito. Vale come prova solo se il revisore ha eseguito controlli che potevano fallire', ok: true, perche: 'Per questo il rapporto deve riportare comandi ed esiti, e dichiarare ciò che non è stato controllato.' },
+          { t: 'Nulla: i revisori automatici sono inutili', ok: false, perche: 'Utili sì, se istruiti a produrre prove. Il difetto è nel fidarsi del verdetto senza guardare che cosa è stato fatto.' },
         ]} />
       </div>
     ),
-    notes: "Domanda di comprensione sul punto più frainteso: l'errore classico è usare exit 1, che è l'abitudine di ogni script di shell, mentre qui il valore che blocca è 2. Dopo la risposta si può chiedere perché è pericoloso per una barriera: se lo script si rompe, la barriera sparisce senza far rumore."
+    notes: `Se qualcuno risponde A, rimandare alla slide sui due agenti che concordano. Se risponde C, ricordare che il revisore trova cose che chi scrive non vede, quando è istruito bene: la slide sui due agenti che concordano. La risposta B è la più lunga di proposito: la condizione conta più del verdetto.`
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Le istruzioni sono consigli, gli hook sono controlli: le regole che non si possono violare vanno in un hook.',
-          'PreToolUse blocca con l\'uscita 2 e il motivo sullo stderr; PostToolUse arriva dopo e non annulla.',
-          'Uno hook si prova prima, con casi da bloccare e casi da lasciar passare, e vede solo ciò che sa riconoscere.',
-          'MCP collega strumenti e dati con uno standard comune; ogni server porta permessi e rischi, e si aggiunge solo se serve.',
+          'Una skill è una procedura in una cartella: l\'agente vede sempre la descrizione, il resto lo legge quando serve. La descrizione decide se verrà scelta.',
+          'Un subagente ha contesto e strumenti propri e restituisce un riassunto: si legge anche il lavoro, non solo il riassunto.',
+          'Due agenti d\'accordo non dimostrano nulla. Vale il controllo eseguito che poteva fallire.',
+          'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un proxy in mezzo, e alias da mappare, non è scontato.',
+          'Lo stesso revisore si scrive anche per OpenCode: permission al posto di tools, il nome è quello del file, e un campo scritto male può non fare rumore.',
+          'Una squadra di agenti, come Memoteca, è questo messo insieme: descrizioni che scelgono, permessi che limitano, un revisore con contesto pulito.',
         ]}
-        dopo="Argomento 9: gli stessi concetti in OpenCode, dove al posto degli hook ci sono i plugin in JavaScript. Argomento 12: l'hook PreToolUse come barriera di un agente che legge posta non fidata." />
+        dopo="Argomento 9 (hook e MCP: controlli che non dipendono dal modello), argomento 10 (OpenCode, permessi e plugin) e argomento 12 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
     ),
-    notes: "Riprendere i quattro punti. Collegamenti: l'argomento 9 mostra il plugin come equivalente dell'hook; l'argomento 12 usa un hook PreToolUse come barriera e mostra perché le regole vanno sia nei permessi sia in un controllo deterministico."
+    notes: `Riprendere i sei punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 9. Il quinto e il sesto punto riprendono la parte su OpenCode e le slide di Memoteca.`
   },
 ];
+
 
 /* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
 
