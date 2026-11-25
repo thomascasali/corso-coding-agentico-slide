@@ -71,10 +71,6 @@ h2 {
   margin: 0 0 14px;
 }
 section { margin-bottom: 40px; }
-.dates { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.dates li { border: 1px solid var(--border); background: var(--panel); border-radius: 4px; padding: 10px 12px; }
-.dates strong { display: block; font-weight: 600; }
-.dates .label { display: block; margin-top: 2px; }
 .note { color: var(--muted); margin-top: 12px; max-width: 42em; }
 ol.topics { list-style: none; border-top: 1px solid var(--border); }
 ol.topics li {
@@ -104,37 +100,25 @@ footer { color: var(--muted); font-size: 15px; border-top: 1px solid var(--borde
 </head>
 <body>
 <main>
-  <p class="label">// corso di formazione · 15 ore</p>
+  <p class="label">// corso di formazione</p>
   <h1>Coding agentico<span class="cursor" aria-hidden="true"></span></h1>
   <p class="sub">Dall'idea al risultato, con l'aiuto degli agenti di programmazione.</p>
   <p class="school">Per i docenti di informatica e l'ufficio tecnico dell'ITTS "Belluzzi-Da Vinci". Lo tiene Thomas Casali.</p>
 
-  <section aria-labelledby="inc">
-    <h2 id="inc">Cinque incontri</h2>
-    <ul class="dates">
-      <li><strong>Giovedì 3 dicembre</strong><span class="label">ore 14–17</span></li>
-      <li><strong>Giovedì 10 dicembre</strong><span class="label">ore 14–17</span></li>
-      <li><strong>Martedì 15 dicembre</strong><span class="label">ore 14–17</span></li>
-      <li><strong>Giovedì 17 dicembre</strong><span class="label">ore 14–17</span></li>
-      <li><strong>Lunedì 21 dicembre</strong><span class="label">ore 14–17</span></li>
-    </ul>
-    <p class="note">Nel laboratorio, un PC per ciascuno, già preparato. Tutti i dati e il codice degli esercizi sono inventati.</p>
-  </section>
-
   <section aria-labelledby="arg">
     <h2 id="arg">Gli argomenti</h2>
     <ol class="topics">
-      <li><span class="num">1</span><span class="title"><a href="argomento-1/slide.html">Chatbot, completamento, agente</a></span><span class="state">incontro 1 · <a href="materiali/argomento-1/index.html">materiali</a></span></li>
-      <li><span class="num">2</span><span class="title"><a href="argomento-2/slide.html">Installare l'agente</a></span><span class="state">incontro 1 · <a href="materiali/argomento-2/index.html">materiali</a></span></li>
-      <li><span class="num">3</span><span class="title"><a href="argomento-3/slide.html">Git come rete di sicurezza</a></span><span class="state">incontro 2 · <a href="materiali/argomento-3/index.html">materiali</a></span></li>
-      <li><span class="num">4</span><span class="title"><a href="argomento-4/slide.html">Dalla richiesta vaga ai requisiti</a></span><span class="state">incontro 2 · <a href="materiali/argomento-4/index.html">materiali</a></span></li>
-      <li><span class="num">5</span><span class="title"><a href="argomento-5/slide.html">Istruzioni persistenti: CLAUDE.md e AGENTS.md</a></span><span class="state">incontro 2 · <a href="materiali/argomento-5/index.html">materiali</a></span></li>
-      <li><span class="num">6</span><span class="title"><a href="argomento-6/slide.html">Test e debugging con l'agente</a></span><span class="state">incontro 3 · <a href="materiali/argomento-6/index.html">materiali</a></span></li>
-      <li><span class="num">7</span><span class="title"><a href="argomento-7/slide.html">Sicurezza: segreti, dipendenze, prompt injection</a></span><span class="state">incontro 3 · <a href="materiali/argomento-7/index.html">materiali</a></span></li>
-      <li><span class="num">8</span><span class="title"><a href="argomento-8/slide.html">Skill e subagenti revisori</a></span><span class="state">incontro 4 · <a href="materiali/argomento-8/index.html">materiali</a></span></li>
-      <li><span class="num">9</span><span class="title"><a href="argomento-9/slide.html">Hook e MCP</a></span><span class="state">incontro 4 · <a href="materiali/argomento-9/index.html">materiali</a></span></li>
-      <li><span class="num">10</span><span class="title"><a href="argomento-10/slide.html">OpenCode e LiteLLM</a></span><span class="state">incontro 4 · <a href="materiali/argomento-10/index.html">materiali</a></span></li>
-      <li><span class="num">11</span><span class="title"><a href="argomento-11/slide.html">Costi e contesto</a></span><span class="state">incontro 4 · <a href="materiali/argomento-11/index.html">materiali</a></span></li>
+      <li><span class="num">1</span><span class="title"><a href="argomento-1/slide.html">Chatbot, completamento, agente</a></span><span class="state"><a href="materiali/argomento-1/index.html">materiali</a></span></li>
+      <li><span class="num">2</span><span class="title"><a href="argomento-2/slide.html">Installare l'agente</a></span><span class="state"><a href="materiali/argomento-2/index.html">materiali</a></span></li>
+      <li><span class="num">3</span><span class="title"><a href="argomento-3/slide.html">Git come rete di sicurezza</a></span><span class="state"><a href="materiali/argomento-3/index.html">materiali</a></span></li>
+      <li><span class="num">4</span><span class="title"><a href="argomento-4/slide.html">Dalla richiesta vaga ai requisiti</a></span><span class="state"><a href="materiali/argomento-4/index.html">materiali</a></span></li>
+      <li><span class="num">5</span><span class="title"><a href="argomento-5/slide.html">Istruzioni persistenti: CLAUDE.md e AGENTS.md</a></span><span class="state"><a href="materiali/argomento-5/index.html">materiali</a></span></li>
+      <li><span class="num">6</span><span class="title"><a href="argomento-6/slide.html">Test e debugging con l'agente</a></span><span class="state"><a href="materiali/argomento-6/index.html">materiali</a></span></li>
+      <li><span class="num">7</span><span class="title"><a href="argomento-7/slide.html">Sicurezza: segreti, dipendenze, prompt injection</a></span><span class="state"><a href="materiali/argomento-7/index.html">materiali</a></span></li>
+      <li><span class="num">8</span><span class="title"><a href="argomento-8/slide.html">Skill e subagenti revisori</a></span><span class="state"><a href="materiali/argomento-8/index.html">materiali</a></span></li>
+      <li><span class="num">9</span><span class="title"><a href="argomento-9/slide.html">Hook e MCP</a></span><span class="state"><a href="materiali/argomento-9/index.html">materiali</a></span></li>
+      <li><span class="num">10</span><span class="title"><a href="argomento-10/slide.html">OpenCode e LiteLLM</a></span><span class="state"><a href="materiali/argomento-10/index.html">materiali</a></span></li>
+      <li><span class="num">11</span><span class="title"><a href="argomento-11/slide.html">Costi e contesto</a></span><span class="state"><a href="materiali/argomento-11/index.html">materiali</a></span></li>
       <li class="case"><span class="num">12</span><span class="title"><a href="argomento-12/slide.html">Caso di studio: il rilascio mobile in autopilota</a></span><span class="state">caso di studio</span></li>
       <li class="case"><span class="num">13</span><span class="title"><a href="argomento-13/slide.html">Caso di studio: l'helpdesk email in autopilota</a></span><span class="state">caso di studio</span></li>
       <li><span class="num">14</span><span class="title"><a href="argomento-14/slide.html">Il racconto: come sono nati il metodo e i portali</a></span><span class="state">facoltativo · <a href="materiali/argomento-14/index.html">materiali</a></span></li>
@@ -145,10 +129,10 @@ footer { color: var(--muted); font-size: 15px; border-top: 1px solid var(--borde
   <section aria-labelledby="lab">
     <h2 id="lab">Il progetto personale</h2>
     <ol class="topics">
-      <li><span class="num">P</span><span class="title"><a href="laboratorio-progetto/slide.html">Laboratorio-progetto</a></span><span class="state">incontro 5 · <a href="materiali/laboratorio-progetto/index.html">schede</a></span></li>
+      <li><span class="num">P</span><span class="title"><a href="laboratorio-progetto/slide.html">Laboratorio-progetto</a></span><span class="state">laboratorio · <a href="materiali/laboratorio-progetto/index.html">schede</a></span></li>
       <li><span class="num">D</span><span class="title"><a href="materiali/dispensa/index.html">Dispensa e glossario</a></span><span class="state">tutti gli argomenti</span></li>
     </ol>
-    <p class="note">Ognuno sviluppa un proprio progetto lungo tutto il corso, partendo dalla scheda del progetto.</p>
+    <p class="note">Ognuno sviluppa un proprio progetto lungo tutto il corso, partendo dalla scheda del progetto. Tutti i dati e il codice degli esercizi sono inventati.</p>
   </section>
 
   <footer>Un corso di Thomas Casali.</footer>
