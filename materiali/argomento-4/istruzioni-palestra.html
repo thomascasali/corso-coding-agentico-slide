@@ -31,6 +31,7 @@ h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
 h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
 h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
 p, li { color: var(--text-dim); }
+main p, main li { overflow-wrap: anywhere; }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .topbar {
@@ -67,10 +68,30 @@ th { background: var(--bg-callout); color: var(--text); font-family: 'Public San
 tr:last-child td { border-bottom: none; }
 code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
 pre {
-  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  background: #0a2416; color: #e6f5ec; border-radius: 8px; padding: 16px 18px;
   overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
 }
 pre code { background: none; padding: 0; color: inherit; }
+:not(pre) > code { overflow-wrap: anywhere; }
+.cmd-copy {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 1px solid var(--accent);
+  border-radius: 5px; background: var(--bg-card); color: var(--accent); cursor: pointer;
+}
+.cmd-copy:hover { background: var(--bg-callout); }
+.cmd-copy svg { width: 16px; height: 16px; }
+.cmd-copy.ok { width: auto; padding: 0 8px; font: 600 13px 'Public Sans', sans-serif; }
+pre:has(> code.language-text), pre:not(:has(> code[class*="language-"])) { white-space: pre-wrap; overflow-wrap: anywhere; font-family: 'Public Sans', system-ui, sans-serif; font-size: 16px; }
+pre > code.language-text, pre > code:not([class*="language-"]) { font-family: inherit; }
+.code-box { position: relative; }
+.code-box pre { padding-top: 54px; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px; min-height: 36px;
+  background: #e6f5ec; color: #0a2416; border: none; border-radius: 6px;
+  padding: 6px 12px; font: 600 14px 'Public Sans', sans-serif; cursor: pointer;
+}
+.copy-btn:hover { background: #ffffff; }
+.copy-btn:focus-visible { outline: 3px solid #e6f5ec; outline-offset: 2px; }
 footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
 @media (max-width: 480px) {
   main.wrap { padding: 24px 16px 60px; }
@@ -84,6 +105,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
   .table-scroll { border: none; overflow: visible; }
   table { font-size: 11pt; }
   pre { white-space: pre-wrap; word-wrap: break-word; }
+  .code-box pre { padding-top: 16px; }
   @page { margin: 16mm 14mm; }
 }
 </style>
@@ -95,26 +117,27 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </div>
 <main class="wrap">
 <h1 id="scheda-sistemare-le-istruzioni-della-palestra">Scheda: sistemare le istruzioni della palestra</h1>
-<p>Si lavora in coppia, sul PC del laboratorio, nella palestra (prenotazione dei laboratori, dati inventati).
-Durata indicativa: 30 minuti.</p>
+<p>Si lavora in coppia, sul PC del laboratorio, nella palestra (prenotazione dei laboratori, dati inventati).</p>
 <h2 id="prima-di-partire">Prima di partire</h2>
-<pre><code>git status
-git switch -c lavoro-a4 partenza-a4
+<p>Incolla i comandi uno alla volta:</p>
+<pre><code class="language-powershell">git status
+</code></pre>
+<pre><code class="language-powershell">git switch -c lavoro-a4 partenza-a4
 </code></pre>
 <p>Il punto <code>partenza-a4</code> ha due file di istruzioni: <code>CLAUDE.md</code> e <code>AGENTS.md</code>. Sono corti di proposito.</p>
 <h2 id="1-il-compito-di-prova-prima">1. Il compito di prova (prima)</h2>
-<p>Apri Claude Code nella cartella della palestra e dai questo compito, copiato così:</p>
-<pre><code>Aggiungi al comando &quot;elenco&quot; l'opzione --max N, che mostra al massimo N prenotazioni.
+<p>Apri Claude Code nella cartella della palestra e dai questo compito (incollalo com'è):</p>
+<pre><code class="language-text">Aggiungi al comando &quot;elenco&quot; l'opzione --max N, che mostra al massimo N prenotazioni.
 Scrivi un test e dimmi come hai verificato che funziona.
 </code></pre>
 <p>Annota nella tabella in fondo: quale comando ha usato per i test, se ha toccato <code>dati/dati.json</code>, se ha creato file nuovi.
-Poi scarta le modifiche con <code>git restore .</code> (e cancella gli eventuali file nuovi: <code>git status</code> li mostra).</p>
+Poi scarta le modifiche con <code class="cmd">git restore .</code> (e cancella gli eventuali file nuovi: <code>git status</code> li mostra).</p>
 <h2 id="2-cosa-ha-capito">2. Cosa ha capito</h2>
-<p>In una sessione nuova (<code>/clear</code>) chiedi:</p>
-<pre><code>Quali istruzioni di progetto hai caricato? Citale e dimmi da quale file vengono.
+<p>In una sessione nuova (<code class="cmd">/clear</code>) incolla questa domanda:</p>
+<pre><code class="language-text">Quali istruzioni di progetto hai caricato? Citale e dimmi da quale file vengono.
 Dove stanno i dati e come si lanciano i test?
 </code></pre>
-<p>Con <code>/context all</code> (voce «Memory files») controlli quali file sono caricati davvero; <code>/memory</code> li elenca e li apre.</p>
+<p>Con <code class="cmd">/context all</code> (voce «Memory files») controlli quali file sono caricati davvero; <code class="cmd">/memory</code> li elenca e li apre.</p>
 <h2 id="3-trova-gli-errori">3. Trova gli errori</h2>
 <p>Leggi <code>CLAUDE.md</code> e <code>AGENTS.md</code> riga per riga. Per ogni percorso e comando nominato, controlla che esista
 (<code>ls</code>, prova il comando). I due file dicono le stesse cose? Che cosa manca di ciò che l'agente ha dovuto
@@ -169,5 +192,48 @@ indovinare?</p>
 <p>Le soluzioni le ha il docente.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
 </main>
+<script>
+document.querySelectorAll('main pre').forEach(function (pre) {
+  var box = document.createElement('div'); box.className = 'code-box';
+  pre.parentNode.insertBefore(box, pre); box.appendChild(pre);
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'copy-btn no-print'; b.textContent = 'Copia';
+  b.setAttribute('aria-label', 'Copia il testo');
+  b.addEventListener('click', function () {
+    var txt = pre.innerText.trimEnd();
+    var ok = function () { b.textContent = 'Copiato ✓'; setTimeout(function () { b.textContent = 'Copia'; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (done) { ok(); } else { b.textContent = 'Selezionate e copiate a mano'; setTimeout(function () { b.textContent = 'Copia'; }, 2500); }
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(ok, fallback); }
+    else { fallback(); }
+  });
+  box.appendChild(b);
+});
+document.querySelectorAll('main code.cmd').forEach(function (c) {
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'cmd-copy no-print'; b.title = 'Copia il comando';
+  b.setAttribute('aria-label', 'Copia il comando: ' + c.textContent);
+  var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  b.innerHTML = icon;
+  b.addEventListener('click', function () {
+    var txt = c.textContent;
+    var done = function (msg) { b.classList.add('ok'); b.textContent = msg; setTimeout(function () { b.classList.remove('ok'); b.innerHTML = icon; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); done(ok ? 'Copiato' : 'Copiate a mano');
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(function () { done('Copiato'); }, fallback); }
+    else { fallback(); }
+  });
+  c.insertAdjacentElement('afterend', b);
+});
+</script>
 </body>
 </html>

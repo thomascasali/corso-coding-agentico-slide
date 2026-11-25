@@ -123,7 +123,6 @@
   .activity:hover { background: var(--panel-2); }
   .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
   .activity .l { text-decoration: underline; text-underline-offset: 3px; }
-  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
   /* quiz a scelta multipla */
   .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
   .quiz .opts { display: grid; gap: 8px; }
@@ -179,6 +178,17 @@
     .node:nth-child(4):not(:last-child)::after { content: none; }
     .g3 { grid-template-columns: 1fr; }
   }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
@@ -224,13 +234,11 @@ const Flow = ({ label, nodes }) => (
   </div>
 );
 
-/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
-   durata: stima indicativa dell'esercizio, mai un orario. */
-const ActivityBadge = ({ n, file, label, durata }) => (
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
   <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Attività al PC</span>
     <span className="l">{label}</span>
-    {durata && <span className="d">{durata}</span>}
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
@@ -280,6 +288,43 @@ const Chiusura = ({ punti, dopo }) => (
   </div>
 );
 
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
+
 /* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
@@ -299,80 +344,14 @@ const PROMPT = String.raw`Bash command
   2. Yes, and don't ask again for: node --test
   3. No`;
 
-/* ---------- simulazione del ciclo (propria dell'argomento) ---------- */
-/* Passi inventati ma plausibili sulla palestra. Non e' l'output di un modello vero: serve a vedere il ciclo e a decidere. */
-const PASSI = [
-  { fase: 'Osserva', tool: 'Read', arg: 'cli.js', chiede: false,
-    cosa: 'Legge il file della riga di comando.', esito: 'Vede che il comando elenco accetta già --data, --docente e --tutte.' },
-  { fase: 'Osserva', tool: 'Read', arg: 'src/logica.js', chiede: false,
-    cosa: 'Legge le regole di prenotazione.', esito: 'Trova la funzione che filtra le prenotazioni.' },
-  { fase: 'Pianifica', tool: 'Piano', arg: '', chiede: false,
-    cosa: 'Decide i passi, senza toccare nulla.', esito: 'Nuova opzione --lab, filtro in logica.js, un test.' },
-  { fase: 'Agisce', tool: 'Edit', arg: 'src/logica.js', chiede: true,
-    cosa: 'Vuole modificare questo file.', esito: 'Aggiunto il filtro per laboratorio.' },
-  { fase: 'Agisce', tool: 'Edit', arg: 'cli.js', chiede: true,
-    cosa: 'Vuole modificare questo file.', esito: 'Aggiunta l\'opzione --lab.' },
-  { fase: 'Verifica', tool: 'Bash', arg: 'node --test', chiede: true,
-    cosa: 'Vuole eseguire questo comando.', esito: 'I test passano.' },
-  { fase: 'Verifica', tool: 'Bash', arg: 'node cli.js elenco --lab LAB-INF1', chiede: true,
-    cosa: 'Vuole eseguire questo comando.', esito: 'Nell\'elenco compaiono solo le prenotazioni di LAB-INF1.',
-    esitoSeRifiutate: 'L\'opzione --lab non esiste: il comando dà errore o la ignora.' },
-];
-const FASE_COLORE = { Osserva: 'var(--info)', Pianifica: 'var(--accent-2)', Agisce: 'var(--accent)', Verifica: 'var(--text)' };
-
-function CicloSim() {
-  const [i, setI] = useState(0);
-  const [log, setLog] = useState([]);
-  const fine = i >= PASSI.length;
-  const p = PASSI[i];
-  const rifiutate = log.filter(x => x.esito === 'no').length;
-  const modificheRifiutate = log.some(x => x.esito === 'no' && x.p.tool === 'Edit');
-  const vai = esito => { setLog(l => [...l, { p, esito, modificheRifiutate }]); setI(n => n + 1); };
-  const ricomincia = () => { setI(0); setLog([]); };
-  const testo = x => {
-    if (x.esito === 'no') return 'Rifiutato da te: non eseguito. L\'agente lo riferisce e aspetta.';
-    if (x.p.esitoSeRifiutate && x.modificheRifiutate) return x.p.esitoSeRifiutate;
-    return x.p.esito;
-  };
-  return (
-    <div className="cols" style={{ gridTemplateColumns: '0.9fr 1.3fr' }}>
-      <div>
-        <div className="card i">
-          <h4>{fine ? 'Fine del giro' : 'Prossima azione · ' + p.fase}</h4>
-          {!fine && <>
-            <p><strong>{p.cosa}</strong></p>
-            <p><code>{p.arg ? p.tool + ' ' + p.arg : p.tool}</code></p>
-            {p.chiede ? (
-              <div role="group" aria-label="La tua decisione" style={{ display: 'grid', gap: 8 }}>
-                <button className="opt" onClick={() => vai('ok')}><span className="lt">&#10003;</span><span>Approva</span></button>
-                <button className="opt" onClick={() => vai('no')}><span className="lt">&#10007;</span><span>Rifiuta</span></button>
-              </div>
-            ) : (
-              <button className="opt" onClick={() => vai('auto')}><span className="lt">&rarr;</span><span>Avanti (non chiede)</span></button>
-            )}
-          </>}
-          {fine && <>
-            <p>{rifiutate === 0
-              ? 'Hai approvato tutto: ora il riassunto dell\'agente va letto con il diff in mano.'
-              : 'Hai rifiutato ' + rifiutate + (rifiutate === 1 ? ' azione' : ' azioni') + ': il riassunto finale deve dirlo. Se dice «fatto tutto», non è vero.'}</p>
-            <button className="opt" onClick={ricomincia}><span className="lt">&#8634;</span><span>Ricomincia</span></button>
-          </>}
-        </div>
-      </div>
-      <div>
-        <div className="rowlabel">Traccia delle azioni</div>
-        <ol className="steps" aria-live="polite" style={{ minHeight: 200 }}>
-          {log.length === 0 && <li className="i">Ancora nessuna azione: l'agente aspetta il primo passo.</li>}
-          {log.map((x, k) => (
-            <li key={k} className={x.esito === 'no' ? 'w' : ''}>
-              <b style={{ color: FASE_COLORE[x.p.fase] }}>{x.p.fase}</b> · <code>{x.p.tool}{x.p.arg ? ' ' + x.p.arg : ''}</code> — {testo(x)}
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
-  );
-}
+/* Collegamento alla simulazione (pagina propria dell'argomento, nella stessa cartella). */
+const SimLink = () => (
+  <a className="activity" href="simulazione-agente.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Simulazione</span>
+    <span className="l">Indovina la mossa dell'agente</span>
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
 
 const slides = [
   {
@@ -383,7 +362,34 @@ const slides = [
         caso="Il caso: un gruppo di dieci agenti che per mesi sembrava funzionare."
         prima="nessun argomento: si può partire da qui." />
     ),
-    notes: "Si parte da una domanda: che differenza c'è tra chiedere codice a un chatbot e dare un compito a un agente nel repository? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale comunque."
+    notes: "Questo argomento segue la demo di AI Studio. Si riparte da una domanda: che differenza c'è tra chiedere un risultato a un chatbot e dare un compito a un agente che lavora in una cartella? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così, e in fondo un'esercitazione con l'agente installato. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale comunque."
+  },
+  {
+    block: B + 'La demo: piano o niente piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Dalla demo</Tag>
+        <h2>Con piano, senza piano</h2>
+        <div className="cols">
+          <Card title="Senza piano" kind="w">
+            <ul>
+              <li>Una richiesta, e il lavoro parte subito</li>
+              <li>Le scelte le fa lo strumento e le scopri a lavoro fatto</li>
+              <li>Correggere vuol dire rifare</li>
+            </ul>
+          </Card>
+          <Card title="Con piano" kind="i">
+            <ul>
+              <li>Le scelte stanno scritte prima</li>
+              <li>Le correggi con una frase, prima che costino</li>
+              <li>L'esecuzione parte dopo il tuo sì</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="info" title="In questo argomento">Lo stesso gesto, con un agente che lavora in una cartella: il piano elenca anche i file che legge, quelli che modifica e come verifica il risultato.</Box>
+      </div>
+    ),
+    notes: "Qui chi parla richiama la demo di AI Studio vista in apertura, con le sue parole: un gioco chiesto senza piano, poi una dashboard chiesta con un piano. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. La stessa idea torna in questo argomento (la modalità piano) e nella prima esercitazione, dove l'agente è installato sul PC e lavora su una cartella di prova."
   },
   {
     block: B + 'Tre strumenti',
@@ -396,7 +402,7 @@ const slides = [
           ['Cosa produce', 'Testo da leggere e da copiare', 'La riga o il blocco successivo', 'Modifiche a più file e comandi eseguiti'],
           ['Chi controlla', 'Tu, incollando e provando', 'Tu, mentre scrivi', 'Anche l\'agente (test, errori); la prova finale resta tua'],
         ]} />
-        <p className="muted">I confini si sfumano: molti chatbot oggi hanno strumenti. Conta che cosa il programma intorno al modello gli permette di fare.</p>
+        <p className="muted">I confini si sfumano: molti chatbot hanno ormai degli strumenti. Conta che cosa il programma intorno al modello gli permette di fare.</p>
       </div>
     ),
     notes: "Tre colonne, tre ruoli. Il chatbot lavora su ciò che gli porti. Il completamento è dentro l'editor e propone il pezzo successivo. L'agente ha accesso al progetto e a un terminale. La domanda utile non è quale sia più intelligente, ma chi decide quali file entrano nel contesto e chi esegue le prove. Precisare che le categorie sono didattiche: gli strumenti reali le mescolano."
@@ -407,16 +413,16 @@ const slides = [
       <div className="pad">
         <Tag>Chatbot, completamento, agente</Tag>
         <h2>La stessa richiesta, tre esiti</h2>
-        <p>«Aggiungi all'elenco delle prenotazioni un filtro per laboratorio.»</p>
+        <p>«Controlla le richieste di installazione software della cartella e dimmi quali si possono accettare.»</p>
         <div className="grid">
-          <Card title="Chatbot"><p>Ti scrive una funzione. Non ha visto <code>cli.js</code>: nomi e struttura sono ipotesi da adattare a mano.</p></Card>
-          <Card title="Completamento" kind="i"><p>Suggerisce righe mentre scrivi nel file giusto. Quale file e quali passi li scegli tu.</p></Card>
-          <Card title="Agente" kind="w"><p>Legge <code>cli.js</code> e <code>logica.js</code>, modifica, lancia i test, legge gli errori. Tu leggi il diff.</p></Card>
+          <Card title="Chatbot"><p>Lavora su ciò che gli incolli: i file li porti tu, uno per uno. Rinominare, spostare e contare le licenze restano lavoro tuo.</p></Card>
+          <Card title="Completamento" kind="i"><p>Non è fatto per questo: suggerisce righe mentre scrivi nel file aperto. Quale file e quali passi li scegli tu.</p></Card>
+          <Card title="Agente" kind="w"><p>Legge i file della cartella, scrive un programma per i conti, chiede il permesso prima di rinominare e dichiara cosa non ha verificato. Tu leggi la traccia.</p></Card>
         </div>
-        <Box type="info" title="Nell'attività">Più avanti l'agente descrive la palestra: voi controllate se ha ragione.</Box>
+        <Box type="info" title="Simulazione ed esercitazione">È proprio questo il compito: una cartella di richieste con nomi disordinati, un catalogo e un regolamento.</Box>
       </div>
     ),
-    notes: "Esempio sulla palestra, l'app comune del corso. Nell'incontro la demo mette fianco a fianco chatbot e agente sullo stesso repository. Qui basta far notare dove sta il lavoro di adattamento: nel chatbot è tuo, nell'agente passa in parte allo strumento, ma la responsabilità di quello che entra nel repository resta di chi guida."
+    notes: "Esempio sulla cartella della prima esercitazione (dati inventati: venti richieste di installazione software in una scuola inventata, con un regolamento da applicare). Il confronto è didattico: gli strumenti reali mescolano le categorie, e un chatbot con strumenti collegati può fare più di quanto scritto qui. Il punto è dove sta il lavoro di adattamento: nel chatbot è di chi incolla, nell'agente passa in parte allo strumento, ma la responsabilità di ciò che entra nella cartella resta di chi guida. Da verificare a schermo, con l'agente installato, cosa fa davvero davanti a questa richiesta."
   },
   {
     block: B + 'Che cos\'è un agente',
@@ -464,16 +470,22 @@ const slides = [
     notes: "Il ciclo è il cuore dell'argomento. Esempio dalla documentazione: «correggi i test che falliscono» diventa eseguire i test, leggere l'errore, cercare i file, leggerli, modificare, rieseguire. Ogni passo informa il successivo. Quello che distingue un agente da uno script è che la mossa dopo dipende da ciò che è appena successo. La persona è nel ciclo: può fermare con Esc e correggere la rotta."
   },
   {
-    block: B + 'Simulazione del ciclo',
+    block: B + 'Simulazione',
     content: () => (
       <div className="pad">
         <Tag>Simulazione</Tag>
-        <h2>Un giro del ciclo, con le tue decisioni</h2>
-        <CicloSim />
-        <p className="muted">Simulazione didattica sulla palestra: non è l'output di un modello vero.</p>
+        <h2>Indovina la mossa dell'agente</h2>
+        <p>Lo stesso compito della prima esercitazione, passo per passo. Prima di ogni mossa scegli tra tre opzioni, poi leggi cosa è successo nella traccia.</p>
+        <ul>
+          <li>Dove si ferma e aspetta una persona</li>
+          <li>Quali azioni chiedono un permesso</li>
+          <li>Cosa conta con un programma, cosa lascia a chi decide</li>
+        </ul>
+        <SimLink />
+        <p className="muted" style={{ marginTop: 10 }}>Sequenza didattica con dati inventati: non è l'output di un modello vero.</p>
       </div>
     ),
-    notes: "Si può fare in plenaria: la classe decide per ogni richiesta. La lettura è automatica, la modifica e i comandi chiedono. Provare almeno una volta a rifiutare una modifica: nella traccia il passo successivo cambia, e il riassunto finale deve tenerne conto. È il primo assaggio dell'idea che un riassunto va confrontato con la traccia. Non è una registrazione di un modello reale."
+    notes: "Si può fare in plenaria: la classe sceglie, poi si legge la traccia. Le mosse da indovinare sono dieci: attesa del sì al piano, lettura della procedura (la skill) e dei dati, programma per i conti, caso ambiguo lasciato alla persona, permesso prima di rinominare, elenco prima e dopo, controllo finale con un programma, limiti dichiarati, consegna. È una sequenza scritta a tavolino, non una registrazione: un agente vero può cambiare ordine e parole. Vale la regola di sempre: conta ciò che si legge nella traccia."
   },
   {
     block: B + 'Cosa vede l\'agente',
@@ -516,7 +528,7 @@ const slides = [
           </Card>
           <Card title="Cosa fai tu">
             <ul>
-              <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>git status</code></li>
+              <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>Get-Content</code></li>
               <li>Tieni le istruzioni corte e vere (argomento 4)</li>
             </ul>
           </Card>
@@ -524,7 +536,7 @@ const slides = [
         <Box type="warn" title="Regola">Per l'agente il testo che legge è un fatto, finché qualcosa non lo smentisce. La verifica è di chi guida.</Box>
       </div>
     ),
-    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nell'attività al PC i partecipanti controllano a mano ciò che l'agente dice di aver capito: è la stessa abitudine, applicata."
+    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nella prima esercitazione i partecipanti controllano a mano ciò che l'agente dice di aver capito: è la stessa abitudine, applicata."
   },
   {
     block: B + 'Cosa riempie il contesto',
@@ -575,7 +587,7 @@ const slides = [
         ]} />
       </div>
     ),
-    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Poi, quando il lavoro è su git, nel diff (argomento 2)."
+    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nel diff (argomento 2); nella prima esercitazione, senza Git, si confrontano la traccia, i file e il riepilogo."
   },
   {
     block: B + 'Permessi',
@@ -630,7 +642,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
       </div>
     ),
-    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Più avanti si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite dell'amministratore (permissions.defaultMode, code.claude.com/docs/en/managed-settings, 11 novembre 2026)."
+    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite dell'amministratore (permissions.defaultMode, code.claude.com/docs/en/managed-settings, 11 novembre 2026)."
   },
   {
     block: B + 'Leggere la richiesta',
@@ -643,14 +655,14 @@ const slides = [
           <ol>
             <li><strong>Cosa fa?</strong> Il comando intero, anche dopo <code>&amp;&amp;</code> e <code>;</code>.</li>
             <li><strong>Dove?</strong> Quali file, dentro la cartella del progetto.</li>
-            <li><strong>Si annulla?</strong> I file sì (git, checkpoint); rete e dati esterni no.</li>
+            <li><strong>Si annulla?</strong> I file sì (checkpoint, copia di prova, Git); rete e dati esterni no.</li>
           </ol>
         </div>
         <p className="muted">Schema indicativo: il testo esatto dipende dalla versione. I checkpoint coprono solo i file, non rete, database o rilasci.</p>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Tre domande da fare ogni volta. Lo schema è indicativo: non vale come riproduzione della schermata. La documentazione (novembre 2026) dice che i checkpoint annullano le modifiche ai file ma non le azioni su sistemi remoti: per quelle conta la modalità di permesso. Nell'attività si approva una volta sola, mai con «non chiedere più»."
+    notes: "Tre domande da fare ogni volta. Lo schema è indicativo: non vale come riproduzione della schermata. La documentazione (novembre 2026) dice che i checkpoint annullano le modifiche ai file ma non le azioni su sistemi remoti: per quelle conta la modalità di permesso. Nella prima esercitazione si approva una volta sola, mai con «non chiedere più»."
   },
   {
     block: B + 'Domanda 2',
@@ -689,7 +701,7 @@ const slides = [
         <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
       </div>
     ),
-    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 3, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nell'attività di oggi si prova a entrare e uscire senza approvare."
+    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 3, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nella prima esercitazione il piano si chiede prima di far partire il lavoro, e si approva o si corregge."
   },
   {
     block: B + 'Tu sei nel ciclo',
@@ -702,11 +714,11 @@ const slides = [
           <Card title="Correggere" kind="i"><p>Scrivi la correzione e invia: l'agente la legge appena finite le chiamate in corso.</p></Card>
           <Card title="Tornare indietro" kind="w"><p><code>Esc</code> due volte riporta i file a uno stato precedente (checkpoint).</p></Card>
         </div>
-        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono git: li vedremo nell'argomento 2.</Box>
+        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono Git (argomento 2). La prima esercitazione lavora su una copia usa e getta per lo stesso motivo.</Box>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 2 insegna a leggere il diff e a fare commit."
+    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 2 insegna a leggere il diff e a fare commit; qui, in attesa, si lavora su una copia da buttare."
   },
   {
     block: B + 'Il racconto',
@@ -727,23 +739,23 @@ const slides = [
     notes: "Episodio del racconto di Thomas, solo fatti documentati: nella primavera 2026 nasce un gruppo di dieci agenti; il 20 luglio si scopre che non erano mai partiti, per un carattere di troppo nell'intestazione dei due agenti principali (gli specialisti l'intestazione non l'avevano proprio). Nessun errore visibile: la sessione principale rispondeva comunque. Il legame con l'argomento: un riassunto fluido non dimostra niente, la traccia delle chiamate sì. Dal racconto nasce anche il passaggio obbligato da un revisore. Gli agenti e i subagenti tornano nell'argomento 7."
   },
   {
-    block: B + 'Attività al PC',
+    block: B + 'Verso la prima esercitazione',
     content: () => (
       <div className="pad">
-        <Tag>Attività</Tag>
-        <h2>Primo contatto con Claude Code</h2>
+        <Tag>Esercitazione</Tag>
+        <h2>Adesso si installa, poi si prova</h2>
         <ol className="timeline">
-          <li><time>1</time>Avvia l'agente nella palestra in modalità Manual.</li>
-          <li><time>2</time>Fagli descrivere il progetto e leggi che cosa ha letto.</li>
-          <li><time>3</time>Controlla a mano se ha ragione.</li>
-          <li><time>4</time>Approva un comando, rifiutane uno, prova il piano.</li>
+          <li><time>1</time>Si installa l'agente sul PC e lo si collega al server del corso (argomento 13).</li>
+          <li><time>2</time>Si estrae la cartella di prova e si avvia l'agente in Manual.</li>
+          <li><time>3</time>Gli si chiede prima un piano: si legge, si approva o si corregge.</li>
+          <li><time>4</time>Si guardano i permessi che chiede e si controlla a mano il riepilogo.</li>
+          <li><time>5</time>Si apre la skill, la si cambia e si rifà.</li>
         </ol>
-        <ActivityBadge n="1" file="primo-giro.html" label="Primo giro: l'agente descrive la palestra" durata="indicativo: 15 min" />
-        <br />
-        <ActivityBadge n="1" file="permessi-in-pratica.html" label="Approvare, rifiutare, pianificare" durata="indicativo: 10 min" />
+        <Box type="tip" title="Copia usa e getta">Si lavora su una cartella estratta da uno zip, senza Git: se qualcosa va storto si estrae di nuovo. Git come rete di sicurezza è un altro argomento.</Box>
+        <ActivityBadge n="1" file="prima-esercitazione.html" label="Prima esercitazione: l'agente controlla le richieste di installazione" />
       </div>
     ),
-    notes: "Due schede. Nella prima l'agente descrive la palestra e i partecipanti controllano le sue affermazioni con comandi propri. Nella seconda si approva un comando, se ne rifiuta uno e si prova la modalità piano senza approvare. In entrambe nessuna modifica va conservata: la palestra si riporta allo stato iniziale con git. Il modello usato lo sceglie la configurazione del laboratorio."
+    notes: "Ponte verso l'installazione (argomento 13) e la prima esercitazione. L'esercitazione parte dal piano visto nella demo: stesso gesto, ora con l'agente installato sul PC. La cartella contiene richieste di installazione software di una scuola inventata, un catalogo, un regolamento, una procedura sotto forma di skill e due richieste nuove da aggiungere dopo. Gli effetti precisi sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se usa la skill da solo) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio."
   },
   {
     block: B + 'Chiusura',
@@ -754,11 +766,12 @@ const slides = [
           'Vede solo ciò che entra nel contesto: leggi cosa ha letto, e controlla le sue affermazioni.',
           'Il contesto si riempie: /context, /compact, /clear; le regole fisse stanno nelle istruzioni di progetto.',
           'In aula si lavora in Manual: leggi ogni richiesta intera prima di approvare.',
-          'Il piano è una proposta, e si approva o si corregge.',
+          'Il piano è una proposta, e si approva o si corregge: è la differenza vista nella demo.',
+          'Il riassunto di un agente non è la prova: lo è la traccia.',
         ]}
-        dopo="Argomento 2: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 3: dalla richiesta vaga ai requisiti, con la modalità piano." />
+        dopo="Argomento 13: installare l'agente, poi la prima esercitazione su una cartella di prova. Argomento 2: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 3: dalla richiesta vaga ai requisiti, con la modalità piano." />
     ),
-    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
+    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Poi l'installazione (argomento 13) e la prima esercitazione. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
   },
 ];
 
@@ -806,6 +819,7 @@ function App() {
     const h = e => {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
       if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }

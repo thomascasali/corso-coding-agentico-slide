@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argomento 13 · Installare l'agente · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+/* @tema-inizio (blocco comune a tutti gli argomenti: si modifica SOLO in modello/slide.html e si ricopia, vedi modello/LEGGIMI.md) */
+  /* Tema della locandina. Contrasti misurati (WCAG) su --bg / --panel / --panel-2:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3;
+     accent-2 14,4 / 12,4 / 11,2; danger 8,8 / 7,5 / 6,8; info >= 9;
+     border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8. */
+  :root {
+    --bg: #000c0a;
+    --panel: #06201a;
+    --panel-2: #0a2a22;
+    --text: #e6f5ec;
+    --muted: #a9c9b8;
+    --accent: #74e9b4;
+    --accent-2: #ffd866;   /* avvisi */
+    --danger: #ff8a8a;
+    --info: #8cd0ff;
+    --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-lead: clamp(20px, 1vw + 14px, 26px);
+    --fs-h2: clamp(28px, 1.6vw + 14px, 38px);
+    --fs-h1: clamp(38px, 4.4vw + 16px, 72px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.45; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; color: var(--accent); overflow-wrap: anywhere; }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); margin-bottom: 10px; }
+  p, li { font-size: var(--fs-body); color: var(--muted); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 26px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, pre { font-family: var(--mono); }
+  code { color: var(--accent); font-size: 0.88em; overflow-wrap: anywhere; }
+  .nw { white-space: nowrap; }
+  .pad { padding: 12px 26px; }
+  .center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(62vh / var(--zoom, 1)); padding: 20px 30px; }
+  .center p { max-width: 62ch; }
+  .tag { display: inline-block; font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid var(--border); border-radius: 20px; padding: 2px 14px; margin-bottom: 8px; }
+  .muted { color: var(--muted); font-size: var(--fs-sm); }
+  .legend { color: var(--muted); font-size: var(--fs-sm); }
+  /* griglie */
+  .grid { display: grid; gap: 14px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); }
+  .cols { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items: start; }
+  .cols > * { min-width: 0; }
+  .twocol { column-count: 2; column-gap: 28px; }
+  .twocol li { break-inside: avoid; font-size: var(--fs-sm); }
+  /* card e statistiche */
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 10px 16px; }
+  .card.w { border-left-color: var(--accent-2); } .card.i { border-left-color: var(--text); } .card.d { border-left-color: var(--danger); }
+  .card h4 { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+  .card.w h4 { color: var(--accent-2); } .card.i h4 { color: var(--text); } .card.d h4 { color: var(--danger); }
+  .card p, .card li { font-size: var(--fs-sm); margin-bottom: 4px; }
+  .card ul, .card ol { padding-left: 22px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; text-align: center; }
+  .stat b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-h2); color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: var(--fs-sm); color: var(--muted); line-height: 1.25; display: block; }
+  /* box: warn (predefinito), info, danger, tip. Il tipo si legge anche dal simbolo, non solo dal colore. */
+  .box { background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent-2); border-radius: 0 8px 8px 0; padding: 8px 16px; margin: 12px 0 0; }
+  .box strong.t { font-family: var(--cond); color: var(--accent-2); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+  .box strong.t::before { content: '\25B2\00a0'; }
+  .box.info { border-left-color: var(--info); } .box.info strong.t { color: var(--info); } .box.info strong.t::before { content: '\2139\00a0'; }
+  .box.danger { border-left-color: var(--danger); } .box.danger strong.t { color: var(--danger); } .box.danger strong.t::before { content: '\2715\00a0'; }
+  .box.tip { border-left-color: var(--accent); } .box.tip strong.t { color: var(--accent); } .box.tip strong.t::before { content: '\2605\00a0'; }
+  .box p { font-size: var(--fs-sm); margin-bottom: 0; }
+  .box p + p { margin-top: 6px; }
+  /* codice */
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: var(--fs-xs); color: var(--text); line-height: 1.5; margin: 10px 0; }
+  /* tabelle: a schede sotto i 900 px (componente DT) */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border: 1px solid var(--border); font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  th { font-family: var(--cond); color: var(--accent); background: var(--panel-2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+  td:first-child { color: var(--text); font-weight: 600; }
+  /* elenchi speciali */
+  .steps { list-style: none; padding: 0; }
+  .steps li { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; padding: 6px 12px; margin-bottom: 8px; font-size: var(--fs-sm); color: var(--muted); }
+  .steps li.w { border-left-color: var(--accent-2); } .steps li.i { border-left-color: var(--text); }
+  .steps b { color: var(--text); }
+  .timeline { list-style: none; padding: 0; border-left: 2px solid var(--border); margin-left: 8px; }
+  .timeline li { position: relative; padding: 0 0 8px 22px; margin: 0; font-size: var(--fs-sm); line-height: 1.35; }
+  .timeline li::before { content: ''; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+  .timeline time { font-family: var(--mono); font-size: 0.85em; color: var(--accent); font-weight: 700; margin-right: 10px; }
+  .terms { display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .terms div { border-left: 3px solid var(--border); padding-left: 12px; }
+  .terms dt { font-family: var(--cond); font-weight: 600; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .terms dd { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+  /* diagramma a riquadri HTML (componente Flow): 4 per riga, impilati su schermi stretti */
+  .rowlabel { font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 6px 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 34px; }
+  .node { position: relative; background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 6px 12px; }
+  .node b { display: block; font-family: var(--cond); font-weight: 700; font-size: var(--fs-body); color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+  .node span { display: block; font-size: var(--fs-sm); color: var(--text); line-height: 1.25; }
+  .node.w { border-color: var(--accent-2); } .node.w b { color: var(--accent-2); }
+  .node.i { border-color: var(--text); } .node.i b { color: var(--text); }
+  .node:not(:nth-child(4n))::after { content: '\2192'; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 26px; line-height: 1; }
+  .node:last-child::after { content: none !important; }
+  .join { text-align: center; color: var(--accent); font-size: var(--fs-sm); margin: 6px 0 0; }
+  .svgwrap svg { width: 100%; height: auto; display: block; }
+  .svt { font-family: var(--sans); }
+  .only-mob { display: none; }
+  /* attivita' al PC (ActivityBadge) */
+  .activity { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: var(--fs-sm); color: var(--text); background: var(--panel); border: 2px solid var(--accent); border-radius: 8px; padding: 8px 14px; margin-top: 10px; text-decoration: none; }
+  .activity:hover { background: var(--panel-2); }
+  .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+  .activity .l { text-decoration: underline; text-underline-offset: 3px; }
+  /* quiz a scelta multipla */
+  .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
+  .quiz .opts { display: grid; gap: 8px; }
+  .opt { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; font: inherit; font-size: var(--fs-body); color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); }
+  .opt .lt { font-family: var(--cond); font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt.ok { border: 2px solid var(--accent); background: var(--panel-2); }
+  .opt.ko { border: 2px dashed var(--danger); }
+  .quiz .fb { min-height: 3.6em; margin-top: 10px; font-size: var(--fs-sm); color: var(--muted); }
+  .quiz .fb strong { color: var(--accent); }
+  .quiz .fb.ko strong { color: var(--danger); }
+  /* effetto unico: cursore lampeggiante (solo slide titolo) */
+  .cursor { display: inline-block; width: 0.5em; height: 0.85em; background: var(--accent); vertical-align: -0.05em; margin-left: 6px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  /* link, focus, barre, note */
+  .text-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .text-link:hover { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .bar { position: fixed; left: 0; right: 0; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 22px; z-index: 100; }
+  .top-bar { top: 0; height: 56px; border-bottom: 1px solid var(--border); }
+  .bottom-bar { bottom: 0; min-height: 60px; border-top: 1px solid var(--border); }
+  .blocklabel { color: var(--accent); font-family: var(--cond); font-weight: 600; font-size: var(--fs-sm); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .counter { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+  .notes-panel { position: fixed; left: 0; right: 0; bottom: 60px; max-height: 42vh; overflow-y: auto; background: var(--bg); border-top: 2px solid var(--accent); padding: 14px 26px; z-index: 90; font-size: var(--fs-sm); color: var(--muted); }
+  .notes-panel strong { color: var(--accent); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; padding: 0; }
+  .icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .icon-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .group { display: flex; align-items: center; gap: 8px; }
+  @media (max-width: 900px) {
+    .pad { padding: 12px 14px; }
+    .bar { padding: 0 12px; }
+    .cols, .g2 { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr 1fr; }
+    .twocol { column-count: 1; }
+    .only-desk { display: none; } .only-mob { display: block; }
+    .terms { grid-template-columns: 1fr; }
+    .blocklabel { font-size: 16px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.1; }
+    /* tabelle a schede (classe dt, attributo data-l = etichetta di colonna) */
+    .dt thead { display: none; }
+    .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+    .dt tr { border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--panel); margin-bottom: 10px; padding: 6px 10px; }
+    .dt td { border: 0; padding: 3px 0; }
+    .dt td:first-child { color: var(--accent); }
+    .dt td::before { content: attr(data-l); display: block; font-family: var(--cond); font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .dt td:first-child::before { display: none; }
+    pre { font-size: 14px; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; gap: 28px; }
+    .node:not(:nth-child(4n))::after { content: '\2193'; right: auto; left: 50%; top: auto; bottom: -27px; transform: translateX(-50%); }
+    .node:nth-child(4n)::after { content: none; }
+    .node:nth-child(4):not(:last-child)::after { content: none; }
+    .g3 { grid-template-columns: 1fr; }
+  }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
+  @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* @tema-fine */
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* @componenti-inizio (blocco comune: si modifica solo in modello/slide.html) */
+
+const Tag = ({ children }) => <div className="tag">{children}</div>;
+
+/* type: 'warn' (predefinito), 'info', 'danger', 'tip' */
+const Box = ({ type = 'warn', title, children }) => (
+  <div className={'box ' + type}><strong className="t">{title}</strong><p>{children}</p></div>
+);
+
+const Stat = ({ big, label }) => <div className="stat"><b>{big}</b><span>{label}</span></div>;
+
+/* kind: '' (accento), 'w' (avviso), 'i' (neutra), 'd' (pericolo) */
+const Card = ({ title, kind = '', children }) => (
+  <div className={'card ' + kind}><h4>{title}</h4>{children}</div>
+);
+
+/* Tabella che sotto i 900 px diventa un elenco di schede (data-l = etichetta di colonna) */
+const DT = ({ cols, rows }) => (
+  <table className="dt">
+    <thead><tr>{cols.map(c => <th key={c}>{c}</th>)}</tr></thead>
+    <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody>
+  </table>
+);
+
+/* Diagramma a riquadri HTML: nodes = [[titolo, sottotitolo, tipo], ...], tipo '' | 'w' | 'i'.
+   Fino a 4 riquadri per riga; su schermi stretti si impilano con una freccia in basso. */
+const Flow = ({ label, nodes }) => (
+  <div>
+    {label && <div className="rowlabel">{label}</div>}
+    <div className="flow">
+      {nodes.map(([t, s, k], i) => <div key={i} className={'node ' + (k || '')}><b>{t}</b><span>{s}</span></div>)}
+    </div>
+  </div>
+);
+
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
+  <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">Attività al PC</span>
+    <span className="l">{label}</span>
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
+
+/* Quiz a scelta multipla: opzioni = [{ t: testo, ok: true|false, perche: spiegazione se scelta }].
+   Le risposte attese delle esercitazioni restano riservate al docente: qui solo domande di comprensione. */
+function Quiz({ domanda, opzioni }) {
+  const [sel, setSel] = useState(null);
+  const done = sel !== null;
+  const ok = done && opzioni[sel].ok;
+  return (
+    <div className="quiz">
+      <p className="q">{domanda}</p>
+      <div className="opts" role="group" aria-label="Risposte possibili">
+        {opzioni.map((o, i) => (
+          <button key={i} className={'opt' + (done && o.ok ? ' ok' : '') + (sel === i && !o.ok ? ' ko' : '')} onClick={() => setSel(i)} aria-pressed={sel === i}>
+            <span className="lt">{'ABCD'[i]}</span><span>{o.t}</span>
+          </button>
+        ))}
+      </div>
+      <div className={'fb' + (done && !ok ? ' ko' : '')} aria-live="polite">
+        {done && <><strong>{ok ? 'Corretto. ' : 'Non proprio. '}</strong>{opzioni[sel].perche}</>}
+      </div>
+    </div>
+  );
+}
+
+/* Slide titolo. prima = "Prima di questo argomento conviene aver visto" */
+const Apertura = ({ n, titolo, sottotitolo, caso, prima }) => (
+  <div className="center">
+    <p className="muted" style={{ letterSpacing: 3, textTransform: 'uppercase' }}>Coding agentico · Argomento {n}</p>
+    <h1 style={{ margin: '12px 0 14px' }}><span aria-hidden="true">&gt; </span>{titolo}<span className="cursor" aria-hidden="true"></span></h1>
+    <p style={{ fontSize: 'var(--fs-lead)', color: 'var(--text)' }}>{sottotitolo}</p>
+    {caso && <p className="muted" style={{ marginTop: 14 }}>{caso}</p>}
+    {prima && <p className="muted">Prima di questo argomento conviene aver visto: {prima}</p>}
+  </div>
+);
+
+/* Ultima slide. punti = elenco da portare a casa, dopo = "Dopo questo argomento" */
+const Chiusura = ({ punti, dopo }) => (
+  <div className="pad">
+    <Tag>Chiusura</Tag>
+    <h2>Cosa portare a casa</h2>
+    <ul>{punti.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    {dopo && <Box type="info" title="Dopo questo argomento">{dopo}</Box>}
+    <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
+  </div>
+);
+
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
+
+/* @componenti-fine */
+
+/* ---------- le slide di questo argomento ---------- */
+/* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
+const B = 'Argomento 13 — Installare l\'agente · ';
+
+const CMD = {
+  claudeInstall: String.raw`irm https://claude.ai/install.ps1 | iex`,
+  claudeVersion: 'claude --version',
+  setUrl: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "http://<indirizzo del server>", "User")`,
+  varName: 'ANTHROPIC_AUTH_TOKEN',
+  checkKey: String.raw`if ($env:ANTHROPIC_AUTH_TOKEN) { "chiave presente" } else { "chiave mancante" }`,
+  showUrl: String.raw`$env:ANTHROPIC_BASE_URL`,
+  last4: String.raw`$env:ANTHROPIC_AUTH_TOKEN.Substring($env:ANTHROPIC_AUTH_TOKEN.Length-4)`,
+  curlModels: String.raw`curl.exe "$env:ANTHROPIC_BASE_URL/v1/models" -H "Authorization: Bearer $env:ANTHROPIC_AUTH_TOKEN"`,
+  mkTest: String.raw`New-Item -ItemType Directory -Force "$env:USERPROFILE\prova-agente" | Out-Null`,
+  cdTest: String.raw`cd "$env:USERPROFILE\prova-agente"`,
+  claudeManual: 'claude --permission-mode manual',
+  claudeModel: 'claude --permission-mode manual --model claude-sonnet-5-5',
+  ocInstall: 'npm install -g opencode-ai@1.19.5',
+  ocVersion: 'opencode --version',
+  mkOc: String.raw`New-Item -ItemType Directory -Force "$env:USERPROFILE\.config\opencode" | Out-Null`,
+  notepadOc: String.raw`notepad "$env:USERPROFILE\.config\opencode\opencode.json"`,
+  stopOc: String.raw`Get-Process opencode* -ErrorAction SilentlyContinue | Stop-Process -Force`,
+  ocModels: 'opencode models',
+  oc: 'opencode',
+  uvInstall: String.raw`powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`,
+  uvVersion: 'uv --version',
+  mdHelp: String.raw`uvx --from "markitdown[all]" markitdown --help`,
+  uvxTest: String.raw`Test-Path "$env:USERPROFILE\.local\bin\uvx.exe"`,
+  uvxRun: String.raw`& "$env:USERPROFILE\.local\bin\uvx.exe" --version`,
+  pathUser: String.raw`[Environment]::GetEnvironmentVariable("Path", "User")`,
+  notepadClaude: String.raw`notepad "$env:USERPROFILE\.claude\CLAUDE.md"`,
+  notepadAgents: String.raw`notepad "$env:USERPROFILE\.config\opencode\AGENTS.md"`,
+  copyPdf: String.raw`Copy-Item "$env:USERPROFILE\Downloads\prova-markitdown.pdf" "$env:USERPROFILE\prova-agente\"`,
+  req1: 'Rispondi con una parola: collegato.',
+  reqPdf: 'Leggi prova-markitdown.pdf e dimmi quante ore sono prenotate in totale per ciascun laboratorio.',
+  unsetKey: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_AUTH_TOKEN", $null, "User")`,
+  unsetUrl: String.raw`[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", $null, "User")`,
+};
+
+const OPENCODE_JSON = `{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": ["anthropic"],
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "http://<indirizzo del server>/v1",
+        "apiKey": "{env:ANTHROPIC_AUTH_TOKEN}",
+        "headers": {
+          "Authorization": "Bearer {env:ANTHROPIC_AUTH_TOKEN}"
+        }
+      },
+      "whitelist": ["claude-sonnet-5-5", "claude-haiku-5-5"]
+    }
+  },
+  "model": "anthropic/claude-sonnet-5-5",
+  "small_model": "anthropic/claude-haiku-5-5",
+  "share": "disabled",
+  "autoupdate": false,
+  "permission": {
+    "*": "ask",
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    },
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "rm *": "deny",
+      "git push *": "deny"
+    },
+    "task": "ask",
+    "skill": "ask",
+    "webfetch": "deny",
+    "websearch": "deny",
+    "external_directory": "deny"
+  }
+}`;
+
+const ISTRUZIONI = `# Istruzioni per l'agente
+
+Lavori per un docente di informatica. Rispondi in italiano, con frasi brevi.
+
+## Leggere i documenti
+
+Per leggere un PDF, un file Word, Excel o PowerPoint non aprirlo come testo: convertilo con MarkItDown, con questo comando (sostituisci il nome del file):
+
+uvx --from "markitdown[all]" markitdown nome-del-file.pdf
+
+Poi lavora sul testo ottenuto. Se il comando scrive avvisi sui caratteri del PDF, ignorali. Se una tabella esce con righe spezzate o colonne mescolate, dillo e non indovinare i valori mancanti.
+
+## Calcoli e tabelle
+
+Per conteggi, percentuali e confronti tra valori usa Python con le librerie caricate al volo, per esempio:
+
+uv run --with pandas python nome-dello-script.py
+
+Per leggere o scrivere file Excel usa uv run --with openpyxl python nome-dello-script.py. Non fare i conti a mente: calcolali.
+
+## Risultati
+
+Scrivi i risultati in file nella cartella di lavoro (Markdown, CSV o Excel), non solo nella chat.
+
+## Cosa non fare
+
+- Non installare programmi. I comandi uvx e uv run scritti qui sopra sono permessi.
+- Non modificare i documenti originali (PDF, Word, Excel): scrivi i risultati in file nuovi.
+- Non cancellare file senza chiedere.
+- Non inviare niente a nessuno (email, messaggi, caricamenti) senza chiedere prima.
+- Alla fine scrivi che cosa non hai potuto verificare.`;
+
+/* Componenti propri dell'argomento */
+const Passo = ({ n, titolo, children }) => (
+  <div className="pad">
+    <Tag>{'Passo ' + n}</Tag>
+    <h2>{titolo}</h2>
+    {children}
+  </div>
+);
+const Controllo = ({ children }) => <Box type="tip" title="Punto di controllo">{children}</Box>;
+
+const PERCORSO = [
+  ['1', 'Installare Claude Code', <><code className="nw">claude --version</code> stampa un numero di versione</>],
+  ['2', 'Indirizzo e chiave, come variabili dell\'utente', 'in una finestra nuova: «chiave presente» e l\'indirizzo senza /v1'],
+  ['3', 'Prima prova di connessione', 'il server elenca i modelli; /status mostra il suo indirizzo'],
+  ['4', 'OpenCode sul server', <><code className="nw">opencode models</code> elenca solo i due modelli del corso</>],
+  ['5', 'Il kit minimo: uv e MarkItDown', 'la prima esecuzione arriva in fondo senza errori'],
+  ['6', 'Le istruzioni globali', 'due file con il nome giusto, sessione nuova'],
+  ['7', 'Prova su un PDF', <>tra le azioni compare <code className="nw">uvx ... markitdown</code></>],
+  ['8', 'Pronti per la prima esercitazione', 'la cartella di lavoro è aperta nell\'agente'],
+];
+
+const slides = [
+  {
+    block: B + 'Apertura',
+    content: () => (
+      <Apertura n="13" titolo="Installare l'agente"
+        sottotitolo="Claude Code e OpenCode sul PC del laboratorio, collegati al server del corso con la vostra chiave, più un kit minimo per leggere i documenti."
+        caso="Un agente senza gli strumenti giusti, davanti a un PDF, si ferma o improvvisa. Per questo l'installazione comprende anche il kit." />
+    ),
+    notes: "Argomento pratico, tutto al PC del laboratorio (Windows). Si procede un passo alla volta, con un punto di controllo per ciascuno: non si passa al successivo finché non torna. Le slide hanno un comando per riquadro, con il tasto Copia. Sull'esperienza dietro il kit: nel corso per il personale, a novembre 2026, l'agente davanti a PDF, Word ed Excel leggeva il file come testo o inventava, finché non gli si è detto che gli strumenti per convertirli erano installati."
+  },
+  {
+    block: B + 'Prima di cominciare',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima di cominciare</Tag>
+        <h2>Cosa serve</h2>
+        <ul>
+          <li>Il PC del laboratorio, con il vostro utente. Non servono permessi di amministratore.</li>
+          <li>Git e Node.js, già installati dall'ufficio tecnico.</li>
+          <li>Il <b>foglio consegnato in aula</b>, con l'indirizzo del server del corso e la vostra chiave personale.</li>
+          <li>Una connessione a internet per scaricare i programmi.</li>
+        </ul>
+        <p>Tutti i comandi si incollano in PowerShell, uno alla volta. Nei comandi compaiono due segnaposto, da sostituire con i dati del foglio prima di premere Invio:</p>
+        <ul>
+          <li><code className="nw">{'<indirizzo del server>'}</code> è l'indirizzo con la porta, come sta sul foglio.</li>
+          <li><code className="nw">{'<la tua chiave>'}</code> è la chiave personale: vale come una password.</li>
+        </ul>
+        <ActivityBadge n="13" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
+      </div>
+    ),
+    notes: "Consegnate ora il foglio con l'indirizzo e le chiavi, uno per PC. Indirizzo e chiavi non compaiono nelle slide e non si mostrano sul proiettore. Windows, nella documentazione di Claude Code (code.claude.com/docs/en/setup, letta il 25/11/2026), richiede Windows 10 1809 o successivo; l'installazione nativa non richiede di essere amministratore e Git for Windows è consigliato ma facoltativo: con Git Claude Code usa Bash, senza usa PowerShell. Il foglio con gli stessi passi serve a chi resta indietro."
+  },
+  {
+    block: B + 'Perché così',
+    content: () => (
+      <div className="pad">
+        <Tag>Le scelte</Tag>
+        <h2>Perché si fa in questo modo</h2>
+        <div className="grid">
+          <Card title="Variabili dell'utente"><p>La chiave sta nell'ambiente del vostro utente: la leggono i programmi che aprite dopo, e non finisce in un file di progetto che potreste versionare.</p></Card>
+          <Card title="Una chiave per PC" kind="i"><p>Ogni chiave ha budget in dollari, scadenza e solo i modelli del corso. Se finisce dove non deve, si blocca quella e le altre restano.</p></Card>
+          <Card title="Il kit"><p>L'agente non sa da solo che sul PC ci sono strumenti per i documenti. Si installano e una riga di istruzioni gli dice di usarli.</p></Card>
+          <Card title="Due indirizzi" kind="w"><p>Claude Code vuole l'indirizzo del server senza <code className="nw">/v1</code>. OpenCode vuole <code className="nw">/v1</code> in fondo, scritto nel suo file.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Cos'è il proxy che sta in mezzo e come si gestisce: argomento 9.</p>
+      </div>
+    ),
+    notes: "Il perché dei passi, per un pubblico tecnico. Variabili: Claude Code accetta anche un blocco env in settings.json; nel file di progetto sarebbe condiviso con chiunque cloni il repository, la documentazione lo sconsiglia per la credenziale (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). Con ANTHROPIC_AUTH_TOKEN valorizzato Claude Code non mostra la schermata di accesso e non serve un account personale (stessa pagina). Una variabile della shell vale solo per quella finestra; una variabile dell'utente vale per tutte le finestre aperte dopo. Budget, scadenza e modelli sono propri della chiave virtuale del server LiteLLM (docs.litellm.ai/docs/proxy/virtual_keys). L'indirizzo è http: il server è raggiungibile solo dalle reti consentite della scuola; se si passasse a https cambierebbe solo l'indirizzo."
+  },
+  {
+    block: B + 'Il percorso',
+    content: () => (
+      <div className="pad">
+        <Tag>Il percorso</Tag>
+        <h2>Otto passi, ognuno con un controllo</h2>
+        <DT cols={['Passo', 'Che cosa', 'Punto di controllo']} rows={PERCORSO} />
+        <ActivityBadge n="13" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
+      </div>
+    ),
+    notes: "Otto passi. I primi tre portano Claude Code a parlare con il server; il quarto fa lo stesso per OpenCode; il quinto e il sesto danno a entrambi gli strumenti per leggere i documenti e le istruzioni per usarli; il settimo prova tutto su un PDF; l'ottavo prepara il passaggio alla prima esercitazione. Chi ha finito un passo prima degli altri aspetta il punto di controllo del vicino: il giro tra i banchi parte dalle variabili."
+  },
+  {
+    block: B + 'Passo 1 · Claude Code',
+    content: () => (
+      <Passo n="1" titolo="Installare Claude Code">
+        <p>Aprite PowerShell dal menu Start: il prompt comincia con <code className="nw">PS</code>. Incollate il comando. Mentre scarica non mostra avanzamento.</p>
+        <CommandBox cmd={CMD.claudeInstall} label="1. Installa Claude Code" />
+        <p>Quando il prompt torna, chiudete la finestra e apritene una nuova: il percorso dei programmi si aggiorna solo nelle finestre aperte dopo.</p>
+        <CommandBox cmd={CMD.claudeVersion} label="2. Controlla la versione" />
+        <Controllo>Esce un numero di versione seguito da <code className="nw">(Claude Code)</code>. Se dice che <code className="nw">claude</code> non è riconosciuto, chiudete e riaprite ancora la finestra, poi chiamate il docente.</Controllo>
+      </Passo>
+    ),
+    notes: "Comando ufficiale per PowerShell, code.claude.com/docs/en/setup (25/11/2026): irm https://claude.ai/install.ps1 | iex. La pagina dice che l'installatore non mostra avanzamento, che per verificare si apre una finestra nuova e si lancia claude --version, e che un 'comando non trovato' indica che la cartella di installazione non è ancora nel PATH. Se la versione di Claude Code per il corso è fissata dal file gestito del PC, il docente dice quale installare (la pagina documenta l'installazione di una versione precisa). Gli avvisi di Windows durante l'installazione non sono ancora stati provati sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 2 · L\'indirizzo',
+    content: () => (
+      <Passo n="2" titolo="L'indirizzo del server, come variabile">
+        <p>Sul foglio l'indirizzo ha la forma indirizzo:porta. Sostituite <code className="nw">{'<indirizzo del server>'}</code> nel comando con quello del foglio, <b>senza</b> <code className="nw">/v1</code> e senza barra in fondo, poi premete Invio.</p>
+        <CommandBox cmd={CMD.setUrl} label="Variabile ANTHROPIC_BASE_URL, valida per il vostro utente" />
+        <p>Il valore <code className="nw">User</code> la rende una variabile dell'utente: non serve l'amministratore e la vedono tutte le finestre aperte da ora in poi, non quelle già aperte.</p>
+        <Box type="warn" title="Niente /v1 qui">Claude Code aggiunge da solo il percorso delle richieste. Un <code className="nw">/v1</code> in più manda le richieste a un indirizzo che non esiste.</Box>
+      </Passo>
+    ),
+    notes: "ANTHROPIC_BASE_URL punta Claude Code al gateway; negli esempi della documentazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026) l'indirizzo non ha /v1 e la richiesta di prova usa $ANTHROPIC_BASE_URL/v1/messages. Una variabile impostata solo nella finestra vale solo per quella finestra (stessa pagina), per questo si usa la variabile dell'utente. Se l'ufficio tecnico ha già copiato il file delle impostazioni gestite, l'indirizzo è imposto da lì e questa variabile non cambia nulla: va comunque creata, perché serve ai comandi di prova e a OpenCode. Che Claude Code legga le variabili create con SetEnvironmentVariable nelle finestre successive è il comportamento normale di Windows; il controllo del passo seguente lo verifica sul PC reale."
+  },
+  {
+    block: B + 'Passo 2 · La chiave',
+    content: () => (
+      <Passo n="2" titolo="La chiave, nella finestra delle variabili">
+        <ol>
+          <li>Menu Start: scrivete <code className="nw">variabili</code> e scegliete la voce che finisce con <i>relative all'account</i>, non quella di sistema.</li>
+          <li>Nella lista <b>in alto</b> premete <i>Nuova</i>.</li>
+          <li>Nome: incollate il nome qui sotto. Valore: incollate la chiave dal foglio. Confermate con OK su tutte le finestre.</li>
+        </ol>
+        <CommandBox cmd={CMD.varName} label="Nome della variabile" />
+        <Box type="danger" title="La chiave non si scrive in un comando">Per la chiave si usa la finestra, non PowerShell: così non resta tra i comandi digitati. Non va mai nei file di un progetto, e il foglio non si fotografa.</Box>
+      </Passo>
+    ),
+    notes: "ANTHROPIC_AUTH_TOKEN manda la chiave nell'intestazione Authorization: Bearer, quella che il server LiteLLM legge; ANTHROPIC_API_KEY userebbe x-api-key e in modalità interattiva chiede una conferma la prima volta (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). Motivo della finestra al posto del comando: prudenza, per non lasciare la chiave in una riga di comando; se PowerShell registri quella riga nella cronologia dei comandi non è stato verificato. Se la finestra delle variabili non si apre sul PC del laboratorio: da verificare a schermo, si chiama il docente."
+  },
+  {
+    block: B + 'Passo 2 · Controllo',
+    content: () => (
+      <Passo n="2" titolo="Controllare le due variabili">
+        <p>Aprite una finestra PowerShell <b>nuova</b>, un comando alla volta. Il primo non mostra la chiave:</p>
+        <CommandBox cmd={CMD.checkKey} label="1. La chiave c'è?" />
+        <CommandBox cmd={CMD.showUrl} label="2. Quale indirizzo vede?" />
+        <Controllo>Il primo scrive <b>chiave presente</b>. Il secondo scrive l'indirizzo del foglio, con <code className="nw">http://</code> davanti e senza <code className="nw">/v1</code> in fondo. Se manca qualcosa, ripetete il passo.</Controllo>
+      </Passo>
+    ),
+    notes: "Il controllo è fatto in una finestra nuova perché le variabili si leggono quando la finestra parte. Questo è il punto dove si perde più tempo: chi ha creato la variabile dopo aver aperto la finestra vede 'chiave mancante'. Il giro tra i banchi comincia da qui."
+  },
+  {
+    block: B + 'Passo 3 · Il server risponde',
+    content: () => (
+      <Passo n="3" titolo="Prima prova: una richiesta diretta">
+        <p>Prima di avviare l'agente, una richiesta al server con le due variabili appena create. Si scrive <code className="nw">curl.exe</code> con l'estensione, perché <code className="nw">curl</code> da solo in PowerShell è un altro comando.</p>
+        <CommandBox cmd={CMD.curlModels} label="Elenco dei modelli che la vostra chiave può usare" tall />
+        <Controllo>Esce una riga di testo con <code className="nw">claude-sonnet-5-5</code> e <code className="nw">claude-haiku-5-5</code>. Se nell'elenco manca uno dei due, o ce ne sono altri, avvisate il docente.</Controllo>
+        <Box type="info" title="Se non esce niente di utile">Una risposta con «401» o «invalid» dice che la chiave è sbagliata. Nessuna risposta o un errore di connessione dice che l'indirizzo o la porta sono sbagliati, oppure che il PC è fuori dalla rete consentita.</Box>
+      </Passo>
+    ),
+    notes: "La richiesta usa le stesse variabili di Claude Code, quindi se va, indirizzo e chiave sono giusti. La documentazione propone una richiesta di prova diretta prima di avviare Claude Code, per distinguere un problema del gateway da uno della configurazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026). L'elenco dei modelli da /v1/models con la chiave del PC è stato provato sul server del corso per il personale; con le chiavi di questo corso: da verificare a schermo. L'uso di curl.exe al posto dell'alias di PowerShell è la stessa precauzione del corso per il personale."
+  },
+  {
+    block: B + 'Passo 3 · Avviare Claude Code',
+    content: () => (
+      <Passo n="3" titolo="Avviare Claude Code in una cartella di prova">
+        <p>Una cartella nuova, per non lavorare in un posto a caso. Tre comandi, uno alla volta:</p>
+        <CommandBox cmd={CMD.mkTest} label="1. Crea la cartella" />
+        <CommandBox cmd={CMD.cdTest} label="2. Entra nella cartella" />
+        <CommandBox cmd={CMD.claudeManual} label="3. Avvia l'agente, con conferma prima di ogni modifica" />
+        <Controllo>Claude Code si apre <b>senza schermata di accesso</b>. Se chiede di accedere con un account, la variabile della chiave non è arrivata: <code className="nw">/exit</code>, finestra nuova, controllo del passo 2.</Controllo>
+      </Passo>
+    ),
+    notes: "Con la credenziale del gateway attiva Claude Code non mostra il login (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026: se si apre sulla schermata di accesso, nessuna credenziale è arrivata). L'opzione --permission-mode manual fa partire l'agente chiedendo conferma: è la stessa che usa il foglio della prima esercitazione. Sui PC con il file delle impostazioni gestite la modalità con conferma è già imposta; l'opzione la rende esplicita anche altrove. Eventuali domande al primo avvio (tema, fiducia nella cartella) non sono ancora state provate sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 3 · /status',
+    content: () => (
+      <Passo n="3" titolo="La prima richiesta e /status">
+        <p>Dentro Claude Code incollate questa richiesta:</p>
+        <CommandBox cmd={CMD.req1} label="Prima richiesta" kind="text" />
+        <p>Poi scrivete <code className="nw">/status</code> e leggete due righe:</p>
+        <ul>
+          <li><b>Anthropic base URL</b>: deve essere il vostro server. Se la riga non c'è, la variabile non è arrivata.</li>
+          <li><b>Auth token</b>: deve nominare <code className="nw">ANTHROPIC_AUTH_TOKEN</code>. Se compare un account claude.ai, la chiave non è attiva.</li>
+        </ul>
+        <Controllo>L'agente risponde e le due righe sono quelle. Uscite con <code className="nw">/exit</code>.</Controllo>
+        <Box type="warn" title="Se dice che il modello non è disponibile">Riavviate con il modello scritto per esteso:</Box>
+        <CommandBox cmd={CMD.claudeModel} label="Ripiego con il modello per esteso" />
+      </Passo>
+    ),
+    notes: "Il controllo di /status è quello indicato dalla documentazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026): la riga Anthropic base URL compare solo se è impostato un indirizzo; una riga Auth token o API key che nomina la variabile conferma che la credenziale del gateway è attiva, mentre una riga Login method con un account claude.ai significa che non lo è. Il modello iniziale dipende dal file delle impostazioni gestite, che mappa gli alias sonnet e haiku sugli ID del server; senza quel file l'alias punta a un ID che il server può non offrire. Per questo c'è il ripiego con --model (documentato in code.claude.com/docs/en/model-config). Il testo esatto dell'errore sul modello: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · OpenCode',
+    content: () => (
+      <Passo n="4" titolo="Installare OpenCode">
+        <p>Node.js c'è già, quindi si usa npm, nella versione fissata per il corso. In una finestra PowerShell:</p>
+        <CommandBox cmd={CMD.ocInstall} label="1. Installa OpenCode" />
+        <CommandBox cmd={CMD.ocVersion} label="2. Controlla la versione" />
+        <Controllo>Esce <code className="nw">1.19.5</code>. Se Windows chiede la password di amministratore, fermatevi e chiamate il docente.</Controllo>
+        <Box type="info" title="La serie">Questa è la serie 1 di OpenCode. Esiste una serie 2 con altre chiavi nel file di configurazione: qui e nell'argomento 9 si mostra la 1.</Box>
+        <Box type="danger" title="Non usate /connect">Salverebbe la chiave in un file di OpenCode. La chiave arriva dalla variabile.</Box>
+      </Passo>
+    ),
+    notes: "Comando per la serie 1, dal README della versione 1.19.5 (github.com/anomalyco/opencode, tag v1.19.5, letto il 25/11/2026): npm install -g opencode-ai. La versione 1.19.5 è del 28/10/2026 e resta da confermare dopo la prova sul PC di Thomas: se cambia, cambia solo il numero. Il sito opencode.ai/docs descrive la serie 2 (pacchetto @opencode/cli, file con chiavi diverse); le configurazioni di esempio hanno una variante per ciascuna serie. Le guide della serie 1 consigliano WSL per l'esperienza migliore su Windows e offrono anche Scoop e Chocolatey; qui si usa npm perché Node c'è già. Se npm scrive in una cartella che richiede amministratore: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · Il file di configurazione',
+    content: () => (
+      <Passo n="4" titolo="Creare opencode.json">
+        <p>Due comandi, uno alla volta. Il primo crea la cartella di configurazione personale, il secondo apre il file in Blocco note; se chiede di crearlo, rispondete di sì.</p>
+        <CommandBox cmd={CMD.mkOc} label="1. Crea la cartella" />
+        <CommandBox cmd={CMD.notepadOc} label="2. Apre il file" />
+        <Box type="warn" title="Al salvataggio">Il nome deve restare <code className="nw">opencode.json</code>, non <code className="nw">opencode.json.txt</code>: nel menu del tipo di file scegliete «Tutti i file».</Box>
+      </Passo>
+    ),
+    notes: "La configurazione personale di OpenCode sta in ~/.config/opencode/opencode.json (documentazione della serie 1, packages/web/src/content/docs/config.mdx al tag v1.19.5, 25/11/2026); su Windows corrisponde alla cartella .config dentro il profilo utente: da verificare a schermo che OpenCode la legga proprio lì. Un file nella cartella dell'utente è sotto la configurazione gestita dall'ufficio tecnico, se presente (%ProgramData%\\opencode): in quel caso il gestito vince sulle chiavi che hanno in comune."
+  },
+  {
+    block: B + 'Passo 4 · Il testo del file',
+    content: () => (
+      <Passo n="4" titolo="Il testo di opencode.json">
+        <p>Incollate tutto il testo nel Blocco note. Sostituite <code className="nw">{'<indirizzo del server>'}</code> con quello del foglio, <b>con</b> il <code className="nw">/v1</code> già scritto in fondo. Non c'è nessuna chiave: il file legge la variabile.</p>
+        <CommandBox cmd={OPENCODE_JSON} label="Contenuto di opencode.json" kind="text" tall />
+        <p className="muted" style={{ marginTop: 8 }}>Dentro: un solo fornitore, condivisione spenta, aggiornamenti spenti, modifiche e comandi con conferma, accesso al web e alle cartelle esterne negati.</p>
+      </Passo>
+    ),
+    notes: "Configurazione di esempio del laboratorio, sintassi della serie 1 (permission come oggetto, provider.anthropic.options.baseURL, whitelist). Il fornitore è quello anthropic già incluso in OpenCode, con baseURL verso il server; la documentazione della serie 1 mostra il baseURL del fornitore nella pagina dei provider e la chiave da variabile con la sintassi {env:NOME} (providers.mdx, tag v1.19.5, 25/11/2026). Le intestazioni Authorization sono una precauzione: il pacchetto anthropic manda la chiave in x-api-key e il server legge Authorization. Che il server accetti anche x-api-key e che questo file funzioni con il fornitore anthropic sono ancora da provare sul server: da verificare a schermo. Le impostazioni: share disabled evita i link pubblici delle conversazioni (valori manual, auto, disabled, config.mdx), autoupdate false spegne il controllo degli aggiornamenti."
+  },
+  {
+    block: B + 'Passo 4 · Fermare e controllare',
+    content: () => (
+      <Passo n="4" titolo="Fermare i processi, poi controllare">
+        <p>Dopo aver cambiato variabili o file, OpenCode va chiuso del tutto: un processo rimasto in secondo piano non vede le variabili create dopo la sua partenza.</p>
+        <CommandBox cmd={CMD.stopOc} label="1. Ferma i processi rimasti (se non scrive niente, non ce n'erano)" />
+        <CommandBox cmd={CMD.ocModels} label="2. Elenca i modelli che OpenCode vede" />
+        <Controllo>L'elenco ha due righe: <code className="nw">anthropic/claude-sonnet-5-5</code> e <code className="nw">anthropic/claude-haiku-5-5</code>. Se ce ne sono altre, il file non è stato letto: ricontrollate virgole, virgolette e nome del file.</Controllo>
+      </Passo>
+    ),
+    notes: "Il comando opencode models elenca i modelli dei fornitori configurati nel formato fornitore/modello (docs della serie 1, cli.mdx, tag v1.19.5, 25/11/2026). Il problema del servizio in background è stato osservato con l'app desktop di OpenCode nel corso per il personale (24/11/2026): il servizio non vedeva variabili e PATH creati dopo la sua partenza e restava acceso anche chiudendo la finestra. Con la sola riga di comando il caso è meno probabile; il comando costa poco e si tiene. Che la whitelist del file riduca davvero l'elenco a due righe: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 4 · Prima richiesta',
+    content: () => (
+      <Passo n="4" titolo="La prima richiesta con OpenCode">
+        <p>Nella cartella di prova di prima. Due comandi, poi la richiesta dentro OpenCode:</p>
+        <CommandBox cmd={CMD.cdTest} label="1. Entra nella cartella" />
+        <CommandBox cmd={CMD.oc} label="2. Avvia OpenCode" />
+        <CommandBox cmd={CMD.req1} label="3. Dentro OpenCode: la richiesta" kind="text" />
+        <Controllo>OpenCode risponde. Se resta fermo senza errori, quasi sempre l'indirizzo o la porta nel file sono sbagliati: aprite «Se qualcosa non va». Per uscire: <code className="nw">/exit</code>.</Controllo>
+      </Passo>
+    ),
+    notes: "Silenzio senza errori: nelle prove del corso per il personale una porta sbagliata non produce alcun messaggio, l'agente resta fermo. Il comando /exit per uscire dalla schermata di OpenCode non è nella pagina CLI della serie 1: da verificare a schermo (in alternativa Ctrl+C). La modalità di partenza di OpenCode con questo file chiede conferma per modifiche e comandi."
+  },
+  {
+    block: B + 'Passo 5 · uv',
+    content: () => (
+      <Passo n="5" titolo="Il kit minimo: uv">
+        <p>Il kit ha due pezzi. <b>uv</b> esegue programmi Python al volo e si porta Python da solo. <b>MarkItDown</b> (Microsoft) trasforma PDF, Word, Excel e PowerPoint in testo Markdown, tabelle comprese. Si parte da uv:</p>
+        <CommandBox cmd={CMD.uvInstall} label="1. Installa uv, solo per il vostro utente" tall />
+        <p>Chiudete la finestra e aprite una nuova, poi:</p>
+        <CommandBox cmd={CMD.uvVersion} label="2. Controlla la versione" />
+        <Controllo>Esce <code className="nw">uv</code> seguito da un numero di versione. Se dice che non è riconosciuto, aprite «Se qualcosa non va».</Controllo>
+      </Passo>
+    ),
+    notes: "Comando ufficiale per Windows, docs.astral.sh/uv/getting-started/installation (25/11/2026): powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\". La pagina elenca i file uv.exe, uvx.exe e uvw.exe in $HOME\\.local\\bin e dice che il programma di installazione può modificare i profili della shell (UV_NO_MODIFY_PATH=1 lo impedisce). MarkItDown è il convertitore open source di Microsoft (github.com/microsoft/markitdown): da riga di comando si lancia come markitdown file.pdf, con l'opzione [all] per tutte le dipendenze. L'installazione di uv senza amministratore sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 5 · MarkItDown',
+    content: () => (
+      <Passo n="5" titolo="La prima esecuzione di MarkItDown">
+        <p>Con <code className="nw">uvx</code> MarkItDown non si installa: uv lo scarica la prima volta e lo tiene in una cache. Quella prima volta è lenta e scrive molte righe. Lanciatela adesso, così non capita davanti a un PDF.</p>
+        <CommandBox cmd={CMD.mdHelp} label="Prima esecuzione: mostra l'aiuto di MarkItDown" tall />
+        <Controllo>Alla fine compare il testo di aiuto di <code className="nw">markitdown</code> e il prompt torna. Non interrompetelo prima. Le volte dopo parte subito.</Controllo>
+        <Box type="info" title="Gli avvisi sui caratteri">Con i PDF possono comparire righe su <i>FontBBox</i>: sono innocue.</Box>
+      </Passo>
+    ),
+    notes: "uvx è l'alias di uv tool run: esegue il programma in un ambiente isolato e temporaneo, senza installarlo (docs.astral.sh/uv/guides/tools, 25/11/2026). Il pacchetto con le dipendenze opzionali si indica tra virgolette con --from, come nell'esempio della pagina per gli extra. Nelle prove del corso per il personale (24/11/2026) la prima esecuzione scaricava una cinquantina di pacchetti e richiedeva internet; l'aiuto con --help come modo di scaldare la cache non è ancora stato provato: da verificare a schermo, in alternativa si lancia il comando su un PDF qualunque. Gli avvisi FontBBox sono su stderr."
+  },
+  {
+    block: B + 'Passo 6 · Il testo',
+    content: () => (
+      <Passo n="6" titolo="Le istruzioni globali: il testo">
+        <p>Un file di istruzioni che l'agente legge a ogni avvio. Dice che gli strumenti del kit ci sono e si possono usare. Senza, davanti a un PDF prova strade peggiori. Dice anche che una tabella spezzata va dichiarata, non indovinata.</p>
+        <CommandBox cmd={ISTRUZIONI} label="Testo delle istruzioni (uguale per i due agenti)" kind="text" tall />
+      </Passo>
+    ),
+    notes: "Il testo è lo stesso per i due strumenti. Le due frasi che contano: gli strumenti uvx e uv run sono permessi (senza, l'agente tende a rifiutarli come 'installazione di programmi') e una tabella che esce spezzata si dichiara. Nelle prove del corso per il personale i PDF generati da pagine web davano tabelle spezzate, mentre il testo corrente usciva pulito: l'istruzione serve a questo. Il comportamento del modello davanti alle istruzioni va riprovato a ogni cambio di modello."
+  },
+  {
+    block: B + 'Passo 6 · I due file',
+    content: () => (
+      <Passo n="6" titolo="Le istruzioni globali: dove salvarle">
+        <p>Lo stesso testo in due file, uno per agente. Aprite il primo, incollate, salvate; poi il secondo.</p>
+        <CommandBox cmd={CMD.notepadClaude} label="1. File per Claude Code" />
+        <CommandBox cmd={CMD.notepadAgents} label="2. File per OpenCode" />
+        <Box type="warn" title="Al salvataggio">Il nome resta <code className="nw">CLAUDE.md</code> e <code className="nw">AGENTS.md</code>, non <code className="nw">.txt</code>: scegliete «Tutti i file». I file si leggono quando parte la sessione: dopo averli salvati, aprite una sessione nuova.</Box>
+        <Controllo>Entrambi i comandi aprono un file con il testo incollato dentro, e il Blocco note non dice «.txt» nel titolo.</Controllo>
+      </Passo>
+    ),
+    notes: "Claude Code legge ~/.claude/CLAUDE.md all'inizio di ogni sessione (code.claude.com/docs/en/memory, 25/11/2026). OpenCode legge ~/.config/opencode/AGENTS.md e, se manca, usa ~/.claude/CLAUDE.md; se esistono tutti e due vince AGENTS.md (rules.mdx della serie 1 al tag v1.19.5, e opencode.ai/docs/rules, 25/11/2026). Scriverli entrambi evita di dipendere dal ripiego. La cartella .claude esiste dopo il primo avvio di Claude Code (passo 3); se il Blocco note dice che il percorso non esiste, si è saltato quel passo. Se un file con quel nome esiste già sul PC, si aggiunge il testo in fondo."
+  },
+  {
+    block: B + 'Passo 7 · Il PDF',
+    content: () => (
+      <Passo n="7" titolo="Un PDF su cui provare">
+        <p>Scaricate il PDF di prova: sono poche righe di prenotazioni di laboratorio inventate. Poi copiatelo nella cartella di prova.</p>
+        <ActivityBadge n="13" file="prova-markitdown.pdf" label="Scarica il PDF di prova" />
+        <CommandBox cmd={CMD.copyPdf} label="Copia il PDF nella cartella di prova" tall />
+        <Box type="warn" title="Se il comando non trova il file">Il browser può averlo salvato altrove o con un altro nome, per esempio con un numero tra parentesi. Cercatelo in Esplora file e adattate il percorso, o chiamate il docente.</Box>
+      </Passo>
+    ),
+    notes: "Il PDF è generato dal foglio prova-markitdown (materiali dell'argomento) e contiene una tabella inventata di prenotazioni. Una tabella in un PDF nato da una pagina web è il caso difficile per MarkItDown: può uscire spezzata, ed è per questo che le istruzioni chiedono di dichiararlo. La cartella Downloads è quella predefinita del browser: se sui PC del laboratorio è un'altra, da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 7 · La prova',
+    content: () => (
+      <Passo n="7" titolo="La prova: l'agente usa il kit">
+        <p>Sessione <b>nuova</b>, nella cartella di prova (<code className="nw">cd</code> come al passo 3). Avviate Claude Code e incollate la richiesta:</p>
+        <CommandBox cmd={CMD.claudeManual} label="1. Avvia Claude Code" />
+        <CommandBox cmd={CMD.reqPdf} label="2. Dentro l'agente: la richiesta" kind="text" />
+        <Controllo>Tra le azioni compare <code className="nw">uvx ... markitdown</code>. L'agente ve ne chiede il permesso: leggete il comando e rispondete sì solo se è quello. Poi ripetete con OpenCode, stessa richiesta.</Controllo>
+        <Box type="warn" title="Se non compare">Il file delle istruzioni non è stato letto: nome, posizione, sessione nuova.</Box>
+      </Passo>
+    ),
+    notes: "La prova dice che il kit, le istruzioni e i permessi lavorano insieme. L'agente chiede conferma prima di lanciare uvx (modalità con conferma): l'abitudine da prendere è leggere il comando, non premere sì a ripetizione. Se la tabella esce spezzata, l'agente deve dirlo; se dà comunque dei totali, vanno controllati a mano sul PDF. Verificate che il comando uvx proposto sia quello atteso e non un altro."
+  },
+  {
+    block: B + 'Passo 8 · Pronti',
+    content: () => (
+      <Passo n="8" titolo="Siete pronti">
+        <div className="grid">
+          <Card title="Sul PC adesso"><p>Claude Code e OpenCode collegati al server con la vostra chiave. Il kit per leggere i documenti. Le istruzioni globali per tutti e due.</p></Card>
+          <Card title="Un PC solo" kind="i"><p>Il lavoro resta su questo PC: usate sempre lo stesso, perché chiave e configurazione sono qui.</p></Card>
+        </div>
+        <Controllo>Siete in una cartella di lavoro con l'agente aperto e funzionante.</Controllo>
+        <p>Si prosegue con l'<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>argomento 1</a> e il foglio della prima esercitazione.</p>
+        <ActivityBadge n="13" file="installazione.html" label="Il foglio con tutti i passi (pagina)" />
+      </Passo>
+    ),
+    notes: "Passaggio all'argomento 1: il foglio della prima esercitazione dice come aprire l'agente nella cartella di lavoro. Chi non ha finito un passo prosegue dal foglio dell'installazione mentre gli altri vanno avanti."
+  },
+  {
+    block: B + 'Se qualcosa non va · Claude Code',
+    content: () => (
+      <div className="pad">
+        <Tag>Se qualcosa non va</Tag>
+        <h2>Claude Code: chiave, indirizzo, modello</h2>
+        <DT cols={['Che cosa vedete', 'Causa probabile', 'Che cosa fare']} rows={[
+          ['Claude Code chiede di accedere con un account', 'La variabile è stata creata dopo aver aperto la finestra, o il nome è scritto diverso', 'Finestra nuova, controllo «chiave presente» del passo 2'],
+          ['Errore 401, token non valido', 'Chiave copiata male, spazio in fondo, o chiave di un altro PC', <>Confrontate le ultime quattro lettere con il foglio, poi ricopiate la chiave nella variabile</>],
+          ['Il modello non è disponibile per la chiave', 'Modello diverso dai due del corso', <>Avviate con <code className="nw">--model claude-sonnet-5-5</code></>],
+          ['Pausa lunga, poi errore di connessione', 'Indirizzo o porta sbagliati, o PC fuori dalla rete consentita', 'Prova diretta del passo 3; se non risponde, il docente'],
+        ]} />
+        <CommandBox cmd={CMD.last4} label="Ultime quattro lettere della chiave che vede il PC" />
+      </div>
+    ),
+    notes: "Casi dalla pagina di risoluzione dei problemi del gateway (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026): un 401 indica una credenziale non emessa dal gateway o nell'intestazione sbagliata; 'Connection refused' o 'ENOTFOUND' con una pausa silenziosa mentre Claude Code ritenta indicano indirizzo o rete; la richiesta di accesso nonostante un indirizzo raggiungibile indica che non c'è una credenziale che Claude Code legge prima della configurazione iniziale. Le ultime quattro lettere si possono leggere ad alta voce al vicino, la chiave intera mai."
+  },
+  {
+    block: B + 'Se qualcosa non va · OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>Se qualcosa non va</Tag>
+        <h2>OpenCode: il file e i processi</h2>
+        <DT cols={['Che cosa vedete', 'Causa probabile', 'Che cosa fare']} rows={[
+          ['L\'elenco dei modelli ha altre righe, o nessuna del corso', 'File non letto: errore di sintassi o cartella sbagliata', <>Il file è <code className="nw">opencode.json</code> in <code className="nw">.config\opencode</code>; ricontrollate le virgole</>],
+          ['Il file si chiama opencode.json.txt', 'Salvato con il tipo «Documenti di testo»', 'Salvate di nuovo con «Tutti i file» e cancellate il .txt'],
+          ['Errore sulla chiave anche se la chiave è giusta', 'Un processo di OpenCode è rimasto acceso con le variabili vecchie', 'Il comando del passo 4 che ferma i processi, poi riaprire'],
+          ['OpenCode resta fermo, senza errori', 'Indirizzo o porta nel file sbagliati', <>Controllate <code className="nw">baseURL</code>: indirizzo del foglio, porta, <code className="nw">/v1</code> in fondo</>],
+        ]} />
+        <CommandBox cmd={CMD.stopOc} label="Ferma i processi di OpenCode" />
+      </div>
+    ),
+    notes: "Il file salvato come .json.txt e il servizio rimasto acceso sono i due problemi più frequenti osservati con OpenCode nel corso per il personale (24/11/2026). Nelle prove una porta sbagliata non dava nessun messaggio. Se la variabile non viene vista nemmeno dopo aver fermato i processi, uscire da Windows e rientrare con il proprio utente: da verificare a schermo."
+  },
+  {
+    block: B + 'Se qualcosa non va · uv',
+    content: () => (
+      <div className="pad">
+        <Tag>Se qualcosa non va</Tag>
+        <h2>uvx installato ma non trovato</h2>
+        <p>Il messaggio dice che <code className="nw">uvx</code> o <code className="nw">uv</code> non è riconosciuto, dopo che l'installazione è finita senza errori. Un passo alla volta:</p>
+        <ol className="steps">
+          <li>Chiudete la finestra e apritene una nuova: il percorso dei programmi si aggiorna solo lì.</li>
+          <li>Se non basta, controllate che il file esista:</li>
+        </ol>
+        <CommandBox cmd={CMD.uvxTest} label="Il file c'è? Deve scrivere True" />
+        <CommandBox cmd={CMD.pathUser} label="Il percorso dell'utente contiene .local\bin?" tall />
+        <p className="muted">Se il file c'è ma il percorso non lo contiene, avvisate il docente: nel frattempo <code className="nw">uvx</code> si può lanciare scrivendo il percorso intero.</p>
+        <CommandBox cmd={CMD.uvxRun} label="Prova diretta, con il percorso intero" />
+      </div>
+    ),
+    notes: "Il programma di installazione di uv scrive in $HOME\\.local\\bin e può modificare il percorso dell'utente (docs.astral.sh/uv/getting-started/installation, 25/11/2026). La causa per cui sui PC della scuola il comando non risulta trovato anche dopo un terminale nuovo non è ancora confermata: ipotesi da verificare a schermo sono un profilo utente che si azzera, una regola che blocca la modifica del percorso, o un avvio di PowerShell che non rilegge la variabile. Se il file esiste, l'agente può comunque usare il percorso intero, ma le istruzioni globali parlano di uvx: in quel caso il docente corregge il percorso."
+  },
+  {
+    block: B + 'Cosa non fare',
+    content: () => (
+      <div className="pad">
+        <Tag>Regole</Tag>
+        <h2>Cosa non fare</h2>
+        <div className="grid">
+          <Card title="La chiave in un file" kind="d"><p>Non va in un file di progetto, in <code className="nw">opencode.json</code>, in <code className="nw">CLAUDE.md</code> o in un commit. Resta solo nella variabile.</p></Card>
+          <Card title="La chiave a schermo" kind="d"><p>Non sul proiettore, non in foto, non in chat. Del foglio si leggono ad alta voce, al massimo, le ultime quattro lettere.</p></Card>
+          <Card title="Le scorciatoie di OpenCode" kind="w"><p>Né <code className="nw">/connect</code> (salva la chiave in un file) né <code className="nw">/share</code> (crea un link pubblico alla conversazione).</p></Card>
+          <Card title="A fine corso" kind="i"><p>Togliete le due variabili dal vostro utente, con i due comandi qui sotto.</p></Card>
+        </div>
+        <CommandBox cmd={CMD.unsetKey} label="1. Toglie la chiave" />
+        <CommandBox cmd={CMD.unsetUrl} label="2. Toglie l'indirizzo" />
+      </div>
+    ),
+    notes: "Il comando che toglie le variabili le rimuove dall'utente; le finestre già aperte le vedono ancora finché non si chiudono. A fine corso il docente blocca e cancella anche le chiavi sul server, quindi una chiave rimasta su un PC non funziona più. La documentazione di Claude Code sconsiglia la credenziale nel settings.json di progetto, perché viene versionato (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026); la raccomandazione su /connect e /share viene dai rischi noti di OpenCode (chiave in chiaro nel file auth.json, link pubblici di /share)."
+  },
+  {
+    block: B + 'Domanda di verifica',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="Avete creato la variabile della chiave, ma Claude Code, avviato dalla finestra PowerShell che avevate già aperta, chiede di accedere con un account. Perché?" opzioni={[
+          { t: 'La chiave è scaduta', ok: false, perche: 'Una chiave scaduta darebbe un errore del server, non la richiesta di accesso.' },
+          { t: 'La finestra legge le variabili quando parte, e questa è partita prima', ok: true, perche: 'Una variabile dell\'utente vale per le finestre aperte dopo. Con una finestra nuova Claude Code vede la credenziale del server e non chiede l\'accesso.' },
+          { t: 'Serve l\'indirizzo con /v1 in fondo', ok: false, perche: 'Con /v1 in più le richieste andrebbero a un percorso sbagliato, ma l\'accesso non verrebbe chiesto per questo.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda di comprensione sul punto che fa perdere più tempo. La spiegazione sta nelle slide del passo 2 e nella pagina di Claude Code sul collegamento a un gateway (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026)."
+  },
+  {
+    block: B + 'Chiusura',
+    content: () => (
+      <Chiusura
+        punti={[
+          'Chiave e indirizzo stanno nelle variabili del vostro utente, mai nei file di un progetto.',
+          'Claude Code vuole l\'indirizzo senza /v1; OpenCode lo vuole nel suo file, con /v1.',
+          'Dopo ogni cambio di variabile: finestra nuova, e per OpenCode anche i processi fermati.',
+          'Senza il kit e le istruzioni, l\'agente davanti a un PDF improvvisa.',
+          'A fine corso le due variabili si tolgono.',
+        ]}
+        dopo={<>L'argomento 1 usa l'agente appena installato per una prima esercitazione sul progetto di prova. L'argomento 9 spiega il proxy che sta dietro all'indirizzo e confronta i due agenti. Il progetto personale parte dalla <a className="text-link" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>scheda del progetto</a>, da compilare dopo la prima esercitazione: con l'agente installato si arriva fino al progetto finito.</>} />
+    ),
+    notes: "Ultima slide: riprendere i punti, rimandare all'argomento 1 e ricordare la scheda del progetto personale, che si compila dopo la prima esercitazione. Fonti usate, tutte lette il 25/11/2026: code.claude.com/docs/en/setup, llm-gateway-connect, model-config, memory; opencode.ai/docs e, per la serie 1, i sorgenti della documentazione al tag v1.19.5 (github.com/anomalyco/opencode); docs.astral.sh/uv; github.com/microsoft/markitdown."
+  },
+];
+
+/* @shell-inizio (icone e applicazione: comuni a tutti gli argomenti) */
+
+const Svg = ({ children }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IconLeft = () => <Svg><polyline points="15 18 9 12 15 6" /></Svg>;
+const IconRight = () => <Svg><polyline points="9 18 15 12 9 6" /></Svg>;
+const IconNotes = () => <Svg><path d="M4 4h16v12H8l-4 4z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="12.5" x2="13" y2="12.5" /></Svg>;
+const IconExpand = () => <Svg><polyline points="9 3 3 3 3 9" /><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><polyline points="15 21 21 21 21 15" /></Svg>;
+const IconCollapse = () => <Svg><polyline points="4 9 9 9 9 4" /><polyline points="20 9 15 9 15 4" /><polyline points="4 15 9 15 9 20" /><polyline points="20 15 15 15 15 20" /></Svg>;
+
+function App() {
+  const hashIndex = () => { const n = parseInt((location.hash || '').replace('#', ''), 10); return n >= 1 && n <= slides.length ? n - 1 : 0; };
+  const [current, setCurrent] = useState(hashIndex);
+  const [notesOn, setNotesOn] = useState(false);
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  const [isFs, setIsFs] = useState(false);
+  const total = slides.length;
+  const slide = slides[current];
+  const fsOk = typeof document !== 'undefined' && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+  const next = () => setCurrent(c => Math.min(c + 1, total - 1));
+  const prev = () => setCurrent(c => Math.max(c - 1, 0));
+
+  const toggleFs = () => {
+    if (!fsOk) return;
+    try {
+      const active = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!active) { const el = document.documentElement; const r = el.requestFullscreen || el.webkitRequestFullscreen; if (r) { const p = r.call(el); if (p && p.catch) p.catch(() => {}); } }
+      else { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } }
+    } catch (err) { /* alcuni browser non supportano l'API */ }
+  };
+
+  useEffect(() => { document.title = slide.block; try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) {} }, [current]);
+  useEffect(() => {
+    const onResize = () => setZoom(calcZoom());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  useEffect(() => {
+    const h = e => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
+      if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === 'n' || e.key === 'N') setNotesOn(v => !v);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  useEffect(() => {
+    const f = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
+    document.addEventListener('fullscreenchange', f);
+    document.addEventListener('webkitfullscreenchange', f);
+    return () => { document.removeEventListener('fullscreenchange', f); document.removeEventListener('webkitfullscreenchange', f); };
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', position: 'relative' }}>
+      <div className="bar top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+          <a href="../index.html" className="text-link" style={{ textDecoration: 'none', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>&larr; Indice</a>
+          <span style={{ color: 'var(--border)' }} aria-hidden="true">|</span>
+          <span title={slide.block} className="blocklabel">{slide.block}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 10 }}>
+          <span className="counter">{current + 1} / {total}</span>
+          <div className="hide-s" role="progressbar" aria-valuemin="1" aria-valuemax={total} aria-valuenow={current + 1} aria-label="Avanzamento" style={{ width: 100, height: 7, background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: ((current + 1) / total * 100) + '%', background: 'var(--accent)' }} />
+          </div>
+        </div>
+      </div>
+
+      <main style={{ paddingTop: 56, paddingBottom: notesOn ? 'calc(60px + 42vh)' : 68, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div key={current} className="slide-content" style={{ width: '100%', maxWidth: 1280, margin: 'auto', padding: '0 24px', zoom, '--zoom': zoom }}>
+          {slide.content()}
+        </div>
+      </main>
+
+      {notesOn && (
+        <div className="notes-panel" role="region" aria-label="Note per chi parla">
+          <strong>Note per chi parla</strong> &mdash; {slide.block}
+          <p style={{ marginTop: 8, maxWidth: 'none', fontSize: 'var(--fs-sm)' }}>{slide.notes}</p>
+        </div>
+      )}
+
+      <div className="bar bottom-bar">
+        <div className="group">
+          <button onClick={prev} disabled={current === 0} className="icon-btn" aria-label="Slide precedente" title="Slide precedente"><IconLeft /></button>
+          <button onClick={next} disabled={current === total - 1} className="icon-btn" aria-label="Slide successiva" title="Slide successiva"><IconRight /></button>
+        </div>
+        <div className="group">
+          <button onClick={() => setNotesOn(v => !v)} className={notesOn ? 'icon-btn active' : 'icon-btn'} aria-label="Note per chi parla (N)" title="Note per chi parla (N)" aria-pressed={notesOn}><IconNotes /></button>
+          {fsOk && <button onClick={toggleFs} className={isFs ? 'icon-btn active' : 'icon-btn'} aria-label="Schermo intero (F)" title="Schermo intero (F)" aria-pressed={isFs}>{isFs ? <IconCollapse /> : <IconExpand />}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+/* @shell-fine */
+</script>
+</body>
+</html>

@@ -123,7 +123,6 @@
   .activity:hover { background: var(--panel-2); }
   .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
   .activity .l { text-decoration: underline; text-underline-offset: 3px; }
-  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
   /* quiz a scelta multipla */
   .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
   .quiz .opts { display: grid; gap: 8px; }
@@ -179,6 +178,17 @@
     .node:nth-child(4):not(:last-child)::after { content: none; }
     .g3 { grid-template-columns: 1fr; }
   }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
@@ -224,13 +234,11 @@ const Flow = ({ label, nodes }) => (
   </div>
 );
 
-/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
-   durata: stima indicativa dell'esercizio, mai un orario. */
-const ActivityBadge = ({ n, file, label, durata }) => (
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
   <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Attività al PC</span>
     <span className="l">{label}</span>
-    {durata && <span className="d">{durata}</span>}
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
@@ -280,6 +288,43 @@ const Chiusura = ({ punti, dopo }) => (
   </div>
 );
 
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
+
 /* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
@@ -300,31 +345,8 @@ const CODICE_DIFF = String.raw`$ git diff src/formato.js
 +const LARGHEZZA_ID = 10;
  function riga(p) {`;
 
-const CODICE_COMMIT = String.raw`$ git add src/logica.js test/logica.test.js
-$ git diff --staged          # ultima lettura di quello che entra nel commit
-$ git commit -m "Elenco: filtro per laboratorio"
-$ git log --oneline -3`;
-
-const CODICE_RAMO = String.raw`$ git switch -c lavoro-filtro     # nuovo ramo, parte da dove sei
-  ... l'agente lavora, tu leggi e fai commit ...
-$ git switch main              # torni alla versione di partenza, intatta
-$ git branch                   # i rami che esistono`;
-
-const CODICE_PUNTI = String.raw`$ git tag                        # elenca i punti di partenza: partenza-a2, partenza-a5 ...
-$ git status                     # prima: niente modifiche da perdere?
-$ git switch -c lavoro-a2 partenza-a2
-$ git log --oneline              # i commit di questo punto di partenza`;
-
 const CODICE_REMOTE = String.raw`$ git remote -v
 (nessun output: il repository non ha un remote, quindi non si può fare push)`;
-
-const CODICE_PROGETTO = String.raw`$ cd progetto-mio
-$ git init -b main
-$ git config user.name "Nome a scelta"
-$ git config user.email "nome@demo.invalid"
-$ git add README.md .gitignore
-$ git commit -m "Primo commit: scheda del progetto"
-$ git remote -v                # deve restare vuoto`;
 
 const slides = [
   {
@@ -378,7 +400,7 @@ const slides = [
         ]} />
       </div>
     ),
-    notes: "Tre zone, due comandi. Un commit è una fotografia dei file tracciati, con un messaggio. L'area di preparazione serve a decidere cosa entra: l'agente potrebbe aver cambiato cinque file e voi ne volete committare due. Se la sala usa git ogni giorno, bastano trenta secondi su questa slide."
+    notes: "Tre zone, due comandi. Un commit è una fotografia dei file tracciati, con un messaggio. L'area di preparazione serve a decidere cosa entra: l'agente potrebbe aver cambiato cinque file e voi ne volete committare due. Se la sala usa git ogni giorno, questa slide si passa in fretta."
   },
   {
     block: B + 'git status',
@@ -451,12 +473,21 @@ const slides = [
       <div className="pad">
         <Tag>Salvare</Tag>
         <h2>Commit piccoli, con i nomi dei file</h2>
-        <pre aria-label="Esempio di commit">{CODICE_COMMIT}</pre>
-        <ul>
-          <li>Un commit per un passo che avete verificato: se il passo dopo va male, tornate lì.</li>
-          <li>I file si aggiungono per nome. <code>git add .</code> e <code>git add -A</code> portano dentro anche quello che non avete guardato.</li>
-          <li>Il messaggio dice cosa è cambiato, in una riga.</li>
-        </ul>
+        <div className="cols">
+          <div>
+            <ul>
+              <li>Un commit per un passo che avete verificato: se il passo dopo va male, tornate lì.</li>
+              <li>I file si aggiungono per nome. <code>git add .</code> e <code>git add -A</code> portano dentro anche quello che non avete guardato.</li>
+              <li>Il messaggio dice cosa è cambiato, in una riga.</li>
+            </ul>
+          </div>
+          <div>
+            <CommandBox cmd="git add src/logica.js test/logica.test.js" label="1. Aggiungi i file per nome" />
+            <CommandBox cmd="git diff --staged" label="2. Ultima lettura di ciò che entra nel commit" />
+            <CommandBox cmd={'git commit -m "Elenco: filtro per laboratorio"'} label="3. Il commit, con un messaggio di una riga" />
+            <CommandBox cmd="git log --oneline -3" label="4. I tre commit più recenti" />
+          </div>
+        </div>
       </div>
     ),
     notes: "Il commit per percorsi espliciti è la stessa disciplina del caso di studio dell'argomento 11. git diff --staged è l'ultima lettura prima di committare. Messaggi: «Elenco: filtro per laboratorio» è meglio di «modifiche». Se l'agente committa da solo, leggere i suoi messaggi e confrontarli con i file. Documentazione: https://git-scm.com/docs/git-commit."
@@ -467,7 +498,9 @@ const slides = [
       <div className="pad">
         <Tag>Salvare</Tag>
         <h2>Un ramo per ogni lavoro</h2>
-        <pre aria-label="Creare un ramo di lavoro">{CODICE_RAMO}</pre>
+        <CommandBox cmd="git switch -c lavoro-filtro" label="1. Nuovo ramo, parte da dove siete. Poi l'agente lavora, voi leggete e fate commit" />
+        <CommandBox cmd="git switch main" label="2. Tornate alla versione di partenza, intatta" />
+        <CommandBox cmd="git branch" label="3. I rami che esistono" />
         <p>Un ramo è una linea di commit separata. Su <code>lavoro-filtro</code> l'agente può sbagliare quanto vuole: <code>main</code> resta com'era.</p>
         <Box type="tip" title="Abitudine">Prima di dare un lavoro all'agente: <code>git status</code> pulito, ramo nuovo, un commit di partenza. Se il risultato non vi piace tornate a <code>main</code> e il ramo si abbandona.</Box>
       </div>
@@ -513,12 +546,21 @@ const slides = [
       <div className="pad">
         <Tag>La palestra</Tag>
         <h2>Ripartire da uno stato noto</h2>
-        <pre aria-label="Punti di partenza della palestra">{CODICE_PUNTI}</pre>
-        <ul>
-          <li>Un tag è un nome fisso dato a un commit: <code>partenza-a2</code> è il punto di partenza di questo esercizio.</li>
-          <li><code>-c</code> crea il ramo <code>lavoro-a2</code> (il nome è a scelta); il tag non si sposta.</li>
-          <li>Se un esercizio viene male, si riparte con un altro nome di ramo. Il lavoro vecchio resta dov'è.</li>
-        </ul>
+        <div className="cols">
+          <div>
+            <ul>
+              <li>Un tag è un nome fisso dato a un commit: <code>partenza-a2</code> è il punto di partenza di questo esercizio.</li>
+              <li><code>-c</code> crea il ramo <code>lavoro-a2</code> (il nome è a scelta); il tag non si sposta.</li>
+              <li>Se un esercizio viene male, si riparte con un altro nome di ramo. Il lavoro vecchio resta dov'è.</li>
+            </ul>
+          </div>
+          <div>
+            <CommandBox cmd="git tag" label="1. I punti di partenza: partenza-a2, partenza-a5 ..." />
+            <CommandBox cmd="git status" label="2. Prima: niente modifiche da perdere?" />
+            <CommandBox cmd="git switch -c lavoro-a2 partenza-a2" label="3. Il ramo di lavoro, dal punto di partenza" />
+            <CommandBox cmd="git log --oneline" label="4. I commit di questo punto di partenza" />
+          </div>
+        </div>
       </div>
     ),
     notes: "Tutti gli esercizi della palestra seguono lo stesso schema, con tag partenza-aN. Il PC è preparato prima e non ha remote. Senza -c, git switch su un tag lascia in «detached HEAD», dove i commit non appartengono a nessun ramo: da evitare. Documentazione: https://git-scm.com/docs/git-tag."
@@ -552,7 +594,7 @@ const slides = [
           <li>Per annullare: <code>git restore</code> su un file nominato, o <code>git revert</code>.</li>
           <li>A fine lavoro: elenco dei file cambiati, da confrontare con <code>git status</code>.</li>
         </ul>
-        <ActivityBadge n="2" file="promemoria-git.html" label="Promemoria dei comandi git per l'agente" durata="da tenere accanto all'esercizio" />
+        <ActivityBadge n="2" file="promemoria-git.html" label="Promemoria dei comandi git per l'agente" />
         <p className="muted" style={{ marginTop: 10 }}>Come si scrive un file di istruzioni di progetto: argomento 4.</p>
       </div>
     ),
@@ -571,7 +613,7 @@ const slides = [
           <li><time>3</time>Annullate le modifiche non richieste una per una, un commit ciascuna, senza toccare il filtro.</li>
           <li><time>4</time>Confrontate con <code>main</code>: devono restare solo le righe del filtro. Poi confrontate l'elenco con quello di un collega.</li>
         </ol>
-        <ActivityBadge n="2" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" durata="indicativo: 25 min" />
+        <ActivityBadge n="2" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" />
       </div>
     ),
     notes: "Il foglio guida i passi senza dire cosa c'è da trovare. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
@@ -582,11 +624,27 @@ const slides = [
       <div className="pad">
         <Tag>Il progetto personale</Tag>
         <h2>La cartella del progetto è un repository</h2>
-        <pre aria-label="Creare il repository del progetto">{CODICE_PROGETTO}</pre>
+        <CommandBox cmd="cd progetto-mio" label="1. Entrate nella cartella del progetto" />
+        <CommandBox cmd="git init -b main" label="2. Create il repository" />
+        <CommandBox cmd={'git config user.name "Nome a scelta"'} label="3. Il nome, solo per questo repository" />
+        <CommandBox cmd={'git config user.email "nome@demo.invalid"'} label="4. L'indirizzo, inventato" />
         <p className="muted">Nome ed email restano solo in questo repository, sul PC della scuola. Non si collega nessun remote.</p>
       </div>
     ),
-    notes: "Tappa del progetto: cartella creata e primo commit. Stessa disciplina dell'esercizio: ramo di lavoro per ogni modifica ampia, git diff prima di accettare. Il file .gitignore tiene fuori dal repository i file generati e qualsiasi cosa che somigli a un segreto. Documentazione: https://git-scm.com/docs/git-init."
+    notes: "La cartella del progetto personale diventa un repository, con nome e indirizzo inventati e validi solo lì. Il nome della cartella è quello deciso con il docente: progetto-mio è un esempio. Documentazione: https://git-scm.com/docs/git-init."
+  },
+  {
+    block: B + 'Il primo commit del progetto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il progetto personale</Tag>
+        <h2>Il primo commit e il controllo del remote</h2>
+        <CommandBox cmd="git add README.md .gitignore" label="1. Aggiungete i file per nome" />
+        <CommandBox cmd={'git commit -m "Primo commit: scheda del progetto"'} label="2. Il primo commit" />
+        <CommandBox cmd="git remote -v" label="3. Non deve scrivere nulla: nessun remote, quindi nessun push" />
+      </div>
+    ),
+    notes: "Stessa disciplina dell'esercizio: ramo di lavoro per ogni modifica ampia, git diff prima di accettare. Il file .gitignore tiene fuori dal repository i file generati e qualsiasi cosa che somigli a un segreto. Se git remote -v scrive qualcosa, si ferma tutto e si chiede al docente."
   },
   {
     block: B + 'Domanda di verifica',
@@ -663,6 +721,7 @@ function App() {
     const h = e => {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
       if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }

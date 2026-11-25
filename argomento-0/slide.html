@@ -123,7 +123,6 @@
   .activity:hover { background: var(--panel-2); }
   .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
   .activity .l { text-decoration: underline; text-underline-offset: 3px; }
-  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
   /* quiz a scelta multipla */
   .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
   .quiz .opts { display: grid; gap: 8px; }
@@ -179,6 +178,17 @@
     .node:nth-child(4):not(:last-child)::after { content: none; }
     .g3 { grid-template-columns: 1fr; }
   }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
@@ -224,13 +234,11 @@ const Flow = ({ label, nodes }) => (
   </div>
 );
 
-/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
-   durata: stima indicativa dell'esercizio, mai un orario. */
-const ActivityBadge = ({ n, file, label, durata }) => (
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
   <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Attività al PC</span>
     <span className="l">{label}</span>
-    {durata && <span className="d">{durata}</span>}
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
@@ -280,28 +288,111 @@ const Chiusura = ({ punti, dopo }) => (
   </div>
 );
 
-/* @componenti-fine */
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
 
+/* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
 const B = 'Argomento 0 — Il racconto · ';
 
-/* Un episodio: che cosa è successo, che cosa è cambiato, dove torna nel corso */
-const Episodio = ({ n, titolo, tema, fatti, regola, dove, stat }) => (
+/* Testi da incollare nell'attività (gli stessi del foglio «Il primo prompt») */
+const PROMPT_VIAGGI = `voglio informatizzare e automatizzare completamente il sistema di gestione delle pratiche viaggi e uscite didattiche della mia scuola.
+
+il portale sviluppato con tecnologia nodejs con frontend a tutta discrezione (in base alle info nella nostra KB) con database posgres dovrà essere conteneirizzato su docker e posizionato sul portale della scuola. nel frattempo per tutta la fase di test possiamo utilizzare il nostro server su contabo nel quale abbiamo gli altri progetti.
+
+per capire il funzionamento del sistema ti metto a disposizione il regolamento scolastico e i moduli per le uscite (in allegato due di esempio compilati).
+
+facciamo una ragionata insieme su come rimuovere completamente tutto il cartaceo, quindi consentire a studenti, genitori e docenti di firmare e prendere visione dei moduli di autorizzazione tramite il riconoscimento digitale (suggeriscimi come).
+
+il portale dovrà servire oltre a docenti che organizzano le uscite, alla commissione viaggi che le dovrà approvare, alla segreteria scolastica che dovrà seguire l'iter del viaggio e gestire eventuali preventivi e richieste di preventivo.
+
+per autenticare gli utenti scolastici possiamo utilizzare autenticazione Google sul dominio ittsrimini.edu.it.
+
+la dirigenza potrà vedere tutte le pratiche e porre un visto per ok, una richiesta di revisione con motivazione o un diniego.
+
+analizza tutti i documenti ed estrapola tutte le info necessarie per la produzione dettagliata del sistema. sfrutta tutta la potenza agentica per svolgere il lavoro in modo parallelo e attento.
+
+per questo progetto crea un repo github provato sul mio git (trovi tutte ne info in kb)
+
+in base alla tua esperienza suggeriscimi anche l'implementazione di funzionalità che non ti ho elencato ma che possono esse utili per il nostro scopo.`;
+
+const PROMPT_ATTIVITA = `Qui sotto c'è il primo messaggio con cui è nato un portale della scuola. Non scrivere codice e non creare file. Rispondi in tre parti: 1) che cosa hai capito che voglio ottenere; 2) quali requisiti mancano o sono ambigui; 3) le domande che mi faresti prima di cominciare, ciascuna con la risposta che raccomanderesti. Il regolamento e i due moduli citati nel messaggio non li hai: dimmi che cosa cercheresti in ciascuno.
+
+MESSAGGIO
+
+` + PROMPT_VIAGGI;
+
+const REGOLAMENTO_ATTIVITA = `Ecco il regolamento, inventato. Aggiorna le tue domande. Poi elenca le regole di validazione che ne ricavi, numerate, e per ciascuna dimmi se si può controllare in automatico.
+
+Regolamento delle uscite didattiche, Istituto Demo
+1. Le classi prime fanno solo uscite di una giornata.
+2. Serve la partecipazione di almeno due terzi degli alunni frequentanti della classe.
+3. Un docente accompagnatore ogni quindici alunni, e almeno uno è della classe. Se c'è un alunno con disabilità, c'è anche il docente di sostegno.
+4. La richiesta si presenta almeno quindici giorni prima, sette se l'uscita è a piedi o con mezzi pubblici.
+5. Dopo il 30 aprile non si organizzano uscite, salvo deroga del Consiglio d'istituto.
+6. Il costo per alunno di un'uscita di una giornata non supera 40 euro.
+7. Un docente non accompagna per più di dieci giorni all'anno.
+8. Il dirigente approva, chiede una revisione motivata oppure nega.`;
+
+const PROMPT_SCHEDA = `Ti incollo la scheda del mio progetto personale. Confrontala con gli ingredienti del primo messaggio con cui è nato un portale della scuola: obiettivo, vincoli tecnici, documenti di partenza, chi lo usa e con quali permessi, come si entra, come voglio che tu lavori. Dimmi quali mancano o sono vaghi. Non scrivere codice e non modificare file.
+
+[sostituisci questa riga con il testo della tua scheda]`;
+
+/* Citazione del prompt: testo reale, refusi compresi */
+const Citazione = ({ righe, sub }) => (
+  <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderLeft: '5px solid var(--accent)', borderRadius: '0 8px 8px 0', padding: '8px 16px', margin: '4px 0 12px' }}>
+    {sub && <div className="muted" style={{ fontSize: 'var(--fs-xs)', marginBottom: 4 }}>{sub}</div>}
+    {righe.map((r, i) => <p key={i} style={{ color: 'var(--text)', fontSize: 'var(--fs-sm)', marginBottom: i === righe.length - 1 ? 0 : 6 }}>{r}</p>)}
+  </div>
+);
+
+/* Un pezzo del prompt letto a quattro voci */
+const Pezzo = ({ n, nome, righe, sub, chiede, scontato, vincolo, manca, extra }) => (
   <div className="pad">
-    <Tag>Episodio {n}</Tag>
-    <h2>{titolo}</h2>
-    <div className="cols">
-      <div>
-        <Card title="Cosa è successo" kind="i">{fatti}</Card>
-        {stat && <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginTop: 12 }}>{stat}</div>}
-      </div>
-      <div>
-        <Card title="Cosa è cambiato">{regola}</Card>
-        <Box type="info" title="Dove torna nel corso">{dove}</Box>
-      </div>
+    <Tag>Il primo prompt · pezzo {n} di 7 · {nome}</Tag>
+    <Citazione righe={righe} sub={sub} />
+    <div className="grid g2">
+      <Card title="Cosa chiede">{chiede}</Card>
+      <Card title="Cosa dà per scontato" kind="i">{scontato}</Card>
+      <Card title="Vincoli che fissa">{vincolo}</Card>
+      <Card title="Cosa manca, e chi ha deciso" kind="w">{manca}</Card>
     </div>
-    <p className="legend" style={{ marginTop: 8 }}>Tema: {tema}</p>
+    {extra}
   </div>
 );
 
@@ -309,57 +400,33 @@ const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="0" titolo="Il racconto" sottotitolo="Come sono nati il metodo di lavoro con Claude Code, la base di conoscenza, gli agenti e i portali della scuola."
-        caso="Una storia di sette mesi, con gli errori raccontati quanto i successi. Ogni episodio anticipa un tema del corso." />
+      <Apertura n="0" titolo="Il racconto" sottotitolo="Il primo messaggio con cui è nato un portale della scuola, letto a pezzi, e il lavoro che ne è seguito."
+        caso="Argomento facoltativo. Testo reale, ripulito solo per la privacy; gli errori contano quanto i successi."
+        prima="nessun obbligo. Aiutano l'argomento 1 (come lavora un agente) e l'argomento 3 (dalla richiesta vaga ai requisiti)." />
     ),
-    notes: "Apertura lunga del racconto. Chi parla racconta in prima persona come ha lavorato nel 2026, partendo da un problema pratico. Il racconto usa solo episodi documentati nei registri di lavoro, nei repository e nelle note di progetto. Non ci sono dati reali di persone, nomi di colleghi o dettagli della rete della scuola."
+    notes: "Argomento facoltativo e autonomo. Racconta in prima persona come sono nati il Portale Viaggi e il Portale FSL a partire da due messaggi reali, poi che cosa è successo dopo. Si usano solo fatti documentati nei repository, nei registri di lavoro e nelle sessioni. Nessun dato di persone, nessun nome di colleghi, nessun dettaglio della rete della scuola. Il testo dei prompt è quello vero, con i refusi: sono stati tolti solo i percorsi sul computer, i link privati e i nomi di classi."
   },
   {
     block: B + 'Come si legge',
     content: () => (
       <div className="pad">
         <Tag>Orientamento</Tag>
-        <h2>Nove episodi, nove temi</h2>
-        <p>Il racconto procede per episodi. In ognuno qualcosa è andato storto o è andato in modo diverso dal previsto, e ne è uscita una regola di lavoro.</p>
+        <h2>Tre parti</h2>
         <div className="grid">
-          <Card title="Il metodo"><p>Il problema da cui si parte, la base di conoscenza, il gruppo di agenti.</p></Card>
-          <Card title="Gli errori" kind="w"><p>Agenti mai caricati, un revisore che trova 26 difetti, dati riservati quasi pubblicati.</p></Card>
-          <Card title="I portali" kind="i"><p>Dal prototipo sui server personali al Raspberry Pi portato a scuola.</p></Card>
-          <Card title="Il costo" kind="d"><p>Una spesa di pochi dollari che segnala un difetto di progetto.</p></Card>
+          <Card title="1. Il terreno"><p>Che cosa c'era prima del messaggio: un problema di contesto, una base di conoscenza, un gruppo di agenti.</p></Card>
+          <Card title="2. Il prompt" kind="i"><p>Il primo messaggio del Portale Viaggi in sette pezzi, poi il secondo, del Portale FSL, che riparte dal primo.</p></Card>
+          <Card title="3. Il lavoro" kind="w"><p>Le fasi, i requisiti nati dopo, gli errori, il passaggio dal server personale a quello della scuola, lo stato attuale.</p></Card>
         </div>
-        <Box type="tip" title="Come usarlo">Ogni episodio indica l'argomento del corso in cui il tema viene ripreso e provato sul codice. Qui basta riconoscerlo.</Box>
+        <Box type="tip" title="Per ogni pezzo del prompt">Cosa chiede, cosa dà per scontato, quali vincoli tecnici fissa, che cosa manca e chi ha deciso. Alla fine un'attività al PC: date il messaggio al vostro agente e confrontate.</Box>
       </div>
     ),
-    notes: "Spiegare la struttura: gli episodi sono anticipazioni, non lezioni. Gli argomenti 8 (hook e MCP) e 9 (OpenCode e LiteLLM) non hanno un episodio narrativo: si dice apertamente e si rimanda ai rispettivi argomenti."
-  },
-  {
-    block: B + 'Perché quei portali',
-    content: () => (
-      <div className="pad">
-        <Tag>Il punto di partenza</Tag>
-        <h2>Perché proprio quei portali</h2>
-        <div className="cols">
-          <div>
-            <p>Il criterio: partire dalle attività che, dal punto di vista di un docente, andavano dematerializzate. Prenotare le risorse dei laboratori, seguire i percorsi di alternanza scuola-lavoro, organizzare i viaggi di istruzione.</p>
-            <p>Sviluppo e prove sono stati fatti sui server personali. Il server della scuola è venuto dopo.</p>
-          </div>
-          <div>
-            <Card title="Tre portali"><ul>
-              <li>Prenota Risorse</li>
-              <li>Alternanza scuola-lavoro (FSL)</li>
-              <li>Viaggi di istruzione</li>
-            </ul></Card>
-          </div>
-        </div>
-      </div>
-    ),
-    notes: "Origine dei portali: digitalizzare per prime le attività che, dal punto di vista di un docente, andavano dematerializzate. Sviluppo e prove sui server personali, poi un Raspberry Pi preparato e portato a scuola. Non servono altri dettagli, e non si entra nella rete della scuola."
+    notes: "La parte centrale è il prompt letto pezzo per pezzo. Le altre due parti servono a capire perché un messaggio così breve ha potuto funzionare (il terreno) e che cosa non bastava (il lavoro). Gli episodi del racconto non legati ai portali stanno negli argomenti 6, 7 e 10: la penultima slide dice dove."
   },
   {
     block: B + 'Il problema',
     content: () => (
       <div className="pad">
-        <Tag>Episodio 1 · il problema</Tag>
+        <Tag>Il terreno · il problema</Tag>
         <h2>Ciò che impari su un progetto non passa agli altri</h2>
         <div role="group" aria-label="Tre progetti e un computer nuovo: lo stesso errore si ripete">
           <Flow label="Un errore, più volte" nodes={[
@@ -377,7 +444,7 @@ const slides = [
     block: B + 'La base di conoscenza',
     content: () => (
       <div className="pad">
-        <Tag>La risposta</Tag>
+        <Tag>Il terreno · la risposta</Tag>
         <h2>Base di conoscenza e LLM Wiki</h2>
         <div role="group" aria-label="Tre livelli: sessione, wiki, base di conoscenza stabile">
           <Flow nodes={[
@@ -392,13 +459,13 @@ const slides = [
         <p className="legend">Tema: istruzioni persistenti e contesto. Torna negli argomenti 1 e 4.</p>
       </div>
     ),
-    notes: "La wiki è nata nell'aprile 2026 con l'ingest di dodici progetti. Tre livelli: sessione (memoria di lavoro), wiki (memoria episodica), base stabile (memoria semantica). L'esame di promozione è la regola del toolkit dalla versione 0.4: basta una delle tre condizioni, e in ogni caso il modello va verificato in produzione o su un dispositivo reale. Se un'informazione cita un sistema reale, resta in wiki e sale solo dopo essere stata generalizzata."
+    notes: "La wiki è nata nell'aprile 2026 con l'ingest di dodici progetti. Tre livelli: sessione (memoria di lavoro), wiki (memoria episodica), base stabile (memoria semantica). L'esame di promozione è la regola del toolkit dalla versione 0.4: basta una delle tre condizioni, e in ogni caso il modello va verificato in produzione o su un dispositivo reale. Se un'informazione cita un sistema reale, resta in wiki e sale solo dopo essere stata generalizzata. Questa base è quella che il primo prompt chiama «KB»."
   },
   {
     block: B + 'Il gruppo di agenti',
     content: () => (
       <div className="pad">
-        <Tag>Il toolkit</Tag>
+        <Tag>Il terreno · il toolkit</Tag>
         <h2>Un lead che delega, un revisore che controlla</h2>
         <div className="grid">
           <Card title="Il lead"><p>Pianifica, mostra il piano, delega ai subagenti e mette insieme il risultato. I compiti banali li fa da solo.</p></Card>
@@ -409,102 +476,347 @@ const slides = [
         <p className="legend" style={{ marginTop: 10 }}>Tema: subagenti e revisione. Tornano nell'argomento 7.</p>
       </div>
     ),
-    notes: "Il toolkit è nato a maggio 2026 (versione 0.1: dieci agenti, ventidue modelli di errore, sei skill) ed è cresciuto; i numeri cambiano a ogni versione, per questo qui non si fissano. Il punto è la divisione dei ruoli: chi pianifica non è chi controlla."
+    notes: "Il toolkit è nato a maggio 2026 (versione 0.1: dieci agenti, ventidue modelli di errore, sei skill) ed è cresciuto; i numeri cambiano a ogni versione, per questo qui non si fissano. Il punto è la divisione dei ruoli: chi pianifica non è chi controlla. Nelle due sessioni di luglio che raccontiamo i subagenti lanciati sono di tipo generico; il difetto che aveva escluso gli specialisti dal caricamento è stato scoperto il 20 luglio (episodio nell'argomento 7)."
   },
   {
-    block: B + 'Gli agenti che non c\'erano',
-    content: () => (
-      <Episodio n="2" titolo="Gli agenti che non c'erano" tema="subagenti, e «sembra funzionare» non vuol dire «funziona»"
-        fatti={<><p>Per mesi i subagenti non sono stati caricati. Nel file di configurazione dei due agenti principali una riga di apertura <code className="nw">\---</code> aveva preso il posto di <code className="nw">---</code>, per colpa di un editor. Gli specialisti non avevano proprio l'intestazione.</p><p>Il lavoro andava avanti lo stesso: il lead improvvisava, senza dire che non stava delegando.</p></>}
-        regola={<><p>La scoperta è del 20 luglio 2026: l'orchestrazione descritta nei documenti non era mai avvenuta.</p><p>Controllo di trenta secondi: chiedere al lead quali subagenti ha a disposizione.</p></>}
-        dove="Argomento 7 (Skill e subagenti revisori): come l'agente vede nome e descrizione di ogni subagente. Argomento 5: verificare che qualcosa funzioni davvero." />
-    ),
-    notes: "Il difetto era nel frontmatter, cioè nell'intestazione dei file degli agenti: un carattere di escape davanti ai trattini, aggiunto da un editor. L'errore è invisibile perché il sistema continua a rispondere. Un secondo caso, il 4 agosto (un ripristino simulato che sembrava riuscito e aveva quattro difetti più uno), ha confermato la regola."
-  },
-  {
-    block: B + 'Il recupero dalle sessioni',
-    content: () => (
-      <Episodio n="3" titolo="Dieci agenti, un'ora, mesi di sessioni" tema="subagenti in parallelo, e il contesto che si perde"
-        fatti={<><p>Per mesi le sessioni di lavoro non erano state passate nella wiki. Il 16 luglio 2026 dieci agenti hanno letto in parallelo le trascrizioni locali delle sessioni.</p><p>Hanno ricostruito lo stato di decine di sessioni in circa un'ora. Cinque progetti non erano nemmeno in elenco.</p></>}
-        regola={<><p>I dettagli (file letti, tentativi, output) restano nei contesti dei subagenti e al lead arriva un riassunto.</p><p>Le trascrizioni sono materiale grezzo: si interrogano con ricerche mirate, non si rileggono per intero.</p></>}
-        dove="Argomento 7: subagenti con contesto proprio. Argomento 1: cosa vede l'agente e cosa no." />
-    ),
-    notes: "Episodio del 16 luglio 2026, dal registro della wiki: dieci agenti di esplorazione sulle trascrizioni locali, cinque progetti nuovi emersi, stato di decine di sessioni ricostruito in circa un'ora. La conclusione utile: ingerire regolarmente costa meno che recuperare dopo."
-  },
-  {
-    block: B + 'Il revisore corregge il lead',
-    content: () => (
-      <Episodio n="4" titolo="Il revisore trova 26 difetti" tema="revisione indipendente"
-        fatti={<><p>Il 20 luglio 2026, riparata l'orchestrazione, il flusso lead, esecutore, revisore, correzione gira per la prima volta davvero.</p><p>Il revisore restituisce 26 osservazioni, 4 bloccanti. Una è un'affermazione sbagliata sulla delega annidata, scritta dal lead in un documento.</p></>}
-        stat={<><Stat big="26" label="osservazioni del revisore" /><Stat big="4" label="bloccanti" /></>}
-        regola={<><p>Chi ha scritto un documento non è il più adatto a trovarne gli errori. Il revisore parte da un contesto pulito e può contraddire il lead.</p><p>Ogni consegna passa dal revisore prima di essere dichiarata finita.</p></>}
-        dove="Argomento 7: subagenti revisori; due agenti che concordano non provano che il codice sia giusto. Argomento 5: revisione e test." />
-    ),
-    notes: "Dato dal registro del 20 luglio 2026 (versione 0.2 del toolkit): ventisei osservazioni, quattro bloccanti. Il caso più istruttivo è l'affermazione errata sulla delega annidata, scritta dal lead e smentita dal revisore."
-  },
-  {
-    block: B + 'I dati prima della pubblicazione',
-    content: () => (
-      <Episodio n="5" titolo="Quarantasette righe prima di andare online" tema="dati riservati nel codice, e controllo prima di pubblicare"
-        fatti={<><p>Il toolkit doveva diventare pubblico. Il 13 agosto 2026 il controllo prima della pubblicazione dà esito negativo: la cartella degli agenti conteneva 47 righe con nomi di clienti e una tabella che li legava ai gateway di pagamento. Erano comparse nella riscrittura della versione 0.2.</p></>}
-        stat={<><Stat big="47" label="righe da togliere" /><Stat big="5 giorni" label="dal controllo alla pubblicazione" /></>}
-        regola={<><p>Si ripulisce, un secondo revisore indipendente dà il via libera, la storia del repository viene ridotta a un solo commit e la pubblicazione avviene il 18 agosto.</p><p>Dalla revisione dei testi pubblici nasce anche una skill per togliere i tic tipici di un testo generato.</p></>}
-        dove="Argomento 6 (Sicurezza): segreti e dati nel codice, e la storia di git che li conserva. Argomento 7: un secondo revisore." />
-    ),
-    notes: "Dal registro del 18 agosto 2026: controllo del 13 agosto con esito negativo, bonifica, nuova verifica con esito positivo, storia ridotta a un commit, pubblicazione il 18 agosto. Si racconta senza nomi: i clienti non vengono citati. La storia di git è parte di ciò che si pubblica."
-  },
-  {
-    block: B + 'Dal portale al server',
+    block: B + 'Il contesto del primo messaggio',
     content: () => (
       <div className="pad">
-        <Tag>Episodio 6 · dal prototipo alla produzione</Tag>
-        <h2>Dal portale in due giorni al server della scuola</h2>
-        <ol className="timeline">
-          <li><time>5 lug</time>Prima commit del portale dei viaggi, sul server personale.</li>
-          <li><time>15-16 lug</time>Portale dell'alternanza: cinque fasi (M0-M4) in due giorni, 105 test automatici.</li>
-          <li><time>23 ago</time>Inizia il repository del server della scuola: Traefik, backup, monitoraggio, runbook e guida alla messa in produzione.</li>
-          <li><time>26 ago</time>Il server funziona a casa. Prenota Risorse viene riscritta da capo.</li>
-          <li><time>10 set</time>I tre portali vengono installati sul Raspberry Pi 5 a scuola.</li>
-        </ol>
-        <p className="legend">Tema: dai requisiti al lavoro a fasi. Torna nell'argomento 3. Il prototipo è la parte veloce.</p>
+        <Tag>Il prompt · il contesto</Tag>
+        <h2>Il messaggio del 5 luglio non parte da zero</h2>
+        <div role="group" aria-label="Allegati e base di conoscenza arrivano all'agente insieme al messaggio">
+          <Flow nodes={[
+            ['3 allegati', 'il regolamento in PDF e due moduli compilati', 'i'], ['La KB', 'stack preferito, server di prova, account del repository'], ['Il messaggio', '5 luglio 2026, 18:49: poche righe, con refusi', 'w'], ['L\'agente', 'legge, cerca, poi fa domande'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Il messaggio rimanda alla KB due volte: «in base alle info nella nostra KB» e «trovi tutte ne info in kb».</li>
+          <li>Indica anche un server già in uso, quello dove stanno gli altri progetti.</li>
+          <li>Il Portale Viaggi nasce dopo la wiki (aprile) e dopo il toolkit (maggio): tre mesi di lavoro stanno sotto queste righe.</li>
+        </ul>
       </div>
     ),
-    notes: "Le date vengono dai repository (prime commit: Viaggi il 5 luglio, FSL il 15 luglio, server il 23 agosto) e dalle note di progetto (105 test per FSL; server funzionante a casa il 26 agosto; installazione sul Raspberry Pi della scuola il 10 settembre). Il passaggio dal server di casa alla rete della scuola non si racconta nei dettagli: si dice solo che runbook, backup e messa in produzione hanno richiesto più tempo del prototipo."
+    notes: "Il messaggio è delle 18:49 del 5 luglio 2026 (ora italiana). Gli allegati erano il regolamento delle uscite approvato nel 2025 e due moduli compilati come esempio, un'uscita e un viaggio. Nei primi minuti l'agente legge i tre documenti e interroga la base di conoscenza per stack, server di prova e account del repository: lo si ricava dal registro della sessione."
   },
   {
-    block: B + 'Bug in produzione',
+    block: B + 'Il primo prompt, pezzo 1',
     content: () => (
-      <Episodio n="7" titolo="Tre bug che i test non vedevano" tema="test, revisione e aggiornamenti in produzione"
-        fatti={<ul>
-          <li>Una colonna del database mai creata sul server: il login andava, ma la pagina successiva rimandava indietro.</li>
-          <li>Telefoni con la vecchia versione dell'app nella cache: la richiesta veniva respinta e l'errore non si vedeva. Dieci tentativi falliti in silenzio.</li>
-          <li>Una data sbagliata di un giorno per il fuso orario, trovata dal revisore prima del rilascio.</li>
-        </ul>}
-        regola={<><p>Aggiornamento automatico del database all'avvio, server che accetta anche il formato vecchio, errore mostrato all'utente.</p><p>Da fine settembre ogni rilascio di Prenota Risorse passa dal revisore, con una riga di registro.</p></>}
-        dove="Argomento 5 (Test e debugging): perché i test non bastavano. Argomento 2: tornare indietro in sicurezza." />
+      <Pezzo n="1" nome="l'obiettivo" righe={['voglio informatizzare e automatizzare completamente il sistema di gestione delle pratiche viaggi e uscite didattiche della mia scuola.']}
+        chiede={<p>Sostituire un'intera procedura, dal modulo cartaceo alla circolare, non aggiungere una funzione.</p>}
+        scontato={<p>Che l'agente sappia che cos'è una pratica di uscita in una scuola italiana, e che «completamente» valga per ogni passaggio.</p>}
+        vincolo={<p>Nessuno tecnico. È la parola «completamente» a fissare l'ampiezza.</p>}
+        manca={<p>Dove fermarsi. L'agente ha posto tre domande a scelta prima del codice: firma dei genitori, anagrafica, ampiezza della prima versione. Sull'ampiezza ha raccomandato di cominciare da pratiche e firme. Thomas ha risposto «Tutto subito».</p>} />
     ),
-    notes: "Dalle note di progetto di Prenota Risorse: la colonna mancante (26 agosto), la cache dei telefoni con il campo assente, l'errore di un giorno trovato dal revisore il 21 settembre prima del rilascio. Il registro delle revisioni di settembre mostra il revisore che chiede correzioni prima di ogni rilascio."
+    notes: "Fonte: registro della sessione del 5 luglio 2026. L'agente ha fatto le tre domande alle 18:55; le risposte sono arrivate alle 18:59. Per la firma e per l'anagrafica Thomas ha scelto l'opzione raccomandata, per l'ampiezza no. Domanda per la sala: chi aveva ragione, e come si sarebbe potuto saperlo?"
   },
   {
-    block: B + 'Il subagente che pusha',
+    block: B + 'Il primo prompt, pezzo 2',
     content: () => (
-      <Episodio n="8" titolo="Il subagente che ha scritto sul repository vero" tema="permessi, comandi distruttivi, git come rete di sicurezza"
-        fatti={<><p>Durante una prova un subagente ha lanciato git nel repository vero della base di conoscenza, perché una variabile di destinazione era vuota.</p><p>Risultato: commit di file estranei, un push sul ramo principale e un reset che ha cancellato lavoro non salvato. Il danno è stato riparato.</p></>}
-        regola={<><p>Ogni prova che usa git lavora in una cartella temporanea, con un controllo che si ferma se un comando di scrittura punta al repository vero.</p><p>Dopo ogni lavoro delegato si confronta il ramo locale con quello remoto prima di un push.</p></>}
-        dove="Argomento 2 (Git come rete di sicurezza), argomento 1 (permessi) e argomento 6 (comandi distruttivi)." />
+      <Pezzo n="2" nome="stack e server" righe={['il portale sviluppato con tecnologia nodejs con frontend a tutta discrezione (in base alle info nella nostra KB) con database posgres dovrà essere conteneirizzato su docker e posizionato sul portale della scuola. nel frattempo per tutta la fase di test possiamo utilizzare il nostro server su contabo nel quale abbiamo gli altri progetti.']}
+        chiede={<p>Uno stack: Node.js, PostgreSQL, contenitori Docker. La scelta del frontend è lasciata all'agente, purché segua la KB.</p>}
+        scontato={<p>Che la KB dica già quale frontend usa Thomas e come si accede al server di prova. L'agente lo ha cercato nei primi minuti.</p>}
+        vincolo={<p>Tre: Node.js con Postgres, tutto in contenitori, prove sul server personale. Il «portale della scuola» è una destinazione futura.</p>}
+        manca={<p>Versioni, backup, chi mantiene il servizio in produzione, che cosa voglia dire «posizionato sul portale della scuola». L'agente ha scelto React, Vite e Tailwind. Il resto è arrivato mesi dopo, con il server della scuola.</p>} />
     ),
-    notes: "Dalle note del progetto della base di conoscenza. Si racconta come limite dell'ambiente di prova: mancava l'isolamento. La regola nata è doppia: cartella temporanea obbligatoria per ogni prova con git, e controllo dei commit che non si riconoscono prima di ogni push."
+    notes: "Il frontend scelto dall'agente (React, Vite, Tailwind) risulta dal repository del 5 luglio. Il server della scuola è del 23 agosto in poi: lo si vede nelle slide sulle fasi. Il punto per la sala: un vincolo lasciato «a discrezione» funziona solo se esiste un posto dove l'agente trova le preferenze di chi scrive."
   },
   {
-    block: B + 'L\'incidente dei costi',
+    block: B + 'Il primo prompt, pezzo 3',
     content: () => (
-      <Episodio n="9" titolo="1,55 dollari e 79 milioni di token" tema="costi, contesto che si riempie, fallback silenziosi"
-        fatti={<><p>Il bot Argo Briefing, tra agosto e settembre 2026, ha consumato il credito di un fornitore a pagamento: 1.140 richieste da quasi 70.000 token ciascuna.</p><p>Il fornitore a pagamento era la riserva silenziosa di una catena gratuita ormai spenta. In più: una storia mai compattata, 21 strumenti nel prompt e tentativi ripetuti a raffica.</p></>}
-        stat={<><Stat big="$1,55" label="costo totale" /><Stat big="1.140" label="richieste" /><Stat big="79,4 M" label="token" /></>}
-        regola={<><p>Fornitore a pagamento solo come scelta esplicita, mai come riserva; la riserva è sempre gratuita; tetto di spesa.</p><p>Meno strumenti nel prompt, storia riassunta, un solo tentativo.</p></>}
-        dove="Argomento 10 (Costi e contesto): come si stima il costo di una sessione." />
+      <Pezzo n="3" nome="i documenti" righe={['per capire il funzionamento del sistema ti metto a disposizione il regolamento scolastico e i moduli per le uscite (in allegato due di esempio compilati).']}
+        chiede={<p>Imparare le regole dai documenti, non da una descrizione a voce.</p>}
+        scontato={<p>Che il regolamento sia completo e che due moduli compilati, un'uscita e un viaggio, mostrino un caso semplice e uno complesso.</p>}
+        vincolo={<p>Le regole vengono dal testo. L'agente le ha trasformate in dieci regole di validazione automatica: quorum dei due terzi, un accompagnatore ogni quindici alunni, tetti di spesa per anno di corso e altre.</p>}
+        manca={<p>Le prassi non scritte. Compaiono anche ruoli che il prompt non nomina, come l'ufficio che gestisce le gare: nel prompt sei figure, nella specifica dieci ruoli.</p>} />
     ),
-    notes: "Dal registro di settembre 2026 e dalle note del progetto: 1,55 dollari, 1.140 richieste, 79,4 milioni di token. L'importo è piccolo, ma il numero di token per richiesta mostra un difetto di progetto. Contromisure applicate: strumenti non necessari disattivati, contesto ridotto, azzeramento giornaliero della storia, un solo tentativo."
+    notes: "Dalla specifica del 5 luglio (requisiti, schema del database, contratto delle API): le dieci regole sono nella sezione sulla validazione automatica, i ruoli nella tabella degli attori. Collegare con l'argomento 3: il documento di partenza è la parte migliore di una richiesta."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 4',
+    content: () => (
+      <Pezzo n="4" nome="la firma" righe={['facciamo una ragionata insieme su come rimuovere completamente tutto il cartaceo, quindi consentire a studenti, genitori e docenti di firmare e prendere visione dei moduli di autorizzazione tramite il riconoscimento digitale (suggeriscimi come).']}
+        chiede={<p>Una proposta da discutere («ragionata insieme», «suggeriscimi come»), non una soluzione già scelta.</p>}
+        scontato={<p>Che esista un modo di firmare accettabile per una scuola e che l'agente sappia confrontarlo con le alternative.</p>}
+        vincolo={<p>Uno solo, ma forte: niente carta. Non dice nulla su valore legale e costi.</p>}
+        manca={<p>L'agente ha confrontato tre strade: codice monouso via email con registro delle firme, SPID o CIE, account con password. Ha raccomandato la prima e Thomas l'ha scelta. Il giudizio sul valore probatorio è dell'agente, non un parere legale.</p>}
+        extra={<Box type="info" title="Cosa ne è uscito nella specifica">Codice di sei cifre valido dieci minuti, cinque tentativi, impronta SHA-256 del documento al momento della firma, ricevuta in PDF, doppia firma se i genitori sono separati.</Box>} />
+    ),
+    notes: "Le tre opzioni e la raccomandazione sono nel registro della sessione (18:55). I parametri del codice sono nella sezione sulla firma della specifica del 5 luglio. Sulla slide non si dice che la soluzione sia giusta: si dice che è stata proposta, scelta e poi scritta. Chi la adotta in un altro contesto la fa valutare da chi ne risponde."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 5',
+    content: () => (
+      <Pezzo n="5" nome="ruoli e accesso"
+        righe={[
+          'il portale dovrà servire oltre a docenti che organizzano le uscite, alla commissione viaggi che le dovrà approvare, alla segreteria scolastica che dovrà seguire l\'iter del viaggio e gestire eventuali preventivi e richieste di preventivo.',
+          'per autenticare gli utenti scolastici possiamo utilizzare autenticazione Google sul dominio ittsrimini.edu.it.',
+          'la dirigenza potrà vedere tutte le pratiche e porre un visto per ok, una richiesta di revisione con motivazione o un diniego.',
+        ]}
+        chiede={<p>Chi usa il portale, con quali permessi e come entra. Il visto della dirigenza ha già tre esiti.</p>}
+        scontato={<p>Che il login Google sul dominio della scuola sia configurabile. Era già in uso in un altro portale: poco dopo mezzanotte Thomas chiede all'agente di guardare come era stato fatto lì.</p>}
+        vincolo={<p>Accesso solo con account del dominio della scuola; un flusso con un visto a tre esiti.</p>}
+        manca={<p>Studenti e genitori non hanno lo stesso tipo di account. L'agente ha chiesto come popolare l'anagrafica; la scelta è stata un elenco esportato dal registro elettronico e importato in CSV.</p>} />
+    ),
+    notes: "Il dominio è quello pubblico della scuola, già presente negli altri materiali del corso collegato. Il collegamento con l'altro portale è nel registro della sessione, alle 00:18 del 6 luglio. Per i genitori il prompt non dice come entrano: la firma per codice monouso risolve il problema senza account."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 6',
+    content: () => (
+      <Pezzo n="6" nome="il modo di lavorare"
+        righe={[
+          'analizza tutti i documenti ed estrapola tutte le info necessarie per la produzione dettagliata del sistema. sfrutta tutta la potenza agentica per svolgere il lavoro in modo parallelo e attento.',
+          'per questo progetto crea un repo github provato sul mio git (trovi tutte ne info in kb)',
+        ]}
+        chiede={<p>Prima analisi e specifica, poi il lavoro diviso tra più agenti. Un repository privato.</p>}
+        scontato={<p>Che «potenza agentica» e «in parallelo» significhino subagenti, e che la KB contenga l'account e il modo di creare il repository.</p>}
+        vincolo={<p>Repository privato. La documentazione precede il codice: requisiti, schema del database e contratto delle API sono il primo commit.</p>}
+        manca={<p>Un criterio per dire «fatto». Il prompt non dice come si controlla il risultato. I controlli sono venuti dopo: 49 test il primo giorno, poi la revisione indipendente.</p>} />
+    ),
+    notes: "Il primo commit del repository è delle 19:06 e contiene i tre documenti. Subito dopo l'agente lancia due subagenti in parallelo, backend e frontend. Il parallelismo c'è, il criterio di accettazione no: è il tema dell'argomento 3."
+  },
+  {
+    block: B + 'Il primo prompt, pezzo 7',
+    content: () => (
+      <Pezzo n="7" nome="le funzioni non richieste" righe={['in base alla tua esperienza suggeriscimi anche l\'implementazione di funzionalità che non ti ho elencato ma che possono esse utili per il nostro scopo.']}
+        chiede={<p>Proposte non richieste, da valutare.</p>}
+        scontato={<p>Che l'agente abbia qualcosa da mettere in gioco: i documenti e la KB che ha letto, più ciò che ha appreso in addestramento.</p>}
+        vincolo={<p>Nessuno. Ogni proposta la accetta o la scarta una persona.</p>}
+        manca={<p>Un criterio per scegliere. Nel Portale FSL, dove la richiesta è identica, la specifica ha una sezione di sedici funzioni aggiuntive, ciascuna marcata [PROPOSTA] per non confonderla con ciò che era stato chiesto. Banca dei posti e questionari di gradimento sono tra quelle realizzate.</p>} />
+    ),
+    notes: "Le sedici proposte sono nella specifica del Portale FSL del 15 luglio. L'etichetta [PROPOSTA] è un'idea dell'agente, utile da copiare: separa ciò che l'utente ha chiesto da ciò che l'agente ha aggiunto. Banca dei posti e questionari sono nella fase M4 della roadmap."
+  },
+  {
+    block: B + 'Il 5 luglio',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · che cosa succede dopo</Tag>
+        <h2>Il 5 luglio, dal messaggio alla consegna</h2>
+        <ol className="timeline">
+          <li><time>18:49</time>Il messaggio arriva con tre allegati.</li>
+          <li><time>18:53</time>L'agente ha letto i documenti e interroga la KB: stack, server di prova, account del repository.</li>
+          <li><time>18:55</time>Tre domande a scelta, ciascuna con una raccomandazione. Risposte alle 18:59, approvazione del design alle 19:01.</li>
+          <li><time>19:06</time>Nel repository: requisiti, schema del database, contratto delle API.</li>
+          <li><time>19:07</time>Due subagenti in parallelo: backend e frontend.</li>
+          <li><time>19:52</time>Backend completo. Il frontend era finito alle 19:36 e aveva segnalato tre lacune nel contratto delle API, chiuse in integrazione.</li>
+          <li><time>20:00</time>Consegna: 49 test, flusso completo provato su un database vero, nove commit.</li>
+        </ol>
+        <p className="legend">Fonte: registro della sessione e git del repository (nove commit tra le 19:06 e le 19:57).</p>
+      </div>
+    ),
+    notes: "Orari italiani, ricavati dal registro della sessione e dalle date dei commit. Il sistema era completo in locale, non in produzione: il deploy di prova su un server personale è della notte, dopo mezzanotte. Un'osservazione per la sala: la parte lenta non è stata scrivere il codice, è stata decidere (le tre domande) e leggere (il regolamento)."
+  },
+  {
+    block: B + 'Cosa il prompt non diceva',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · i vuoti</Tag>
+        <h2>Quello che non c'era nel messaggio</h2>
+        <div className="cols">
+          <div>
+            <Card title="Venuto dai documenti">
+              <ul>
+                <li>La macchina a stati della pratica, con ogni transizione registrata.</li>
+                <li>Le dieci regole di validazione.</li>
+                <li>Il quorum dei due terzi, il tetto di dieci giorni di accompagnamento per docente.</li>
+                <li>I moduli da generare in PDF.</li>
+              </ul>
+            </Card>
+          </div>
+          <div>
+            <Card title="Venuto dalle scelte dell'agente" kind="i">
+              <ul>
+                <li>La firma con codice monouso e ricevuta.</li>
+                <li>I dati sanitari degli alunni cifrati.</li>
+                <li>Un link di caricamento per le agenzie, senza account.</li>
+                <li>L'importazione dell'elenco dal registro elettronico.</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+        <Box type="warn" title="Non c'era nemmeno">Nessuna schermata, nessun menu, nessun pulsante. Quel livello è nato dopo, con i requisiti scritti, le revisioni e il collaudo.</Box>
+      </div>
+    ),
+    notes: "Gli elenchi vengono dalla specifica dei requisiti del 5 luglio. Il tetto di dieci giorni è una regola del regolamento sulle assenze dei docenti accompagnatori. La cifratura dei dati sanitari è una scelta dell'agente, non richiesta nel prompt: un esempio di funzione non elencata che vale la pena di tenere."
+  },
+  {
+    block: B + 'Il secondo prompt',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · il secondo messaggio</Tag>
+        <h2>Il Portale FSL riparte dal primo</h2>
+        <DT cols={['Aspetto', 'Viaggi (5 luglio)', 'FSL (15 luglio)']} rows={[
+          ['Apertura', 'solo il testo', 'comincia con /goal'],
+          ['Stack', '«frontend a tutta discrezione»', 'nominato: React, Vite, Tailwind'],
+          ['Riferimento', 'la KB', '«esattamente come il portale che abbiamo già realizzato»'],
+          ['Documenti', 'regolamento e due moduli', 'cartella di modelli e documenti, più il foglio di calcolo con cui il docente seguiva la classe'],
+          ['Ruoli', 'sei figure', 'otto, con una regola: gli esterni vedono solo le pratiche assegnate a loro'],
+          ['Novità', 'nessuna', 'proposta di usare Documenti e Fogli Google come modelli'],
+        ]} />
+        <ActivityBadge n="0" file="il-secondo-prompt.html" label="Il testo completo del secondo messaggio" />
+      </div>
+    ),
+    notes: "Il secondo messaggio ripete quasi alla lettera il metodo del primo («ragionata insieme», «analizza tutti i documenti», «suggeriscimi»). Cambia ciò che il primo progetto ha già risolto: lo stack è nominato, il riferimento è un progetto esistente, la firma e il login non si ridiscutono. Il testo completo è nel foglio dei materiali."
+  },
+  {
+    block: B + 'Il comando /goal',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · /goal</Tag>
+        <h2>Che cosa ha fatto davvero /goal</h2>
+        <div className="grid">
+          <Card title="Come funziona"><p>Il comando dichiara un obiettivo per la sessione. Nel registro compare come un controllo a fine turno: quando l'agente prova a fermarsi, la condizione viene valutata e, se non è soddisfatta, il lavoro riprende.</p></Card>
+          <Card title="Il primo stop" kind="i"><p>15 luglio, dopo la specifica: «il portale non è ancora stato sviluppato». L'agente riparte con la prima fase (M0).</p></Card>
+          <Card title="In tutto" kind="i"><p>Trenta richiami tra il 15 luglio e il 21 settembre. Il 21 settembre l'agente verifica il servizio in produzione e dichiara raggiunto l'obiettivo.</p></Card>
+          <Card title="Il limite" kind="w"><p>La condizione era il testo del prompt: una direzione più che un criterio verificabile. A decidere se era finito era un controllo automatico, non una persona.</p></Card>
+        </div>
+        <p className="legend" style={{ marginTop: 10 }}>Tema: obiettivi verificabili. Torna nell'argomento 3.</p>
+      </div>
+    ),
+    notes: "Dal registro della sessione del Portale FSL: il comando installa un controllo valido per la sessione, che riporta la condizione scritta; il numero di richiami (30) è un conteggio dei messaggi di quel controllo. Il 21 settembre l'agente controlla lo stato di salute del servizio e il certificato in produzione, poi dichiara raggiunto l'obiettivo. Funzione recente: nomi e comportamento da riverificare sulla documentazione ufficiale prima di usarla in aula. Domanda per la sala: come avreste scritto una condizione verificabile?"
+  },
+  {
+    block: B + 'Dal messaggio alla specifica (FSL)',
+    content: () => (
+      <div className="pad">
+        <Tag>Il prompt · il secondo giorno</Tag>
+        <h2>FSL: dal messaggio alla specifica, 15 luglio</h2>
+        <ol className="timeline">
+          <li><time>08:56</time>Il messaggio, con /goal.</li>
+          <li><time>08:58</time>Tre agenti di analisi in parallelo: i modelli ufficiali (sedici documenti e due procedure), i fascicoli compilati di una classe, l'architettura del portale Viaggi.</li>
+          <li><time>09:07</time>Un quarto agente scrive la specifica: requisiti, schema, API, roadmap.</li>
+          <li><time>09:17</time>Commit della specifica. Alle 09:18 il controllo del /goal la giudica insufficiente.</li>
+          <li><time>09:20</time>Partono backend e frontend. Subito dopo la sessione raggiunge il limite d'uso e si ferma.</li>
+          <li><time>12:25</time>«riprendi e completa il goal».</li>
+          <li><time>20:49</time>Nel repository c'è anche la quinta fase (M4); i test sono 105 il giorno dopo.</li>
+        </ol>
+        <p className="legend">Fonte: registro della sessione e git del repository.</p>
+      </div>
+    ),
+    notes: "Orari italiani. Il limite d'uso è un fatto della sessione (si resetta a ore fisse): il lavoro non è andato perso perché la specifica era già nel repository. Le cinque fasi M0-M4 sono nei commit del 15 luglio, M0 e M1 insieme alle 12:58, M4 alle 20:49. I 105 test sono il dato del 16 luglio dalle note di progetto, riverificato a novembre con il conteggio nel codice."
+  },
+  {
+    block: B + 'Le fasi',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · le fasi</Tag>
+        <h2>Dal prompt al servizio in uso</h2>
+        <ol className="timeline">
+          <li><time>5 lug</time>Portale Viaggi completo in locale. Nella notte, deploy di prova su un server personale.</li>
+          <li><time>15 lug</time>Portale FSL: specifica e cinque fasi (M0-M4).</li>
+          <li><time>23-26 ago</time>Repository del server della scuola. Il 26 funziona a casa; Prenota Risorse viene riscritta da capo.</li>
+          <li><time>10 set</time>I tre portali sono installati sul Raspberry Pi 5 a scuola.</li>
+          <li><time>21 set</time>Chiuso il /goal di FSL. Da qui ogni deploy di Prenota Risorse passa dal revisore.</li>
+          <li><time>27 ott</time>Accesso anche con il dominio degli studenti (Viaggi).</li>
+          <li><time>14 nov</time>Viaggi adeguato al regolamento 2026, in due lotti, ciascuno rivisto prima del deploy.</li>
+        </ol>
+        <p className="legend">Fonti: git dei repository, note di progetto, registro delle revisioni.</p>
+      </div>
+    ),
+    notes: "Le date vengono dai repository (prime commit: Viaggi 5 luglio, FSL 15 luglio, server 23 agosto) e dalle note di progetto. Il passaggio dal server di casa alla rete della scuola non si racconta nei dettagli: si dice solo che è stato preparato e poi portato a scuola. L'origine dichiarata da Thomas il 21 ottobre 2026: prove sui server personali, poi il Raspberry Pi preparato e portato a scuola."
+  },
+  {
+    block: B + 'Requisiti nati dopo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · requisiti nati dopo</Tag>
+        <h2>Nati usando il sistema, non scrivendolo</h2>
+        <div className="grid">
+          <Card title="La mail alle agenzie"><p>6 luglio, mattina: «troppo generica per consentire all'agenzia di fare un'offerta». Servono periodo, percorso, mezzo, pernotti, ingressi, guide.</p></Card>
+          <Card title="Un documento per la dirigenza" kind="i"><p>6 luglio: descrizione del progetto, scelte di sicurezza e di conformità, con una prima parte in linguaggio semplice.</p></Card>
+          <Card title="Il portale a scuola" kind="i"><p>14 luglio: «vorrei portare il portale a scuola in un raspberry con container. Cosa ne pensi? è fattibile?».</p></Card>
+          <Card title="Un solo accesso Google" kind="i"><p>14-15 luglio: il progetto di accesso già esistente viene riusato e rinominato per i tre portali.</p></Card>
+          <Card title="Gli studenti"><p>27 ottobre: login anche con il dominio degli studenti.</p></Card>
+          <Card title="Il regolamento 2026"><p>14 novembre: scadenze per anno scolastico e altre regole nuove, in due lotti.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Le prime quattro voci sono messaggi di Thomas nella sessione del Portale Viaggi (6 e 14-15 luglio). Le ultime due vengono dalle note di progetto. Il messaggio sulla mail alle agenzie è del tipo «guardo il risultato e vedo che manca»: nessun prompt iniziale poteva prevederlo."
+  },
+  {
+    block: B + 'Il revisore',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · revisione</Tag>
+        <h2>Che cosa ha trovato il revisore</h2>
+        <div className="cols">
+          <div>
+            <Card title="20 luglio" kind="i"><p>Riparata l'orchestrazione, il flusso lead, esecutore, revisore gira per la prima volta davvero: 26 osservazioni, 4 bloccanti. Una è un'affermazione sbagliata scritta dal lead.</p></Card>
+            <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginTop: 12 }}>
+              <Stat big="26" label="osservazioni" /><Stat big="4" label="bloccanti" />
+            </div>
+          </div>
+          <div>
+            <Card title="Sui portali">
+              <ul>
+                <li>21 settembre, Prenota Risorse: un giorno di scarto nelle date per il fuso orario.</li>
+                <li>23 settembre: email retroattive a prenotazioni già in attesa (bloccante).</li>
+                <li>14 novembre, Viaggi: nell'elenco delle firme mancanti gli studenti vedevano i nomi di altri alunni.</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+        <p className="legend" style={{ marginTop: 8 }}>Tema: revisione indipendente. Torna nell'argomento 7.</p>
+      </div>
+    ),
+    notes: "Le 26 osservazioni sono dal registro del 20 luglio (versione 0.2 del toolkit). Le altre tre dal registro delle revisioni delle note di progetto: tutte corrette prima del rilascio. Tra il 21 e il 28 settembre ci sono quattro revisioni di Prenota Risorse."
+  },
+  {
+    block: B + 'Cosa è andato storto',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · errori</Tag>
+        <h2>Cosa è andato storto</h2>
+        <div className="grid">
+          <Card title="Contratto tra le due metà" kind="w"><p>Viaggi: tre lacune segnalate dal subagente del frontend. FSL: un commit di «allineamento del contratto» diciotto minuti dopo la prima implementazione.</p></Card>
+          <Card title="Limite d'uso" kind="w"><p>15 luglio: la sessione si ferma subito dopo il lancio degli agenti di implementazione e riparte tre ore dopo.</p></Card>
+          <Card title="Tre bug in produzione" kind="d"><p>Una colonna del database mai creata sul server; telefoni con la vecchia versione in cache e richieste respinte in silenzio; una data sbagliata di un giorno.</p></Card>
+          <Card title="Un obiettivo troppo largo" kind="d"><p>Il /goal chiedeva «completamente»: ha tenuto l'agente al lavoro per due mesi, senza dire quando fermarsi davvero.</p></Card>
+        </div>
+        <Box type="info" title="Come sono stati chiusi">Aggiornamento automatico del database all'avvio, server che accetta anche il formato vecchio, errore mostrato all'utente, revisore prima di ogni rilascio.</Box>
+      </div>
+    ),
+    notes: "Il commit di allineamento del contratto di FSL è del 15 luglio alle 13:16, diciotto minuti dopo la prima implementazione (12:58). I tre bug sono dalle note di Prenota Risorse (26 agosto e 21 settembre). L'ultima voce è una lettura: il registro dice che l'obiettivo è stato richiamato trenta volte; l'interpretazione («troppo largo») è di chi racconta."
+  },
+  {
+    block: B + 'Dal server personale alla scuola',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · il server</Tag>
+        <h2>Dal prototipo veloce alla parte lenta</h2>
+        <div role="group" aria-label="Server personale, server della scuola preparato a casa, installazione a scuola">
+          <Flow nodes={[
+            ['Server personale', 'prove dei portali, da luglio', 'i'], ['Repository del server', 'dal 23 agosto: proxy, backup, monitoraggio, runbook'], ['Funziona a casa', '26 agosto'], ['A scuola', '10 settembre: tre portali su un Raspberry Pi 5', 'w'],
+          ]} />
+        </div>
+        <ul style={{ marginTop: 12 }}>
+          <li>Il prototipo è la parte veloce: il primo portale in una sera. Backup, ripristino, guida alla messa in produzione e manuali hanno richiesto più tempo.</li>
+          <li>L'ambiente di prova sul server personale è stato dismesso il 13 settembre.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Origine dichiarata da Thomas il 21 ottobre 2026: sviluppo e prove sui server personali, poi il Raspberry Pi preparato e portato a scuola. Non si entra nella rete della scuola e non si citano indirizzi. Il passaggio dal server di casa alla rete della scuola non è documentato nei dettagli."
+  },
+  {
+    block: B + 'I numeri',
+    content: () => (
+      <div className="pad">
+        <Tag>Il lavoro · i numeri</Tag>
+        <h2>Commit e test</h2>
+        <DT cols={['Progetto', 'Prima commit', 'Commit al 24/09', 'Commit al 25/11']} rows={[
+          ['Prenota Risorse', '29/09/2025', '61', '75'],
+          ['Portale FSL', '15/07/2026', '57', '75'],
+          ['Portale Viaggi', '05/07/2026', '49', '101'],
+          ['Server della scuola', '23/08/2026', '16', '27'],
+        ]} />
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', marginTop: 10 }}>
+          <Stat big="49" label="test di Viaggi il 5 luglio" />
+          <Stat big="532" label="test di Viaggi il 14 novembre" />
+          <Stat big="105" label="test di FSL il 16 luglio" />
+        </div>
+        <p className="legend" style={{ marginTop: 8 }}>Commit: ramo principale, conteggio con git, dato al 25 novembre 2026. Test: dai registri di progetto, non ricalcolati.</p>
+      </div>
+    ),
+    notes: "Il conteggio dei commit è stato rifatto con git il 25 novembre 2026 sul ramo principale di ciascun repository (per Prenota Risorse il ramo master, ultima commit dell'11 novembre). La colonna del 24 settembre viene dall'inventario del corso collegato. I test sono dai registri: 49 nel messaggio di consegna del 5 luglio, 532 nell'ultima revisione del 14 novembre, 105 nelle note del Portale FSL. Sono dati, non obiettivi."
   },
   {
     block: B + 'Stato dei portali',
@@ -513,37 +825,33 @@ const slides = [
         <Tag>Il risultato</Tag>
         <h2>Come stanno i tre portali</h2>
         <div className="grid">
-          <Card title="Prenota Risorse"><p><strong>Online e in uso</strong> alla scuola.</p></Card>
-          <Card title="Alternanza (FSL)" kind="w"><p><strong>In prova.</strong></p></Card>
+          <Card title="Prenota Risorse"><p><strong>Online e in uso</strong> alla scuola, da ottobre.</p></Card>
+          <Card title="Portale FSL" kind="w"><p><strong>In prova.</strong></p></Card>
           <Card title="Viaggi di istruzione" kind="w"><p><strong>In prova.</strong></p></Card>
         </div>
-        <Box type="info" title="Per i numeri">I conteggi di commit e di righe di documentazione cambiano a ogni sessione. Nelle slide non si fissano: si leggono dal repository.</Box>
-        <p className="muted" style={{ marginTop: 10 }}>Stato al 21 ottobre 2026.</p>
+        <Box type="info" title="Per i numeri">I conteggi cambiano a ogni sessione di lavoro: si leggono dal repository, con la data.</Box>
+        <p className="muted" style={{ marginTop: 10 }}>Stato al 21 ottobre 2026, indicazione di Thomas.</p>
       </div>
     ),
-    notes: "Stato: Prenota Risorse online e in uso; FSL e Viaggi in prova. Se arrivano domande sui numeri, si invita a leggerli dal repository: cambiano a ogni sessione di lavoro."
+    notes: "Stato confermato da Thomas il 25 novembre 2026: Prenota Risorse online e in uso; FSL e Viaggi in fase di test, finché il codice non passa su un server con infrastruttura di rete certificata."
   },
   {
-    block: B + 'Mappa degli episodi',
+    block: B + 'Altri episodi',
     content: () => (
       <div className="pad">
-        <Tag>Anteprima del corso</Tag>
-        <h2>Dove torna ogni episodio</h2>
-        <DT cols={['Episodio', 'Tema', 'Argomento']} rows={[
-          ['1 Il problema', 'contesto, memoria', '1 e 4'],
-          ['2 Gli agenti che non c\'erano', 'subagenti, verifica', '7 e 5'],
-          ['3 Dieci agenti, un\'ora', 'subagenti in parallelo', '7 e 1'],
-          ['4 Il revisore', 'revisione indipendente', '7 e 5'],
-          ['5 Le 47 righe', 'segreti e dati', '6'],
-          ['6 Dal portale al server', 'requisiti, fasi di lavoro', '3'],
-          ['7 Tre bug in produzione', 'test, aggiornamenti', '5 e 2'],
-          ['8 Il subagente che pusha', 'permessi, git', '2, 1 e 6'],
-          ['9 1,55 dollari', 'costi e contesto', '10'],
+        <Tag>Altri episodi</Tag>
+        <h2>Raccontati negli altri argomenti</h2>
+        <DT cols={['Episodio', 'Tema', 'Dove']} rows={[
+          ['Gli agenti che non c\'erano', 'verificare lo stato reale', 'argomento 7'],
+          ['Dieci agenti in parallelo', 'subagenti con contesto proprio', 'argomento 7'],
+          ['Le 47 righe prima della pubblicazione', 'segreti e dati nel codice', 'argomento 6'],
+          ['Il subagente che scrive sul repository vero', 'permessi, comandi distruttivi', 'argomento 6'],
+          ['1,55 dollari e 79 milioni di token', 'costi e contesto', 'argomento 10'],
         ]} />
         <p className="legend">Hook e MCP (argomento 8) e OpenCode (argomento 9) non hanno un episodio: si provano direttamente.</p>
       </div>
     ),
-    notes: "Mappa degli episodi sugli argomenti del catalogo. Chi vuole seguire un solo tema trova qui dove. Gli argomenti 8 e 9 non hanno episodi documentati nel racconto."
+    notes: "Gli episodi non legati ai portali sono stati spostati dove illustrano il loro tema. Chi segue solo l'argomento 0 può ignorarli."
   },
   {
     block: B + 'Domanda di verifica',
@@ -551,47 +859,82 @@ const slides = [
       <div className="pad">
         <Tag>Quiz</Tag>
         <h2>Una domanda per voi</h2>
-        <Quiz domanda="Per mesi i subagenti non sono stati caricati e il lavoro è andato avanti lo stesso. Quale controllo li avrebbe scoperti subito?" opzioni={[
-          { t: 'Rileggere i documenti di progetto', ok: false, perche: 'I documenti descrivevano il sistema come doveva essere, non come era.' },
-          { t: 'Chiedere al lead quali subagenti ha a disposizione', ok: true, perche: 'È una domanda diretta allo stato reale: bastano trenta secondi.' },
-          { t: 'Controllare che le risposte fossero buone', ok: false, perche: 'Erano buone: il lead improvvisava. Proprio questo ha nascosto il difetto.' },
+        <Quiz domanda="Il prompt chiedeva «una ragionata insieme» sulla firma. Che cosa ha fatto l'agente?" opzioni={[
+          { t: 'Ha scelto una soluzione e ha scritto il codice', ok: false, perche: 'Il codice è venuto solo dopo l\'approvazione del design.' },
+          { t: 'Ha messo a confronto tre strade, ne ha raccomandata una e ha aspettato la scelta', ok: true, perche: 'Codice monouso via email, SPID o CIE, account con password: la scelta è stata di Thomas.' },
+          { t: 'Ha chiesto a Thomas di scrivere prima un documento dei requisiti', ok: false, perche: 'I requisiti li ha scritti l\'agente, a partire dai documenti allegati.' },
         ]} />
       </div>
     ),
-    notes: "Domanda di comprensione sul secondo episodio. Si controlla lo stato reale, non la qualità apparente del risultato."
+    notes: "Domanda di comprensione sul quarto pezzo del prompt. Il punto: la frase «suggeriscimi come» ha ottenuto una proposta con alternative, non una decisione al posto dell'utente."
   },
   {
-    block: B + 'Attività al PC',
+    block: B + 'Attività al PC (1)',
     content: () => (
       <div className="pad">
-        <Tag>Attività</Tag>
-        <h2>Come lavorate: tre cose che rifate ogni volta</h2>
-        <ol className="timeline">
-          <li><time>1</time>Elencate tre cose che nel vostro lavoro rifate da capo o che spiegate più di una volta.</li>
-          <li><time>2</time>Per ognuna: dove sta scritta, chi altro la sa, che cosa succede se non ci siete.</li>
-          <li><time>3</time>Sceglietene una come punto di partenza della scheda del progetto.</li>
-        </ol>
-        <ActivityBadge n="0" file="tre-cose-che-rifate.html" label="Tre cose che rifate ogni volta" durata="indicativo: 15 min" />
-        <br />
-        {/* La scheda sta nei materiali del progetto personale, non in quelli dell'argomento 0: link scritto a mano con lo stesso aspetto di ActivityBadge. */}
-        <a className="activity" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
-          <span className="k">Attività al PC</span>
-          <span className="l">Poi: la scheda del progetto personale</span>
-          <span aria-hidden="true">&#8599;</span>
-        </a>
-        <p className="muted" style={{ marginTop: 10 }}>Nessun agente in questa attività: serve a scegliere il progetto con cognizione.</p>
+        <Tag>Attività al PC · 1 di 4</Tag>
+        <h2>Una cartella vuota e l'agente in modalità piano</h2>
+        <p>Si lavora in una cartella nuova: nessun file e nessun rischio per il resto del PC.</p>
+        <CommandBox cmd="mkdir prova-prompt" label="Crea la cartella" />
+        <CommandBox cmd="cd prova-prompt" label="Entra nella cartella" />
+        <CommandBox cmd="claude --permission-mode plan" label="Avvia Claude Code in modalità piano" />
+        <p className="muted">Se non parte in modalità piano, premete Maiusc+Tab finché compare «plan». In OpenCode il tasto Tab passa all'agente di piano.</p>
+        <ActivityBadge n="0" file="il-primo-prompt.html" label="Il foglio con i testi da incollare" />
       </div>
     ),
-    notes: "Attività al PC che chiude il blocco di racconto. Collega il problema (ciò che si sa non passa ad altri) al lavoro dei partecipanti e prepara la scheda del progetto personale. Si usa un foglio, non l'agente."
+    notes: "La modalità piano è quella dell'argomento 3: l'agente può leggere e proporre, non modificare. Sui PC del laboratorio la partenza in modalità con conferma è imposta dal file delle impostazioni gestite: se il comando con il parametro non ha effetto, si passa alla modalità piano con Maiusc+Tab."
+  },
+  {
+    block: B + 'Attività al PC (2)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 2 di 4</Tag>
+        <h2>Date all'agente il primo messaggio</h2>
+        <p>Incollate questo testo: contiene la richiesta e, in fondo, il messaggio vero.</p>
+        <CommandBox kind="text" tall label="Richiesta e primo messaggio (Portale Viaggi)" cmd={PROMPT_ATTIVITA} />
+        <p className="muted">Leggete le tre parti della risposta. Quante domande fa? Quante sono sui documenti, quante sulle scelte?</p>
+      </div>
+    ),
+    notes: "Il messaggio è quello vero del 5 luglio, ripulito: stesso testo del foglio. Gli allegati citati non ci sono e l'agente lo dirà: è voluto. Le risposte cambiano da una sessione all'altra: si confrontano le categorie di domande, non le parole."
+  },
+  {
+    block: B + 'Attività al PC (3)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 3 di 4</Tag>
+        <h2>Aggiungete il regolamento</h2>
+        <p>Il regolamento qui sotto è inventato. Incollatelo nella stessa conversazione.</p>
+        <CommandBox kind="text" tall label="Regolamento inventato e nuova richiesta" cmd={REGOLAMENTO_ATTIVITA} />
+        <p className="muted">Confrontate con il racconto: l'agente reale ne ha ricavato dieci regole e ha fatto tre domande sulle scelte (firma, anagrafica, ampiezza). Che cosa ha chiesto in più o in meno il vostro?</p>
+      </div>
+    ),
+    notes: "Il regolamento è inventato e ricalca solo la forma di quello reale (soglie, scadenze, ruoli). Sono otto articoli. Il confronto con le dieci regole reali è di forma, non di contenuto."
+  },
+  {
+    block: B + 'Attività al PC (4)',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC · 4 di 4</Tag>
+        <h2>Rileggete la scheda del vostro progetto</h2>
+        <p>Aprite la scheda del progetto personale e incollatela al posto della riga tra parentesi quadre.</p>
+        <CommandBox kind="text" tall label="Scheda del progetto confrontata con il primo prompt" cmd={PROMPT_SCHEDA} />
+        <a className="activity" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+          <span className="k">Attività al PC</span>
+          <span className="l">La scheda del progetto personale</span>
+          <span aria-hidden="true">&#8599;</span>
+        </a>
+      </div>
+    ),
+    notes: "La scheda del progetto personale sta nei materiali del laboratorio-progetto: il collegamento è scritto a mano con lo stesso aspetto del componente. Serve a usare il racconto per migliorare la propria scheda, non a ricopiare il prompt dei portali."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
-        punti={['Ciò che si impara su un progetto non passa da solo agli altri: va scritto e curato.', 'Un sistema che sembra funzionare può non funzionare: si controlla lo stato reale.', 'Chi scrive non è il più adatto a controllare: serve un revisore con un contesto pulito.', 'Costi, permessi e dati riservati si decidono prima di lanciare il lavoro.']}
-        dopo="L'argomento 1 (Chatbot, completamento, agente) parte da che cosa vede l'agente e che cosa no; l'argomento 2 (Git come rete di sicurezza) mostra come leggere ciò che ha fatto prima di accettarlo." />
+        punti={['Un messaggio corto, con refusi, è bastato per partire: lo reggevano i documenti allegati e la base di conoscenza.', 'Conta quello che l\'agente fa dopo: legge, chiede con alternative, scrive la specifica, aspetta l\'approvazione, poi il codice.', 'Il prompt non diceva come controllare il risultato: sono serviti test, revisore e collaudo.', 'Molti requisiti sono nati usando il sistema, non scrivendolo.']}
+        dopo="L'argomento 3 (dalla richiesta vaga ai requisiti) riprende il criterio di «fatto»; l'argomento 7 (skill e subagenti revisori) chi controlla; l'argomento 4 (CLAUDE.md) le istruzioni che restano." />
     ),
-    notes: "Chiusura: riprendere i quattro punti e lasciare spazio alle domande. Rimando all'argomento 1 per il ciclo dell'agente e all'argomento 2 per git."
+    notes: "Chiusura: riprendere i quattro punti e lasciare spazio alle domande. Chi vuole proseguire sceglie l'argomento 3, 7 o 4."
   },
 ];
 
@@ -639,6 +982,7 @@ function App() {
     const h = e => {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
       if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }

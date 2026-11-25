@@ -31,6 +31,7 @@ h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
 h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
 h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
 p, li { color: var(--text-dim); }
+main p, main li { overflow-wrap: anywhere; }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .topbar {
@@ -67,10 +68,30 @@ th { background: var(--bg-callout); color: var(--text); font-family: 'Public San
 tr:last-child td { border-bottom: none; }
 code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
 pre {
-  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  background: #0a2416; color: #e6f5ec; border-radius: 8px; padding: 16px 18px;
   overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
 }
 pre code { background: none; padding: 0; color: inherit; }
+:not(pre) > code { overflow-wrap: anywhere; }
+.cmd-copy {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 1px solid var(--accent);
+  border-radius: 5px; background: var(--bg-card); color: var(--accent); cursor: pointer;
+}
+.cmd-copy:hover { background: var(--bg-callout); }
+.cmd-copy svg { width: 16px; height: 16px; }
+.cmd-copy.ok { width: auto; padding: 0 8px; font: 600 13px 'Public Sans', sans-serif; }
+pre:has(> code.language-text), pre:not(:has(> code[class*="language-"])) { white-space: pre-wrap; overflow-wrap: anywhere; font-family: 'Public Sans', system-ui, sans-serif; font-size: 16px; }
+pre > code.language-text, pre > code:not([class*="language-"]) { font-family: inherit; }
+.code-box { position: relative; }
+.code-box pre { padding-top: 54px; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px; min-height: 36px;
+  background: #e6f5ec; color: #0a2416; border: none; border-radius: 6px;
+  padding: 6px 12px; font: 600 14px 'Public Sans', sans-serif; cursor: pointer;
+}
+.copy-btn:hover { background: #ffffff; }
+.copy-btn:focus-visible { outline: 3px solid #e6f5ec; outline-offset: 2px; }
 footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
 @media (max-width: 480px) {
   main.wrap { padding: 24px 16px 60px; }
@@ -84,6 +105,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
   .table-scroll { border: none; overflow: visible; }
   table { font-size: 11pt; }
   pre { white-space: pre-wrap; word-wrap: break-word; }
+  .code-box pre { padding-top: 16px; }
   @page { margin: 16mm 14mm; }
 }
 </style>
@@ -106,7 +128,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </thead>
 <tbody>
 <tr>
-<td><code>node --test</code></td>
+<td><code class="cmd">node --test</code></td>
 <td>esegue tutti i test del progetto (file in <code>test/</code> e con nome <code>*.test.js</code>)</td>
 </tr>
 <tr>
@@ -114,15 +136,15 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <td>esegue solo i test il cui nome contiene <code>testo</code> (è un'espressione regolare)</td>
 </tr>
 <tr>
-<td><code>node --test test/logica.test.js</code></td>
+<td><code class="cmd">node --test test/logica.test.js</code></td>
 <td>esegue un solo file di test</td>
 </tr>
 <tr>
-<td><code>git diff --stat -- test/</code></td>
+<td><code class="cmd">git diff --stat -- test/</code></td>
 <td>i test sono stati toccati?</td>
 </tr>
 <tr>
-<td><code>git diff -- test/</code></td>
+<td><code class="cmd">git diff -- test/</code></td>
 <td>come sono stati toccati</td>
 </tr>
 </tbody>
@@ -150,7 +172,8 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <li>[ ] Ho provato a mano il caso, quando posso.</li>
 </ul>
 <h2 id="righe-da-dare-allagente-claudemd">Righe da dare all'agente (CLAUDE.md)</h2>
-<pre><code>## Test
+<p>Da incollare nel file <code>CLAUDE.md</code> del progetto:</p>
+<pre><code class="language-markdown">## Test
 - Prima di dire «fatto» lancia node --test e riporta i numeri di tests, pass, fail e skipped.
 - Non modificare né cancellare un test per farlo passare. Se pensi che sia sbagliato,
   fermati e spiegami perché, citando la regola scritta.
@@ -160,5 +183,48 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <p>Sono contesto, non un divieto: il diff si controlla comunque.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
 </main>
+<script>
+document.querySelectorAll('main pre').forEach(function (pre) {
+  var box = document.createElement('div'); box.className = 'code-box';
+  pre.parentNode.insertBefore(box, pre); box.appendChild(pre);
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'copy-btn no-print'; b.textContent = 'Copia';
+  b.setAttribute('aria-label', 'Copia il testo');
+  b.addEventListener('click', function () {
+    var txt = pre.innerText.trimEnd();
+    var ok = function () { b.textContent = 'Copiato ✓'; setTimeout(function () { b.textContent = 'Copia'; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (done) { ok(); } else { b.textContent = 'Selezionate e copiate a mano'; setTimeout(function () { b.textContent = 'Copia'; }, 2500); }
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(ok, fallback); }
+    else { fallback(); }
+  });
+  box.appendChild(b);
+});
+document.querySelectorAll('main code.cmd').forEach(function (c) {
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'cmd-copy no-print'; b.title = 'Copia il comando';
+  b.setAttribute('aria-label', 'Copia il comando: ' + c.textContent);
+  var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  b.innerHTML = icon;
+  b.addEventListener('click', function () {
+    var txt = c.textContent;
+    var done = function (msg) { b.classList.add('ok'); b.textContent = msg; setTimeout(function () { b.classList.remove('ok'); b.innerHTML = icon; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); done(ok ? 'Copiato' : 'Copiate a mano');
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(function () { done('Copiato'); }, fallback); }
+    else { fallback(); }
+  });
+  c.insertAdjacentElement('afterend', b);
+});
+</script>
 </body>
 </html>

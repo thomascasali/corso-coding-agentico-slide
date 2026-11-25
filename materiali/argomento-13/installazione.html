@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installare l'agente: i passi — Materiali argomento 13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6faf7;
+  --bg-card: #ffffff;
+  --bg-callout: #e3f1e7;
+  --border: #bcd3c3;
+  --text: #0f1a13;
+  --text-dim: #2a3a30;
+  --text-muted: #4a5d51;
+  --accent: #006b2e;
+  --accent-strong: #004d21;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+  font-size: 17px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; line-height: 1.25; color: var(--text); }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
+h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
+h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
+p, li { color: var(--text-dim); }
+main p, main li { overflow-wrap: anywhere; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+.topbar a.back { color: var(--text-dim); text-decoration: none; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; }
+.topbar a.back:hover, .topbar a.back:focus-visible { color: var(--accent); }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  background: var(--accent); color: #fff !important; text-decoration: none;
+  padding: 10px 18px; border-radius: 7px; font-weight: 600; font-size: 15px;
+}
+.dl-btn:hover, .dl-btn:focus-visible { background: var(--accent-strong); }
+main.wrap { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+blockquote {
+  border-left: 4px solid var(--accent); background: var(--bg-callout);
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 0 8px 8px 0;
+  color: var(--text-dim); font-size: 15px;
+}
+blockquote p { margin: 0 0 6px; color: var(--text-dim); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 26px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+hr { border: none; border-top: 1px solid var(--border); margin: 30px 0; }
+.table-scroll { overflow-x: auto; margin: 1.1em 0; border: 1px solid var(--border); border-radius: 8px; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--bg-callout); color: var(--text); font-family: 'Public Sans', sans-serif; }
+tr:last-child td { border-bottom: none; }
+code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+pre {
+  background: #0a2416; color: #e6f5ec; border-radius: 8px; padding: 16px 18px;
+  overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
+}
+pre code { background: none; padding: 0; color: inherit; }
+:not(pre) > code { overflow-wrap: anywhere; }
+.cmd-copy {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 1px solid var(--accent);
+  border-radius: 5px; background: var(--bg-card); color: var(--accent); cursor: pointer;
+}
+.cmd-copy:hover { background: var(--bg-callout); }
+.cmd-copy svg { width: 16px; height: 16px; }
+.cmd-copy.ok { width: auto; padding: 0 8px; font: 600 13px 'Public Sans', sans-serif; }
+pre:has(> code.language-text), pre:not(:has(> code[class*="language-"])) { white-space: pre-wrap; overflow-wrap: anywhere; font-family: 'Public Sans', system-ui, sans-serif; font-size: 16px; }
+pre > code.language-text, pre > code:not([class*="language-"]) { font-family: inherit; }
+.code-box { position: relative; }
+.code-box pre { padding-top: 54px; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px; min-height: 36px;
+  background: #e6f5ec; color: #0a2416; border: none; border-radius: 6px;
+  padding: 6px 12px; font: 600 14px 'Public Sans', sans-serif; cursor: pointer;
+}
+.copy-btn:hover { background: #ffffff; }
+.copy-btn:focus-visible { outline: 3px solid #e6f5ec; outline-offset: 2px; }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
+@media (max-width: 480px) {
+  main.wrap { padding: 24px 16px 60px; }
+  .topbar { padding: 10px 12px; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; font-size: 12.5pt; }
+  main.wrap { max-width: 100%; padding: 0; }
+  a { color: inherit; text-decoration: underline; }
+  .table-scroll { border: none; overflow: visible; }
+  table { font-size: 11pt; }
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  .code-box pre { padding-top: 16px; }
+  @page { margin: 16mm 14mm; }
+}
+</style>
+</head>
+<body>
+<div class="topbar no-print">
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 13</a>
+  <a class="dl-btn" href="installazione.pdf" download>Scarica il PDF &darr;</a>
+</div>
+<main class="wrap">
+<h1 id="installare-lagente-claude-code-e-opencode-sul-pc-del-laboratorio">Installare l'agente: Claude Code e OpenCode sul PC del laboratorio</h1>
+<p>Si installano due agenti da terminale, <strong>Claude Code</strong> e <strong>OpenCode</strong>, e li si collega al server del corso con la vostra chiave personale. Poi si aggiunge un kit minimo per leggere PDF, Word ed Excel. Il PC è un PC Windows del laboratorio, con il vostro utente: non servono permessi di amministratore.</p>
+<p>Funzioni e comandi sono quelli della documentazione ufficiale letta il 25/11/2026: <a href="https://code.claude.com/docs/en/setup">Claude Code</a>, <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>, <a href="https://github.com/microsoft/markitdown">MarkItDown</a>, <a href="https://opencode.ai/docs/">OpenCode</a>. Di OpenCode si usa la <strong>serie 1</strong> (versione 1.19.5).</p>
+<p>Tutti i comandi si incollano in <strong>PowerShell</strong>, uno alla volta, premendo Invio dopo ciascuno. Nei comandi compaiono due segnaposto da sostituire con i dati del foglio consegnato in aula, prima di premere Invio:</p>
+<ul>
+<li><code>&lt;indirizzo del server&gt;</code> è l'indirizzo del server del corso, con la porta, come sta sul foglio.</li>
+<li><code>&lt;la tua chiave&gt;</code> è la vostra chiave personale. Vale come una password: non si mostra a nessuno.</li>
+</ul>
+<p>Per ogni passo c'è un <strong>punto di controllo</strong>: se non torna, non passate al successivo.</p>
+<h2 id="passo-1-installare-claude-code">Passo 1. Installare Claude Code</h2>
+<p>Aprite PowerShell dal menu Start: il prompt comincia con <code>PS</code>. Incollate il comando; mentre scarica non mostra avanzamento.</p>
+<pre><code class="language-powershell">irm https://claude.ai/install.ps1 | iex
+</code></pre>
+<p>Quando il prompt torna, chiudete la finestra e apritene una nuova: il percorso dei programmi si aggiorna solo nelle finestre aperte dopo.</p>
+<pre><code class="language-powershell">claude --version
+</code></pre>
+<p><strong>Punto di controllo.</strong> Esce un numero di versione seguito da <code>(Claude Code)</code>. Se dice che <code>claude</code> non è riconosciuto, chiudete e riaprite ancora la finestra, poi chiamate il docente.</p>
+<h2 id="passo-2-indirizzo-e-chiave-come-variabili-dellutente">Passo 2. Indirizzo e chiave come variabili dell'utente</h2>
+<p>Sul foglio l'indirizzo ha la forma indirizzo:porta. Sostituite <code>&lt;indirizzo del server&gt;</code> nel comando con quello del foglio, <strong>senza</strong> <code>/v1</code> e senza barra in fondo, poi premete Invio.</p>
+<pre><code class="language-powershell">[Environment]::SetEnvironmentVariable(&quot;ANTHROPIC_BASE_URL&quot;, &quot;http://&lt;indirizzo del server&gt;&quot;, &quot;User&quot;)
+</code></pre>
+<p>Il valore <code>User</code> la rende una variabile dell'utente: non serve l'amministratore e la vedono le finestre aperte da ora in poi, non quelle già aperte.</p>
+<p>Per la chiave si usa la finestra delle variabili, non PowerShell:</p>
+<ol>
+<li>Menu Start: scrivete <code>variabili</code> e scegliete la voce che finisce con <em>relative all'account</em>, non quella di sistema.</li>
+<li>Nella lista <strong>in alto</strong> premete <em>Nuova</em>.</li>
+<li>Nome: incollate il nome qui sotto. Valore: incollate la chiave dal foglio. Confermate con OK su tutte le finestre.</li>
+</ol>
+<pre><code class="language-text">ANTHROPIC_AUTH_TOKEN
+</code></pre>
+<p>Poi aprite una finestra PowerShell <strong>nuova</strong> e controllate. Il primo comando non mostra la chiave:</p>
+<pre><code class="language-powershell">if ($env:ANTHROPIC_AUTH_TOKEN) { &quot;chiave presente&quot; } else { &quot;chiave mancante&quot; }
+</code></pre>
+<pre><code class="language-powershell">$env:ANTHROPIC_BASE_URL
+</code></pre>
+<p><strong>Punto di controllo.</strong> Il primo scrive <code>chiave presente</code>. Il secondo scrive l'indirizzo del foglio, con <code>http://</code> davanti e senza <code>/v1</code> in fondo.</p>
+<h2 id="passo-3-prima-prova-di-connessione">Passo 3. Prima prova di connessione</h2>
+<p>Una richiesta diretta al server, con le due variabili appena create. Si scrive <code>curl.exe</code> con l'estensione, perché <code>curl</code> da solo in PowerShell è un altro comando.</p>
+<pre><code class="language-powershell">curl.exe &quot;$env:ANTHROPIC_BASE_URL/v1/models&quot; -H &quot;Authorization: Bearer $env:ANTHROPIC_AUTH_TOKEN&quot;
+</code></pre>
+<p><strong>Punto di controllo.</strong> Esce una riga di testo con <code>claude-sonnet-5-5</code> e <code>claude-haiku-5-5</code>. Una risposta con 401 dice che la chiave è sbagliata; nessuna risposta dice che indirizzo o porta sono sbagliati, o che il PC è fuori dalla rete consentita.</p>
+<p>Ora Claude Code, in una cartella di prova. Tre comandi, uno alla volta:</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force &quot;$env:USERPROFILE\prova-agente&quot; | Out-Null
+</code></pre>
+<pre><code class="language-powershell">cd &quot;$env:USERPROFILE\prova-agente&quot;
+</code></pre>
+<pre><code class="language-powershell">claude --permission-mode manual
+</code></pre>
+<p>Claude Code si apre <strong>senza schermata di accesso</strong>. Se chiede di accedere con un account, la variabile della chiave non è arrivata: uscite con <code class="cmd">/exit</code>, aprite una finestra nuova e rifate il controllo del passo 2.</p>
+<p>Dentro Claude Code incollate la richiesta:</p>
+<pre><code class="language-text">Rispondi con una parola: collegato.
+</code></pre>
+<p>Poi scrivete <code class="cmd">/status</code> e leggete due righe: <strong>Anthropic base URL</strong> deve essere il vostro server; <strong>Auth token</strong> deve nominare <code>ANTHROPIC_AUTH_TOKEN</code>.</p>
+<p><strong>Punto di controllo.</strong> L'agente risponde e le due righe sono quelle. Uscite con <code class="cmd">/exit</code>.</p>
+<p>Se dice che il modello non è disponibile, riavviate con il modello scritto per esteso:</p>
+<pre><code class="language-powershell">claude --permission-mode manual --model claude-sonnet-5-5
+</code></pre>
+<h2 id="passo-4-opencode-sul-server">Passo 4. OpenCode sul server</h2>
+<p>Node.js c'è già, quindi OpenCode si installa con npm, nella versione fissata per il corso:</p>
+<pre><code class="language-powershell">npm install -g opencode-ai@1.19.5
+</code></pre>
+<pre><code class="language-powershell">opencode --version
+</code></pre>
+<p><strong>Punto di controllo.</strong> Esce <code>1.19.5</code>. Se Windows chiede la password di amministratore, fermatevi e chiamate il docente. Non usate <code>/connect</code> dentro OpenCode: salverebbe la chiave in un file.</p>
+<p>Due comandi per il file di configurazione. Il primo crea la cartella, il secondo apre il file in Blocco note; se chiede di crearlo, rispondete di sì:</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force &quot;$env:USERPROFILE\.config\opencode&quot; | Out-Null
+</code></pre>
+<pre><code class="language-powershell">notepad &quot;$env:USERPROFILE\.config\opencode\opencode.json&quot;
+</code></pre>
+<p>Incollate nel Blocco note tutto il testo qui sotto. Sostituite <code>&lt;indirizzo del server&gt;</code> con quello del foglio, <strong>con</strong> il <code>/v1</code> già scritto in fondo. Non c'è nessuna chiave: il file legge la variabile. Al salvataggio il nome deve restare <code>opencode.json</code>, non <code>opencode.json.txt</code>: scegliete «Tutti i file».</p>
+<pre><code class="language-text">{
+  &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
+  &quot;enabled_providers&quot;: [&quot;anthropic&quot;],
+  &quot;provider&quot;: {
+    &quot;anthropic&quot;: {
+      &quot;options&quot;: {
+        &quot;baseURL&quot;: &quot;http://&lt;indirizzo del server&gt;/v1&quot;,
+        &quot;apiKey&quot;: &quot;{env:ANTHROPIC_AUTH_TOKEN}&quot;,
+        &quot;headers&quot;: {
+          &quot;Authorization&quot;: &quot;Bearer {env:ANTHROPIC_AUTH_TOKEN}&quot;
+        }
+      },
+      &quot;whitelist&quot;: [&quot;claude-sonnet-5-5&quot;, &quot;claude-haiku-5-5&quot;]
+    }
+  },
+  &quot;model&quot;: &quot;anthropic/claude-sonnet-5-5&quot;,
+  &quot;small_model&quot;: &quot;anthropic/claude-haiku-5-5&quot;,
+  &quot;share&quot;: &quot;disabled&quot;,
+  &quot;autoupdate&quot;: false,
+  &quot;permission&quot;: {
+    &quot;*&quot;: &quot;ask&quot;,
+    &quot;read&quot;: {
+      &quot;*&quot;: &quot;allow&quot;,
+      &quot;*.env&quot;: &quot;deny&quot;,
+      &quot;*.env.*&quot;: &quot;deny&quot;,
+      &quot;*.env.example&quot;: &quot;allow&quot;
+    },
+    &quot;glob&quot;: &quot;allow&quot;,
+    &quot;grep&quot;: &quot;allow&quot;,
+    &quot;list&quot;: &quot;allow&quot;,
+    &quot;todowrite&quot;: &quot;allow&quot;,
+    &quot;question&quot;: &quot;allow&quot;,
+    &quot;edit&quot;: &quot;ask&quot;,
+    &quot;bash&quot;: {
+      &quot;*&quot;: &quot;ask&quot;,
+      &quot;git status *&quot;: &quot;allow&quot;,
+      &quot;git diff *&quot;: &quot;allow&quot;,
+      &quot;git log *&quot;: &quot;allow&quot;,
+      &quot;rm *&quot;: &quot;deny&quot;,
+      &quot;git push *&quot;: &quot;deny&quot;
+    },
+    &quot;task&quot;: &quot;ask&quot;,
+    &quot;skill&quot;: &quot;ask&quot;,
+    &quot;webfetch&quot;: &quot;deny&quot;,
+    &quot;websearch&quot;: &quot;deny&quot;,
+    &quot;external_directory&quot;: &quot;deny&quot;
+  }
+}
+</code></pre>
+<p>Dopo aver cambiato variabili o file, OpenCode va chiuso del tutto: un processo rimasto in secondo piano non vede le variabili create dopo la sua partenza. Se il comando non scrive niente, non c'erano processi aperti: va bene.</p>
+<pre><code class="language-powershell">Get-Process opencode* -ErrorAction SilentlyContinue | Stop-Process -Force
+</code></pre>
+<pre><code class="language-powershell">opencode models
+</code></pre>
+<p><strong>Punto di controllo.</strong> L'elenco ha due righe: <code>anthropic/claude-sonnet-5-5</code> e <code>anthropic/claude-haiku-5-5</code>. Se ce ne sono altre, il file non è stato letto: ricontrollate virgole, virgolette e nome del file.</p>
+<p>Prima richiesta, nella cartella di prova:</p>
+<pre><code class="language-powershell">cd &quot;$env:USERPROFILE\prova-agente&quot;
+</code></pre>
+<pre><code class="language-powershell">opencode
+</code></pre>
+<p>Dentro OpenCode incollate:</p>
+<pre><code class="language-text">Rispondi con una parola: collegato.
+</code></pre>
+<p><strong>Punto di controllo.</strong> OpenCode risponde. Se resta fermo senza errori, quasi sempre l'indirizzo o la porta nel file sono sbagliati. Per uscire: <code class="cmd">/exit</code>.</p>
+<h2 id="passo-5-il-kit-minimo-uv-e-markitdown">Passo 5. Il kit minimo: uv e MarkItDown</h2>
+<p><strong>uv</strong> esegue programmi Python al volo e si porta Python da solo. <strong>MarkItDown</strong> trasforma PDF, Word, Excel e PowerPoint in testo Markdown, tabelle comprese. Si parte da uv, solo per il vostro utente:</p>
+<pre><code class="language-powershell">powershell -ExecutionPolicy ByPass -c &quot;irm https://astral.sh/uv/install.ps1 | iex&quot;
+</code></pre>
+<p>Chiudete la finestra e apritene una nuova, poi:</p>
+<pre><code class="language-powershell">uv --version
+</code></pre>
+<p><strong>Punto di controllo.</strong> Esce <code>uv</code> seguito da un numero di versione.</p>
+<p>Con <code>uvx</code> MarkItDown non si installa: uv lo scarica la prima volta e lo tiene in una cache. Quella prima volta è lenta e scrive molte righe; lanciatela adesso, così non capita davanti a un PDF. Non interrompetela.</p>
+<pre><code class="language-powershell">uvx --from &quot;markitdown[all]&quot; markitdown --help
+</code></pre>
+<p><strong>Punto di controllo.</strong> Alla fine compare il testo di aiuto di <code>markitdown</code> e il prompt torna. Eventuali righe su <em>FontBBox</em> sono innocue.</p>
+<h2 id="passo-6-le-istruzioni-globali">Passo 6. Le istruzioni globali</h2>
+<p>Un file che l'agente legge a ogni avvio: dice che gli strumenti del kit ci sono e si possono usare, e che una tabella spezzata va dichiarata, non indovinata. Lo stesso testo va in due file, uno per agente. Aprite il primo, incollate il testo qui sotto, salvate con «Tutti i file» (il nome resta <code>CLAUDE.md</code>, non <code>.txt</code>):</p>
+<pre><code class="language-powershell">notepad &quot;$env:USERPROFILE\.claude\CLAUDE.md&quot;
+</code></pre>
+<pre><code class="language-text"># Istruzioni per l'agente
+
+Lavori per un docente di informatica. Rispondi in italiano, con frasi brevi.
+
+## Leggere i documenti
+
+Per leggere un PDF, un file Word, Excel o PowerPoint non aprirlo come testo: convertilo con MarkItDown, con questo comando (sostituisci il nome del file):
+
+uvx --from &quot;markitdown[all]&quot; markitdown nome-del-file.pdf
+
+Poi lavora sul testo ottenuto. Se il comando scrive avvisi sui caratteri del PDF, ignorali. Se una tabella esce con righe spezzate o colonne mescolate, dillo e non indovinare i valori mancanti.
+
+## Calcoli e tabelle
+
+Per conteggi, percentuali e confronti tra valori usa Python con le librerie caricate al volo, per esempio:
+
+uv run --with pandas python nome-dello-script.py
+
+Per leggere o scrivere file Excel usa uv run --with openpyxl python nome-dello-script.py. Non fare i conti a mente: calcolali.
+
+## Risultati
+
+Scrivi i risultati in file nella cartella di lavoro (Markdown, CSV o Excel), non solo nella chat.
+
+## Cosa non fare
+
+- Non installare programmi. I comandi uvx e uv run scritti qui sopra sono permessi.
+- Non modificare i documenti originali (PDF, Word, Excel): scrivi i risultati in file nuovi.
+- Non cancellare file senza chiedere.
+- Non inviare niente a nessuno (email, messaggi, caricamenti) senza chiedere prima.
+- Alla fine scrivi che cosa non hai potuto verificare.
+</code></pre>
+<p>Poi il secondo, con lo stesso testo (il nome resta <code>AGENTS.md</code>):</p>
+<pre><code class="language-powershell">notepad &quot;$env:USERPROFILE\.config\opencode\AGENTS.md&quot;
+</code></pre>
+<p>I file si leggono quando parte la sessione: dopo averli salvati, aprite una sessione nuova.</p>
+<p><strong>Punto di controllo.</strong> I due file esistono con il testo dentro e il Blocco note non dice «.txt» nel titolo.</p>
+<h2 id="passo-7-prova-su-un-pdf">Passo 7. Prova su un PDF</h2>
+<p>Scaricate il PDF di prova, <code>prova-markitdown.pdf</code>, dalla pagina dei materiali di questo argomento: sono poche righe di prenotazioni di laboratorio inventate. Poi copiatelo nella cartella di prova. Se il browser lo ha salvato altrove o con un altro nome, adattate il percorso.</p>
+<pre><code class="language-powershell">Copy-Item &quot;$env:USERPROFILE\Downloads\prova-markitdown.pdf&quot; &quot;$env:USERPROFILE\prova-agente\&quot;
+</code></pre>
+<p>Sessione <strong>nuova</strong>, nella cartella di prova (<code>cd</code> come al passo 3). Avviate Claude Code:</p>
+<pre><code class="language-powershell">claude --permission-mode manual
+</code></pre>
+<p>Dentro l'agente incollate la richiesta:</p>
+<pre><code class="language-text">Leggi prova-markitdown.pdf e dimmi quante ore sono prenotate in totale per ciascun laboratorio.
+</code></pre>
+<p><strong>Punto di controllo.</strong> Tra le azioni compare <code>uvx ... markitdown</code>. L'agente ve ne chiede il permesso: leggete il comando e rispondete sì solo se è quello. Poi ripetete con OpenCode, stessa richiesta. Se non compare, il file delle istruzioni non è stato letto: controllate nome, posizione e sessione nuova.</p>
+<h2 id="passo-8-pronti-per-la-prima-esercitazione">Passo 8. Pronti per la prima esercitazione</h2>
+<p>Se i sette controlli tornano, avete Claude Code e OpenCode collegati al server con la vostra chiave, il kit per leggere i documenti e le istruzioni globali per tutti e due. Il lavoro resta su questo PC: usate sempre lo stesso. Si prosegue con il foglio della prima esercitazione.</p>
+<h2 id="se-qualcosa-non-va">Se qualcosa non va</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Che cosa vedete</th>
+<th>Causa probabile</th>
+<th>Che cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code chiede di accedere con un account</td>
+<td>Variabile creata dopo aver aperto la finestra, o nome diverso</td>
+<td>Finestra nuova, controllo «chiave presente» del passo 2</td>
+</tr>
+<tr>
+<td>Errore 401, token non valido</td>
+<td>Chiave copiata male, spazio in fondo, o chiave di un altro PC</td>
+<td>Confrontate le ultime quattro lettere con il foglio e ricopiate la chiave</td>
+</tr>
+<tr>
+<td>Il modello non è disponibile per la chiave</td>
+<td>Modello diverso dai due del corso</td>
+<td>Avviate con <code>--model claude-sonnet-5-5</code></td>
+</tr>
+<tr>
+<td>Pausa lunga, poi errore di connessione</td>
+<td>Indirizzo o porta sbagliati, o PC fuori dalla rete consentita</td>
+<td>Prova diretta del passo 3; se non risponde, chiamate il docente</td>
+</tr>
+<tr>
+<td>L'elenco di OpenCode ha altre righe</td>
+<td>File non letto: sintassi o cartella</td>
+<td>Il file è <code>opencode.json</code> in <code>.config\opencode</code>; ricontrollate le virgole</td>
+</tr>
+<tr>
+<td>Il file si chiama <code>opencode.json.txt</code></td>
+<td>Salvato come «Documenti di testo»</td>
+<td>Salvate di nuovo con «Tutti i file» e cancellate il <code>.txt</code></td>
+</tr>
+<tr>
+<td>Errore sulla chiave in OpenCode, ma la chiave è giusta</td>
+<td>Un processo di OpenCode è rimasto acceso</td>
+<td>Il comando del passo 4 che ferma i processi, poi riaprite</td>
+</tr>
+<tr>
+<td>OpenCode resta fermo, senza errori</td>
+<td>Indirizzo o porta nel file sbagliati</td>
+<td>Controllate <code>baseURL</code>: indirizzo del foglio, porta, <code>/v1</code> in fondo</td>
+</tr>
+</tbody>
+</table></div>
+<p>Per vedere le ultime quattro lettere della chiave che il PC legge, in una finestra nuova:</p>
+<pre><code class="language-powershell">$env:ANTHROPIC_AUTH_TOKEN.Substring($env:ANTHROPIC_AUTH_TOKEN.Length-4)
+</code></pre>
+<h3 id="uvx-installato-ma-non-trovato">uvx installato ma non trovato</h3>
+<p>Il messaggio dice che <code>uvx</code> o <code>uv</code> non è riconosciuto, dopo un'installazione finita senza errori. Prima chiudete la finestra e apritene una nuova. Se non basta, controllate che il file esista; deve scrivere <code>True</code>:</p>
+<pre><code class="language-powershell">Test-Path &quot;$env:USERPROFILE\.local\bin\uvx.exe&quot;
+</code></pre>
+<p>Poi guardate se il percorso dell'utente contiene <code>.local\bin</code>:</p>
+<pre><code class="language-powershell">[Environment]::GetEnvironmentVariable(&quot;Path&quot;, &quot;User&quot;)
+</code></pre>
+<p>Se il file c'è ma il percorso non lo contiene, avvisate il docente. Nel frattempo si può lanciare <code>uvx</code> con il percorso intero:</p>
+<pre><code class="language-powershell">&amp; &quot;$env:USERPROFILE\.local\bin\uvx.exe&quot; --version
+</code></pre>
+<h2 id="cosa-non-fare">Cosa non fare</h2>
+<ul>
+<li>La chiave non va in un file di progetto, né in <code>opencode.json</code>, né in <code>CLAUDE.md</code>, né in un commit. Resta solo nella variabile.</li>
+<li>La chiave non si mostra sul proiettore, non si fotografa, non si scrive in chat.</li>
+<li>In OpenCode niente <code>/connect</code> (salva la chiave in un file) e niente <code>/share</code> (crea un link pubblico alla conversazione).</li>
+</ul>
+<h2 id="a-fine-corso">A fine corso</h2>
+<p>Togliete le due variabili dal vostro utente, un comando alla volta. Le finestre già aperte le vedono ancora finché non si chiudono.</p>
+<pre><code class="language-powershell">[Environment]::SetEnvironmentVariable(&quot;ANTHROPIC_AUTH_TOKEN&quot;, $null, &quot;User&quot;)
+</code></pre>
+<pre><code class="language-powershell">[Environment]::SetEnvironmentVariable(&quot;ANTHROPIC_BASE_URL&quot;, $null, &quot;User&quot;)
+</code></pre>
+<footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
+</main>
+<script>
+document.querySelectorAll('main pre').forEach(function (pre) {
+  var box = document.createElement('div'); box.className = 'code-box';
+  pre.parentNode.insertBefore(box, pre); box.appendChild(pre);
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'copy-btn no-print'; b.textContent = 'Copia';
+  b.setAttribute('aria-label', 'Copia il testo');
+  b.addEventListener('click', function () {
+    var txt = pre.innerText.trimEnd();
+    var ok = function () { b.textContent = 'Copiato ✓'; setTimeout(function () { b.textContent = 'Copia'; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (done) { ok(); } else { b.textContent = 'Selezionate e copiate a mano'; setTimeout(function () { b.textContent = 'Copia'; }, 2500); }
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(ok, fallback); }
+    else { fallback(); }
+  });
+  box.appendChild(b);
+});
+document.querySelectorAll('main code.cmd').forEach(function (c) {
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'cmd-copy no-print'; b.title = 'Copia il comando';
+  b.setAttribute('aria-label', 'Copia il comando: ' + c.textContent);
+  var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  b.innerHTML = icon;
+  b.addEventListener('click', function () {
+    var txt = c.textContent;
+    var done = function (msg) { b.classList.add('ok'); b.textContent = msg; setTimeout(function () { b.classList.remove('ok'); b.innerHTML = icon; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); done(ok ? 'Copiato' : 'Copiate a mano');
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(function () { done('Copiato'); }, fallback); }
+    else { fallback(); }
+  });
+  c.insertAdjacentElement('afterend', b);
+});
+</script>
+</body>
+</html>

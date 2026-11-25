@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulazione dell'agente · Argomento 1 · Coding agentico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+  /* Tema della locandina, stessi colori delle slide. Contrasti misurati (WCAG) come in slide.html:
+     text 17,6 / 15,2 / 13,6; muted 11,1 / 9,6 / 8,6; accent 13,3 / 11,4 / 10,3; accent-2 14,4 / 12,4 / 11,2;
+     danger 8,8 / 7,5 / 6,8; info >= 9; border (bordi, minimo 3:1) 5,0 / 4,3 / 3,8 su bg / panel / panel-2. */
+  :root {
+    --bg: #000c0a; --panel: #06201a; --panel-2: #0a2a22;
+    --text: #e6f5ec; --muted: #a9c9b8; --accent: #74e9b4; --accent-2: #ffd866;
+    --danger: #ff8a8a; --info: #8cd0ff; --border: #2f8f68;
+    --sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --cond: 'Barlow Condensed', 'Arial Narrow', 'Barlow', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+    --fs-xs: clamp(16px, 0.2vw + 14px, 17px);
+    --fs-sm: clamp(17px, 0.6vw + 13px, 20px);
+    --fs-body: clamp(18px, 0.6vw + 13px, 22px);
+    --fs-h1: clamp(34px, 3vw + 16px, 56px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: var(--fs-body); line-height: 1.5; }
+  #root { min-height: 100vh; }
+  h1, h2, h3 { font-family: var(--cond); text-transform: uppercase; letter-spacing: .02em; line-height: 1.1; }
+  code, .mono { font-family: var(--mono); font-size: .88em; overflow-wrap: anywhere; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+  .box { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .box.warn { border-left: 5px solid var(--accent-2); border-radius: 0 10px 10px 0; }
+  .box.ok { border-left: 5px solid var(--accent); border-radius: 0 10px 10px 0; }
+  .sim-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 14px; align-items: start; }
+  @media (max-width: 900px) { .sim-grid { grid-template-columns: 1fr; } }
+  .log-item { display: flex; gap: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .log-item b { display: block; color: var(--text); font-size: var(--fs-sm); }
+  .log-item span.d { color: var(--muted); font-size: var(--fs-xs); }
+  .badge { font-family: var(--mono); font-size: var(--fs-xs); color: var(--info); flex: none; }
+  .btn { display: block; width: 100%; text-align: left; padding: 10px 14px; min-height: 44px; background: var(--panel-2); color: var(--text);
+         border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font: inherit; font-size: var(--fs-sm); }
+  .btn:hover:not(:disabled) { border-color: var(--accent); }
+  .btn.go { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .btn.good { border-color: var(--accent); background: var(--panel); }
+  .btn.bad { border-color: var(--danger); background: var(--panel); }
+  .btn.ghost { background: transparent; color: var(--muted); width: auto; display: inline-block; font-size: var(--fs-xs); }
+  .btn:disabled { cursor: default; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--fs-xs); }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  .muted { color: var(--muted); }
+  details > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-sm); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* Sequenza didattica sul compito della prima esercitazione (cartella di richieste di installazione, dati inventati).
+   Non è l'output di un modello vero: un agente reale può cambiare ordine, parole e numero di passi. */
+
+const TASK = "Controlla le richieste di installazione secondo la procedura della scuola. Prima dammi solo un piano. Non installare niente.";
+
+const STEPS = [
+  { action: "Fa un piano", icon: "PIANO",
+    detail: "Prima di toccare qualcosa elenca: leggerà istruzioni, procedura, regolamento, laboratori, catalogo e le venti richieste; farà i conti con un programma; rinominerà i file e sposterà quelli da restituire solo dopo il tuo permesso; non toccherà in-arrivo; controllerà il risultato con un secondo programma." },
+  { action: "Aspetta il tuo sì", icon: "STOP",
+    detail: "Si ferma. Tu rispondi: «Il piano va bene, con una correzione: tra i casi dubbi segnala quelli che non si decidono con il regolamento.» L'agente aggiorna il piano e procede.",
+    options: ["Esegue subito, perché il compito era chiaro", "Aspetta che tu approvi o corregga il piano", "Passa da solo a una modalità che non chiede più permessi"], correct: 1 },
+  { action: "Legge le istruzioni e la skill", icon: "READ",
+    detail: "Ha già in contesto CLAUDE.md. Vede la descrizione della skill controllo-richieste, riconosce il compito, ne apre il testo e ne segue i nove passi. Il regolamento lo apre dopo, per le regole dettagliate.",
+    options: ["Ignora la skill e inventa una sua procedura", "Carica la skill controllo-richieste e la usa come traccia del lavoro", "Ti chiede di incollare la procedura in chat"], correct: 1 },
+  { action: "Legge i dati, tranne in-arrivo", icon: "READ",
+    detail: "Apre laboratori.csv, catalogo-software.csv, il regolamento e le venti richieste una per una. Nomi come scan_0042.txt o Doc2.txt non dicono niente: conta il contenuto. La cartella in-arrivo la lascia chiusa.",
+    options: ["Apre tutto, anche in-arrivo, per essere completo", "Classifica le richieste dai nomi dei file", "Apre laboratori, catalogo, regolamento e ogni richiesta; lascia in-arrivo"], correct: 2 },
+  { action: "Scrive ed esegue un piccolo programma", icon: "BASH",
+    detail: "Chiede il permesso di eseguire uno script Python che legge solo i file della cartella. Tu lo leggi, controlli che non scriva fuori e rispondi sì una volta. Il programma stampa gli stati (dieci approvate, due per licenze insufficienti, due doppie, due senza visto, una per ciascuno degli altri casi) e le licenze: AutoCAD 20 su 40 per il laboratorio CAD; per INF1 (24 PC) si arriverebbe a 44, quindi la richiesta è respinta e non consuma licenze. MATLAB 24 su 30; SIS (18 PC) porterebbe a 42.",
+    options: ["Somma le licenze a mente mentre legge", "Scrive uno script che legge i file, lo esegue dopo il tuo permesso", "Ti chiede di rifare i conti in un foglio di calcolo"], correct: 1 },
+  { action: "Si ferma sul caso ambiguo", icon: "STOP",
+    detail: "La mail di Greco chiede Node.js LTS nel «laboratorio di informatica», ma i laboratori di informatica sono due, INF1 e INF2. Il visto è di Marchetti, responsabile di INF1: un indizio, non una prova (art. 2, comma 2). L'agente non sceglie: lo scrive tra i dubbi e te lo chiede. Tu rispondi: «Lasciala da decidere.»",
+    options: ["La assegna a INF1, perché il visto è di Marchetti", "La mette tra i dubbi e ti chiede cosa fare", "La approva per tutti e due i laboratori, così non sbaglia"], correct: 1 },
+  { action: "Chiede il permesso prima di rinominare", icon: "PERMESSO",
+    detail: "«Posso rinominare le venti richieste come AAAA-MM-GG-LAB-Software-stato e spostare in da-restituire le due senza visto? Non cancello niente.» Tu rispondi sì. È una modifica ai file: in Manual chiede sempre, e la copia usa e getta rende l'errore poco costoso, ma non per questo si approva senza leggere.",
+    options: ["Rinomina e sposta subito: tanto la cartella è una copia", "Chiede il permesso e dice che non cancella niente", "Cancella le richieste doppie per fare ordine"], correct: 1 },
+  { action: "Rinomina, sposta e mostra cosa è cambiato", icon: "DIFF",
+    detail: "Senza Git non c'è un diff vero: mostra l'elenco prima e dopo. Per esempio: scan_0042.txt diventa 2026-11-05-INF2-MATLAB-approvata.txt; Doc2.txt diventa 2026-11-10-INF1-AutoCAD-licenze-insufficienti.txt; mail-sala-vbox.txt diventa da-restituire/2026-11-16-CAD-VirtualBox-senza-visto.txt. Venti righe, nessun file perso.",
+    options: ["Scrive «fatto» e passa oltre", "Mostra l'elenco prima e dopo e le due richieste spostate", "Mostra solo quanti file ha rinominato"], correct: 1 },
+  { action: "Controlla il proprio lavoro con un programma", icon: "BASH",
+    detail: "Esegue un secondo script: ogni richiesta compare una volta sola nel riepilogo, i file nelle cartelle sono venti come le righe, la somma per stato dà venti, le licenze usate non superano quelle disponibili. Se un numero non tornasse, correggerebbe prima di consegnare.",
+    options: ["Rilegge il riepilogo e lo trova convincente", "Esegue un secondo programma che confronta file, righe e licenze", "Controlla solo che riepilogo-richieste.md esista"], correct: 1 },
+  { action: "Dichiara i limiti", icon: "LIMITI",
+    detail: "Scrive cosa non ha potuto verificare: se i visti sono autentici, se catalogo e licenze sono aggiornati, quale laboratorio intendeva Greco, se il laboratorio INF3 è un errore o una sala prevista. Il confronto l'ha fatto leggendo il testo delle richieste, non gli eventuali allegati.",
+    options: ["Dice che è tutto verificato", "Elenca cosa non ha potuto verificare e cosa ha lasciato a te", "Cancella il riepilogo e ricomincia"], correct: 1 },
+  { action: "Consegna", icon: "FINE",
+    detail: "Presenta il riepilogo: dieci approvate (quattro richiedono l'amministratore di rete), le altre con il motivo e l'articolo, un caso da decidere. Dichiara che in-arrivo non è stata toccata e che non è stato installato niente. Decidere e restituire le richieste tocca a te.",
+    options: ["Installa i software approvati", "Consegna il riepilogo e lascia a te in-arrivo e le decisioni", "Scrive ai docenti delle richieste respinte"], correct: 1 },
+];
+
+const END = "Consegnato. L'agente ha pianificato prima, aspettato il tuo sì, usato la procedura, contato con un programma, chiesto il permesso prima di rinominare, lasciato a te il caso ambiguo e dichiarato i limiti. Ogni passo era una traccia che potevi leggere: è il tuo modo di controllarlo.";
+
+const LABS = [
+  ['Codice', 'Laboratorio', 'PC', 'Sistema', 'Responsabile'],
+  ['INF1', 'Informatica 1', '24', 'Windows', 'Marchetti'],
+  ['INF2', 'Informatica 2', '24', 'Windows', 'Galli'],
+  ['SIS', 'Sistemi e reti', '18', 'Linux', 'Orsini'],
+  ['CAD', 'Disegno e progettazione', '20', 'Windows', 'Pace'],
+  ['MOB', 'Sviluppo mobile', '16', 'Windows', 'Leoni'],
+];
+const COMM = [
+  ['Software commerciale', 'Licenze', 'Sistemi', 'Serve l\'amministratore'],
+  ['AutoCAD', '40', 'Windows', 'sì'],
+  ['MATLAB', '30', 'Windows, Linux', 'sì'],
+];
+
+function Tabella({ righe }) {
+  return (
+    <div className="scroll">
+      <table>
+        <thead><tr>{righe[0].map((h, i) => <th key={i} scope="col">{h}</th>)}</tr></thead>
+        <tbody>{righe.slice(1).map((r, i) => <tr key={i}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+  );
+}
+
+function Agente() {
+  const [step, setStep] = useState(0);
+  const [guessMode, setGuessMode] = useState(false);
+  const [guess, setGuess] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+  const [giuste, setGiuste] = useState(0);
+  const [tot, setTot] = useState(0);
+  const [log, setLog] = useState([STEPS[0]]);
+  const atEnd = step >= STEPS.length - 1;
+  const next = !atEnd ? STEPS[step + 1] : null;
+
+  const pick = (i) => {
+    if (revealed) return;
+    setGuess(i); setRevealed(true); setTot(t => t + 1);
+    if (i === next.correct) setGiuste(c => c + 1);
+  };
+  const advance = () => {
+    const n = step + 1;
+    setStep(n); setLog(l => [...l, STEPS[n]]);
+    setGuessMode(false); setGuess(null); setRevealed(false);
+  };
+  const restart = () => { setStep(0); setLog([STEPS[0]]); setGuessMode(false); setGuess(null); setRevealed(false); setGiuste(0); setTot(0); };
+
+  return (
+    <div className="box" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+        <h2 style={{ color: 'var(--accent)', fontSize: 28 }}>L'agente</h2>
+        <div className="mono muted" aria-live="polite">Previsioni giuste: <strong style={{ color: 'var(--accent-2)' }}>{giuste}/{tot}</strong></div>
+      </div>
+      <div style={{ background: 'var(--panel-2)', borderRadius: 8, padding: '8px 12px', fontSize: 'var(--fs-sm)' }}>
+        <strong>Compito:</strong> {TASK}
+      </div>
+      <div className="mono muted" style={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 'var(--fs-xs)' }}>Traccia delle azioni</div>
+      <div role="log" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 420, overflowY: 'auto' }}>
+        {log.map((s, i) => (
+          <div className="log-item" key={i}>
+            <span className="badge">{s.icon}</span>
+            <div><b>{s.action}</b><span className="d">{s.detail}</span></div>
+          </div>
+        ))}
+      </div>
+
+      {!atEnd && !guessMode && (
+        <button className="btn go" onClick={() => { setGuess(null); setRevealed(false); setGuessMode(true); }}>Indovina la prossima mossa &rarr;</button>
+      )}
+      {!atEnd && guessMode && (
+        <div role="group" aria-label="Opzioni per la prossima mossa" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="muted">Cosa farà adesso l'agente?</div>
+          {next.options.map((o, i) => {
+            const cls = revealed ? (i === next.correct ? 'good' : (i === guess ? 'bad' : '')) : '';
+            const mark = revealed ? (i === next.correct ? '✓ ' : (i === guess ? '✗ ' : '')) : '';
+            return <button key={i} className={'btn ' + cls} disabled={revealed} onClick={() => pick(i)}>{mark}{o}</button>;
+          })}
+          {revealed && <button className="btn go" onClick={advance}>Avanti &rarr;</button>}
+        </div>
+      )}
+      {atEnd && <div className="box ok" style={{ fontSize: 'var(--fs-sm)' }}>{END}</div>}
+      <button className="btn ghost" onClick={restart}>&#8634; Ricomincia la simulazione</button>
+    </div>
+  );
+}
+
+function App() {
+  const calcZoom = () => (window.innerWidth <= 900 ? 1 : Math.min(2.4, Math.max(1, Math.min(window.innerWidth / 1366, window.innerHeight / 768))));
+  const [zoom, setZoom] = useState(calcZoom);
+  useEffect(() => {
+    const f = () => setZoom(calcZoom());
+    window.addEventListener('resize', f);
+    return () => window.removeEventListener('resize', f);
+  }, []);
+  return (
+    <div className="wrap" style={{ zoom }}>
+      <a href="slide.html">&larr; Torna alle slide</a>
+      <h1 style={{ color: 'var(--accent)', fontSize: 'var(--fs-h1)', margin: '16px 0 14px' }}>Argomento 1 — Dal chatbot all'agente · Simulazione</h1>
+
+      <div className="box warn" style={{ marginBottom: 16 }}>
+        <p style={{ marginBottom: 8 }}><strong>Il compito.</strong> Una cartella con venti richieste di installazione software nei laboratori di una scuola inventata, un catalogo, un regolamento e una procedura (la skill). L'agente deve decidere lo stato di ogni richiesta, rinominare i file, contare le licenze e scrivere un riepilogo.</p>
+        <p><strong>Come si gioca.</strong> Prima di ogni mossa premi «Indovina la prossima mossa», scegli una delle tre opzioni e guarda quale è giusta. Poi premi «Avanti» e leggi cosa è successo nella traccia. Le mosse da indovinare sono dieci.</p>
+      </div>
+
+      <details style={{ marginBottom: 16 }} className="box">
+        <summary>I dati della cartella (inventati)</summary>
+        <div style={{ marginTop: 10, display: 'grid', gap: 12 }}>
+          <Tabella righe={LABS} />
+          <Tabella righe={COMM} />
+          <p className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Gli altri otto software del catalogo sono liberi o gratuiti, senza limite di licenze. Le richieste sono moduli, mail e appunti, con nomi di file disordinati.</p>
+        </div>
+      </details>
+
+      <div className="sim-grid">
+        <div className="box">
+          <h2 style={{ color: 'var(--info)', fontSize: 28, marginBottom: 8 }}>Cosa guardare</h2>
+          <ul style={{ paddingLeft: 20, display: 'grid', gap: 8, fontSize: 'var(--fs-sm)' }}>
+            <li>Dove si ferma e aspetta una persona.</li>
+            <li>Quali azioni chiedono un permesso e quali no.</li>
+            <li>Cosa conta con un programma invece che a mente.</li>
+            <li>Cosa lascia a te invece di decidere.</li>
+          </ul>
+          <p className="muted" style={{ marginTop: 12, fontSize: 'var(--fs-xs)' }}>Sequenza didattica sul compito della prima esercitazione: non è l'output di un modello vero. Un agente reale può cambiare ordine, parole e numero di passi; resta valido ciò che controlli nella traccia.</p>
+        </div>
+        <Agente />
+      </div>
+
+      <p className="muted" style={{ marginTop: 24, fontSize: 'var(--fs-sm)' }}>Dati inventati: nessuna scuola, persona o richiesta reale.</p>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

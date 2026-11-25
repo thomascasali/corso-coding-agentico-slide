@@ -31,6 +31,7 @@ h1 { font-size: clamp(28px, 4vw, 38px); margin: 0 0 6px; }
 h2 { font-size: clamp(21px, 2.6vw, 26px); margin: 34px 0 12px; color: var(--accent); }
 h3 { font-size: clamp(18px, 2.2vw, 21px); margin: 26px 0 10px; }
 p, li { color: var(--text-dim); }
+main p, main li { overflow-wrap: anywhere; }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .topbar {
@@ -67,10 +68,30 @@ th { background: var(--bg-callout); color: var(--text); font-family: 'Public San
 tr:last-child td { border-bottom: none; }
 code { background: var(--bg-callout); padding: 1px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
 pre {
-  background: #0a0f0c; color: #7dffa8; border-radius: 8px; padding: 16px 18px;
+  background: #0a2416; color: #e6f5ec; border-radius: 8px; padding: 16px 18px;
   overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.55;
 }
 pre code { background: none; padding: 0; color: inherit; }
+:not(pre) > code { overflow-wrap: anywhere; }
+.cmd-copy {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 1px solid var(--accent);
+  border-radius: 5px; background: var(--bg-card); color: var(--accent); cursor: pointer;
+}
+.cmd-copy:hover { background: var(--bg-callout); }
+.cmd-copy svg { width: 16px; height: 16px; }
+.cmd-copy.ok { width: auto; padding: 0 8px; font: 600 13px 'Public Sans', sans-serif; }
+pre:has(> code.language-text), pre:not(:has(> code[class*="language-"])) { white-space: pre-wrap; overflow-wrap: anywhere; font-family: 'Public Sans', system-ui, sans-serif; font-size: 16px; }
+pre > code.language-text, pre > code:not([class*="language-"]) { font-family: inherit; }
+.code-box { position: relative; }
+.code-box pre { padding-top: 54px; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px; min-height: 36px;
+  background: #e6f5ec; color: #0a2416; border: none; border-radius: 6px;
+  padding: 6px 12px; font: 600 14px 'Public Sans', sans-serif; cursor: pointer;
+}
+.copy-btn:hover { background: #ffffff; }
+.copy-btn:focus-visible { outline: 3px solid #e6f5ec; outline-offset: 2px; }
 footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px; }
 @media (max-width: 480px) {
   main.wrap { padding: 24px 16px 60px; }
@@ -84,6 +105,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
   .table-scroll { border: none; overflow: visible; }
   table { font-size: 11pt; }
   pre { white-space: pre-wrap; word-wrap: break-word; }
+  .code-box pre { padding-top: 16px; }
   @page { margin: 16mm 14mm; }
 }
 </style>
@@ -95,7 +117,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </div>
 <main class="wrap">
 <h1 id="promemoria-git-per-chi-lavora-con-un-agente">Promemoria: git per chi lavora con un agente</h1>
-<p>Un foglio da tenere accanto al terminale. Tutti i comandi sono quelli di git 2.23 o più recente (<code>git --version</code> dice quale avete). Documentazione completa: https://git-scm.com/docs</p>
+<p>Un foglio da tenere accanto al terminale. Tutti i comandi sono quelli di git 2.23 o più recente (<code class="cmd">git --version</code> dice quale avete). Documentazione completa: https://git-scm.com/docs</p>
 <h2 id="leggere-cosa-e-cambiato">Leggere cosa è cambiato</h2>
 <div class="table-scroll"><table>
 <thead>
@@ -106,41 +128,48 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </thead>
 <tbody>
 <tr>
-<td><code>git status</code></td>
+<td><code class="cmd">git status</code></td>
 <td>quali file sono cambiati, quali sono nuovi (<code>Untracked</code>), su quale ramo siete</td>
 </tr>
 <tr>
-<td><code>git diff</code></td>
+<td><code class="cmd">git diff</code></td>
 <td>le righe cambiate nella cartella di lavoro, non ancora preparate per il commit</td>
 </tr>
 <tr>
-<td><code>git diff --staged</code></td>
+<td><code class="cmd">git diff --staged</code></td>
 <td>le righe già preparate con <code>git add</code>, cioè quelle che entreranno nel commit</td>
 </tr>
 <tr>
-<td><code>git diff main</code></td>
+<td><code class="cmd">git diff main</code></td>
 <td>tutto quello che differisce dal ramo <code>main</code>, cioè dalla partenza</td>
 </tr>
 <tr>
-<td><code>git diff --stat</code></td>
+<td><code class="cmd">git diff --stat</code></td>
 <td>solo l'elenco dei file e il numero di righe, per un colpo d'occhio</td>
 </tr>
 <tr>
-<td><code>git show --stat HEAD</code></td>
+<td><code class="cmd">git show --stat HEAD</code></td>
 <td>che cosa contiene l'ultimo commit</td>
 </tr>
 <tr>
-<td><code>git log --oneline</code></td>
+<td><code class="cmd">git log --oneline</code></td>
 <td>i commit, uno per riga, dal più recente</td>
 </tr>
 </tbody>
 </table></div>
 <p>Un file nuovo non compare in <code>git diff</code> finché non lo aggiungete: si vede con <code>git status</code>.</p>
 <h2 id="salvare">Salvare</h2>
-<pre><code>git switch -c lavoro-filtro               # ramo nuovo per questo lavoro
-git add src/logica.js test/logica.test.js # i file per nome, mai &quot;tutto&quot;
-git diff --staged                         # ultima lettura
-git commit -m &quot;Elenco: filtro per laboratorio&quot;
+<p>Quattro comandi, da incollare uno alla volta. Prima un ramo nuovo per questo lavoro:</p>
+<pre><code class="language-powershell">git switch -c lavoro-filtro
+</code></pre>
+<p>Poi i file per nome, mai «tutto»:</p>
+<pre><code class="language-powershell">git add src/logica.js test/logica.test.js
+</code></pre>
+<p>Ultima lettura di ciò che entrerà nel commit:</p>
+<pre><code class="language-powershell">git diff --staged
+</code></pre>
+<p>Il commit:</p>
+<pre><code class="language-powershell">git commit -m &quot;Elenco: filtro per laboratorio&quot;
 </code></pre>
 <p>Un commit per ogni passo che avete controllato.</p>
 <h2 id="tornare-indietro">Tornare indietro</h2>
@@ -174,7 +203,7 @@ git commit -m &quot;Elenco: filtro per laboratorio&quot;
 </tr>
 <tr>
 <td>Tornare sul ramo di partenza</td>
-<td><code>git switch main</code></td>
+<td><code class="cmd">git switch main</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -188,13 +217,20 @@ git commit -m &quot;Elenco: filtro per laboratorio&quot;
 </ul>
 <p>Principio: niente operazioni distruttive sul lavoro condiviso. Se avete dubbi su cosa c'è nella cartella, create un ramo nuovo o chiedete.</p>
 <h2 id="punti-di-partenza-della-palestra">Punti di partenza della palestra</h2>
-<pre><code>git tag                                    # elenca i punti di partenza
-git status                                 # prima: niente da perdere?
-git switch -c lavoro-a2 partenza-a2        # ramo vostro (nome a scelta) dal punto noto
-git switch main                            # per tornare alla base
+<p>Un comando per volta. Per elencare i punti di partenza:</p>
+<pre><code class="language-powershell">git tag
+</code></pre>
+<p>Prima di cambiare ramo, niente da perdere?</p>
+<pre><code class="language-powershell">git status
+</code></pre>
+<p>Il ramo vostro (il nome è a scelta) dal punto noto:</p>
+<pre><code class="language-powershell">git switch -c lavoro-a2 partenza-a2
+</code></pre>
+<p>Per tornare alla base:</p>
+<pre><code class="language-powershell">git switch main
 </code></pre>
 <h2 id="regole-da-dare-allagente-da-adattare-nel-file-di-istruzioni-del-progetto">Regole da dare all'agente (da adattare nel file di istruzioni del progetto)</h2>
-<pre><code>## Uso di git
+<pre><code class="language-text">## Uso di git
 - Prima di una modifica ampia: fai un commit di partenza e lavora su un ramo nuovo.
 - Aggiungi i file per nome (git add percorso). Mai git add . né git add -A.
 - Non eseguire git push, git reset --hard, git stash, git clean senza chiedere.
@@ -204,5 +240,48 @@ git switch main                            # per tornare alla base
 <p>Le soluzioni le ha il docente.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
 </main>
+<script>
+document.querySelectorAll('main pre').forEach(function (pre) {
+  var box = document.createElement('div'); box.className = 'code-box';
+  pre.parentNode.insertBefore(box, pre); box.appendChild(pre);
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'copy-btn no-print'; b.textContent = 'Copia';
+  b.setAttribute('aria-label', 'Copia il testo');
+  b.addEventListener('click', function () {
+    var txt = pre.innerText.trimEnd();
+    var ok = function () { b.textContent = 'Copiato ✓'; setTimeout(function () { b.textContent = 'Copia'; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (done) { ok(); } else { b.textContent = 'Selezionate e copiate a mano'; setTimeout(function () { b.textContent = 'Copia'; }, 2500); }
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(ok, fallback); }
+    else { fallback(); }
+  });
+  box.appendChild(b);
+});
+document.querySelectorAll('main code.cmd').forEach(function (c) {
+  var b = document.createElement('button'); b.type = 'button';
+  b.className = 'cmd-copy no-print'; b.title = 'Copia il comando';
+  b.setAttribute('aria-label', 'Copia il comando: ' + c.textContent);
+  var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  b.innerHTML = icon;
+  b.addEventListener('click', function () {
+    var txt = c.textContent;
+    var done = function (msg) { b.classList.add('ok'); b.textContent = msg; setTimeout(function () { b.classList.remove('ok'); b.innerHTML = icon; }, 1500); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove(); done(ok ? 'Copiato' : 'Copiate a mano');
+    };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(txt).then(function () { done('Copiato'); }, fallback); }
+    else { fallback(); }
+  });
+  c.insertAdjacentElement('afterend', b);
+});
+</script>
 </body>
 </html>

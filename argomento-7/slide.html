@@ -123,7 +123,6 @@
   .activity:hover { background: var(--panel-2); }
   .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
   .activity .l { text-decoration: underline; text-underline-offset: 3px; }
-  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
   /* quiz a scelta multipla */
   .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
   .quiz .opts { display: grid; gap: 8px; }
@@ -179,6 +178,17 @@
     .node:nth-child(4):not(:last-child)::after { content: none; }
     .g3 { grid-template-columns: 1fr; }
   }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
@@ -224,13 +234,11 @@ const Flow = ({ label, nodes }) => (
   </div>
 );
 
-/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
-   durata: stima indicativa dell'esercizio, mai un orario. */
-const ActivityBadge = ({ n, file, label, durata }) => (
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
   <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Attività al PC</span>
     <span className="l">{label}</span>
-    {durata && <span className="d">{durata}</span>}
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
@@ -280,6 +288,43 @@ const Chiusura = ({ punti, dopo }) => (
   </div>
 );
 
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
+
 /* @componenti-fine */
 
 /* ---------- le slide di questo argomento ---------- */
@@ -328,6 +373,37 @@ const AMBIGUA = String.raw`# docs/istruzioni-revisore.md  (versione 1)
 Guarda il codice che ti passo. Se i test passano e il
 codice sembra corretto, rispondi APPROVATO.
 Se trovi dei problemi, elencali.`;
+
+const AGENTEOC = String.raw`# .opencode/agents/revisore.md
+---
+description: Rivede una funzione rispetto alla sua
+  specifica, eseguendo controlli. Usalo prima di
+  darla per finita. Non modifica il codice.
+mode: subagent
+permission:
+  edit: deny
+  task: deny
+  bash:
+    "*": ask
+    "node --test*": allow
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica esegui un controllo
+e riporta comando ed esito. Non modificare i file.`;
+
+const CMD_OC = {
+  elenco: String.raw`opencode agent list | Select-String "subagent"`,
+  richiesta: 'Controlla che prenotaSettimanale rispetti la specifica, prima di darla per buona.',
+};
+
+/* Link a pagine esterne, con l'aspetto del pulsante delle attività. */
+const ApriSlide = ({ href, kicker, label }) => (
+  <a className="activity" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
+    <span className="k">{kicker}</span>
+    <span className="l">{label}</span>
+    <span aria-hidden="true">&#8599;</span>
+  </a>
+);
 
 const slides = [
   {
@@ -612,7 +688,43 @@ const slides = [
         <Box type="warn" title="Il rischio">Un modello può rispondere senza avere usato né la skill né il subagente: la risposta c'è, la verifica no. Se la risposta non mostra prove, è così finché non si dimostra il contrario.</Box>
       </div>
     ),
-    notes: `Nel laboratorio Claude Code parla con modelli Claude attraverso il proxy LiteLLM, quindi il rischio che il modello usi male gli strumenti è molto ridotto rispetto a un modello di un altro fornitore; resta il principio. Skill e subagenti dipendono da come il modello li sceglie: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano; il piano B serve anche per un guasto di rete o del proxy. Gli hook invece non dipendono dal modello (argomento 8). Il proxy espone l'endpoint in formato Anthropic (docs.litellm.ai/docs/anthropic_unified, 11/11/2026); gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno comunque mappati nel file config.yaml del proxy e nelle variabili ANTHROPIC_DEFAULT_*_MODEL del file gestito, altrimenti la delega fallisce o è rifiutata (la chiave dei partecipanti non ha Opus): verificare prima dell'incontro (code.claude.com/docs/en/llm-gateway-rollout).`
+    notes: `Nel laboratorio Claude Code parla con modelli Claude attraverso il proxy LiteLLM, quindi il rischio che il modello usi male gli strumenti è molto ridotto rispetto a un modello di un altro fornitore; resta il principio. Skill e subagenti dipendono da come il modello li sceglie: può non scegliere la skill, non delegare, oppure delegare e poi riassumere male. Le due difese sono lo stesso principio dell'argomento: guardare ciò che è successo, non ciò che è stato detto. Se un modello non usa uno strumento da solo, si prova a forzarlo (invocazione a mano). Se anche così non regge, il piano B del docente è mostrare l'esecuzione registrata: i concetti non cambiano; il piano B serve anche per un guasto di rete o del proxy. Gli hook invece non dipendono dal modello (argomento 8). Il proxy espone l'endpoint in formato Anthropic (docs.litellm.ai/docs/anthropic_unified, 11/11/2026); gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno comunque mappati nel file config.yaml del proxy e nelle variabili ANTHROPIC_DEFAULT_*_MODEL del file gestito, altrimenti la delega fallisce o è rifiutata (la chiave dei partecipanti non ha Opus): verificare prima dell'aula (code.claude.com/docs/en/llm-gateway-rollout).`
+  },
+  {
+    block: B + 'Memoteca: la squadra',
+    content: () => (
+      <div className="pad">
+        <Tag>Una squadra di agenti</Tag>
+        <h2>Subagenti e revisore, messi insieme: Memoteca</h2>
+        <p>Un toolkit pubblico per Claude Code che mette per iscritto come lavora una squadra di agenti: chi pianifica, chi esegue, chi controlla, che cosa resta alla sessione dopo.</p>
+        <div className="grid">
+          <Card title="Orchestrazione"><p>Un lead che pianifica, delega e sintetizza. Tre livelli di modello, con rilancio al livello sopra.</p></Card>
+          <Card title="Qualità" kind="i"><p>Un revisore con contesto pulito prima di dire «finito». Si rivede solo ciò che è cambiato.</p></Card>
+          <Card title="Conoscenza" kind="i"><p>Ciò che si impara in un progetto non si perde: sessione, wiki, base stabile.</p></Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Nelle slide cerca: «Il lead», «Tre livelli di modello», «Gli specialisti», «Il gate», «Fonte unica».</p>
+        <ApriSlide href="https://thomascasali.github.io/presentazione-memoteca/" kicker="Slide pubbliche" label="Presentazione di Memoteca (si apre in una nuova scheda)" />
+      </div>
+    ),
+    notes: `Passaggio alle slide vere di Memoteca: il link si apre in una nuova scheda, poi si torna qui. Non si rifanno le slide: si usa la presentazione pubblica (thomascasali.github.io/presentazione-memoteca/), nel mazzo «Presentazione» le slide Il lead, Tre livelli di modello, Gli specialisti, Il gate e Fonte unica; per la memoria condivisa anche I tre livelli. Fonti, lette il 25/11/2026 e tutte pubbliche: README del toolkit (github.com/thomascasali/memoteca, tre parti: conoscenza, orchestrazione, qualità), docs/orchestrazione.md, CHANGELOG (versione 0.4.1 del 5 novembre 2026) e la presentazione. Memoteca è scritta per chi mantiene da solo molti progetti non collegati: è un esempio da leggere, non un prodotto da installare in laboratorio, e la slide dei limiti dice che cosa non è stato provato. Domande da lasciare a chi guarda: chi può delegare e chi no? Su che cosa sceglie il lead l'agente? Che cosa impedisce al revisore di approvare per abitudine?`
+  },
+  {
+    block: B + 'Memoteca: cosa portarsi via',
+    content: () => (
+      <div className="pad">
+        <Tag>Il collegamento</Tag>
+        <h2>Dalla squadra al revisore che hai scritto</h2>
+        <DT cols={['In Memoteca', 'Nel revisore di questo argomento']} rows={[
+          ['La description dell\'agente è l\'unico criterio con cui il lead lo sceglie', 'La riga che riscrivi finché l\'agente principale delega da solo'],
+          ['Delega piatta: solo il lead delega', <><code className="nw">task: deny</code> nel revisore: non delega a sua volta</>],
+          ['Il gate: il revisore rilegge con contesto pulito', 'Parte senza la conversazione e riporta comandi ed esiti'],
+          ['Il livello più basso ha limiti scritti: niente produzione, niente segreti, mai il gate finale', <>I limiti stanno nei permessi: <code className="nw">edit: deny</code>, comandi che chiedono conferma</>],
+          ['Fonte unica: ogni informazione ha una sola casa', 'La procedura sta in un posto solo, non copiata in tre'],
+        ]} />
+        <Box type="info" title="Il modo di lavorare di Thomas (non è testo di Memoteca)">Una sola sessione salva e pubblica. I segreti non passano a schermo. Una persona dice sì alle azioni difficili da annullare: nel laboratorio è il <code className="nw">ask</code> che leggi prima di rispondere.</Box>
+      </div>
+    ),
+    notes: `Il ritorno dalle slide di Memoteca: ogni riga collega una regola della squadra a qualcosa che si è appena scritto. Fonti pubbliche, 25/11/2026: docs/orchestrazione.md di Memoteca (delega piatta, description come unico criterio di selezione, limiti del livello più basso, gate obbligatorio) e presentazione (Il gate, Fonte unica). Il riquadro sul modo di lavorare riporta indicazioni di Thomas sul proprio lavoro, non testo di Memoteca: una sola sessione salva e pubblica, i segreti non passano a schermo, una persona approva le azioni difficili da annullare. Ricordare che per verificare una squadra Memoteca stessa propone di chiedere al lead quali subagenti ha a disposizione: se i propri non compaiono, il frontmatter non è valido. È la stessa prova dell'episodio dei dieci agenti fantasma.`
   },
   {
     block: B + 'Attività: la palestra',
@@ -621,17 +733,76 @@ const slides = [
         <Tag>Attività</Tag>
         <h2>Una skill e un revisore per prenotaSettimanale</h2>
         <ol className="timeline">
-          <li><time>1</time>Dal punto <code className="nw">partenza-a7</code>: rivedi a mano la funzione contro la specifica. <em>10 min</em></li>
-          <li><time>2</time>Prova il revisore con le istruzioni del collega e annota che cosa ha eseguito. <em>5 min</em></li>
-          <li><time>3</time>Scrivi la skill di revisione, partendo dal modello. <em>15 min</em></li>
-          <li><time>4</time>Scrivi il subagente revisore: strumenti di lettura, rimando alla skill. <em>10 min</em></li>
-          <li><time>5</time>Fai girare tutto, controlla che sia stato usato, confronta con la revisione a mano. <em>10 min</em></li>
+          <li><time>1</time>Dal punto <code className="nw">partenza-a7</code>: rivedi a mano la funzione contro la specifica.</li>
+          <li><time>2</time>Prova il revisore con le istruzioni del collega e annota che cosa ha eseguito.</li>
+          <li><time>3</time>Scrivi la skill di revisione, partendo dal modello.</li>
+          <li><time>4</time>Scrivi il subagente revisore: strumenti di lettura, rimando alla skill.</li>
+          <li><time>5</time>Fai girare tutto, controlla che sia stato usato, confronta con la revisione a mano.</li>
         </ol>
-        <ActivityBadge n="7" file="scheda-revisione.html" label="Scheda: skill e subagente revisore" durata="indicativo: 50 min" />
+        <ActivityBadge n="7" file="scheda-revisione.html" label="Scheda: skill e subagente revisore" />
         <p className="muted" style={{ marginTop: 8 }}>Modelli da completare: <a className="text-link" href="../materiali/argomento-7/modello-skill-revisione.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>skill</a> e <a className="text-link" href="../materiali/argomento-7/modello-subagente-revisore.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente</a>.</p>
       </div>
     ),
-    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a7 (git switch -c lavoro-a7 partenza-a7). I test sono tutti verdi: la funzione prenotaSettimanale ha un solo test. Non dire se e dove ci siano problemi: è parte dell'esercizio. La revisione a mano viene prima, così c'è un termine di confronto. Il passo 2 è volutamente fatto con le istruzioni ambigue. Alla fine ogni coppia confronta tre colonne: a mano, revisore del collega, il proprio revisore. Le durate sono indicative. Se il modello non usa la skill o il subagente: invocarli a mano, e annotarlo come risultato.`
+    notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a7 (git switch -c lavoro-a7 partenza-a7). I test sono tutti verdi: la funzione prenotaSettimanale ha un solo test. Non dire se e dove ci siano problemi: è parte dell'esercizio. La revisione a mano viene prima, così c'è un termine di confronto. Il passo 2 è volutamente fatto con le istruzioni ambigue. Alla fine ogni coppia confronta tre colonne: a mano, revisore del collega, il proprio revisore. Se il modello non usa la skill o il subagente: invocarli a mano, e annotarlo come risultato.`
+  },
+  {
+    block: B + 'Il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Lo stesso revisore, in un altro file</h2>
+        <div className="cols">
+          <pre aria-label="Esempio di file di un subagente revisore per OpenCode">{AGENTEOC}</pre>
+          <ul>
+            <li>Cartella <code className="nw">.opencode/agents/</code>. Il <strong>nome del file</strong> è il nome dell'agente.</li>
+            <li><code className="nw">description</code> è obbligatoria: è ciò che l'agente principale legge per scegliere.</li>
+            <li><code className="nw">mode: subagent</code>. Senza, vale <code className="nw">all</code>.</li>
+            <li>Niente <code className="nw">tools</code>: i limiti stanno in <code className="nw">permission</code>. L'ultima regola che corrisponde vince.</li>
+            <li>Niente <code className="nw">skills</code>: la procedura sta nel testo.</li>
+          </ul>
+        </div>
+        <p className="muted">Si chiama con <code className="nw">@revisore</code>, oppure lo sceglie l'agente principale.</p>
+      </div>
+    ),
+    notes: `Fonte: opencode.ai/docs/agents, pagina della serie 1 al tag v1.19.5 (packages/web/src/content/docs/agents.mdx), letta il 25/11/2026. Gli agenti in Markdown stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/; il nome del file diventa il nome dell'agente; description è obbligatoria; mode vale all se manca; tools è deprecato in favore di permission; i subagenti usano il modello dell'agente che li chiama se model non è indicato. Con permission.bash l'ultima regola che corrisponde vince, quindi il "*" va per primo. Nella configurazione del laboratorio lo strumento che lancia i subagenti (task) chiede conferma: la delega parte solo dopo un sì. Rispetto al file di Claude Code: stessa idea (descrizione, strumenti limitati, istruzioni nel testo), campi diversi. Lo scheletro da completare è nel foglio «Modello: subagente revisore per OpenCode». Provato su OpenCode 1.19.5 il 25/11/2026: il file viene letto e l'elenco degli agenti lo mostra come subagente; non provato con il modello del corso. Da verificare a schermo: la chiamata con @ e l'ingresso nella sessione del subagente.`
+  },
+  {
+    block: B + 'OpenCode: è stato letto?',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Un errore nel file non sempre si sente</h2>
+        <DT cols={['Che cosa scrivi', 'Che cosa succede']} rows={[
+          [<><code className="nw">permision:</code> al posto di <code className="nw">permission:</code></>, <>Nessun errore. Il campo finisce tra le opzioni del modello e <code className="nw">edit</code> resta permesso.</>],
+          ['Una riga vuota prima del primo ---', 'Nessun errore. Il frontmatter non vale: l\'agente compare come «all» e senza description.'],
+          [<><code className="nw">name:</code> diverso dal nome del file</>, 'Nessun errore. L\'agente prende il nome di name.'],
+          [<><code className="nw">tools: Read, Grep</code> come in Claude Code</>, <>Errore: «Configuration is invalid». Nessun agente viene elencato.</>],
+        ]} />
+        <CommandBox cmd={CMD_OC.elenco} label="Controllo: l'agente è nell'elenco come subagent?" />
+        <p className="muted" style={{ marginTop: 8 }}>Con <code className="nw">opencode debug agent revisore</code> vedi description, modalità e permessi come li ha letti OpenCode.</p>
+      </div>
+    ),
+    notes: `Prove fatte il 25/11/2026 su OpenCode 1.19.5 con file di agenti scritti apposta: un permesso scritto male viene passato come opzione del modello (il comando debug agent lo mostra tra le options) e il permesso di scrittura non c'è; con una riga vuota prima del primo --- l'agente compare come all e senza description; un campo name nel frontmatter rinomina l'agente (comportamento osservato, non descritto nella pagina agents); un campo tools con un elenco in stile Claude Code (Read, Grep) rende invalida l'intera configurazione e il comando che elenca gli agenti stampa solo l'errore. Stesso principio dell'episodio dei dieci agenti fantasma: un file sbagliato non sempre fa rumore, si smaschera guardando che cosa è stato caricato. Il comando per l'elenco è opencode agent list; filtrato con Select-String in PowerShell mostra solo i subagenti. Le versioni di OpenCode cambiano in fretta: riprovare sulla versione installata.`
+  },
+  {
+    block: B + 'Attività: il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Un subagente revisore per OpenCode</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dal punto <code className="nw">partenza-a7</code>: la tua lettura di <code className="nw">prenotaSettimanale</code>, a mano.</li>
+          <li><time>2</time>Scrivi <code className="nw">.opencode/agents/revisore.md</code> dal modello e controlla che sia stato letto.</li>
+          <li><time>3</time>Chiamalo con <code className="nw">@revisore</code> e leggi che cosa ha eseguito.</li>
+          <li><time>4</time>Confronta il suo rapporto con la tua lettura.</li>
+          <li><time>5</time>Chiedi la revisione senza nominarlo: riscrivi la description finché l'agente principale lo sceglie.</li>
+        </ol>
+        <CommandBox cmd={CMD_OC.richiesta} label="Richiesta del passo 5, senza nominare il revisore" kind="text" />
+        <ActivityBadge n="7" file="scheda-subagente-opencode.html" label="Scheda: subagente revisore per OpenCode" />
+        <p className="muted" style={{ marginTop: 8 }}>Modello da completare: <a className="text-link" href="../materiali/argomento-7/modello-subagente-opencode.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente per OpenCode</a>. Se OpenCode non parte, la stessa cosa con Claude Code come nell'attività precedente.</p>
+      </div>
+    ),
+    notes: `Attività a coppie, dallo stesso punto di partenza della precedente (git switch -c lavoro-a7-opencode partenza-a7); si usa la stessa funzione, quindi chi ha già fatto la lettura a mano riprende quella tabella. Non dire se e dove ci siano problemi. Il confronto è fra la lettura a mano e il rapporto del revisore: che cosa ha eseguito, che cosa ha riportato, che cosa si riproduce. Nell'ultimo passo la richiesta non nomina il revisore: nella configurazione del laboratorio l'agente principale chiede il permesso prima di lanciare un subagente, ed è quella richiesta che dice che la delega è partita; se invece rivede da solo o delega a un altro agente, la description va riscritta. Se OpenCode non parte, il piano B è Claude Code con .claude/agents, già visto in questo argomento. Da verificare a schermo, perché non provato con il modello del corso: la chiamata con @ da testo incollato (in caso scegliere il nome dall'elenco che si apre scrivendo @), i tasti per entrare nella sessione del subagente (documentazione della serie 1: session_child_first, di norma Leader più Giù), se la modifica della description si vede senza riaprire OpenCode, e quale shell usa lo strumento bash su Windows. Fonte: opencode.ai/docs/agents, serie 1 al tag v1.19.5, 25/11/2026.`
   },
   {
     block: B + 'Domanda di verifica',
@@ -657,10 +828,12 @@ const slides = [
           'Un subagente ha contesto e strumenti propri e restituisce un riassunto: si legge anche il lavoro, non solo il riassunto.',
           'Due agenti d\'accordo non dimostrano nulla. Vale il controllo eseguito che poteva fallire.',
           'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un proxy in mezzo, e alias da mappare, non è scontato.',
+          'Lo stesso revisore si scrive anche per OpenCode: permission al posto di tools, il nome è quello del file, e un campo scritto male può non fare rumore.',
+          'Una squadra di agenti, come Memoteca, è questo messo insieme: descrizioni che scelgono, permessi che limitano, un revisore con contesto pulito.',
         ]}
-        dopo="Argomento 8 (hook e MCP: controlli che non dipendono dal modello) e argomento 11 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
+        dopo="Argomento 8 (hook e MCP: controlli che non dipendono dal modello), argomento 9 (OpenCode, permessi e plugin) e argomento 11 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
     ),
-    notes: `Riprendere i quattro punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 8.`
+    notes: `Riprendere i sei punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 8. Il quinto e il sesto punto riprendono la parte su OpenCode e le slide di Memoteca.`
   },
 ];
 
@@ -709,6 +882,7 @@ function App() {
     const h = e => {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
       if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }

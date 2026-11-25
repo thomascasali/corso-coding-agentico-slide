@@ -123,7 +123,6 @@
   .activity:hover { background: var(--panel-2); }
   .activity .k { font-family: var(--cond); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
   .activity .l { text-decoration: underline; text-underline-offset: 3px; }
-  .activity .d { font-family: var(--mono); font-size: 0.85em; color: var(--muted); }
   /* quiz a scelta multipla */
   .quiz .q { font-size: var(--fs-lead); color: var(--text); margin-bottom: 10px; }
   .quiz .opts { display: grid; gap: 8px; }
@@ -179,6 +178,17 @@
     .node:nth-child(4):not(:last-child)::after { content: none; }
     .g3 { grid-template-columns: 1fr; }
   }
+  /* CommandBox: riquadro con tasto Copia (contrasti: testo 15,2 su --panel; tasto --bg su --accent 13,3) */
+  .cmdbox { margin: 8px 0; }
+  .cmdbox-label { color: var(--muted); font-size: var(--fs-xs); margin-bottom: 4px; }
+  .cmdbox-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .cmdbox-pre { flex: 1 1 260px; min-width: 0; margin: 0; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: var(--fs-xs); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+  .cmdbox-pre.tall { max-height: calc(44vh / var(--zoom, 1)); overflow: auto; }
+  .cmdbox-pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .copy-btn { flex: 0 0 auto; min-height: 44px; min-width: 96px; padding: 0 16px; background: var(--accent); color: var(--bg); border: 1px solid var(--accent); border-radius: 8px; font-family: var(--sans); font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .copy-btn:hover { background: var(--text); border-color: var(--text); }
+  .copy-btn.ok { background: var(--text); border-color: var(--text); }
+  @media (max-width: 480px) { .copy-btn { width: 100%; } }
   @media (max-width: 480px) { .top-bar .hide-s { display: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 /* @tema-fine */
@@ -224,13 +234,11 @@ const Flow = ({ label, nodes }) => (
   </div>
 );
 
-/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py).
-   durata: stima indicativa dell'esercizio, mai un orario. */
-const ActivityBadge = ({ n, file, label, durata }) => (
+/* Attivita' al PC: apre la scheda in materiali/argomento-N/<file> (cartella generata da scripts/genera-materiali.py). */
+const ActivityBadge = ({ n, file, label }) => (
   <a className="activity" href={'../materiali/argomento-' + n + '/' + file} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Attività al PC</span>
     <span className="l">{label}</span>
-    {durata && <span className="d">{durata}</span>}
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
@@ -279,6 +287,43 @@ const Chiusura = ({ punti, dopo }) => (
     <p className="muted" style={{ marginTop: 10 }}><a className="text-link" href="../index.html" onClick={e => e.stopPropagation()}>Torna all'indice del corso</a></p>
   </div>
 );
+
+/* Riquadro di comando con tasto Copia. kind="text" per testi da incollare (font normale, vanno a capo). */
+function CommandBox({ cmd, label, tall, kind }) {
+  const [state, setState] = React.useState('idle');
+  const timer = React.useRef(null);
+  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const finish = s => { setState(s); clearTimeout(timer.current); timer.current = setTimeout(() => setState('idle'), s === 'ok' ? 1500 : 2500); };
+  const fallback = txt => {
+    let done = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand('copy');
+      ta.remove();
+    } catch (err) { done = false; }
+    finish(done ? 'ok' : 'fail');
+  };
+  const copy = e => {
+    e.stopPropagation();
+    const txt = cmd.trimEnd();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(txt).then(() => finish('ok'), () => fallback(txt));
+    } else { fallback(txt); }
+  };
+  const caption = state === 'ok' ? 'Copiato' : (state === 'fail' ? 'Selezionate e copiate a mano' : 'Copia');
+  return (
+    <div className="cmdbox" data-cmdbox="1" onClick={e => e.stopPropagation()}>
+      {label && <div className="cmdbox-label">{label}</div>}
+      <div className="cmdbox-row">
+        <pre tabIndex={0} aria-label={label || 'Comando'} className={tall ? 'cmdbox-pre tall' : 'cmdbox-pre'} style={kind === 'text' ? { fontFamily: 'var(--sans)' } : undefined}>{cmd}</pre>
+        <button type="button" data-own-keys="1" onClick={copy} className={state === 'ok' ? 'copy-btn ok' : 'copy-btn'} aria-label={'Copia: ' + (label || cmd.slice(0, 40))}>{caption}</button>
+      </div>
+    </div>
+  );
+}
 
 /* @componenti-fine */
 
@@ -330,11 +375,9 @@ if (r.status !== 0) {
   process.exit(2);     // la modifica c'è già: l'agente legge e corregge
 }`;
 
-const PROVA_A_MANO = String.raw`echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | node .claude/hooks/blocca-comandi.js
-echo $?            # in PowerShell: $LASTEXITCODE`;
+const PROVA_EVENTO = String.raw`echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | node .claude/hooks/blocca-comandi.js`;
 
-const MCP_ADD = String.raw`claude mcp add --transport stdio documenti \
-  -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova`;
+const MCP_ADD = String.raw`claude mcp add --transport stdio documenti -- npx -y @modelcontextprotocol/server-filesystem --read-only ./cartella-prova`;
 
 const MCP_JSON = String.raw`{
   "mcpServers": {
@@ -500,7 +543,8 @@ const slides = [
           <li><time>2</time>Con una batteria di casi: comandi da bloccare <b>e</b> comandi che devono passare.</li>
           <li><time>3</time>Dentro Claude Code: <code className="nw">/hooks</code> per vederlo, poi si chiede all'agente il comando vietato.</li>
         </ol>
-        <pre aria-label="Prova manuale di uno hook">{PROVA_A_MANO}</pre>
+        <CommandBox cmd={PROVA_EVENTO} label="1. Mandate allo hook un evento finto" />
+        <CommandBox cmd="$LASTEXITCODE" label="2. Il codice di uscita (in bash: echo $?)" />
         <p className="muted">Se qualcosa non va: <code className="nw">Ctrl+O</code> apre la trascrizione, <code className="nw">claude --debug</code> mostra uscite e messaggi.</p>
       </div>
     ),
@@ -585,7 +629,7 @@ const slides = [
       <div className="pad">
         <Tag>In pratica</Tag>
         <h2>Collegare un server a Claude Code</h2>
-        <pre aria-label="Comando per aggiungere un server MCP">{MCP_ADD}</pre>
+        <CommandBox cmd={MCP_ADD} label="Aggiungere un server MCP" />
         <p>Con <code className="nw">--scope project</code> il comando scrive invece un file <code className="nw">.mcp.json</code> nella radice del progetto, di questo tipo:</p>
         <pre aria-label="File .mcp.json">{MCP_JSON}</pre>
         <p className="muted">Ambiti: <b>local</b> (solo tu, solo questo progetto), <b>project</b> (<code className="nw">.mcp.json</code>, condiviso con git), <b>user</b> (tutti i tuoi progetti). Dentro la sessione: <code className="nw">/mcp</code>.</p>
@@ -645,12 +689,12 @@ const slides = [
           <li><time>3</time>Collegatelo a Claude Code e chiedete all'agente un comando vietato.</li>
           <li><time>4</time>Facoltativo: collegate un server MCP di sola lettura su una cartella di prova.</li>
         </ol>
-        <ActivityBadge n="8" file="attivita-hook.html" label="Uno hook che blocca un comando" durata="indicativo: 35 min, senza il passo facoltativo" />
-        <ActivityBadge n="8" file="promemoria-hook-mcp.html" label="Promemoria: eventi, formato, comandi MCP" durata="da consultare" />
-        <p className="muted" style={{ marginTop: 10 }}>Il passo facoltativo richiede circa 15 minuti. Le soluzioni le ha il docente.</p>
+        <ActivityBadge n="8" file="attivita-hook.html" label="Uno hook che blocca un comando" />
+        <ActivityBadge n="8" file="promemoria-hook-mcp.html" label="Promemoria: eventi, formato, comandi MCP" />
+        <p className="muted" style={{ marginTop: 10 }}>Le soluzioni le ha il docente.</p>
       </div>
     ),
-    notes: "Il punto di partenza della palestra è il tag partenza-a8 (la scheda dice come ottenerlo). Si lavora in coppia. Il progetto personale riceve lo stesso hook nella tappa «skill e hook» dell'incontro. Chi finisce prima prova a far passare un comando che aggira la regola (un altro modo di scrivere lo stesso comando) e corregge lo hook."
+    notes: "Il punto di partenza della palestra è il tag partenza-a8 (la scheda dice come ottenerlo). Si lavora in coppia. Anche il progetto personale riceve lo stesso hook. Chi finisce prima prova a far passare un comando che aggira la regola (un altro modo di scrivere lo stesso comando) e corregge lo hook."
   },
   {
     block: B + 'Domanda di verifica',
@@ -727,6 +771,7 @@ function App() {
     const h = e => {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target && e.target.closest && e.target.closest('[data-own-keys]') && (e.key === ' ' || e.key === 'Enter')) return; /* elementi con tasti propri (CommandBox) */
       if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; /* il pulsante focalizzato fa il suo lavoro (quiz, navigazione) */
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
