@@ -64,60 +64,61 @@
 <script type="text/babel">
 const { useState, useEffect } = React;
 
-/* Sequenza didattica sul compito della prima esercitazione (cartella di richieste di installazione, dati inventati).
+/* Sequenza didattica sul compito della prima esercitazione (la palestra: prenotazione dei laboratori, dati inventati).
    Non è l'output di un modello vero: un agente reale può cambiare ordine, parole e numero di passi. */
 
-const TASK = "Controlla le richieste di installazione secondo la procedura della scuola. Prima dammi solo un piano. Non installare niente.";
+const TASK = "Leggi docs/idea-dashboard.md e aggiungi a elenco l'opzione --lab, come fa la dashboard. Prima dammi solo un piano. Non toccare dati/dati.json.";
 
 const STEPS = [
   { action: "Fa un piano", icon: "PIANO",
-    detail: "Prima di toccare qualcosa elenca: leggerà istruzioni, procedura, regolamento, laboratori, catalogo e le venti richieste; farà i conti con un programma; rinominerà i file e sposterà quelli da restituire solo dopo il tuo permesso; non toccherà in-arrivo; controllerà il risultato con un secondo programma." },
+    detail: "Prima di toccare qualcosa elenca: leggerà le istruzioni, il piano della dashboard, cli.js, src/logica.js e i test; aggiungerà un filtro per laboratorio in logica.js e l'opzione --lab in cli.js; scriverà un test in test/cli.test.js; non toccherà dati/dati.json; verificherà con node --test e con elenco --lab LAB-INF1." },
   { action: "Aspetta il tuo sì", icon: "STOP",
-    detail: "Si ferma. Tu rispondi: «Il piano va bene, con una correzione: tra i casi dubbi segnala quelli che non si decidono con il regolamento.» L'agente aggiorna il piano e procede.",
+    detail: "Si ferma. Tu rispondi: «Il piano va bene, con una correzione: lancia tutti i test alla fine e dimmi i numeri.» L'agente aggiorna il piano e procede.",
     options: ["Esegue subito, perché il compito era chiaro", "Aspetta che tu approvi o corregga il piano", "Passa da solo a una modalità che non chiede più permessi"], correct: 1 },
-  { action: "Legge le istruzioni e la skill", icon: "READ",
-    detail: "Ha già in contesto CLAUDE.md. Vede la descrizione della skill controllo-richieste, riconosce il compito, ne apre il testo e ne segue i nove passi. Il regolamento lo apre dopo, per le regole dettagliate.",
-    options: ["Ignora la skill e inventa una sua procedura", "Carica la skill controllo-richieste e la usa come traccia del lavoro", "Ti chiede di incollare la procedura in chat"], correct: 1 },
-  { action: "Legge i dati, tranne in-arrivo", icon: "READ",
-    detail: "Apre laboratori.csv, catalogo-software.csv, il regolamento e le venti richieste una per una. Nomi come scan_0042.txt o Doc2.txt non dicono niente: conta il contenuto. La cartella in-arrivo la lascia chiusa.",
-    options: ["Apre tutto, anche in-arrivo, per essere completo", "Classifica le richieste dai nomi dei file", "Apre laboratori, catalogo, regolamento e ogni richiesta; lascia in-arrivo"], correct: 2 },
-  { action: "Scrive ed esegue un piccolo programma", icon: "BASH",
-    detail: "Chiede il permesso di eseguire uno script Python che legge solo i file della cartella. Tu lo leggi, controlli che non scriva fuori e rispondi sì una volta. Il programma stampa gli stati (dieci approvate, due per licenze insufficienti, due doppie, due senza visto, una per ciascuno degli altri casi) e le licenze: AutoCAD 20 su 40 per il laboratorio CAD; per INF1 (24 PC) si arriverebbe a 44, quindi la richiesta è respinta e non consuma licenze. MATLAB 24 su 30; SIS (18 PC) porterebbe a 42.",
-    options: ["Somma le licenze a mente mentre legge", "Scrive uno script che legge i file, lo esegue dopo il tuo permesso", "Ti chiede di rifare i conti in un foglio di calcolo"], correct: 1 },
-  { action: "Si ferma sul caso ambiguo", icon: "STOP",
-    detail: "La mail di Greco chiede Node.js LTS nel «laboratorio di informatica», ma i laboratori di informatica sono due, INF1 e INF2. Il visto è di Marchetti, responsabile di INF1: un indizio, non una prova (art. 2, comma 2). L'agente non sceglie: lo scrive tra i dubbi e te lo chiede. Tu rispondi: «Lasciala da decidere.»",
-    options: ["La assegna a INF1, perché il visto è di Marchetti", "La mette tra i dubbi e ti chiede cosa fare", "La approva per tutti e due i laboratori, così non sbaglia"], correct: 1 },
-  { action: "Chiede il permesso prima di rinominare", icon: "PERMESSO",
-    detail: "«Posso rinominare le venti richieste come AAAA-MM-GG-LAB-Software-stato e spostare in da-restituire le due senza visto? Non cancello niente.» Tu rispondi sì. È una modifica ai file: in Manual chiede sempre, e la copia usa e getta rende l'errore poco costoso, ma non per questo si approva senza leggere.",
-    options: ["Rinomina e sposta subito: tanto la cartella è una copia", "Chiede il permesso e dice che non cancella niente", "Cancella le richieste doppie per fare ordine"], correct: 1 },
-  { action: "Rinomina, sposta e mostra cosa è cambiato", icon: "DIFF",
-    detail: "Senza Git non c'è un diff vero: mostra l'elenco prima e dopo. Per esempio: scan_0042.txt diventa 2026-11-05-INF2-MATLAB-approvata.txt; Doc2.txt diventa 2026-11-10-INF1-AutoCAD-licenze-insufficienti.txt; mail-sala-vbox.txt diventa da-restituire/2026-11-16-CAD-VirtualBox-senza-visto.txt. Venti righe, nessun file perso.",
-    options: ["Scrive «fatto» e passa oltre", "Mostra l'elenco prima e dopo e le due richieste spostate", "Mostra solo quanti file ha rinominato"], correct: 1 },
-  { action: "Controlla il proprio lavoro con un programma", icon: "BASH",
-    detail: "Esegue un secondo script: ogni richiesta compare una volta sola nel riepilogo, i file nelle cartelle sono venti come le righe, la somma per stato dà venti, le licenze usate non superano quelle disponibili. Se un numero non tornasse, correggerebbe prima di consegnare.",
-    options: ["Rilegge il riepilogo e lo trova convincente", "Esegue un secondo programma che confronta file, righe e licenze", "Controlla solo che riepilogo-richieste.md esista"], correct: 1 },
+  { action: "Legge le istruzioni, il piano e il codice", icon: "READ",
+    detail: "Ha già in contesto CLAUDE.md, che dice che i dati stanno in dati/prenotazioni.json. Apre il piano della dashboard, cli.js, src/logica.js e src/archivio.js: nel codice il file è dati/dati.json, e il file delle istruzioni è sbagliato. Lo segnala invece di cercare un file che non c'è.",
+    options: ["Si fida di CLAUDE.md e cerca dati/prenotazioni.json", "Legge il codice e nota che il file dei dati è un altro", "Ti chiede di incollare il codice in chat"], correct: 1 },
+  { action: "Lancia i test prima di modificare", icon: "BASH",
+    detail: "Chiede il permesso di eseguire node --test. Tu leggi il comando (un comando solo, nella cartella del progetto) e rispondi sì una volta. Esito: 35 test, 35 passano, 0 falliscono. Ora c'è un punto di partenza da confrontare.",
+    options: ["Salta i test: ci sono già e dovrebbero passare", "Chiede il permesso e lancia node --test per avere un punto di partenza", "Scrive la modifica e lancia i test solo se qualcosa si rompe"], correct: 1 },
+  { action: "Chiede il permesso per modificare i file", icon: "PERMESSO",
+    detail: "«Posso modificare src/logica.js (una riga nel filtro di elenco) e cli.js (l'opzione --lab e il passaggio del valore)? Non tocco dati/dati.json.» Tu rispondi sì. Modificare un file chiede sempre il permesso in Manual, e la copia usa e getta rende l'errore poco costoso; ma non si approva senza leggere.",
+    options: ["Modifica subito: tanto la cartella è una copia", "Riscrive tutto src/logica.js per fare ordine", "Chiede il permesso e dice quali file tocca"], correct: 2 },
+  { action: "Modifica logica.js e cli.js", icon: "EDIT",
+    detail: "In src/logica.js aggiunge al filtro di elenco la riga per il laboratorio; in cli.js dichiara l'opzione lab tra quelle di elenco e la passa alla funzione. Due modifiche piccole, nei file annunciati dal piano. Non tocca server.js né la pagina web.",
+    options: ["Modifica solo i due file annunciati", "Cambia anche server.js e la pagina web, già che c'è", "Cambia i nomi delle funzioni per renderle più chiare"], correct: 0 },
+  { action: "Si ferma su una scelta che il piano non faceva", icon: "STOP",
+    detail: "Chiede: «Con --lab LAB-XYZ, un laboratorio che non esiste, vuoi un elenco vuoto oppure un errore?» Il piano non lo diceva e il piano della dashboard nemmeno. L'agente non sceglie. Tu rispondi: «Elenco vuoto, come per le altre ricerche senza risultati.»",
+    options: ["Aggiunge un errore con codice di uscita 1, perché sembra più corretto", "Ti chiede cosa vuoi in quel caso", "Lascia il comportamento a caso, senza accorgersene"], correct: 1 },
+  { action: "Aggiunge un test e lo lancia", icon: "BASH",
+    detail: "Scrive in test/cli.test.js un test che chiama elenco --lab LAB-INF1 e controlla che le righe siano quattro e che contengano tutte LAB-INF1. Chiede il permesso per modificare il file e per lanciare node --test. Esito: 36 test, 36 passano, 0 falliscono.",
+    options: ["Non aggiunge nessun test: la modifica è troppo piccola", "Cambia un test già esistente perché passi con la nuova opzione", "Aggiunge un test e lancia node --test, dopo il tuo permesso"], correct: 2 },
+  { action: "Controlla il risultato con un comando vero", icon: "BASH",
+    detail: "Esegue node cli.js elenco --lab LAB-INF1 e mostra le quattro prenotazioni che si aspetta: P-0001, P-0003, P-0004, P-0008. Poi ne prova un'altra, LAB-RETI, con la sola P-0005. Senza Git non c'è un diff vero: mostra anche l'elenco dei file toccati (logica.js, cli.js, cli.test.js) e conferma che dati/dati.json è rimasto com'era.",
+    options: ["Dice «funziona» perché il codice gli sembra giusto", "Controlla solo che cli.js sia stato salvato", "Esegue il comando con due laboratori diversi e mostra l'esito"], correct: 2 },
   { action: "Dichiara i limiti", icon: "LIMITI",
-    detail: "Scrive cosa non ha potuto verificare: se i visti sono autentici, se catalogo e licenze sono aggiornati, quale laboratorio intendeva Greco, se il laboratorio INF3 è un errore o una sala prevista. Il confronto l'ha fatto leggendo il testo delle richieste, non gli eventuali allegati.",
-    options: ["Dice che è tutto verificato", "Elenca cosa non ha potuto verificare e cosa ha lasciato a te", "Cancella il riepilogo e ricomincia"], correct: 1 },
+    detail: "Scrive cosa non ha fatto o verificato: la pagina web e il server non filtrano per laboratorio (non richiesto); il README non cita la nuova opzione; CLAUDE.md nomina un file dei dati sbagliato e non l'ha corretto perché non gli è stato chiesto; non ha provato il filtro combinato con --data e --docente.",
+    options: ["Dice che è tutto verificato", "Elenca cosa non ha fatto o non ha potuto verificare", "Corregge da solo il README e CLAUDE.md senza dirlo"], correct: 1 },
   { action: "Consegna", icon: "FINE",
-    detail: "Presenta il riepilogo: dieci approvate (quattro richiedono l'amministratore di rete), le altre con il motivo e l'articolo, un caso da decidere. Dichiara che in-arrivo non è stata toccata e che non è stato installato niente. Decidere e restituire le richieste tocca a te.",
-    options: ["Installa i software approvati", "Consegna il riepilogo e lascia a te in-arrivo e le decisioni", "Scrive ai docenti delle richieste respinte"], correct: 1 },
+    detail: "Presenta il riepilogo: tre file toccati, test da 35 a 36 tutti verdi, dati intatti. Lascia a te le decisioni che restano: se correggere CLAUDE.md, se estendere il filtro alla pagina web, le due domande rimaste aperte nel piano della dashboard.",
+    options: ["Consegna il riepilogo e lascia a te le decisioni che restano", "Corregge CLAUDE.md e la pagina web, per completezza", "Scrive ai colleghi che la nuova opzione è pronta"], correct: 0 },
 ];
 
-const END = "Consegnato. L'agente ha pianificato prima, aspettato il tuo sì, usato la procedura, contato con un programma, chiesto il permesso prima di rinominare, lasciato a te il caso ambiguo e dichiarato i limiti. Ogni passo era una traccia che potevi leggere: è il tuo modo di controllarlo.";
+const END = "Consegnato. L'agente ha pianificato prima, aspettato il tuo sì, letto il codice invece di fidarsi del file di istruzioni, chiesto il permesso prima di modificare, lasciato a te la scelta che il piano non faceva, controllato con un comando vero e dichiarato i limiti. Ogni passo era una traccia che potevi leggere: è il tuo modo di controllarlo.";
 
 const LABS = [
-  ['Codice', 'Laboratorio', 'PC', 'Sistema', 'Responsabile'],
-  ['INF1', 'Informatica 1', '24', 'Windows', 'Marchetti'],
-  ['INF2', 'Informatica 2', '24', 'Windows', 'Galli'],
-  ['SIS', 'Sistemi e reti', '18', 'Linux', 'Orsini'],
-  ['CAD', 'Disegno e progettazione', '20', 'Windows', 'Pace'],
-  ['MOB', 'Sviluppo mobile', '16', 'Windows', 'Leoni'],
+  ['Codice', 'Laboratorio', 'Posti'],
+  ['LAB-INF1', 'Laboratorio Informatica 1', '24'],
+  ['LAB-INF2', 'Laboratorio Informatica 2', '20'],
+  ['LAB-RETI', 'Laboratorio Reti', '18'],
+  ['LAB-ELET', 'Laboratorio Elettronica', '16'],
 ];
-const COMM = [
-  ['Software commerciale', 'Licenze', 'Sistemi', 'Serve l\'amministratore'],
-  ['AutoCAD', '40', 'Windows', 'sì'],
-  ['MATLAB', '30', 'Windows, Linux', 'sì'],
+const PREN = [
+  ['Prenotazione', 'Laboratorio', 'Data', 'Orario'],
+  ['P-0001', 'LAB-INF1', '2026-10-12', '08:00-10:00'],
+  ['P-0003', 'LAB-INF1', '2026-11-12', '09:00-11:00'],
+  ['P-0004', 'LAB-INF1', '2026-11-12', '11:00-13:00'],
+  ['P-0008', 'LAB-INF1', '2026-12-03', '14:00-17:00'],
 ];
 
 function Tabella({ righe }) {
@@ -207,16 +208,16 @@ function App() {
       <h1 style={{ color: 'var(--accent)', fontSize: 'var(--fs-h1)', margin: '16px 0 14px' }}>Argomento 1 — Dal chatbot all'agente · Simulazione</h1>
 
       <div className="box warn" style={{ marginBottom: 16 }}>
-        <p style={{ marginBottom: 8 }}><strong>Il compito.</strong> Una cartella con venti richieste di installazione software nei laboratori di una scuola inventata, un catalogo, un regolamento e una procedura (la skill). L'agente deve decidere lo stato di ogni richiesta, rinominare i file, contare le licenze e scrivere un riepilogo.</p>
+        <p style={{ marginBottom: 8 }}><strong>Il compito.</strong> Una piccola app per prenotare i laboratori di una scuola inventata, con una riga di comando, i test e un file con i dati. Un file di piano, <code>docs/idea-dashboard.md</code>, descrive una dashboard che filtra per laboratorio; l'app non lo fa. L'agente deve aggiungere l'opzione <code>--lab</code> a <code>elenco</code>.</p>
         <p><strong>Come si gioca.</strong> Prima di ogni mossa premi «Indovina la prossima mossa», scegli una delle tre opzioni e guarda quale è giusta. Poi premi «Avanti» e leggi cosa è successo nella traccia. Le mosse da indovinare sono dieci.</p>
       </div>
 
       <details style={{ marginBottom: 16 }} className="box">
-        <summary>I dati della cartella (inventati)</summary>
+        <summary>I dati della palestra (inventati)</summary>
         <div style={{ marginTop: 10, display: 'grid', gap: 12 }}>
           <Tabella righe={LABS} />
-          <Tabella righe={COMM} />
-          <p className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Gli altri otto software del catalogo sono liberi o gratuiti, senza limite di licenze. Le richieste sono moduli, mail e appunti, con nomi di file disordinati.</p>
+          <Tabella righe={PREN} />
+          <p className="muted" style={{ fontSize: 'var(--fs-xs)' }}>Le prenotazioni di LAB-INF1 sono le quattro in tabella: sono quelle che un filtro per laboratorio deve far vedere. In tutto le prenotazioni attive sono sette.</p>
         </div>
       </details>
 
@@ -226,15 +227,15 @@ function App() {
           <ul style={{ paddingLeft: 20, display: 'grid', gap: 8, fontSize: 'var(--fs-sm)' }}>
             <li>Dove si ferma e aspetta una persona.</li>
             <li>Quali azioni chiedono un permesso e quali no.</li>
-            <li>Cosa conta con un programma invece che a mente.</li>
+            <li>Che cosa prova con un comando vero e con i test.</li>
             <li>Cosa lascia a te invece di decidere.</li>
           </ul>
-          <p className="muted" style={{ marginTop: 12, fontSize: 'var(--fs-xs)' }}>Sequenza didattica sul compito della prima esercitazione: non è l'output di un modello vero. Un agente reale può cambiare ordine, parole e numero di passi; resta valido ciò che controlli nella traccia.</p>
+          <p className="muted" style={{ marginTop: 12, fontSize: 'var(--fs-xs)' }}>Sequenza didattica sul compito della prima esercitazione (la palestra): non è l'output di un modello vero. Un agente reale può cambiare ordine, parole e numero di passi; resta valido ciò che controlli nella traccia.</p>
         </div>
         <Agente />
       </div>
 
-      <p className="muted" style={{ marginTop: 24, fontSize: 'var(--fs-sm)' }}>Dati inventati: nessuna scuola, persona o richiesta reale.</p>
+      <p className="muted" style={{ marginTop: 24, fontSize: 'var(--fs-sm)' }}>Dati inventati: nessuna scuola, persona o prenotazione reale.</p>
     </div>
   );
 }

@@ -656,15 +656,15 @@ const slides = [
         <Tag>Attività</Tag>
         <h2>Lo stesso compito, due agenti</h2>
         <ol className="timeline">
-          <li><time>1</time>Dalla palestra, punto <code className="nw">partenza-a10</code>: stesse istruzioni per tutti e due gli agenti.</li>
-          <li><time>2</time>Lo stesso compito a Claude Code, in una sessione nuova. Annota cosa chiede, cosa fa da solo.</li>
+          <li><time>1</time>Dalla palestra, punto <code className="nw">partenza-a10</code>: le istruzioni sono già le stesse per tutti e due gli agenti.</li>
+          <li><time>2</time>Il compito: un filtro per laboratorio nella pagina web e in <code className="nw">/api/prenotazioni?lab=</code>. Lo dai a Claude Code, in una sessione nuova. Annota cosa chiede, cosa fa da solo.</li>
           <li><time>3</time>Scarta le modifiche e ripeti con OpenCode, con i permessi del laboratorio.</li>
           <li><time>4</time>Confronta: richieste di conferma, comandi lanciati, file toccati, configurazione letta.</li>
         </ol>
         <ActivityBadge n="10" file="confronto-claude-code-opencode.html" label="Scheda: il confronto fra i due strumenti" />
       </div>
     ),
-    notes: `Attività sulla palestra, a coppie. Il compito è semplice e già noto: aggiungere all'elenco delle prenotazioni il filtro per laboratorio, con un test. Perché il confronto valga, i due agenti devono vedere le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 5. Il modello dietro il proxy è lo stesso per tutti e due (Claude), quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
+    notes: `Attività sulla palestra, a coppie. Il compito è semplice: portare il filtro per laboratorio nella pagina web e nell'API del server, con un test. Il filtro esiste già nella riga di comando (elenco con --lab): un buon agente lo nota e lo riusa, uno distratto lo riscrive. Perché il confronto valga, i due agenti vedono le stesse istruzioni: AGENTS.md come fonte e CLAUDE.md che lo importa, come nell'argomento 5, già così nel punto di partenza. Il modello dietro il proxy è lo stesso per tutti e due (Claude), quindi le differenze che si vedono sono dello strumento, non del modello. Cosa far notare: quante conferme chiede Claude Code e quante OpenCode con la configurazione del laboratorio, e che cosa farebbe OpenCode senza quella configurazione. Si discute poi quale dei due si vorrebbe sul PC di un collega meno esperto.`
   },
   {
     block: B + 'Attività: trova l\'errore',

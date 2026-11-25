@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prima esercitazione: l'agente controlla le richieste di installazione — Materiali argomento 1</title>
+<title>Prima esercitazione: l'agente legge un piano e aggiunge un filtro alla palestra — Materiali argomento 1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -118,25 +118,35 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 <main class="wrap">
 <blockquote>
 <p><strong>MATERIALE DEL CORSO. Solo dati inventati.</strong>
-Scuola, docenti, laboratori, software e licenze di questa cartella sono inventati.</p>
+Scuola, docenti, laboratori, classi e prenotazioni di questa cartella sono inventati.</p>
 </blockquote>
-<h1 id="prima-esercitazione-lagente-controlla-le-richieste-di-installazione">Prima esercitazione: l'agente controlla le richieste di installazione</h1>
-<p>Una cartella di richieste di installazione software nei laboratori di una scuola inventata: moduli, mail e appunti in formati diversi, un catalogo del software, i laboratori e un regolamento. Il compito è il lavoro che un tecnico farebbe a mano: stabilire per ogni richiesta se si può accettare, rinominare i file, mettere da parte quelli da restituire, contare le licenze e scrivere un riepilogo.</p>
-<p>Si lavora su una <strong>copia usa e getta</strong>: se qualcosa va storto si cancella la cartella e si estrae di nuovo lo zip. Non serve Git. L'agente non installa niente: nessuna richiesta viene eseguita e i programmi citati restano dove sono.</p>
-<p>Serve Claude Code già installato e collegato al server del corso (la guida è nell'argomento 2). Funzioni citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026.</p>
+<h1 id="prima-esercitazione-lagente-legge-un-piano-e-aggiunge-un-filtro-alla-palestra">Prima esercitazione: l'agente legge un piano e aggiunge un filtro alla palestra</h1>
+<p>La palestra è una piccola app in Node.js per prenotare i laboratori di una scuola inventata: una riga di comando (<code>cli.js</code>), le regole in <code>src/logica.js</code>, i test, i dati in <code>dati/dati.json</code>. Nella sezione su AI Studio hai visto una dashboard dei laboratori nata da un piano. Quel piano è un file della cartella, <code>docs/idea-dashboard.md</code>. Il compito: far leggere il piano all'agente, confrontarlo con l'app vera e aggiungere la prima cosa che manca, il filtro per laboratorio nell'elenco.</p>
+<p>Si lavora su una <strong>copia usa e getta</strong>: se qualcosa va storto si cancella la cartella e si estrae di nuovo lo zip. Non serve Git, e il <code>README.md</code> della palestra che ne parla per ora si ignora. L'agente non ha bisogno della rete e non deve installare niente.</p>
+<p>Serve Claude Code già installato e collegato al server del corso (la guida è nell'argomento 2), e Node.js, che sul PC del laboratorio c'è già. Funzioni citate come da documentazione ufficiale (code.claude.com/docs), novembre 2026.</p>
 <h2 id="regole">Regole</h2>
 <ul>
 <li>Leggi ogni richiesta di permesso per intero prima di rispondere. Rispondi sì solo se capisci cosa sta per fare.</li>
 <li>Non scegliere mai «Yes, and don't ask again»: per i comandi di shell vale per sempre in quella cartella.</li>
 <li>Se l'agente propone di cancellare un file, di uscire dalla cartella o di scaricare qualcosa, rispondi no.</li>
-<li>L'agente non deve inviare niente a nessuno.</li>
+<li>L'agente non deve inviare niente a nessuno e non deve toccare <code>dati/dati.json</code>.</li>
 </ul>
 <h2 id="1-prepara-la-cartella">1. Prepara la cartella</h2>
-<p>Dalla pagina dei materiali dell'argomento 1 scarica lo zip «Cartella delle richieste di installazione» ed estrailo in una cartella tua, per esempio una cartella <code>prova</code> sul Desktop (tasto destro, «Estrai tutto»). Dentro trovi la cartella <code>richieste-software</code>.</p>
-<p>Apri il terminale <strong>dentro</strong> <code>richieste-software</code> (in Esplora file: tasto destro su uno spazio vuoto, «Apri nel Terminale»). Controlla di essere nel posto giusto:</p>
+<p>Dalla pagina dei materiali dell'argomento 1 scarica lo zip «La palestra, copia usa e getta» ed estrailo in una cartella tua, per esempio una cartella <code>prova</code> sul Desktop (tasto destro, «Estrai tutto»). Dentro trovi la cartella <code>palestra-prima-prova</code>.</p>
+<p>Apri il terminale <strong>dentro</strong> <code>palestra-prima-prova</code> (in Esplora file: tasto destro su uno spazio vuoto, «Apri nel Terminale»). Controlla di essere nel posto giusto:</p>
 <pre><code class="language-powershell">ls
 </code></pre>
-<p>Dovresti vedere una ventina di file <code>.txt</code> con nomi disordinati, due file <code>.csv</code>, <code>regolamento-installazioni.md</code>, <code>CLAUDE.md</code>, <code>AGENTS.md</code> e la cartella <code>in-arrivo</code>. Apri a mano due o tre richieste e il regolamento: sono il materiale su cui lavora l'agente, e servono a te per controllarlo dopo.</p>
+<p>Dovresti vedere <code>cli.js</code>, <code>server.js</code>, <code>package.json</code>, le cartelle <code>src</code>, <code>test</code>, <code>dati</code>, <code>docs</code> e i file <code>CLAUDE.md</code> e <code>AGENTS.md</code>. Annota l'impronta del file dei dati: alla fine servirà per controllare che nessuno l'abbia toccato.</p>
+<pre><code class="language-powershell">Get-FileHash dati\dati.json
+</code></pre>
+<p>Prova a mano l'app, così sai com'è fatta prima che la veda l'agente:</p>
+<pre><code class="language-powershell">node cli.js laboratori
+</code></pre>
+<pre><code class="language-powershell">node cli.js elenco
+</code></pre>
+<p>Conta quante prenotazioni vedi, e lancia i test annotando i numeri di <code>pass</code> e <code>fail</code>:</p>
+<pre><code class="language-powershell">node --test
+</code></pre>
 <h2 id="2-avvia-lagente-e-guardati-intorno">2. Avvia l'agente e guardati intorno</h2>
 <p>Avvia Claude Code in modalità Manual:</p>
 <pre><code class="language-powershell">claude --permission-mode manual
@@ -144,13 +154,40 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 <p>Incolla questa richiesta, com'è:</p>
 <pre><code class="language-text">Cosa c'è in questa cartella e quali istruzioni trovi per lavorarci? Non modificare niente.
 </code></pre>
-<p>Guarda la traccia: quali file ha aperto? Ha citato <code>CLAUDE.md</code>? Ha trovato la procedura nella cartella <code>.claude</code>? Annotalo.</p>
-<h2 id="3-chiedi-prima-un-piano">3. Chiedi prima un piano</h2>
-<p>Nella demo di AI Studio hai visto la differenza tra chiedere subito il risultato e chiedere prima un piano da leggere. Qui lo stesso gesto serve a evitare che l'agente cominci a rinominare file prima che tu abbia capito cosa intende fare.</p>
-<p>Puoi chiederlo a parole, con la richiesta qui sotto, oppure entrare in modalità piano con <code>Shift+Tab</code> (finché compare <strong>plan</strong>) e incollare la stessa richiesta.</p>
-<pre><code class="language-text">Controlla le richieste di installazione secondo la procedura della scuola. Prima dammi solo un piano: quali file leggerai, cosa rinominerai o sposterai, come farai i conti e come verificherai il risultato. Non modificare niente finché non lo approvo.
+<p>Guarda la traccia: quali file ha aperto? Ha citato <code>CLAUDE.md</code>? Cosa dice del file dei dati? Controlla a mano che quello che afferma sia vero, per esempio guardando cosa c'è nella cartella <code>dati</code>:</p>
+<pre><code class="language-powershell">ls dati
 </code></pre>
-<h2 id="4-leggi-il-piano-e-approvalo-o-correggilo">4. Leggi il piano e approvalo, o correggilo</h2>
+<h2 id="3-confronta-il-piano-con-lapp">3. Confronta il piano con l'app</h2>
+<p>Incolla questa richiesta. L'agente deve solo leggere:</p>
+<pre><code class="language-text">Leggi docs/idea-dashboard.md e confrontalo con l'app: che cosa c'è già, che cosa manca, quali regole coincidono con quelle del codice e quali no. Non modificare niente.
+</code></pre>
+<p>Controlla a mano due cose che l'agente ha detto, con i comandi del punto 1. Compila la tabella:</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Cosa ha detto l'agente</th>
+<th>Come l'ho controllato</th>
+<th>Esito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td>confermato / sbagliato / non verificabile</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>confermato / sbagliato / non verificabile</td>
+</tr>
+</tbody>
+</table></div>
+<p>Quali regole del piano trova anche nel codice, e in quale file? Quale cosa del piano manca nell'app?</p>
+<h2 id="4-chiedi-prima-un-piano">4. Chiedi prima un piano</h2>
+<p>La dashboard del piano mostra le prenotazioni per laboratorio, l'app no: <code>elenco</code> filtra per data e per docente, non per laboratorio. Puoi chiedere il piano a parole, con la richiesta qui sotto, oppure entrare in modalità piano con <code>Shift+Tab</code> (finché compare <strong>plan</strong>) e incollare la stessa richiesta.</p>
+<pre><code class="language-text">La dashboard filtra per laboratorio, l'app no. Prima dammi solo un piano per aggiungere a elenco l'opzione --lab: quali file toccherai, quali test aggiungerai e come verificherai il risultato. Non modificare niente finché non lo approvo.
+</code></pre>
 <p>Un piano si legge come un diff. Compila la tabella, anche a penna:</p>
 <div class="table-scroll"><table>
 <thead>
@@ -161,29 +198,29 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 </thead>
 <tbody>
 <tr>
-<td>Quali file legge?</td>
+<td>Quali file tocca?</td>
 <td></td>
 </tr>
 <tr>
-<td>Cosa vuole rinominare o spostare, e dove?</td>
+<td>Quale test aggiunge?</td>
 <td></td>
 </tr>
 <tr>
-<td>Cosa non tocca? (guarda <code>in-arrivo</code>)</td>
+<td>Cosa non tocca? (guarda <code>dati/dati.json</code>)</td>
 <td></td>
 </tr>
 <tr>
-<td>Come fa i conti delle licenze? A mente o con un programma?</td>
+<td>Come verifica il risultato?</td>
 <td></td>
 </tr>
 <tr>
-<td>Quali casi lascia a una persona?</td>
+<td>Cosa decide da solo senza che tu l'abbia chiesto?</td>
 <td></td>
 </tr>
 </tbody>
 </table></div>
-<p>Se manca qualcosa, correggilo con parole tue prima di approvare. Per esempio, se non parla di <code>in-arrivo</code> o dei casi dubbi:</p>
-<pre><code class="language-text">Il piano va bene, con una correzione: non toccare la cartella in-arrivo e tra i casi dubbi segnala quelli che non si decidono con il regolamento.
+<p>Se manca qualcosa, correggilo con parole tue prima di approvare. Per esempio, se non parla dei test:</p>
+<pre><code class="language-text">Il piano va bene, con una correzione: aggiungi anche un test per --lab e lancia tutti i test alla fine. Non toccare dati/dati.json.
 </code></pre>
 <p>Se il piano è già buono, approvalo con una riga:</p>
 <pre><code class="language-text">Il piano va bene, procedi.
@@ -228,13 +265,23 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 </tr>
 </tbody>
 </table></div>
-<p>Un programma per i conti va letto prima di approvarlo: legge solo i file della cartella? Scrive qualcosa fuori? Se sì, rifiuta e dillo all'agente.</p>
-<h2 id="6-confronta-il-riepilogo-con-i-file">6. Confronta il riepilogo con i file</h2>
-<p>Alla fine l'agente dovrebbe aver scritto <code>riepilogo-richieste.md</code> e dichiarato i limiti del suo controllo. Non fidarti del racconto: controlla tre cose a mano.</p>
-<p>Conta i file di testo. Prima dell'agente erano 22 (20 più i 2 di <code>in-arrivo</code>): il numero non deve cambiare, salvo file di testo creati dall'agente stesso, che devi riconoscere.</p>
-<pre><code class="language-powershell">(Get-ChildItem -Recurse -File -Filter *.txt).Count
+<p>Le richieste per modificare un file e per lanciare <code>node --test</code> sono attese. Un comando che scrive fuori dalla cartella, che cancella qualcosa o che apre la rete va rifiutato, e lo dici all'agente.</p>
+<h2 id="6-controlla-il-risultato-non-il-racconto">6. Controlla il risultato, non il racconto</h2>
+<p>Alla fine l'agente dirà di aver finito. Non fidarti del racconto: controlla tre cose a mano.</p>
+<p>Il filtro. Con la palestra com'è, ti aspetti quattro prenotazioni, tutte di LAB-INF1 (le trovi anche con il solo <code>elenco</code>: sono le righe con quel laboratorio).</p>
+<pre><code class="language-powershell">node cli.js elenco --lab LAB-INF1
 </code></pre>
-<p>Scegli poi tre righe del riepilogo con tre stati diversi e verificale: apri la richiesta, leggi il regolamento, decidi tu lo stato. Infine rifai a mano il conto delle licenze di AutoCAD: quali laboratori ha approvato, quanti PC hanno (<code>laboratori.csv</code>), quante licenze ci sono (<code>catalogo-software.csv</code>)?</p>
+<p>Prova anche un altro laboratorio e un laboratorio che non esiste, e guarda cosa risponde:</p>
+<pre><code class="language-powershell">node cli.js elenco --lab LAB-RETI
+</code></pre>
+<pre><code class="language-powershell">node cli.js elenco --lab LAB-XYZ
+</code></pre>
+<p>I test. Rilanciali tu e confronta con il numero annotato al punto 1: i <code>pass</code> devono essere aumentati, i <code>fail</code> essere zero.</p>
+<pre><code class="language-powershell">node --test
+</code></pre>
+<p>I dati. L'impronta del file non deve essere cambiata:</p>
+<pre><code class="language-powershell">Get-FileHash dati\dati.json
+</code></pre>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -245,74 +292,35 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 </thead>
 <tbody>
 <tr>
-<td>Riga 1 del riepilogo</td>
+<td><code>elenco --lab LAB-INF1</code> mostra solo prenotazioni di quel laboratorio</td>
 <td></td>
-<td>confermata / sbagliata / non verificabile</td>
+<td>confermata / sbagliata</td>
 </tr>
 <tr>
-<td>Riga 2 del riepilogo</td>
+<td>Test: prima / dopo (<code>pass</code> e <code>fail</code>)</td>
 <td></td>
-<td>confermata / sbagliata / non verificabile</td>
+<td>confermata / sbagliata</td>
 </tr>
 <tr>
-<td>Riga 3 del riepilogo</td>
+<td>Impronta di <code>dati/dati.json</code> uguale</td>
 <td></td>
-<td>confermata / sbagliata / non verificabile</td>
+<td>confermata / sbagliata</td>
 </tr>
 <tr>
-<td>Conto delle licenze di AutoCAD</td>
+<td>I file toccati sono quelli del piano</td>
 <td></td>
-<td>confermata / sbagliata / non verificabile</td>
+<td>confermata / sbagliata</td>
 </tr>
 </tbody>
 </table></div>
-<p>Cosa non ha potuto verificare, secondo l'agente? Quali casi ha lasciato a una persona, e sei d'accordo?</p>
-<h2 id="7-aggiungi-le-richieste-in-arrivo">7. Aggiungi le richieste in arrivo</h2>
-<p>Incolla questa richiesta:</p>
-<pre><code class="language-text">Sono arrivate due richieste nuove nella cartella in-arrivo: aggiorna il lavoro.
-</code></pre>
-<p>Guarda cosa fa: rilegge tutto o solo le due nuove? Ricalcola le licenze con un programma? Chiede il permesso prima di rinominare e spostare? Rifai a mano il conto di AutoCAD con le due richieste nuove. Una delle due ripete una richiesta già respinta: come la tratta?</p>
-<h2 id="8-apri-la-skill">8. Apri la skill</h2>
-<p>La procedura che l'agente ha seguito è un file di testo nella cartella. Leggilo:</p>
-<pre><code class="language-powershell">Get-Content .claude\skills\controllo-richieste\SKILL.md
-</code></pre>
-<p>Collega ciò che hai visto ai passi: da quale passo viene il piano? da quale il conto con un programma? da quale la domanda di permesso prima di rinominare? Quale passo lascia la decisione a te? Quale passo, se lo togliessi, cambierebbe di più il comportamento?</p>
-<h2 id="9-cambia-la-skill-e-rifai">9. Cambia la skill e rifai</h2>
-<p>Estrai di nuovo lo zip in una cartella nuova e lavora lì: la cartella del primo giro resta com'è e puoi confrontare. Apri <code>SKILL.md</code> della cartella nuova in un editor e aggiungi una regola. Un esempio, da inserire come punto 6 bis:</p>
-<pre><code class="language-text">Sposta nella cartella `da-restituire` anche le richieste con stato `doppia`.
-</code></pre>
-<p>Oppure inventa la tua: un'altra cartella, un altro formato del riepilogo, un controllo in più. Prima di rilanciare scrivi cosa ti aspetti. Poi ripeti dal punto 2 con le stesse richieste e confronta:</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>Domanda</th>
-<th>Prima</th>
-<th>Dopo la modifica</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>L'agente ha usato la regola nuova?</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>Cosa è cambiato nel riepilogo o nei file?</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>È successo qualcosa che non ti aspettavi?</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table></div>
+<p>Cosa non ha potuto verificare, secondo l'agente? Il laboratorio che non esiste: cosa risponde? Ti va bene, o preferiresti un errore? È una cosa da decidere tu, e il piano non la diceva.</p>
+<h2 id="7-cosa-resta-fuori">7. Cosa resta fuori</h2>
+<p>Rileggi <code>docs/idea-dashboard.md</code>. Dopo il filtro, quali cose del piano mancano ancora nell'app? Quali delle due domande rimaste aperte nel piano vorresti risolvere per prima, e perché? Non serve rispondere all'agente: sono appunti per i prossimi argomenti.</p>
 <h2 id="facoltativo-la-stessa-cartella-con-opencode">Facoltativo: la stessa cartella con OpenCode</h2>
-<p>Estrai lo zip una terza volta in una cartella nuova. OpenCode legge <code>AGENTS.md</code> e anche le skill in <code>.claude/skills</code> (documentazione di OpenCode, consultata a novembre 2026), quindi la cartella è la stessa. Avvia OpenCode dentro <code>richieste-software</code>, con la configurazione del corso:</p>
+<p>Estrai lo zip una seconda volta in un'altra cartella e avvia OpenCode dentro <code>palestra-prima-prova</code>, con la configurazione del corso:</p>
 <pre><code class="language-powershell">opencode
 </code></pre>
-<p>Ripeti il punto 3 con la stessa richiesta di piano e poi il punto 5. Confronta con Claude Code:</p>
+<p>Ripeti il punto 4 con la stessa richiesta e poi il punto 5. Confronta con Claude Code:</p>
 <div class="table-scroll"><table>
 <thead>
 <tr>
@@ -323,12 +331,7 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 </thead>
 <tbody>
 <tr>
-<td>Ha trovato e usato la skill?</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>Ha chiesto il permesso prima di rinominare?</td>
+<td>Ha letto <code>AGENTS.md</code>?</td>
 <td></td>
 <td></td>
 </tr>
@@ -338,13 +341,20 @@ Scuola, docenti, laboratori, software e licenze di questa cartella sono inventat
 <td></td>
 </tr>
 <tr>
-<td>I conti delle licenze tornano con i tuoi?</td>
+<td>Ha chiesto il permesso prima di modificare i file?</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>I test sono aumentati e passano?</td>
 <td></td>
 <td></td>
 </tr>
 </tbody>
 </table></div>
-<p>Se OpenCode rinomina o sposta senza chiedere, fermalo con <code>Esc</code> e annotalo: le regole di permesso sono una cosa che si configura, e non è detto che partano uguali.</p>
+<p>Se OpenCode modifica un file senza chiedere, fermalo con <code>Esc</code> e annotalo: le regole di permesso si configurano, e non è detto che partano uguali.</p>
+<h2 id="se-finisci-prima">Se finisci prima</h2>
+<p>Esiste una seconda esercitazione, senza codice: un controllo di richieste di installazione software, con una procedura scritta come skill. Sta nella pagina dei materiali dell'argomento 1, come esercitazione di riserva.</p>
 <h2 id="per-finire">Per finire</h2>
 <p>Cancella le cartelle di prova quando hai finito. Non hai niente da conservare. Le soluzioni le ha il docente.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>

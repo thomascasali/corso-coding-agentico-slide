@@ -367,7 +367,7 @@ const slides = [
       <Apertura n="4" titolo="Dalla richiesta ai requisiti"
         sottotitolo="Prima di far scrivere codice all'agente si decide che cosa deve fare e come si saprà che l'ha fatto."
         caso="Il caso: un portale costruito in cinque tappe, e una richiesta di due righe."
-        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
+        prima="argomento 1 (dal chatbot all'agente: strumenti, ciclo, piano)." />
     ),
     notes: "Si parte da una richiesta di due righe, come ne arrivano davvero a un ufficio tecnico. Un agente la eseguirebbe subito. Il lavoro di questo argomento sta prima: capire che cosa si sta chiedendo e come si controllerà il risultato. Tutto si prova sulla palestra, l'app di prenotazione dei laboratori con dati inventati."
   },
@@ -465,13 +465,13 @@ const slides = [
         <Tag>Un richiamo</Tag>
         <h2>Il piano che avete visto nella demo</h2>
         <div className="grid">
-          <Card title="Compito piccolo, niente piano"><p>Un gioco chiesto in una riga: l'agente parte e in poco tempo c'è qualcosa da provare. Se non va bene, si rifà.</p></Card>
-          <Card title="Compito grande, prima il piano" kind="i"><p>Una dashboard che tocca più servizi e dati personali: prima si legge che cosa intende fare, poi si dà il via. Un errore di impostazione costa molto di più.</p></Card>
+          <Card title="Compito piccolo, niente piano"><p>Un gioco chiesto in una riga: lo strumento parte e c'è subito qualcosa da provare. Se non va bene, si rifà.</p></Card>
+          <Card title="Compito con regole, prima il piano" kind="i"><p>La dashboard dei laboratori, con le sue regole su sovrapposizioni, annullate e capienza: prima si legge il piano e lo si corregge, poi si dà il via. Un errore di impostazione costa di più.</p></Card>
         </div>
-        <Box type="info" title="Che cosa si aggiunge qui">Nella demo il piano si leggeva a occhio. Qui si impara a leggerlo con una lista di controllo e a trasformarlo in una specifica con criteri di accettazione.</Box>
+        <Box type="info" title="Che cosa si aggiunge qui">Il piano della dashboard, corretto in aula, è diventato il file <code className="nw">docs/idea-dashboard.md</code> della palestra: un'idea, non una specifica. Aveva due domande ancora aperte. Qui si impara a leggere un piano con una lista di controllo e a trasformare idea e domande in una specifica con criteri di accettazione.</Box>
       </div>
     ),
-    notes: "Richiamo della demo di apertura con Google AI Studio: due passi con lo stesso strumento, il primo senza pianificazione (un gioco semplice, velocissimo da provare), il secondo con pianificazione (un compito grande, con più servizi coinvolti). Il messaggio era il contrasto. Si può chiedere alla sala che cosa avrebbe voluto controllare nel piano della dashboard prima di dare il via: sono già le domande di questo argomento. Dettagli dell'esempio della demo non servono qui."
+    notes: "Richiamo della demo di apertura con Google AI Studio (argomento 1): due prove con lo stesso strumento, la prima senza piano (un gioco semplice, velocissimo da provare), la seconda con piano (la dashboard dei laboratori, con regole da correggere prima di costruire). Il messaggio era il contrasto. Il piano corretto in aula è il file docs/idea-dashboard.md della palestra, che si legge e si confronta con l'app nella prima esercitazione dell'argomento 1: contiene le tre regole corrette (estremi che si toccano, annullate, capienza compresa), ciò che la dashboard non fa e due domande rimaste aperte, per esempio che cosa vede un docente delle prenotazioni degli altri. Si può chiedere alla sala che cosa avrebbe voluto controllare nel piano prima del via: sono già le domande di questo argomento. Dettagli di ciò che è successo a schermo nella demo non servono qui.",
   },
   {
     block: B + 'Modalità piano',

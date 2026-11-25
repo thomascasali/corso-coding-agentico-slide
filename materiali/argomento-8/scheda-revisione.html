@@ -142,7 +142,7 @@ istruzioni incolla il testo di <code>docs/istruzioni-revisore.md</code> così co
 </code></pre>
 <p>Annota il verdetto e <strong>che cosa ha eseguito</strong> (comandi, file letti). Poi elimina quel file: serve solo per il confronto.</p>
 <h2 id="3-scrivi-la-skill">3. Scrivi la skill</h2>
-<p>Crea <code>.claude/skills/revisione-funzione/SKILL.md</code> dal modello «Modello: skill di revisione». La skill contiene la
+<p>Crea <code>.claude/skills/revisione-codice/SKILL.md</code> dal modello «Modello: skill di revisione». La skill contiene la
 procedura di revisione, non il giudizio su questa funzione: deve servire anche per la prossima.</p>
 <ul>
 <li>Scrivi la <code>description</code> per ultima, quando sai che cosa fa la skill davvero. Controllala con le domande del modello.</li>
@@ -161,7 +161,7 @@ precedente, una <code>/clear</code> non basta: chiudi e riapri Claude Code. Poi 
 <p>Prima di leggere il risultato controlla che gli strumenti siano stati usati davvero:</p>
 <ul>
 <li>compare la delega al subagente (la riga dello strumento che lo avvia)?</li>
-<li>la skill è stata caricata? Prova anche <code class="cmd">/revisione-funzione</code> scritto da te;</li>
+<li>la skill è stata caricata? Prova anche <code class="cmd">/revisione-codice</code> scritto da te;</li>
 <li>il revisore ha eseguito qualcosa, oppure ha solo letto?</li>
 <li>il riassunto che torna a te dice quali comandi sono stati eseguiti e con quale esito?</li>
 </ul>

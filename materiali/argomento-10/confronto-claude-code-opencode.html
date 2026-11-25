@@ -126,13 +126,12 @@ stesso proxy, quindi con lo stesso modello: le differenze che noti sono dello st
 </code></pre>
 <pre><code class="language-powershell">git switch -c lavoro-a10 partenza-a10
 </code></pre>
-<p>Per far leggere le stesse istruzioni ai due agenti, porta nella cartella i due file corretti
-dell'argomento 5: <code>AGENTS.md</code> con le istruzioni e <code>CLAUDE.md</code> con la sola riga <code>@AGENTS.md</code>.
-Se hai ancora il ramo <code>lavoro-a5</code>, puoi copiarli da lì.</p>
+<p>Le istruzioni di progetto sono già a posto: <code>AGENTS.md</code> contiene il testo e <code>CLAUDE.md</code> lo importa, quindi
+Claude Code e OpenCode leggono le stesse regole. Nella cartella <code>.claude/</code> ci sono anche la skill, il
+subagente e l'hook dei test degli argomenti 8 e 9: annota quale dei due strumenti li usa.</p>
 <h2 id="il-compito">Il compito</h2>
 <p>Incollalo uguale in tutti e due gli agenti:</p>
-<pre><code class="language-text">Aggiungi al comando &quot;elenco&quot; l'opzione --lab, che mostra solo le prenotazioni di un laboratorio.
-Scrivi un test e dimmi come hai verificato che funziona.
+<pre><code class="language-text">Aggiungi alla pagina web della palestra un filtro per laboratorio: una tendina in public/index.html e il parametro ?lab= in GET /api/prenotazioni. Scrivi un test in test/server.test.js e dimmi come hai verificato che funziona.
 </code></pre>
 <h2 id="1-claude-code">1. Claude Code</h2>
 <ol>
@@ -177,6 +176,11 @@ Scrivi un test e dimmi come hai verificato che funziona.
 <td></td>
 </tr>
 <tr>
+<td>Ha riusato quello che c'era già (il filtro <code>--lab</code> di <code>elenco</code>)?</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td>File toccati</td>
 <td></td>
 <td></td>
@@ -192,7 +196,7 @@ Scrivi un test e dimmi come hai verificato che funziona.
 <td></td>
 </tr>
 <tr>
-<td>L'opzione <code>--lab</code> funziona? (provala tu)</td>
+<td>Il filtro funziona? (avvia <code class="cmd">node server.js</code>, apri la pagina e prova la tendina; poi <code>/api/prenotazioni?lab=LAB-INF1</code>)</td>
 <td></td>
 <td></td>
 </tr>

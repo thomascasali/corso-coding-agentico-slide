@@ -336,13 +336,58 @@ const Fonte = ({ href, children }) => (
   <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>{children}</a>, documentazione di Claude Code, consultata a novembre 2026.</p>
 );
 
-const PROMPT = String.raw`Bash command
-  node --test
-  Esegue i test del progetto
+/* Fonti di Google AI Studio: pagine della documentazione lette il 17/11/2026. */
+const FonteGoogle = () => (
+  <p className="legend" style={{ marginTop: 8 }}>Fonti: documentazione di Google AI Studio, letta il 17/11/2026:{' '}
+    <a className="text-link" href="https://aistudio.google.com/docs/aistudio-build-mode" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Build mode</a>,{' '}
+    <a className="text-link" href="https://aistudio.google.com/docs/aistudio-deploying" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Publish</a>,{' '}
+    <a className="text-link" href="https://aistudio.google.com/docs/terms" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>termini</a>.</p>
+);
 
-  1. Yes
-  2. Yes, and don't ask again for: node --test
-  3. No`;
+/* La richiesta tecnica che tutti fanno a un chatbot: dati inventati, indirizzi nell'intervallo riservato alla documentazione. */
+const RICHIESTA_PC = String.raw`Scrivi uno script che controlla l'elenco dei PC di un laboratorio. Per ogni PC ho nome, indirizzo IP, sistema operativo e data dell'ultimo aggiornamento. Segnalami i PC non aggiornati da più di 90 giorni e quelli con lo stesso indirizzo IP, prendendo come data di riferimento il 2026-12-01. I dati sono questi:
+
+nome,ip,sistema,ultimo_aggiornamento
+LAB1-PC01,192.0.2.11,Windows 11,2026-11-20
+LAB1-PC02,192.0.2.12,Windows 11,2026-08-28
+LAB1-PC03,192.0.2.13,Windows 10,2026-09-02
+LAB1-PC04,192.0.2.14,Windows 11,2026-11-25
+LAB1-PC05,192.0.2.12,Windows 11,2026-11-18
+LAB1-PC06,192.0.2.16,Ubuntu 24.04,2026-10-30
+LAB1-PC07,192.0.2.17,Windows 11,2026-12-01
+LAB1-PC08,192.0.2.18,Windows 10,2026-06-14`;
+
+/* Passo 1 della demo: il gioco, senza piano. */
+const RICHIESTA_GIOCO = String.raw`Crea un gioco in una sola pagina, in stile arcade. Un labirinto visto dall'alto, un personaggio che si muove con le frecce e raccoglie dei punti sparsi nei corridoi, e due inseguitori che lo rincorrono. Se un inseguitore lo tocca, perde una vita (ne ha tre). Quando ha raccolto tutti i punti, si passa al livello successivo, con inseguitori un po' più veloci. Mostra punteggio e vite. Usa solo forme semplici disegnate con il codice: niente immagini esterne, e nessun nome, personaggio o musica di giochi già esistenti.`;
+
+/* Passo 2 della demo: la dashboard dei laboratori, con la regola del piano. I dati sono quelli della palestra (dati/dati.json). */
+const RICHIESTA_DASHBOARD = String.raw`Voglio una dashboard dei laboratori di una scuola, in una sola pagina. Serve ai docenti per vedere a colpo d'occhio chi usa quale laboratorio e quando. I dati sono inventati e sono questi:
+
+Orario: dal lunedì al venerdì, dalle 08:00 alle 18:00. Giorni di chiusura: 2026-12-08, 2026-12-24, 2026-12-25, 2026-12-26, 2026-12-31.
+
+Laboratori: LAB-INF1 "Laboratorio Informatica 1", 24 posti; LAB-INF2 "Laboratorio Informatica 2", 20 posti; LAB-RETI "Laboratorio Reti", 18 posti; LAB-ELET "Laboratorio Elettronica", 16 posti.
+
+Docenti: d01 Giulia Prova (giulia.prova@demo.invalid); d02 Mario Esempio (mario.esempio@demo.invalid); d03 Elena Finta (elena.finta@demo.invalid); d04 Paolo Demo (paolo.demo@demo.invalid).
+
+Classi: 2B-SIS "2B Sistemi", 19 studenti; 3A-INF "3A Informatica", 22; 3B-ELE "3B Elettronica", 15; 3C-INF "3C Informatica", 24; 4A-INF "4A Informatica", 25.
+
+Prenotazioni:
+P-0001 LAB-INF1, d01, 3A-INF, 2026-10-12, 08:00-10:00, attiva
+P-0002 LAB-INF2, d02, 3C-INF, 2026-10-14, 10:00-12:00, attiva
+P-0003 LAB-INF1, d01, 3A-INF, 2026-11-12, 09:00-11:00, attiva
+P-0004 LAB-INF1, d03, 2B-SIS, 2026-11-12, 11:00-13:00, attiva
+P-0005 LAB-RETI, d02, 3C-INF, 2026-11-16, 14:00-16:00, attiva
+P-0006 LAB-ELET, d04, 3B-ELE, 2026-11-17, 08:00-10:00, annullata
+P-0007 LAB-INF2, d03, 2B-SIS, 2026-11-18, 10:00-12:00, attiva
+P-0008 LAB-INF1, d02, 3C-INF, 2026-12-03, 14:00-17:00, attiva
+
+La dashboard deve mostrare la settimana di ogni laboratorio, partendo da quella del 16 novembre 2026 con le frecce per le settimane vicine, e mettere in evidenza i problemi: classi che non entrano in un laboratorio, prenotazioni che si sovrappongono, prenotazioni in giorni di chiusura.
+
+Non costruire ancora niente. Prima scrivimi un piano: quali viste farai, quali regole userai per dire che due prenotazioni si sovrappongono e che una classe non entra, come tratterai le prenotazioni annullate, che cosa NON farai (per esempio niente accesso, niente servizi esterni, niente intelligenza artificiale dentro l'app, nessun dato reale), e quali domande hai per me. Poi aspetta la mia risposta.`;
+
+const CORREZIONE_PIANO = String.raw`Tre correzioni. Due prenotazioni che si toccano, una che finisce alle 11:00 e una che comincia alle 11:00, non si sovrappongono. Le prenotazioni annullate si vedono barrate ma non contano per le sovrapposizioni. Una classe di 24 studenti entra in un laboratorio da 24 posti. La dashboard è solo da leggere: niente pulsanti per prenotare o annullare.`;
+
+const VIA_DASHBOARD = String.raw`Va bene, con queste correzioni. Costruisci la dashboard e, finito, dimmi in poche righe che cosa hai fatto e che cosa non hai potuto verificare.`;
 
 /* Collegamento alla simulazione (pagina propria dell'argomento, nella stessa cartella). */
 const SimLink = () => (
@@ -358,17 +403,150 @@ const slides = [
     block: B + 'Apertura',
     content: () => (
       <Apertura n="1" titolo="Dal chatbot all'agente"
-        sottotitolo="Ciclo, contesto e permessi: che cosa fa un agente di programmazione, che cosa vede e che cosa gli lasciamo fare."
-        caso="Il caso: un gruppo di dieci agenti che per mesi sembrava funzionare."
-        prima="nessun argomento: si può partire da qui." />
+        sottotitolo="Dalla stessa richiesta fatta a un chatbot a un agente che lavora nella tua cartella: chi agisce, dove, e chi controlla."
+        caso="Si comincia provando, prima di qualunque spiegazione." />
     ),
-    notes: "Questo argomento segue la demo di AI Studio. Si riparte da una domanda: che differenza c'è tra chiedere un risultato a un chatbot e dare un compito a un agente che lavora in una cartella? Il resto dell'argomento risponde in tre mosse: il ciclo, il contesto, i permessi. In mezzo c'è un episodio del racconto in cui tutto sembrava funzionare e non era così, e in fondo un'esercitazione con l'agente installato. Ogni affermazione sulle funzioni di Claude Code riporta la data (novembre 2026) e il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale comunque."
+    notes: "Si parte da una prova, non da una definizione. Prima tutti fanno la stessa richiesta tecnica a un chatbot e confrontano le risposte; poi due prove con Google AI Studio (un gioco senza piano, una dashboard con piano); poi la scala che va dal chatbot all'agente, con qualche esempio dal lavoro di Thomas; infine che cosa è un agente e la prima esercitazione con l'agente installato. Ogni affermazione sulle funzioni degli strumenti riporta la data (novembre 2026) e, dove c'è, il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente in aula è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale con qualunque modello."
   },
   {
-    block: B + 'La demo: piano o niente piano',
+    block: B + 'Prima provate',
     content: () => (
       <div className="pad">
-        <Tag>Dalla demo</Tag>
+        <Tag>Prima provate</Tag>
+        <h2>La stessa richiesta, a tutti</h2>
+        <p>Aprite un chatbot a scelta, in una chat nuova, e incollate <strong>tutti la stessa richiesta</strong>, parola per parola. Non correggete niente. Per ora non eseguite lo script.</p>
+        <CommandBox kind="text" tall cmd={RICHIESTA_PC} label="Richiesta da incollare (dati inventati: i PC e gli indirizzi non esistono)" />
+      </div>
+    ),
+    notes: "Chi parla fa incollare questa richiesta a tutti, nello stesso momento, in una chat nuova di un chatbot a scelta. Nessuno corregge e nessuno esegue lo script: lo scopo è avere risposte diverse da confrontare. I dati sono inventati e gli indirizzi sono nell'intervallo riservato alla documentazione. Due casi sono scelti apposta: il PC03 è fermo a esattamente 90 giorni dalla data di riferimento (più di 90 vuol dire che non va segnalato, ma non tutti lo leggono così) e due PC hanno lo stesso indirizzo. Nei servizi gratuiti i contenuti possono essere letti da revisori: per questo i dati sono inventati. Quale chatbot usare dipende da ciò che è disponibile sui PC del laboratorio: da verificare a schermo."
+  },
+  {
+    block: B + 'Prima provate',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima provate</Tag>
+        <h2>Mettete le risposte una accanto all'altra</h2>
+        <div className="grid">
+          <Card title="Il linguaggio"><p>Python, JavaScript, PowerShell? Chi ha scelto, e perché?</p></Card>
+          <Card title="Dove stanno i dati" kind="i"><p>Dentro il codice, in un file CSV da leggere, o chiesti all'utente?</p></Card>
+          <Card title="Il caso al limite" kind="w"><p>Il PC03 è fermo a 90 giorni esatti. Viene segnalato o no? Lo dice?</p></Card>
+          <Card title="Cosa dichiara"><p>Dice di aver eseguito lo script? Mostra un risultato? Chiede qualcosa o assume?</p></Card>
+        </div>
+        <p style={{ marginTop: 10 }}>Poi eseguite lo script, se il linguaggio è installato: l'elenco dei PC segnalati è lo stesso per tutti?</p>
+      </div>
+    ),
+    notes: "Chi parla fa leggere a voce alta due o tre risposte e mette in fila le differenze: linguaggio, dove stanno i dati, come è trattato il PC03, che cosa dice di aver fatto. Non si dà ancora la spiegazione. Alla domanda finale ci si aspetta risposte diverse anche sull'elenco: due PC sono sicuramente da segnalare per l'aggiornamento (PC02 e PC08) e due per l'indirizzo (PC02 e PC05); il PC03 dipende da come si legge «più di 90». Da verificare a schermo, con il chatbot che si userà in aula, se esegue il codice che scrive: molti non lo fanno, alcuni sì."
+  },
+  {
+    block: B + 'Prima provate',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima provate</Tag>
+        <h2>Perché le risposte sono diverse</h2>
+        <div className="cols">
+          <Card title="Il modello scrive testo">
+            <p>A ogni passo sceglie la continuazione più plausibile tra quelle possibili. La richiesta lasciava aperte molte scelte (linguaggio, formato, limite dei 90 giorni), e ogni risposta ne fa di diverse.</p>
+          </Card>
+          <Card title="La scrivania" kind="i">
+            <p>Il modello vede solo ciò che sta sulla scrivania: la tua richiesta, gli allegati, la conversazione. Non vede il tuo PC, i tuoi file, né l'esito di uno script che nessuno ha eseguito.</p>
+          </Card>
+        </div>
+        <Box type="info" title="Da portarsi dietro">Quello che sta sulla scrivania si chiama contesto. Tutto ciò che segue riguarda chi decide che cosa metterci, e chi controlla ciò che ne esce.</Box>
+      </div>
+    ),
+    notes: "Spiegazione breve, con le parole del corso collegato: il modello prevede il testo successivo, per questo risposte diverse alla stessa richiesta; la scrivania è il contesto. Non entrare nei dettagli dei token e della finestra di contesto: se ne parla nell'argomento 11. Un chatbot con strumenti di esecuzione può fare di più di quanto scritto qui: è proprio il tema della scala che arriva dopo."
+  },
+  {
+    block: B + 'Google AI Studio',
+    content: () => (
+      <div className="pad">
+        <Tag>Google AI Studio</Tag>
+        <h2>Un costruttore di app: Build mode</h2>
+        <div className="cols">
+          <Card title="Cosa fa">
+            <ul>
+              <li>Descrivi l'app in un prompt: viene generata, con un'anteprima da provare</li>
+              <li>Web app o app Android</li>
+              <li>Le app sono private di default</li>
+            </ul>
+          </Card>
+          <Card title="Cosa vedrete" kind="i">
+            <ul>
+              <li>Un gioco chiesto in una riga, senza piano</li>
+              <li>Una dashboard dei laboratori, chiesta con un piano da leggere prima</li>
+            </ul>
+          </Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Che tipo di codice generi Build mode (si dice React e TypeScript): da verificare a schermo.</p>
+        <FonteGoogle />
+      </div>
+    ),
+    notes: "Due prove dal vivo con lo stesso strumento, senza screenshot nelle slide: ciò che si vede lo si vede sul proiettore, dai dati inventati della palestra. Fonti: documentazione di Google AI Studio letta il 17/11/2026. La pagina dice che l'app viene generata da un prompt e che è privata di default. Che il codice generato sia React e TypeScript è riportato da fonti secondarie e non è stato verificato: si dice solo dopo averlo visto. Se Build mode non è disponibile per l'account, si passa alla registrazione preparata."
+  },
+  {
+    block: B + 'Google AI Studio',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima le avvertenze</Tag>
+        <h2>Cosa non si fa con AI Studio</h2>
+        <div className="grid">
+          <Card title="Servizi gratuiti" kind="w"><p>I contenuti si usano per migliorare i prodotti e possono essere letti da revisori umani. I termini dicono di non inviare informazioni sensibili o personali. Qui i dati sono inventati.</p></Card>
+          <Card title="Publish" kind="d"><p>Crea un indirizzo pubblico, aperto a chiunque lo abbia, e l'app usa la chiave dell'autore. In aula non si preme.</p></Card>
+          <Card title="Account scolastico" kind="w"><p>Quali condizioni valgano per un account Education non è chiaro nella documentazione: da verificare. Lo Starter Tier non è disponibile con Workspace, Education compresi.</p></Card>
+        </div>
+        <FonteGoogle />
+      </div>
+    ),
+    notes: "Si dicono a voce prima di cominciare. Servizi gratuiti: contenuti usati per migliorare i prodotti e leggibili da revisori umani, dati scollegati dall'account; i termini dicono di non inviare informazioni sensibili, riservate o personali. Publish: indirizzo pubblico per chiunque; dopo la pubblicazione l'app usa la chiave dell'autore per tutti gli utenti; condividere non è la stessa cosa, ma chi riceve vede il codice e può farne copie. Account Education: la documentazione non nomina Education per Build mode; l'accesso di default c'è in tutte le edizioni Workspace, ma non per gli utenti sotto i 18 anni con Workspace for Education. Starter Tier: non per Workspace, Education compresi, servirebbe un account di fatturazione. Tutto riletto il 17/11/2026: ricontrollare prima di dirlo."
+  },
+  {
+    block: B + 'Il gioco, senza piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 1 · senza piano</Tag>
+        <h2>Un gioco, chiesto in una riga</h2>
+        <CommandBox kind="text" tall cmd={RICHIESTA_GIOCO} label="Richiesta da incollare in Build mode" />
+        <ul>
+          <li>Nessun piano: si lascia partire e si prova subito.</li>
+          <li>Se c'è un difetto, si chiede la correzione in una riga. Se non va, si butta e si rifà.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Chi parla incolla la richiesta e lascia partire, senza chiedere un piano. Mentre lo strumento lavora legge a voce alta ciò che scrive di sé: file creati, passi fatti. Poi prova il gioco davanti alla sala. Se c'è un difetto (un inseguitore che attraversa i muri) è materiale buono: una correzione in una riga. Frase chiave: qui andare veloci costa poco, se non va si butta e si rifà. Il codice non si legge. Se lo strumento non risponde, si passa alla registrazione di riserva."
+  },
+  {
+    block: B + 'La dashboard, con piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 2 · con piano</Tag>
+        <h2>La dashboard dei laboratori</h2>
+        <p>Dati inventati, gli stessi della palestra. L'ultimo capoverso chiede un piano e poi di aspettare.</p>
+        <CommandBox kind="text" tall cmd={RICHIESTA_DASHBOARD} label="Richiesta 1: da incollare in Build mode" />
+      </div>
+    ),
+    notes: "La richiesta contiene i dati, la vista voluta e la regola che conta: non costruire ancora niente, scrivere prima un piano (viste, regole, annullate, cosa non farà, domande) e aspettare. I dati sono quelli del file dei dati della palestra: laboratori, docenti, classi, prenotazioni, giorni di chiusura. Da verificare a schermo: che Build mode scriva il piano senza costruire; se costruisce subito, si ripete la richiesta con «Non costruire ancora niente, scrivi solo il piano», ed è già una lezione. Nessuno screenshot dell'account nelle slide."
+  },
+  {
+    block: B + 'La dashboard, con piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 2 · con piano</Tag>
+        <h2>Si legge il piano e lo si corregge</h2>
+        <ol className="steps">
+          <li><b>Si legge insieme.</b> Quali viste? Che regola ha scelto per le sovrapposizioni? Che cosa fa delle annullate? Che cosa non farà? Quali regole ha inventato?</li>
+          <li><b>Si corregge il piano, non il codice.</b></li>
+        </ol>
+        <CommandBox kind="text" cmd={CORREZIONE_PIANO} label="La correzione" />
+        <CommandBox kind="text" cmd={VIA_DASHBOARD} label="Poi il via" />
+      </div>
+    ),
+    notes: "Il piano scritto dallo strumento cambia da una prova all'altra: si legge davanti alla sala e si adatta la correzione. Le tre regole sono quelle della palestra e il modello le sbaglia spesso, soprattutto sulle sovrapposizioni (estremi che si toccano) e sulle annullate. A lavoro finito si guarda: la classe 4A-INF (25 studenti) non entra in nessun laboratorio, la dashboard lo dice? La prenotazione annullata è barrata? Le due prenotazioni che si toccano alle 11:00 non sono segnalate come conflitto? Se il prototipo ne sbaglia una è materiale buono: nel prototipo nessuno lo controlla, nell'app vera lo controlla un test. Da verificare a schermo: che la pagina non chiami il modello per «analizzare» le prenotazioni."
+  },
+  {
+    block: B + 'Con piano, senza piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Dalle due prove</Tag>
         <h2>Con piano, senza piano</h2>
         <div className="cols">
           <Card title="Senza piano" kind="w">
@@ -386,67 +564,104 @@ const slides = [
             </ul>
           </Card>
         </div>
-        <Box type="info" title="In questo argomento">Lo stesso gesto, con un agente che lavora in una cartella: il piano elenca anche i file che legge, quelli che modifica e come verifica il risultato.</Box>
+        <Box type="info" title="Il prototipo e il piano">Il prototipo dice che cosa vogliamo e si può buttare. Il piano, corretto in aula, si conserva: è l'idea da cui parte il lavoro vero.</Box>
       </div>
     ),
-    notes: "Qui chi parla richiama la demo di AI Studio vista in apertura, con le sue parole: un gioco chiesto senza piano, poi una dashboard chiesta con un piano. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. La stessa idea torna in questo argomento (la modalità piano) e nella prima esercitazione, dove l'agente è installato sul PC e lavora su una cartella di prova."
+    notes: "Chi parla richiama le due prove con le sue parole: un gioco chiesto in una riga, una dashboard chiesta con un piano da leggere. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. Il prototipo non si tiene; il piano si salva in un file, e dopo l'installazione dell'agente (argomento 2) lo si ritrova nella palestra, l'app vera. Il piano torna nell'argomento 4, dove si impara a leggerlo e a trasformarlo in una specifica."
   },
   {
-    block: B + 'Tre strumenti',
+    block: B + 'La scala',
     content: () => (
       <div className="pad">
-        <Tag>Chatbot, completamento, agente</Tag>
-        <h2>Tre cose diverse</h2>
-        <DT cols={['', 'Chatbot', 'Completamento nell\'editor', 'Agente']} rows={[
-          ['Cosa vede', 'Solo quello che scrivi, incolli o allegi', 'Il file aperto e i dintorni', 'Il progetto: cerca e legge i file da solo'],
-          ['Cosa produce', 'Testo da leggere e da copiare', 'La riga o il blocco successivo', 'Modifiche a più file e comandi eseguiti'],
-          ['Chi controlla', 'Tu, incollando e provando', 'Tu, mentre scrivi', 'Anche l\'agente (test, errori); la prova finale resta tua'],
-        ]} />
-        <p className="muted">I confini si sfumano: molti chatbot hanno ormai degli strumenti. Conta che cosa il programma intorno al modello gli permette di fare.</p>
-      </div>
-    ),
-    notes: "Tre colonne, tre ruoli. Il chatbot lavora su ciò che gli porti. Il completamento è dentro l'editor e propone il pezzo successivo. L'agente ha accesso al progetto e a un terminale. La domanda utile non è quale sia più intelligente, ma chi decide quali file entrano nel contesto e chi esegue le prove. Precisare che le categorie sono didattiche: gli strumenti reali le mescolano."
-  },
-  {
-    block: B + 'La stessa richiesta',
-    content: () => (
-      <div className="pad">
-        <Tag>Chatbot, completamento, agente</Tag>
-        <h2>La stessa richiesta, tre esiti</h2>
-        <p>«Controlla le richieste di installazione software della cartella e dimmi quali si possono accettare.»</p>
-        <div className="grid">
-          <Card title="Chatbot"><p>Lavora su ciò che gli incolli: i file li porti tu, uno per uno. Rinominare, spostare e contare le licenze restano lavoro tuo.</p></Card>
-          <Card title="Completamento" kind="i"><p>Non è fatto per questo: suggerisce righe mentre scrivi nel file aperto. Quale file e quali passi li scegli tu.</p></Card>
-          <Card title="Agente" kind="w"><p>Legge i file della cartella, scrive un programma per i conti, chiede il permesso prima di rinominare e dichiara cosa non ha verificato. Tu leggi la traccia.</p></Card>
+        <Tag>Dal chatbot all'agente</Tag>
+        <h2>Una scala a quattro gradini</h2>
+        <div role="group" aria-label="La scala: chatbot, chatbot con canvas e app collegate, costruttore di app, agente nella cartella">
+          <Flow nodes={[
+            ['1 Chatbot', 'scrive testo nella chat'],
+            ['2 Chatbot con canvas e app collegate', 'area di lavoro accanto alla chat, azioni nelle app'],
+            ['3 Costruttore di app', 'genera un\'app con anteprima (AI Studio)', 'w'],
+            ['4 Agente nella tua cartella', 'Claude Code, OpenCode', 'i'],
+          ]} />
         </div>
-        <Box type="info" title="Simulazione ed esercitazione">È proprio questo il compito: una cartella di richieste con nomi disordinati, un catalogo e un regolamento.</Box>
+        <p className="muted" style={{ marginTop: 12 }}>Non è un confine netto: è una scala che si sale un gradino alla volta, e i prodotti reali stanno a cavallo.</p>
+        <p className="legend">Funzioni dei chatbot descritte come nella ricerca del corso collegato (settembre 2026): nomi e disponibilità cambiano per prodotto, da riverificare.</p>
       </div>
     ),
-    notes: "Esempio sulla cartella della prima esercitazione (dati inventati: venti richieste di installazione software in una scuola inventata, con un regolamento da applicare). Il confronto è didattico: gli strumenti reali mescolano le categorie, e un chatbot con strumenti collegati può fare più di quanto scritto qui. Il punto è dove sta il lavoro di adattamento: nel chatbot è di chi incolla, nell'agente passa in parte allo strumento, ma la responsabilità di ciò che entra nella cartella resta di chi guida. Da verificare a schermo, con l'agente installato, cosa fa davvero davanti a questa richiesta."
+    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
+  },
+  {
+    block: B + 'La scala',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal chatbot all'agente</Tag>
+        <h2>Chi agisce, dove, chi controlla</h2>
+        <DT cols={['Gradino', 'Chi agisce', 'Dove', 'Chi controlla']} rows={[
+          ['1 Chatbot', 'Il modello: scrive testo', 'Nella chat', 'Tu: copi, incolli, provi'],
+          ['2 Con canvas e app collegate', 'Il modello, anche con azioni nelle app', 'Chat, area di lavoro, app collegate', 'Tu: ogni azione che esce dalla chat chiede una conferma'],
+          ['3 Costruttore di app', 'Il modello scrive il codice di un\'app', 'Nell\'ambiente del servizio, con un\'anteprima', 'Tu: provi l\'app e leggi il piano; il codice di solito non lo leggi'],
+          ['4 Agente nella cartella', 'Il modello con strumenti: legge, modifica, esegue', 'Nella tua cartella, sul tuo PC', 'Tu: permessi, traccia delle azioni, test, differenze'],
+        ]} />
+      </div>
+    ),
+    notes: "Tre domande per ogni gradino: chi agisce, dove, chi controlla. Per il gradino 2 un esempio visto nel corso collegato (prova del 23/11/2026): un chatbot con le app collegate ha creato bozze direttamente in Gmail e ha chiesto «Vuoi inviarlo subito?»: la risposta spetta a chi usa lo strumento. Per il gradino 3, nella demo il controllo era il piano letto prima e il risultato provato dopo. Per il gradino 4 il controllo è nelle mani di chi guida: si impara negli argomenti 2, 3 e 6 (permessi, Git, test). La tabella è una semplificazione: i prodotti reali mescolano i gradini."
+  },
+  {
+    block: B + 'Due modi di fare lo stesso lavoro',
+    content: () => (
+      <div className="pad">
+        <Tag>Chatbot e agente</Tag>
+        <h2>Lo stesso lavoro, in due modi</h2>
+        <p>«Controlla i cinque file di inventario dei laboratori e dimmi quali PC sono da aggiornare o hanno lo stesso indirizzo.»</p>
+        <DT cols={['', 'Chatbot', 'Agente']} rows={[
+          ['I file', 'Li porti tu: incolli o allegi', 'Li cerca e li apre nella cartella'],
+          ['Lo script', 'Lo scrive; lo esegui e lo correggi tu', 'Lo scrive, chiede il permesso, lo esegue e legge l\'esito'],
+          ['Cosa consegna', 'Testo da leggere e da provare', 'File, esito dei comandi, elenco di ciò che non ha verificato'],
+          ['Chi decide', 'Tu', 'Tu: permessi, traccia, prova finale'],
+        ]} />
+        <Box type="tip" title="Una conclusione prudente">Sulle stesse pratiche scolastiche, nel corso collegato, un chatbot con i file allegati e un agente hanno trovato gli stessi problemi (prova del 23/11/2026). Non c'è un modo giusto e uno sbagliato. Sul compito dei PC è da verificare a schermo.</Box>
+      </div>
+    ),
+    notes: "Il caso è tecnico e inventato: cinque file di inventario, uno per laboratorio. La tabella descrive come lavorano i due strumenti, non chi vince. La prova reale del corso collegato (23/11/2026) ha smentito la tesi «il chatbot sbaglia, l'agente si corregge»: i due risultati erano entrambi corretti, in modi diversi. Quindi qui non si afferma che un modo sia migliore. Tendenza da verificare a schermo sul vostro compito: il chatbot conviene per pochi file e azioni nelle proprie app; l'agente per molti file, lavori da ripetere, da ricontrollare. Il confronto vero con i PC del laboratorio si fa in aula, e va annotato."
+  },
+  {
+    block: B + 'Dal lavoro di Thomas',
+    content: () => (
+      <div className="pad">
+        <Tag>Esempi dal lavoro vero</Tag>
+        <h2>Quattro esempi dal lavoro di Thomas</h2>
+        <div className="grid">
+          <Card title="Prenota Risorse"><p>Online e in uso alla scuola. Uno dei portali nati per digitalizzare per prime le attività che, per un docente, andavano dematerializzate. <em>Argomento 14.</em></p></Card>
+          <Card title="Il primo messaggio del Portale Viaggi" kind="i"><p>Scritto il 5 luglio 2026 alle 18:49. Alle 20:00 c'era un sistema completo in locale, con 49 test. Il portale è in fase di test. <em>Argomento 14.</em></p></Card>
+          <Card title="Dieci agenti che «funzionavano»" kind="w"><p>Per mesi un gruppo di agenti è sembrato lavorare, ma non era mai partito. <em>Argomento 8.</em></p></Card>
+          <Card title="Memoteca"><p>Un metodo pubblico per far lavorare una squadra di agenti, con un revisore obbligatorio prima di dichiarare finito. <em>Argomento 8.</em></p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Quattro esempi tangibili, solo da fonti documentate; ciascuno ha il suo argomento di approfondimento. Prenota Risorse: stato confermato da Thomas (online e in uso; Portale FSL e Portale Viaggi in fase di test, finché il codice non passa su un server con infrastruttura di rete certificata). Il primo messaggio del Portale Viaggi: orari dal registro della sessione del 5 luglio 2026 (18:49 il messaggio, 20:00 la consegna, 49 test, nove commit); era completo in locale, non in produzione. Il caso dei dieci agenti: nel file di istruzioni dei due agenti principali c'era una barra rovesciata davanti ai tre trattini e gli altri non avevano l'intestazione: per mesi i subagenti non sono stati caricati, e nulla di visibile andava storto. Lezione ripresa più avanti: il racconto di un agente non è la prova, la traccia sì. Memoteca: repository pubblico, versione 0.4.1 del 5/11/2026. Non si citano altri episodi in questo argomento."
   },
   {
     block: B + 'Che cos\'è un agente',
     content: () => (
       <div className="pad">
         <Tag>Il ciclo</Tag>
-        <h2>Modello + strumenti + ciclo</h2>
-        <div className="cols">
+        <h2>Modello + strumenti + ciclo + permessi</h2>
+        <div className="grid">
           <Card title="Il modello"><p>Ragiona sul compito e decide la mossa successiva. Da solo può solo rispondere con del testo.</p></Card>
           <Card title="Gli strumenti" kind="i">
             <ul>
               <li>File: leggere, modificare, creare</li>
-              <li>Ricerca: per nome e per contenuto</li>
+              <li>Ricerca e web</li>
               <li>Esecuzione: comandi, test, git</li>
-              <li>Web: pagine e documentazione</li>
             </ul>
           </Card>
+          <Card title="Il ciclo" kind="i"><p>Ogni risultato di uno strumento rientra nel ciclo e guida la mossa dopo.</p></Card>
+          <Card title="I permessi" kind="w"><p>Ciò che cambia qualcosa chiede il tuo sì. Le prime richieste le vedrete nell'argomento 2.</p></Card>
         </div>
-        <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). Ogni risultato di uno strumento rientra nel ciclo e guida la mossa dopo.</Box>
-        <Box type="tip" title="In aula">In aula il modello è un Claude, scelto dalla configurazione del laboratorio. Ciclo, contesto e permessi funzionano allo stesso modo con qualunque modello.</Box>
+        <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). In aula il modello è un Claude scelto dalla configurazione del laboratorio: il metodo vale con qualunque modello.</Box>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Agente come somma di tre pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. Il modello usato in aula lo sceglie la configurazione del laboratorio (un Claude); non affermare quale versione."
+    notes: "Un agente come somma di quattro pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega, permessi che decidono cosa può fare senza chiedere. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. I permessi in dettaglio, le modalità e la partenza in Manual si vedono quando si installa l'agente (argomento 2); la finestra di contesto e i costi sono nell'argomento 11."
   },
   {
     block: B + 'Il ciclo',
@@ -475,24 +690,24 @@ const slides = [
       <div className="pad">
         <Tag>Simulazione</Tag>
         <h2>Indovina la mossa dell'agente</h2>
-        <p>Lo stesso compito della prima esercitazione, passo per passo. Prima di ogni mossa scegli tra tre opzioni, poi leggi cosa è successo nella traccia.</p>
+        <p>Il compito della prima esercitazione, passo per passo: aggiungere un filtro per laboratorio alla palestra. Prima di ogni mossa scegli tra tre opzioni, poi leggi cosa è successo nella traccia.</p>
         <ul>
           <li>Dove si ferma e aspetta una persona</li>
           <li>Quali azioni chiedono un permesso</li>
-          <li>Cosa conta con un programma, cosa lascia a chi decide</li>
+          <li>Che cosa prova con un comando vero e con i test</li>
         </ul>
         <SimLink />
         <p className="muted" style={{ marginTop: 10 }}>Sequenza didattica con dati inventati: non è l'output di un modello vero.</p>
       </div>
     ),
-    notes: "Si può fare in plenaria: la classe sceglie, poi si legge la traccia. Le mosse da indovinare sono dieci: attesa del sì al piano, lettura della procedura (la skill) e dei dati, programma per i conti, caso ambiguo lasciato alla persona, permesso prima di rinominare, elenco prima e dopo, controllo finale con un programma, limiti dichiarati, consegna. È una sequenza scritta a tavolino, non una registrazione: un agente vero può cambiare ordine e parole. Vale la regola di sempre: conta ciò che si legge nella traccia."
+    notes: "Si può fare in plenaria: la classe sceglie, poi si legge la traccia. Le mosse da indovinare sono dieci: attesa del sì al piano, lettura del codice invece di fidarsi del file di istruzioni, test prima di modificare, permesso prima di modificare, solo i file annunciati, la scelta che il piano non faceva lasciata a chi decide, test aggiunto, controllo con un comando vero, limiti dichiarati, consegna. È una sequenza scritta a tavolino, non una registrazione: un agente vero può cambiare ordine e parole. Vale la regola di sempre: conta ciò che si legge nella traccia."
   },
   {
     block: B + 'Cosa vede l\'agente',
     content: () => (
       <div className="pad">
         <Tag>Contesto</Tag>
-        <h2>Cosa vede, cosa non vede</h2>
+        <h2>La scrivania dell'agente</h2>
         <div className="cols">
           <Card title="Vede">
             <ul>
@@ -511,10 +726,11 @@ const slides = [
             </ul>
           </Card>
         </div>
+        <p className="muted" style={{ marginTop: 10 }}>La scrivania si riempie a ogni lettura e a ogni comando: come tenerla in ordine e quanto costa, nell'argomento 11.</p>
         <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
       </div>
     ),
-    notes: "Il contesto è tutto ciò che il modello ha davanti quando decide. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 5. Sottolineare la colonna di destra: gran parte degli errori degli agenti viene da qualcosa che non vedevano."
+    notes: "Stessa scrivania della prima prova, ma più grande: l'agente la riempie da solo, leggendo file e lanciando comandi. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 5. La gestione del contesto (comandi per vederlo, compattarlo, svuotarlo) e i costi sono nell'argomento 11."
   },
   {
     block: B + 'Il contesto può mentire',
@@ -536,43 +752,7 @@ const slides = [
         <Box type="warn" title="Regola">Per l'agente il testo che legge è un fatto, finché qualcosa non lo smentisce. La verifica è di chi guida.</Box>
       </div>
     ),
-    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nella prima esercitazione i partecipanti controllano a mano ciò che l'agente dice di aver capito: è la stessa abitudine, applicata."
-  },
-  {
-    block: B + 'Cosa riempie il contesto',
-    content: () => (
-      <div className="pad">
-        <Tag>Finestra di contesto</Tag>
-        <h2>La finestra di contesto si riempie</h2>
-        <DT cols={['Cosa entra', 'Quando', 'Come cresce']} rows={[
-          ['Istruzioni di progetto e memoria', 'All\'avvio', 'Fisso, sempre presente'],
-          ['File letti', 'A ogni lettura', 'Con la dimensione del file'],
-          ['Output dei comandi', 'A ogni comando', 'Un test che stampa molto pesa quanto un file'],
-          ['Conversazione', 'A ogni messaggio', 'A ogni giro del ciclo'],
-        ]} />
-        <Box type="info" title="Finestra di contesto">È la quantità massima di testo (misurata in <em>token</em>, pezzi di parola) che il modello può avere davanti insieme. Oltre il limite non entra altro, e ogni messaggio costa in token (argomento 11).</Box>
-        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
-      </div>
-    ),
-    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo; l'argomento 11 ci torna. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello usato."
-  },
-  {
-    block: B + 'Quando è piena',
-    content: () => (
-      <div className="pad">
-        <Tag>Finestra di contesto</Tag>
-        <h2>Quando il contesto è pieno</h2>
-        <p>Claude Code <strong>compatta</strong> la conversazione in un riassunto. Le richieste e i pezzi di codice chiave restano; i dettagli delle istruzioni date all'inizio possono perdersi.</p>
-        <DT cols={['Comando', 'Che cosa fa']} rows={[
-          [<code>/context</code>, 'Mostra cosa occupa spazio, per categoria'],
-          [<code>/compact</code>, 'Compatta ora; si può dire su cosa concentrarsi'],
-          [<code>/clear</code>, 'Svuota: conviene tra compiti non collegati'],
-        ]} />
-        <Box type="warn" title="Regola">Ciò che deve valere sempre sta nel file di istruzioni di progetto, non nella conversazione: dopo la compattazione viene ricaricato dal disco.</Box>
-        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
-      </div>
-    ),
-    notes: "Secondo la documentazione (novembre 2026) la compattazione è automatica e si può anche chiedere a mano con /compact, eventualmente con un'indicazione su cosa tenere. /context mostra l'occupazione reale. /clear tra compiti diversi: la conversazione vecchia ruba posto e costa token a ogni messaggio. Le istruzioni di progetto vengono ricaricate dal disco dopo la compattazione. Altri dettagli (cosa viene ricaricato) sono nella pagina context-window."
+    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nella prima esercitazione i partecipanti controllano a mano ciò che l'agente dice di aver capito, e il file di istruzioni della palestra nomina un file dei dati che nella cartella non c'è: è la stessa abitudine, applicata."
   },
   {
     block: B + 'Domanda 1',
@@ -587,104 +767,14 @@ const slides = [
         ]} />
       </div>
     ),
-    notes: "Anticipa l'episodio del racconto. La differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nel diff (argomento 3); nella prima esercitazione, senza Git, si confrontano la traccia, i file e il riepilogo."
+    notes: "Richiama l'esempio dei dieci agenti: la differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nelle differenze (argomento 3); nella prima esercitazione, senza Git, si confrontano la traccia, i file, i numeri dei test e l'impronta del file dei dati."
   },
   {
-    block: B + 'Permessi',
+    block: B + 'Tu sei nel ciclo',
     content: () => (
       <div className="pad">
-        <Tag>Permessi</Tag>
-        <h2>Che cosa chiede prima di agire</h2>
-        <DT cols={['Tipo di azione', 'Esempio', 'In modalità Manual']} rows={[
-          ['Lettura', 'Read, ricerca nei file', 'Non chiede, dentro la cartella di lavoro'],
-          ['Comandi di shell', 'Bash', 'Chiede, salvo un piccolo insieme di comandi di sola lettura'],
-          ['Modifica di file', 'Edit, Write', 'Chiede'],
-          ['Web', 'Pagine e ricerche', 'Chiede (salvo domini di documentazione già approvati)'],
-        ]} />
-        <Box type="warn" title="«Yes, and don't ask again»">Per i comandi Bash vale <strong>per sempre</strong> in quel repository e per quel comando. Per le modifiche ai file, fino a fine sessione.</Box>
-        <Fonte href="https://code.claude.com/docs/en/permissions">code.claude.com/docs/en/permissions</Fonte>
-      </div>
-    ),
-    notes: "Tabella ripresa dalla documentazione dei permessi (novembre 2026). Il punto pratico: in Manual le letture sono libere e tutto ciò che cambia qualcosa chiede. Il «non chiedere più» ha una durata diversa a seconda dello strumento: per Bash è permanente, per repository e comando. In aula non lo si usa, per non lasciare permessi sui PC condivisi."
-  },
-  {
-    block: B + 'Le modalità',
-    content: () => (
-      <div className="pad">
-        <Tag>Permessi</Tag>
-        <h2>Le modalità di permesso</h2>
-        <DT cols={['Modalità', 'Va senza chiedere', 'A che serve']} rows={[
-          [<>Manual <code>default</code></>, 'Solo le letture', 'Rivedere ogni azione'],
-          [<code>acceptEdits</code>, 'Letture, modifiche ai file e comandi come mkdir, mv, rm, nella cartella', 'Iterare su codice che rivedi dopo'],
-          [<code>plan</code>, 'Letture: nessuna modifica ai sorgenti', 'Esplorare prima di cambiare'],
-          [<code>auto</code>, 'Quasi tutto, con un controllo automatico di sicurezza', 'Compiti lunghi'],
-          [<code>dontAsk</code>, 'Solo quanto già approvato; il resto è negato', 'Script e CI'],
-          [<code>bypassPermissions</code>, 'Tutto', 'Solo contenitori e VM isolati'],
-        ]} />
-        <p className="muted">In sessione: <code>Shift+Tab</code> fa girare le modalità. All'avvio: <code>claude --permission-mode plan</code>.</p>
-        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
-      </div>
-    ),
-    notes: "Sei modalità, dalla più prudente alla più libera. Nomi esatti come in documentazione (novembre 2026): la modalità chiamata Manual nell'interfaccia è default nei file di configurazione. Le regole di rifiuto valgono in ogni modalità. bypassPermissions solo in ambienti isolati: non lo usiamo. auto richiede disponibilità sul fornitore e sul modello. dontAsk non compare nel giro di Shift+Tab. Attenzione: acceptEdits approva da solo anche i comandi di file più comuni (mkdir, touch, rm, rmdir, mv, cp, sed) dentro la cartella di lavoro."
-  },
-  {
-    block: B + 'Perché Manual',
-    content: () => (
-      <div className="pad">
-        <Tag>Permessi</Tag>
-        <h2>In aula si parte da Manual</h2>
-        <div className="grid">
-          <Card title="Vedi ogni azione"><p>Prima che accada. Si impara il ciclo guardandolo passo passo.</p></Card>
-          <Card title="Gli errori costano poco" kind="i"><p>Un comando sbagliato letto prima di approvarlo non fa danni.</p></Card>
-          <Card title="Sul PC del laboratorio è imposta" kind="w"><p>Un file di impostazioni gestite fa partire la sessione in Manual. A casa, o su un PC non preparato, la partenza va fissata da sé.</p></Card>
-        </div>
-        <Box type="warn" title="Attenzione al valore predefinito">Per la documentazione di novembre 2026, nel terminale la modalità iniziale predefinita è <code>auto</code> (dalla versione 2.1.283). Per questo la si fissa: <code>claude --permission-mode manual</code>, oppure <code>permissions.defaultMode</code> nei file di configurazione.</Box>
-        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
-      </div>
-    ),
-    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite dell'amministratore (permissions.defaultMode, code.claude.com/docs/en/managed-settings, 11 novembre 2026)."
-  },
-  {
-    block: B + 'Leggere la richiesta',
-    content: () => (
-      <div className="pad">
-        <Tag>Permessi</Tag>
-        <h2>Leggere la richiesta prima di approvare</h2>
-        <div className="cols">
-          <pre aria-label="Schema di una richiesta di permesso">{PROMPT}</pre>
-          <ol>
-            <li><strong>Cosa fa?</strong> Il comando intero, anche dopo <code>&amp;&amp;</code> e <code>;</code>.</li>
-            <li><strong>Dove?</strong> Quali file, dentro la cartella del progetto.</li>
-            <li><strong>Si annulla?</strong> I file sì (checkpoint, copia di prova, Git); rete e dati esterni no.</li>
-          </ol>
-        </div>
-        <p className="muted">Schema indicativo: il testo esatto dipende dalla versione. I checkpoint coprono solo i file, non rete, database o rilasci.</p>
-        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
-      </div>
-    ),
-    notes: "Tre domande da fare ogni volta. Lo schema è indicativo: non vale come riproduzione della schermata. La documentazione (novembre 2026) dice che i checkpoint annullano le modifiche ai file ma non le azioni su sistemi remoti: per quelle conta la modalità di permesso. Nella prima esercitazione si approva una volta sola, mai con «non chiedere più»."
-  },
-  {
-    block: B + 'Domanda 2',
-    content: () => (
-      <div className="pad">
-        <Tag>Quiz</Tag>
-        <h2>Una decisione per voi</h2>
-        <Quiz domanda="In modalità Manual arriva la richiesta: rm -rf dati && node cli.js elenco. Che cosa fai?" opzioni={[
-          { t: 'Approvo: il comando che mi interessa è l\'elenco', ok: false, perche: 'Il comando è composto: la prima parte cancella una cartella. Va letto per intero.' },
-          { t: 'Rifiuto e chiedo perché vuole cancellare i dati', ok: true, perche: 'Giusto. Il rifiuto è senza danno: l\'agente riferisce e propone altro, e la decisione resta tua.' },
-          { t: 'Approvo con «non chiedere più», così non mi interrompe', ok: false, perche: 'Per Bash vale per sempre su quel repository e quel comando: è l\'opposto della prudenza.' },
-        ]} />
-      </div>
-    ),
-    notes: "Comando inventato per l'occasione. Il punto è l'abitudine di leggere fino in fondo i comandi composti. Il rifiuto non rompe il lavoro: l'agente riceve l'esito e cambia strada."
-  },
-  {
-    block: B + 'Il piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Piano</Tag>
-        <h2>Il piano è una proposta da approvare</h2>
+        <Tag>Controllo</Tag>
+        <h2>Il piano, e tu dentro il ciclo</h2>
         <div role="group" aria-label="Modalità piano: esplora, propone, tu decidi, poi esegue">
           <Flow nodes={[
             ['1 Esplora', 'legge, non modifica'],
@@ -694,49 +784,36 @@ const slides = [
           ]} />
         </div>
         <ul>
-          <li>Si entra con <code>Shift+Tab</code>, con <code>/plan</code> prima di un messaggio o con <code>claude --permission-mode plan</code>.</li>
-          <li>Scelte: «Yes, and use auto mode», «Yes, manually approve edits», «No, keep planning». <code>Ctrl+G</code> apre il piano in un editor.</li>
+          <li>Si entra in modalità piano con <code>Shift+Tab</code> o con <code>/plan</code>. Un piano si legge come un diff: quali file tocca, che cosa non tocca, come verifica.</li>
+          <li><code>Esc</code> ferma l'agente in ogni momento; <code>Esc</code> due volte riporta i file a uno stato precedente. I checkpoint non sostituiscono Git (argomento 3).</li>
+          <li>In aula l'agente parte in Manual: ogni azione che cambia qualcosa chiede il tuo sì, e va letta per intero prima di rispondere.</li>
         </ul>
-        <p className="muted">Un piano si legge come un diff: quali file tocca, che cosa non tocca, come verifica.</p>
         <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
       </div>
     ),
-    notes: "Il piano mette la decisione prima del lavoro. Secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Se l'approvazione non convince, si resta in pianificazione e si corregge. Tornerà nell'argomento 4, dove si impara a far scrivere un buon piano e a spezzarlo in passi verificabili. Nella prima esercitazione il piano si chiede prima di far partire il lavoro, e si approva o si corregge."
+    notes: "Un accenno, non il tema dell'argomento. Il piano mette la decisione prima del lavoro: secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Esc ferma, Esc due volte torna indietro (checkpoint: solo i file, non rete né rilasci). Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite. Le modalità di permesso, il «non chiedere più», come si legge una richiesta di permesso e le prime richieste vere si vedono quando si installa l'agente (argomento 2) e nella prima esercitazione; il piano torna nell'argomento 4."
   },
   {
-    block: B + 'Tu sei nel ciclo',
+    block: B + 'Il filo',
     content: () => (
       <div className="pad">
-        <Tag>Controllo</Tag>
-        <h2>Tu sei dentro il ciclo</h2>
-        <div className="grid">
-          <Card title="Fermare"><p><code>Esc</code> interrompe subito: l'azione in corso viene annullata e l'agente aspetta.</p></Card>
-          <Card title="Correggere" kind="i"><p>Scrivi la correzione e invia: l'agente la legge appena finite le chiamate in corso.</p></Card>
-          <Card title="Tornare indietro" kind="w"><p><code>Esc</code> due volte riporta i file a uno stato precedente (checkpoint).</p></Card>
+        <Tag>Il filo del corso</Tag>
+        <h2>Dall'idea all'app vera</h2>
+        <div role="group" aria-label="Il filo: prototipo, piano, palestra, argomenti successivi">
+          <Flow nodes={[
+            ['1 Il prototipo', 'la dashboard di AI Studio dice che cosa vogliamo', 'w'],
+            ['2 Il piano', 'il file docs/idea-dashboard.md'],
+            ['3 La palestra', 'l\'app vera in Node.js, con i test', 'i'],
+            ['4 Gli argomenti', 'ognuno aggiunge un pezzo all\'app'],
+          ]} />
         </div>
-        <Box type="danger" title="Limite dei checkpoint">Coprono solo i file e non sostituiscono Git (argomento 3). La prima esercitazione lavora su una copia usa e getta per lo stesso motivo.</Box>
-        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+        <ul>
+          <li>Il prototipo non si tiene. Il piano sì: con l'agente installato lo si confronta con l'app vera e si aggiunge la prima cosa che manca, il filtro per laboratorio.</li>
+          <li>Ogni argomento parte da un punto noto del codice della palestra, e il progetto personale ripete gli stessi passi su un'idea propria.</li>
+        </ul>
       </div>
     ),
-    notes: "Tre gesti che tengono la persona nel ciclo (documentazione, novembre 2026). Fermare, correggere in corsa, tornare indietro. I checkpoint non sono git e non coprono le azioni fuori dai file. Per questo l'argomento 3 insegna a leggere il diff e a fare commit; qui, in attesa, si lavora su una copia da buttare."
-  },
-  {
-    block: B + 'Il racconto',
-    content: () => (
-      <div className="pad">
-        <Tag>Il racconto</Tag>
-        <h2>Dieci agenti che «funzionavano»</h2>
-        <ol className="timeline">
-          <li><time>Maggio</time>Prima versione del gruppo di agenti: dieci agenti specializzati, ognuno con un file di istruzioni.</li>
-          <li><time>Mesi</time>Tutto sembra andare: arrivano risposte, il lavoro viene fatto.</li>
-          <li><time>20 luglio</time>Ci si accorge che l'orchestrazione non è mai avvenuta: gli agenti non venivano mai avviati.</li>
-          <li><time>Causa</time>Nell'intestazione dei due agenti principali, una barra rovesciata davanti ai tre trattini (<code className="nw">\---</code> invece di <code className="nw">---</code>); gli specialisti l'intestazione non l'avevano. File non riconosciuti.</li>
-          <li><time>Dopo</time>Correzione e un revisore obbligatorio prima di dichiarare finito un lavoro.</li>
-        </ol>
-        <Box type="tip" title="Lezione">Ciò che l'agente racconta e ciò che ha fatto sono due cose. La traccia degli strumenti è la seconda.</Box>
-      </div>
-    ),
-    notes: "Episodio del racconto di Thomas, solo fatti documentati: nella primavera 2026 nasce un gruppo di dieci agenti; il 20 luglio si scopre che non erano mai partiti, per un carattere di troppo nell'intestazione dei due agenti principali (gli specialisti l'intestazione non l'avevano proprio). Nessun errore visibile: la sessione principale rispondeva comunque. Il legame con l'argomento: un riassunto fluido non dimostra niente, la traccia delle chiamate sì. Dal racconto nasce anche il passaggio obbligato da un revisore. Gli agenti e i subagenti tornano nell'argomento 8."
+    notes: "Il filo che lega la demo al resto del corso. Il prototipo della dashboard è l'idea, non il codice che si terrà: ha dati in memoria e nessun controllo delle regole. Il piano, ripulito, è un file della palestra (docs/idea-dashboard.md). La palestra è l'app vera: Node.js senza dipendenze, riga di comando, regole in un file, test. Precisazione onesta: cresce l'app di riferimento, non il lavoro di ciascuno; chi segue un argomento da solo parte dal punto di partenza giusto. Il lavoro che si accumula davvero, persona per persona, è il progetto personale. Da dire in aula: il prototipo dice che cosa vogliamo; che sia giusto lo dicono i test, e quelli stanno nell'app vera."
   },
   {
     block: B + 'Verso la prima esercitazione',
@@ -746,32 +823,33 @@ const slides = [
         <h2>Adesso si installa, poi si prova</h2>
         <ol className="timeline">
           <li><time>1</time>Si installa l'agente sul PC e lo si collega al server del corso (argomento 2).</li>
-          <li><time>2</time>Si estrae la cartella di prova e si avvia l'agente in Manual.</li>
-          <li><time>3</time>Gli si chiede prima un piano: si legge, si approva o si corregge.</li>
-          <li><time>4</time>Si guardano i permessi che chiede e si controlla a mano il riepilogo.</li>
-          <li><time>5</time>Si apre la skill, la si cambia e si rifà.</li>
+          <li><time>2</time>Si estrae la palestra da uno zip e si avvia l'agente in Manual.</li>
+          <li><time>3</time>Gli si fa confrontare il piano della dashboard con l'app.</li>
+          <li><time>4</time>Gli si chiede prima un piano per il filtro per laboratorio: si legge, si approva o si corregge.</li>
+          <li><time>5</time>Si guardano i permessi che chiede e si controllano a mano il filtro, i test e il file dei dati.</li>
         </ol>
         <Box type="tip" title="Copia usa e getta">Si lavora su una cartella estratta da uno zip, senza Git: se qualcosa va storto si estrae di nuovo. Git come rete di sicurezza è un altro argomento.</Box>
-        <ActivityBadge n="1" file="prima-esercitazione.html" label="Prima esercitazione: l'agente controlla le richieste di installazione" />
+        <ActivityBadge n="1" file="prima-esercitazione.html" label="Prima esercitazione: l'agente legge un piano e aggiunge un filtro alla palestra" />
+        <ActivityBadge n="1" file="palestra-prima-prova.zip" label="La palestra, copia usa e getta (zip)" />
       </div>
     ),
-    notes: "Ponte verso l'installazione (argomento 2) e la prima esercitazione. L'esercitazione parte dal piano visto nella demo: stesso gesto, ora con l'agente installato sul PC. La cartella contiene richieste di installazione software di una scuola inventata, un catalogo, un regolamento, una procedura sotto forma di skill e due richieste nuove da aggiungere dopo. Gli effetti precisi sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se usa la skill da solo) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio."
+    notes: "Ponte verso l'installazione (argomento 2) e la prima esercitazione. L'esercitazione parte dal piano visto nelle prove con AI Studio: stesso gesto, ora con l'agente installato sul PC e su un'app vera. Gli effetti sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se si accorge che il file di istruzioni nomina un file dei dati che non c'è) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio. Per chi finisce prima c'è un'esercitazione di riserva, senza codice, nella pagina dei materiali."
   },
   {
     block: B + 'Chiusura',
     content: () => (
       <Chiusura
         punti={[
-          'Un agente è un modello con strumenti dentro un ciclo: osserva, pianifica, agisce, verifica.',
-          'Vede solo ciò che entra nel contesto: leggi cosa ha letto, e controlla le sue affermazioni.',
-          'Il contesto si riempie: /context, /compact, /clear; le regole fisse stanno nelle istruzioni di progetto.',
-          'In aula si lavora in Manual: leggi ogni richiesta intera prima di approvare.',
-          'Il piano è una proposta, e si approva o si corregge: è la differenza vista nella demo.',
+          'La stessa richiesta dà risposte diverse: il modello scrive testo, e vede solo ciò che sta sulla sua scrivania.',
+          'Piano o niente piano: un compito piccolo si rifà, uno più grande si decide prima. Il prototipo si butta, il piano si tiene.',
+          'La scala: chatbot, chatbot con canvas e app, costruttore di app, agente nella cartella. Per ognuno: chi agisce, dove, chi controlla.',
+          'Un agente è un modello con strumenti dentro un ciclo, con permessi che decidono cosa fa senza chiedere.',
+          'Chatbot e agente fanno lo stesso lavoro in due modi: nessuno dei due ti toglie il controllo.',
           'Il riassunto di un agente non è la prova: lo è la traccia.',
         ]}
-        dopo="Argomento 2: installare l'agente, poi la prima esercitazione su una cartella di prova. Argomento 3: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 4: dalla richiesta vaga ai requisiti, con la modalità piano." />
+        dopo="Argomento 2: installare l'agente, poi la prima esercitazione sulla palestra. Argomento 3: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 4: dalla richiesta vaga ai requisiti, con la modalità piano. Argomento 11: contesto e costi." />
     ),
-    notes: "Ripartire dal ciclo e dai tre limiti: il contesto, i permessi, la verifica. Poi l'installazione (argomento 2) e la prima esercitazione. Le funzioni di Claude Code citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
+    notes: "Ripartire dalla scala e dal filo: dalla prova con il chatbot all'agente nella cartella, passando per il piano. Poi l'installazione (argomento 2) e la prima esercitazione. Le funzioni di Claude Code e di AI Studio citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs e aistudio.google.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
   },
 ];
 

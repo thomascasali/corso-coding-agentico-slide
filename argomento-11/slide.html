@@ -517,7 +517,7 @@ const slides = [
       <Apertura n="11" titolo="Costi e contesto"
         sottotitolo="Quanto costa una sessione con un agente, perché cresce più di quanto sembra e come si tiene sotto controllo."
         caso="Il caso: un bot che tra agosto e settembre 2026 ha speso 1,55 dollari senza che nessuno l'avesse deciso."
-        prima={<>argomento 1 (<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>Dal chatbot all'agente</a>): finestra di contesto, <code>/context</code>, <code>/compact</code>.</>} />
+        prima={<>argomento 1 (<a className="text-link" href="../argomento-1/slide.html" onClick={e => e.stopPropagation()}>Dal chatbot all'agente</a>): come funziona un agente, con strumenti e ciclo.</>} />
     ),
     notes: "Si parte dalla cifra, piccola di proposito: 1,55 dollari. Il problema non fu l'importo ma il meccanismo, che con un altro volume o un altro modello avrebbe prodotto un'altra cifra. L'argomento va in tre mosse: che cosa si paga, come si stima, che cosa è successo. I prezzi vengono dai listini pubblici consultati il 9 novembre 2026 e cambiano spesso; i parametri della calcolatrice sono esempi dichiarati, non misure. In aula Claude Code usa modelli Claude attraverso un proxy del laboratorio: i prezzi sono quelli dei listini e il metodo di stima vale lo stesso."
   },
@@ -559,6 +559,24 @@ const slides = [
       </div>
     ),
     notes: "Prezzi in dollari per milione di token, dai listini pubblici consultati il 9 novembre 2026. Sono quelli che usa la calcolatrice. Due letture utili: a parità di fornitore Sonnet 5.5 costa 20 volte Haiku 5.5, Opus 5.5 il doppio di Sonnet 5.5 e Fable 5.1 cinque volte; e fra fornitori diversi la differenza arriva a due ordini di grandezza. Il listino DeepSeek indica solo ingresso con cache, ingresso senza cache e uscita: per la scrittura in cache la calcolatrice usa l'ingresso senza cache. Il listino cambia: prima di una stima vera si riapre la pagina del fornitore."
+  },
+  {
+    block: B + 'Cosa riempie il contesto',
+    content: () => (
+      <div className="pad">
+        <Tag>Finestra di contesto</Tag>
+        <h2>La finestra di contesto si riempie</h2>
+        <DT cols={['Cosa entra', 'Quando', 'Come cresce']} rows={[
+          ['Istruzioni di progetto e memoria', 'All\'avvio', 'Fisso, sempre presente'],
+          ['File letti', 'A ogni lettura', 'Con la dimensione del file'],
+          ['Output dei comandi', 'A ogni comando', 'Un test che stampa molto pesa quanto un file'],
+          ['Conversazione', 'A ogni messaggio', 'A ogni giro del ciclo'],
+        ]} />
+        <Box type="info" title="Finestra di contesto">È la quantità massima di testo (misurata in <em>token</em>, pezzi di parola) che il modello può avere davanti insieme. Oltre il limite non entra altro, e ogni messaggio costa in token.</Box>
+        <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com/docs/en/context-window</Fonte>
+      </div>
+    ),
+    notes: "Token: pezzi di parola, l'unità con cui il modello legge e con cui si misura il costo. La documentazione (novembre 2026) elenca cosa tiene la finestra: conversazione, contenuto dei file, output dei comandi, istruzioni di progetto, memoria, skill caricate e istruzioni di sistema. Far notare che l'output di un comando è contesto come un file: un test rumoroso lo gonfia. Nessun numero di token qui: dipende dal modello usato."
   },
   {
     block: B + 'Il contesto si rimanda',
@@ -668,17 +686,19 @@ const slides = [
       <div className="pad">
         <Tag>Contesto</Tag>
         <h2>Compattare, azzerare o ripartire</h2>
+        <p>Quando la finestra è piena Claude Code compatta da solo la conversazione in un riassunto.</p>
         <DT cols={['Situazione', 'Mossa', 'Perché']} rows={[
+          ['Vuoi sapere che cosa occupa la finestra', <code>/context</code>, 'Mostra l\'occupazione per categoria'],
           [<>Passi a un compito scollegato</>, <code>/clear</code>, 'Non costa nulla, mentre la vecchia conversazione si pagherebbe a ogni messaggio'],
           ['Stesso compito, ma la conversazione è piena di vicoli ciechi', <><code>/rewind</code> o <code>/compact</code> con una indicazione</>, 'Si tiene ciò che serve e si butta il resto'],
           ['Devi leggere molto (log, documentazione)', 'Un subagente', 'Le letture restano nel suo contesto e torna solo il riassunto'],
           ['Torni a una sessione ferma da ore', 'Meglio una sessione nuova', 'Cache scaduta: compattare costringe a rileggere tutto'],
         ]} />
-        <Box type="info" title="Richiamo">Il contesto e i comandi <code>/context</code>, <code>/compact</code>, <code>/clear</code> sono nell'argomento 1. Qui si aggiunge il conto: compattare è esso stesso una richiesta grande.</Box>
+        <Box type="warn" title="Regola">Nel riassunto i dettagli delle istruzioni date all'inizio possono perdersi. Ciò che deve valere sempre sta nel file di istruzioni di progetto, non nella conversazione: dopo la compattazione viene ricaricato dal disco.</Box>
         <Fonte href="https://code.claude.com/docs/en/context-window">code.claude.com, context window</Fonte>
       </div>
     ),
-    notes: "Secondo la documentazione (novembre 2026): /clear azzera e non costa nulla; /compact può ricevere un'indicazione su cosa tenere; /rewind torna a un punto precedente già in cache; i subagenti tengono le letture grosse fuori dal contesto principale. Attenzione al costo della compattazione: è una richiesta che rilegge la conversazione da riassumere, a buon mercato se la cache è calda e cara se è scaduta. Per questo conviene compattare fra un compito e l'altro. La compattazione automatica scatta da sola vicino al limite della finestra, che dipende dal modello."
+    notes: "Secondo la documentazione (novembre 2026): /clear azzera e non costa nulla; /compact può ricevere un'indicazione su cosa tenere; /rewind torna a un punto precedente già in cache; i subagenti tengono le letture grosse fuori dal contesto principale. Attenzione al costo della compattazione: è una richiesta che rilegge la conversazione da riassumere, a buon mercato se la cache è calda e cara se è scaduta. Per questo conviene compattare fra un compito e l'altro. La compattazione automatica scatta da sola vicino al limite della finestra, che dipende dal modello. Con /context si vede l'occupazione reale per categoria. Le istruzioni di progetto vengono ricaricate dal disco dopo la compattazione: ciò che deve valere sempre sta lì, non nella conversazione."
   },
   {
     block: B + 'La calcolatrice',

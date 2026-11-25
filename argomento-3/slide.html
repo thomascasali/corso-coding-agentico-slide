@@ -355,7 +355,7 @@ const slides = [
       <Apertura n="3" titolo="Git come rete di sicurezza"
         sottotitolo="Leggere cosa ha fatto l'agente prima di accettarlo, e saper tornare indietro senza rovinare niente."
         caso="Un episodio dal racconto: un subagente che, durante un test, ha fatto push sul repository vero."
-        prima="argomento 1 (chatbot, completamento, agente: ciclo, contesto, permessi)." />
+        prima="argomento 1 (dal chatbot all'agente: strumenti, ciclo, piano)." />
     ),
     notes: "Apertura. Un agente modifica più file in pochi secondi e riassume a parole quello che ha fatto. Il riassunto non è una prova: git mostra le righe che sono cambiate davvero. L'argomento insegna due abilità: leggere il diff e tornare indietro. Chi usa git ogni giorno può saltare i comandi base, ma tutti fanno l'esercizio sul repository della palestra."
   },
@@ -606,7 +606,7 @@ const slides = [
       <div className="pad">
         <Tag>Attività</Tag>
         <h2>Trovate le modifiche non richieste</h2>
-        <p>Un agente ha aggiunto il filtro per laboratorio all'elenco delle prenotazioni, come richiesto. Ha fatto anche altro. I test passano.</p>
+        <p>Un agente ha aggiunto il filtro per laboratorio all'elenco delle prenotazioni, come richiesto. Ha fatto anche altro. I test passano. È la stessa richiesta della prima esercitazione dell'argomento 1: confrontate con il lavoro del vostro agente.</p>
         <ol className="timeline">
           <li><time>1</time>Partite da <code>partenza-a3</code> con un ramo vostro e lanciate i test.</li>
           <li><time>2</time>Con <code>git show --stat</code> e <code>git diff</code> elencate cosa è cambiato e dividetelo in «richiesto» e «non richiesto».</li>
@@ -616,7 +616,7 @@ const slides = [
         <ActivityBadge n="3" file="attivita-modifiche-non-richieste.html" label="Modifiche non richieste: leggere e annullare" />
       </div>
     ),
-    notes: "Il foglio guida i passi senza dire cosa c'è da trovare. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
+    notes: "Il foglio guida i passi senza dire cosa c'è da trovare. La richiesta è quella della prima esercitazione dell'argomento 1: chi l'ha fatta può confrontare il proprio agente con questo, che ha fatto anche altro. Si può fare a coppie: uno legge il diff, l'altro annulla. Chi è in difficoltà con git restore -p può chiedere all'agente di annullare un solo file e verificare poi con git diff main. Chi finisce prima prova a chiedere all'agente «ripulisci le modifiche non richieste» e controlla con il diff se ha trovato tutto."
   },
   {
     block: B + 'Sul vostro progetto',

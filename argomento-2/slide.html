@@ -448,6 +448,19 @@ Scrivi i risultati in file nella cartella di lavoro (Markdown, CSV o Excel), non
 - Alla fine scrivi che cosa non hai potuto verificare.`;
 
 /* Componenti propri dell'argomento */
+/* Riga di fonte con data: ogni affermazione su Claude Code porta la data di consultazione. */
+const Fonte = ({ href, children }) => (
+  <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>{children}</a>, documentazione di Claude Code, consultata a novembre 2026.</p>
+);
+
+const PROMPT = String.raw`Bash command
+  node --test
+  Esegue i test del progetto
+
+  1. Yes
+  2. Yes, and don't ask again for: node --test
+  3. No`;
+
 const Passo = ({ n, titolo, children }) => (
   <div className="pad">
     <Tag>{'Passo ' + n}</Tag>
@@ -460,7 +473,7 @@ const Controllo = ({ children }) => <Box type="tip" title="Punto di controllo">{
 const PERCORSO = [
   ['1', 'Installare Claude Code', <><code className="nw">claude --version</code> stampa un numero di versione</>],
   ['2', 'Indirizzo e chiave, come variabili dell\'utente', 'in una finestra nuova: «chiave presente» e l\'indirizzo senza /v1'],
-  ['3', 'Prima prova di connessione', 'il server elenca i modelli; /status mostra il suo indirizzo'],
+  ['3', 'Prima prova di connessione e prime richieste di permesso', 'il server elenca i modelli; /status mostra il suo indirizzo'],
   ['4', 'OpenCode sul server', <><code className="nw">opencode models</code> elenca solo i due modelli del corso</>],
   ['5', 'Il kit minimo: uv e MarkItDown', 'la prima esecuzione arriva in fondo senza errori'],
   ['6', 'Le istruzioni globali', 'due file con il nome giusto, sessione nuova'],
@@ -623,6 +636,96 @@ const slides = [
       </Passo>
     ),
     notes: "Il controllo di /status è quello indicato dalla documentazione (code.claude.com/docs/en/llm-gateway-connect, 25/11/2026): la riga Anthropic base URL compare solo se è impostato un indirizzo; una riga Auth token o API key che nomina la variabile conferma che la credenziale del gateway è attiva, mentre una riga Login method con un account claude.ai significa che non lo è. Il modello iniziale dipende dal file delle impostazioni gestite, che mappa gli alias sonnet e haiku sugli ID del server; senza quel file l'alias punta a un ID che il server può non offrire. Per questo c'è il ripiego con --model (documentato in code.claude.com/docs/en/model-config). Il testo esatto dell'errore sul modello: da verificare a schermo."
+  },
+  {
+    block: B + 'Passo 3 · Permessi',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Che cosa chiede prima di agire</h2>
+        <DT cols={['Tipo di azione', 'Esempio', 'In modalità Manual']} rows={[
+          ['Lettura', 'Read, ricerca nei file', 'Non chiede, dentro la cartella di lavoro'],
+          ['Comandi di shell', 'Bash', 'Chiede, salvo un piccolo insieme di comandi di sola lettura'],
+          ['Modifica di file', 'Edit, Write', 'Chiede'],
+          ['Web', 'Pagine e ricerche', 'Chiede (salvo domini di documentazione già approvati)'],
+        ]} />
+        <Box type="warn" title="«Yes, and don't ask again»">Per i comandi Bash vale <strong>per sempre</strong> in quel repository e per quel comando. Per le modifiche ai file, fino a fine sessione.</Box>
+        <Fonte href="https://code.claude.com/docs/en/permissions">code.claude.com/docs/en/permissions</Fonte>
+      </div>
+    ),
+    notes: "Tabella ripresa dalla documentazione dei permessi (novembre 2026). Il punto pratico: in Manual le letture sono libere e tutto ciò che cambia qualcosa chiede. Il «non chiedere più» ha una durata diversa a seconda dello strumento: per Bash è permanente, per repository e comando. In aula non lo si usa, per non lasciare permessi sui PC condivisi. Le prime richieste vere compaiono nel passo 7, con la prova sul PDF: queste slide servono a leggerle bene prima."
+  },
+  {
+    block: B + 'Passo 3 · Le modalità',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Le modalità di permesso</h2>
+        <DT cols={['Modalità', 'Va senza chiedere', 'A che serve']} rows={[
+          [<>Manual <code>default</code></>, 'Solo le letture', 'Rivedere ogni azione'],
+          [<code>acceptEdits</code>, 'Letture, modifiche ai file e comandi come mkdir, mv, rm, nella cartella', 'Iterare su codice che rivedi dopo'],
+          [<code>plan</code>, 'Letture: nessuna modifica ai sorgenti', 'Esplorare prima di cambiare'],
+          [<code>auto</code>, 'Quasi tutto, con un controllo automatico di sicurezza', 'Compiti lunghi'],
+          [<code>dontAsk</code>, 'Solo quanto già approvato; il resto è negato', 'Script e CI'],
+          [<code>bypassPermissions</code>, 'Tutto', 'Solo contenitori e VM isolati'],
+        ]} />
+        <p className="muted">In sessione: <code>Shift+Tab</code> fa girare le modalità. All'avvio: <code>claude --permission-mode plan</code>.</p>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Sei modalità, dalla più prudente alla più libera. Nomi esatti come in documentazione (novembre 2026): la modalità chiamata Manual nell'interfaccia è default nei file di configurazione. Le regole di rifiuto valgono in ogni modalità. bypassPermissions solo in ambienti isolati: non lo usiamo. auto richiede disponibilità sul fornitore e sul modello. dontAsk non compare nel giro di Shift+Tab. Attenzione: acceptEdits approva da solo anche i comandi di file più comuni (mkdir, touch, rm, rmdir, mv, cp, sed) dentro la cartella di lavoro."
+  },
+  {
+    block: B + 'Passo 3 · Perché Manual',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>In aula si parte da Manual</h2>
+        <div className="grid">
+          <Card title="Vedi ogni azione"><p>Prima che accada. Si impara il ciclo guardandolo passo passo.</p></Card>
+          <Card title="Gli errori costano poco" kind="i"><p>Un comando sbagliato letto prima di approvarlo non fa danni.</p></Card>
+          <Card title="Sul PC del laboratorio è imposta" kind="w"><p>Un file di impostazioni gestite fa partire la sessione in Manual. A casa, o su un PC non preparato, la partenza va fissata da sé.</p></Card>
+        </div>
+        <Box type="warn" title="Attenzione al valore predefinito">Per la documentazione di novembre 2026, nel terminale la modalità iniziale predefinita è <code>auto</code> (dalla versione 2.1.283). Per questo la si fissa: <code>claude --permission-mode manual</code>, oppure <code>permissions.defaultMode</code> nei file di configurazione.</Box>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Il PC del laboratorio è preparato per partire in Manual, ma conviene saperlo fare da soli. Ordine di precedenza secondo la documentazione (novembre 2026): il flag --permission-mode, poi permissions.defaultMode nei file di configurazione, poi il valore predefinito, che nel terminale è auto dalla versione 2.1.283. Si allarga, con acceptEdits o con regole mirate, quando si è capito cosa succede. Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite dell'amministratore (permissions.defaultMode, code.claude.com/docs/en/managed-settings, 11 novembre 2026)."
+  },
+  {
+    block: B + 'Passo 3 · Leggere la richiesta',
+    content: () => (
+      <div className="pad">
+        <Tag>Permessi</Tag>
+        <h2>Leggere la richiesta prima di approvare</h2>
+        <div className="cols">
+          <pre aria-label="Schema di una richiesta di permesso">{PROMPT}</pre>
+          <ol>
+            <li><strong>Cosa fa?</strong> Il comando intero, anche dopo <code>&amp;&amp;</code> e <code>;</code>.</li>
+            <li><strong>Dove?</strong> Quali file, dentro la cartella del progetto.</li>
+            <li><strong>Si annulla?</strong> I file sì (checkpoint, copia di prova, Git); rete e dati esterni no.</li>
+          </ol>
+        </div>
+        <p className="muted">Schema indicativo: il testo esatto dipende dalla versione. I checkpoint coprono solo i file, non rete, database o rilasci.</p>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Tre domande da fare ogni volta. Lo schema è indicativo: non vale come riproduzione della schermata. La documentazione (novembre 2026) dice che i checkpoint annullano le modifiche ai file ma non le azioni su sistemi remoti: per quelle conta la modalità di permesso. Nella prima esercitazione (argomento 1) e nella prova sul PDF si approva una volta sola, mai con «non chiedere più»."
+  },
+  {
+    block: B + 'Passo 3 · Una decisione',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una decisione per voi</h2>
+        <Quiz domanda="In modalità Manual arriva la richiesta: rm -rf dati && node cli.js elenco. Che cosa fai?" opzioni={[
+          { t: 'Approvo: il comando che mi interessa è l\'elenco', ok: false, perche: 'Il comando è composto: la prima parte cancella una cartella. Va letto per intero.' },
+          { t: 'Rifiuto e chiedo perché vuole cancellare i dati', ok: true, perche: 'Giusto. Il rifiuto è senza danno: l\'agente riferisce e propone altro, e la decisione resta tua.' },
+          { t: 'Approvo con «non chiedere più», così non mi interrompe', ok: false, perche: 'Per Bash vale per sempre su quel repository e quel comando: è l\'opposto della prudenza.' },
+        ]} />
+      </div>
+    ),
+    notes: "Comando inventato per l'occasione. Il punto è l'abitudine di leggere fino in fondo i comandi composti. Il rifiuto non rompe il lavoro: l'agente riceve l'esito e cambia strada."
   },
   {
     block: B + 'Passo 4 · OpenCode',
@@ -869,6 +972,7 @@ const slides = [
           'Claude Code vuole l\'indirizzo senza /v1; OpenCode lo vuole nel suo file, con /v1.',
           'Dopo ogni cambio di variabile: finestra nuova, e per OpenCode anche i processi fermati.',
           'Senza il kit e le istruzioni, l\'agente davanti a un PDF improvvisa.',
+          'Le richieste di permesso si leggono per intero; in Manual il «non chiedere più» non si usa.',
           'A fine corso le due variabili si tolgono.',
         ]}
         dopo={<>L'argomento 1 usa l'agente appena installato per una prima esercitazione sul progetto di prova. L'argomento 10 spiega il proxy che sta dietro all'indirizzo e confronta i due agenti. Il progetto personale parte dalla <a className="text-link" href="../materiali/laboratorio-progetto/scheda-progetto.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>scheda del progetto</a>, da compilare dopo la prima esercitazione: con l'agente installato si arriva fino al progetto finito.</>} />
