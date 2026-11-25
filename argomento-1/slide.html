@@ -393,10 +393,76 @@ const VIA_DASHBOARD = String.raw`Va bene, con queste correzioni. Costruisci la d
 const SimLink = () => (
   <a className="activity" href="simulazione-agente.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
     <span className="k">Simulazione</span>
-    <span className="l">Indovina la mossa dell'agente</span>
+    <span className="l">Simulazione sulla palestra: indovina la mossa dell'agente</span>
     <span aria-hidden="true">&#8599;</span>
   </a>
 );
+
+/* La stessa richiesta per l'agente: identica alla prima prova, cambia solo dove stanno i dati (un file nella cartella). */
+const RICHIESTA_AGENTE = RICHIESTA_PC.split(' I dati sono questi:')[0] + ' I dati sono nel file elenco-pc.csv di questa cartella.';
+const ELENCO_CSV = RICHIESTA_PC.split('\n\n')[1];
+
+/* Simulazione guidata: l'agente sul compito dei PC. Le mosse sono tratte dalla prova reale del 25/11/2026 (Claude Code 2.1.332, Opus 5.5), riassunte e con le opzioni sbagliate scritte a tavolino. */
+const SIM_COMPITO = 'Controlla elenco-pc.csv: segnala i PC non aggiornati da più di 90 giorni (riferimento 2026-12-01) e quelli con lo stesso indirizzo IP.';
+const SIM_PASSI = [
+  { azione: 'Parte dal compito', dettaglio: 'Non annuncia un piano e non chiede dove siano i dati: prima di scrivere codice va a vedere cosa c\'è nella cartella.' },
+  { azione: 'Guarda la cartella', dettaglio: 'Elenca i file (strumento di ricerca dei file) e trova solo elenco-pc.csv. È una lettura: non chiede il permesso.',
+    opzioni: ['Scrive subito lo script, senza guardare cosa c\'è nella cartella', 'Elenca i file della cartella e trova elenco-pc.csv', 'Ti chiede di incollare i dati nella chat'], giusta: 1 },
+  { azione: 'Legge l\'elenco', dettaglio: 'Apre elenco-pc.csv: intestazione e otto righe, date nel formato AAAA-MM-GG. Gli serve per scrivere uno script adatto a questi dati.',
+    opzioni: ['Apre il file e guarda colonne e formato delle date', 'Immagina le colonne dal testo della richiesta', 'Copia tutto il file nella risposta e lo rilegge'], giusta: 0 },
+  { azione: 'Scrive lo script', dettaglio: 'Crea controlla_pc.py (Python): data e soglia come opzioni, righe vuote gestite. Nella prova le modifiche ai file erano accettate in automatico; in Manual chiede il tuo sì.',
+    opzioni: ['Salva lo script come file nella cartella, non solo nella chat', 'Scrive lo script solo nella chat, senza salvarlo', 'Modifica elenco-pc.csv per adattarlo allo script'], giusta: 0 },
+  { azione: 'Lo esegue', dettaglio: 'Il comando provato con PowerShell viene fermato: non è tra quelli ammessi. L\'agente lo rilancia con Bash (python controlla_pc.py), che è ammesso.',
+    opzioni: ['Ti dice come eseguirlo e aspetta che lo faccia tu', 'Dà per buono lo script senza provarlo', 'Quando un comando è fermato, ne prova un altro ammesso'], giusta: 2 },
+  { azione: 'Legge l\'esito', dettaglio: 'Nessun errore: PC08 a 170 giorni e PC02 a 95 oltre la soglia; indirizzo 192.0.2.12 usato da PC02 e PC05.',
+    opzioni: ['Dichiara che è fatto senza leggere l\'output', 'Legge l\'output e lo confronta con ciò che era stato chiesto', 'Cancella lo script e ricomincia da capo'], giusta: 1 },
+  { azione: 'Rifinisce e controlla', dettaglio: 'Vede gli accenti storti nel terminale di Windows, modifica lo script (codifica dell\'output) e lo rilancia per controllare.',
+    opzioni: ['Lascia stare: il risultato è giusto', 'Modifica lo script e lo rilancia per controllare', 'Modifica elenco-pc.csv per togliere gli accenti'], giusta: 1 },
+  { azione: 'Consegna', dettaglio: 'Presenta esito e uso dello script, e una scelta: PC03 è a 90 giorni esatti, «più di 90» in senso stretto, quindi non è segnalato (con --giorni 89 sì). Non tocca i PC.',
+    opzioni: ['Segnala il PC03 senza dire che è un caso al limite', 'Corregge da sé l\'indirizzo duplicato nell\'elenco', 'Consegna esito e script, e dichiara la scelta sul PC03'], giusta: 2 },
+];
+
+function SimulazioneAgente() {
+  const [passo, setPasso] = useState(0);
+  const [provando, setProvando] = useState(false);
+  const [scelta, setScelta] = useState(null);
+  const [giuste, setGiuste] = useState(0);
+  const [tentate, setTentate] = useState(0);
+  const fine = passo >= SIM_PASSI.length - 1;
+  const prossimo = fine ? null : SIM_PASSI[passo + 1];
+  const scegli = i => { if (scelta !== null) return; setScelta(i); setTentate(t => t + 1); if (i === prossimo.giusta) setGiuste(g => g + 1); };
+  const avanti = () => { setPasso(p => p + 1); setProvando(false); setScelta(null); };
+  const ricomincia = () => { setPasso(0); setProvando(false); setScelta(null); setGiuste(0); setTentate(0); };
+  const ricom = <button type="button" className="icon-btn" style={{ width: 'auto', padding: '0 14px', fontFamily: 'var(--sans)', fontSize: 'var(--fs-xs)' }} onClick={ricomincia}>Ricomincia</button>;
+  return (
+    <div>
+      <p><strong>Chatbot, il giro già fatto:</strong> tu incolli la richiesta con i dati, lui scrive lo script, tu lo salvi, lo lanci e riporti nella chat l'eventuale errore. Se il chatbot esegue anche il codice che scrive: da verificare a schermo.</p>
+      <div className="card" style={{ marginTop: 8 }}>
+        <h4>Agente · previsioni giuste {giuste}/{tentate}</h4>
+        <p><strong>Compito:</strong> {SIM_COMPITO}</p>
+        <ol className="steps" aria-live="polite">
+          <li className="i"><b>Mossa {passo + 1} di {SIM_PASSI.length} · {SIM_PASSI[passo].azione}.</b> {SIM_PASSI[passo].dettaglio}</li>
+        </ol>
+        {!fine && provando && (
+          <div className="opts" role="group" aria-label="Cosa fa adesso l'agente? Mosse possibili" style={{ display: 'grid', gap: 8 }}>
+            {prossimo.opzioni.map((o, i) => (
+              <button key={i} type="button" className={'opt' + (scelta !== null && i === prossimo.giusta ? ' ok' : '') + (scelta === i && i !== prossimo.giusta ? ' ko' : '')} onClick={() => scegli(i)} aria-pressed={scelta === i}>
+                <span className="lt">{'ABC'[i]}</span><span>{o}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {fine && <p><strong>Consegnato.</strong> Restano a te due decisioni: PC03 va segnalato? I due PC con lo stesso indirizzo sono un errore dell'elenco?</p>}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: 8 }}>
+          {!fine && !provando && <button type="button" className="copy-btn" onClick={() => setProvando(true)}>Indovina la prossima mossa</button>}
+          {!fine && provando && scelta !== null && <button type="button" className="copy-btn" onClick={avanti}>Avanti</button>}
+          {ricom}
+          <span className="legend">Dalla prova del 25/11/2026 (Claude Code, Opus 5.5): un'altra prova può andare diversamente.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const slides = [
   {
@@ -406,7 +472,7 @@ const slides = [
         sottotitolo="Dalla stessa richiesta fatta a un chatbot a un agente che lavora nella tua cartella: chi agisce, dove, e chi controlla."
         caso="Si comincia provando, prima di qualunque spiegazione." />
     ),
-    notes: "Si parte da una prova, non da una definizione. Prima tutti fanno la stessa richiesta tecnica a un chatbot e confrontano le risposte; poi due prove con Google AI Studio (un gioco senza piano, una dashboard con piano); poi la scala che va dal chatbot all'agente, con qualche esempio dal lavoro di Thomas; infine che cosa è un agente e la prima esercitazione con l'agente installato. Ogni affermazione sulle funzioni degli strumenti riporta la data (novembre 2026) e, dove c'è, il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente in aula è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale con qualunque modello."
+    notes: "Si parte da una prova, non da una definizione. Prima tutti fanno la stessa richiesta tecnica a un chatbot e confrontano le risposte; poi la stessa situazione vista con un agente (due colonne, simulazione «indovina la mossa», ciclo, prova dal vivo); poi due prove con Google AI Studio (un gioco senza piano, una dashboard con piano); poi la scala che va dal chatbot all'agente, con qualche esempio dal lavoro di Thomas; infine la prima esercitazione con l'agente installato. Ogni affermazione sulle funzioni degli strumenti riporta la data (novembre 2026) e, dove c'è, il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente in aula è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale con qualunque modello."
   },
   {
     block: B + 'Prima provate',
@@ -455,6 +521,275 @@ const slides = [
       </div>
     ),
     notes: "Spiegazione breve, con le parole del corso collegato: il modello prevede il testo successivo, per questo risposte diverse alla stessa richiesta; la scrivania è il contesto. Non entrare nei dettagli dei token e della finestra di contesto: se ne parla nell'argomento 11. Un chatbot con strumenti di esecuzione può fare di più di quanto scritto qui: è proprio il tema della scala che arriva dopo."
+  },
+  {
+    block: B + 'E un agente?',
+    content: () => (
+      <div className="pad">
+        <Tag>E un agente, nella stessa situazione?</Tag>
+        <h2>La stessa richiesta, in due modi</h2>
+        <p>Torniamo allo script per i PC del laboratorio. Cambia una cosa sola: l'elenco non è incollato nella richiesta, sta in un file, <code>elenco-pc.csv</code>, nella cartella di lavoro.</p>
+        <div className="cols">
+          <Card title="Chatbot: lavora con te" kind="i">
+            <ul>
+              <li>I dati li porti tu: incolli o allegi</li>
+              <li>Scrive lo script e spiega come usarlo</li>
+              <li>Lo salvi e lo lanci tu; se c'è un errore lo riporti nella chat</li>
+              <li>Consegna testo da leggere e da provare</li>
+            </ul>
+          </Card>
+          <Card title="Agente: lavora da sé, nella cartella">
+            <ul>
+              <li>La cartella la guarda lui: trova e apre <code>elenco-pc.csv</code></li>
+              <li>Scrive lo script e lo salva; per i comandi serve un permesso</li>
+              <li>Lo esegue e legge l'esito: se qualcosa non torna, riparte da lì</li>
+              <li>Consegna script, esito e le scelte che ha fatto</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="info" title="Chi decide">In tutti e due i casi l'ultima parola è tua. Cambia dove sta il lavoro, non chi risponde del risultato. Le colonne descrivono due modi di lavorare. L'agente è stato provato davvero (slide seguenti); il chatbot, a schermo.</Box>
+      </div>
+    ),
+    notes: "Si riprende la richiesta della prima prova, quella dello script per i PC. Cambia solo dove stanno i dati: un file nella cartella, non incollati. A sinistra ciò che si è appena visto con il chatbot: i dati li porta chi usa, lo script lo esegue e lo corregge lui, se c'è un errore lo riporta nella chat. A destra ciò che ha fatto un agente nella prova del 25/11/2026 con Claude Code: guarda la cartella, legge il file, scrive e salva lo script, lo esegue, legge l'esito, consegna con le sue scelte. Non è una gara: nel corso collegato, su pratiche scolastiche, un chatbot con i file allegati e un agente hanno trovato gli stessi problemi (prova del 23/11/2026), e la tesi «il chatbot sbaglia, l'agente si corregge» è stata smentita. Qui non si afferma che un modo sia migliore. L'agente è stato provato sul compito dei PC (slide «La prova vera»); il comportamento del chatbot scelto in aula sullo stesso compito è da verificare a schermo."
+  },
+  {
+    block: B + 'Il ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Il ciclo</Tag>
+        <h2>Il ciclo dell'agente</h2>
+        <div role="group" aria-label="Il ciclo: osserva, pianifica, agisce, verifica, poi si ripete">
+          <Flow nodes={[
+            ['1 Osserva', 'legge file, cerca, guarda l\'output dei comandi'],
+            ['2 Pianifica', 'decide la mossa successiva'],
+            ['3 Agisce', 'modifica un file o esegue un comando', 'w'],
+            ['4 Verifica', 'lancia i test, legge gli errori', 'i'],
+          ]} />
+          <p className="join" aria-hidden="true">&#8634; se qualcosa non torna, si riparte dal punto 1</p>
+        </div>
+        <Box type="tip" title="L'ultimo passaggio non è suo">Quando il ciclo si chiude l'agente consegna. Poi decide una persona: anche quando si è controllato da solo.</Box>
+        <p className="muted">La documentazione ufficiale lo racconta in tre fasi (raccogliere contesto, agire, verificare); qui separiamo il piano per vederlo meglio. Puoi interromperlo in ogni punto con <code>Esc</code>.</p>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Anteprima della simulazione che segue: le stesse mosse si vedranno una alla volta, con la possibilità di indovinarle. Il ciclo è il cuore dell'argomento. Esempio dalla documentazione: «correggi i test che falliscono» diventa eseguire i test, leggere l'errore, cercare i file, leggerli, modificare, rieseguire. Ogni passo informa il successivo: è ciò che distingue un agente da uno script, perché la mossa dopo dipende da ciò che è appena successo. La persona è nel ciclo: può fermare con Esc e correggere la rotta. Insistere già qui sull'ultima riga: la decisione finale resta a una persona."
+  },
+  {
+    block: B + 'Simulazione',
+    content: () => (
+      <div className="pad">
+        <Tag>Simulazione</Tag>
+        <h2>Indovina la mossa dell'agente</h2>
+        <SimulazioneAgente />
+      </div>
+    ),
+    notes: "Si gioca in plenaria: la sala sceglie a voce («chi A, chi B, chi C?»), poi si rivela. Si dice ad alta voce quante previsioni ha azzeccato la sala. Le sette mosse da indovinare sono tratte dalla prova del 25/11/2026 con Claude Code (versione 2.1.332, modello Claude Opus 5.5), lanciato da una cartella con il solo elenco inventato: guarda la cartella, legge il file, scrive lo script, lo esegue (un comando fermato, poi uno ammesso), legge l'esito, rifinisce, consegna con la scelta sul PC03. Le opzioni sbagliate sono scritte a tavolino. Cifre dai dati inventati: PC02 a 95 giorni, PC03 a 90 esatti, PC08 a 170, indirizzo 192.0.2.12 doppio. Un agente può cambiare ordine, linguaggio e scelte da una prova all'altra: dal vivo si ripete con Claude Code o con OpenCode e vale ciò che si vede. Da verificare a schermo: che cosa chiede l'agente in modalità Manual (nella prova le modifiche ai file erano accettate in automatico, quindi il permesso per salvare lo script non è stato visto). Conta la traccia, non ciò che dice l'agente."
+  },
+  {
+    block: B + 'Che cosa abbiamo visto',
+    content: () => (
+      <div className="pad">
+        <Tag>Che cos'è un agente</Tag>
+        <h2>Modello + strumenti + ciclo + permessi</h2>
+        <div className="grid">
+          <Card title="Il modello"><p>Ragiona e decide la mossa successiva. Da solo può solo rispondere con del testo. <em>Nella prova: sceglie di leggere il file prima di scrivere.</em></p></Card>
+          <Card title="Gli strumenti" kind="i"><p>File (leggere, creare, modificare), ricerca, esecuzione di comandi e test. <em>Nella prova: elencare, leggere, salvare lo script, lanciarlo.</em> Paragone: gli attrezzi del laboratorio, che non si usano da soli.</p></Card>
+          <Card title="Il ciclo" kind="i"><p>Ogni esito rientra e guida la mossa dopo. <em>Nella prova: l'esito del comando guida la rifinitura.</em></p></Card>
+          <Card title="I permessi" kind="w"><p>Ciò che cambia qualcosa chiede il tuo sì. <em>Nella prova: un comando non ammesso viene fermato, e l'agente cambia strada.</em> Paragone: la chiave del locale tecnico, apre una porta, non tutto l'edificio.</p></Card>
+        </div>
+        <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). In aula il modello è un Claude scelto dalla configurazione del laboratorio: il metodo vale con qualunque modello.</Box>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Si chiede alla sala di riempire i riquadri con ciò che ha appena visto nella simulazione (tratta dalla prova vera), prima di leggere le descrizioni. Un agente è la somma di quattro pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega, permessi che decidono cosa può fare senza chiedere. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. I permessi in dettaglio, le modalità e la partenza in Manual si vedono quando si installa l'agente (argomento 2); skill e subagenti sono nell'argomento 8, hook e MCP nel 9; contesto e costi nell'argomento 11. I paragoni sono quelli dell'argomento sull'agente del corso collegato, adattati."
+  },
+  {
+    block: B + 'Ora con un agente vero',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal vivo</Tag>
+        <h2>Ora la stessa richiesta, a un agente vero</h2>
+        <p>Cartella vuota con dentro solo l'elenco; si avvia Claude Code (o OpenCode) da lì, in Manual, e si incolla la richiesta.</p>
+        <CommandBox kind="text" tall cmd={ELENCO_CSV} label="Contenuto di elenco-pc.csv (dati inventati)" />
+        <CommandBox kind="text" tall cmd={RICHIESTA_AGENTE} label="Richiesta all'agente" />
+        <p className="muted">Si confronta con la simulazione: che cosa ha guardato, quando ha chiesto il permesso, che errori ha letto, che cosa ha deciso da solo.</p>
+      </div>
+    ),
+notes: "Prova dal vivo, fatta da chi parla con Claude Code o OpenCode, in modalità Manual. Prima si salva il file con l'elenco in una cartella vuota, poi si avvia l'agente da lì e si incolla la richiesta: è la stessa della prima prova, tranne l'ultima frase, che indica il file invece di incollare i dati. Mentre l'agente lavora si legge a voce la traccia: quali strumenti usa, quando si ferma a chiedere un sì, che cosa esegue, che cosa dichiara. Poi si mette il risultato accanto alla prova del 25/11/2026 (slide seguenti): se l'agente fa qualcosa di diverso, vale la prova di quel momento. Da verificare a schermo in Manual: quando chiede il permesso per salvare lo script. Piano B: la traccia registrata del 25/11/2026."
+  },
+  {
+    block: B + 'La prova vera · le mosse',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 25/11/2026</Tag>
+        <h2>Cosa ha fatto davvero l'agente</h2>
+        <p>Claude Code 2.1.332, modello Claude Opus 5.5, avviato da una cartella con il solo <code>elenco-pc.csv</code>. Stessa richiesta della prima prova, con i dati nel file. Modifiche ai file accettate in automatico; comandi limitati a un elenco (python, node, ls).</p>
+        <DT cols={['Mossa', 'Strumento', 'Cosa è successo']} rows={[
+          ['1', 'Glob', 'Elenca la cartella: trova solo elenco-pc.csv'],
+          ['2', 'Read', 'Legge il file: intestazione e otto righe'],
+          ['3', 'Write', 'Crea controlla_pc.py (Python), senza chiedere: modifiche accettate in automatico'],
+          ['4', 'PowerShell', 'Prova a lanciarlo: il comando è fermato, non è tra quelli ammessi'],
+          ['5', 'Bash', 'Lo rilancia con python: nessun errore, otto PC letti, il risultato è quello dei dati'],
+          ['6', 'Edit, Bash', 'Sistema gli accenti nel terminale di Windows e rilancia per controllare'],
+          ['7', 'Risposta', 'Consegna esito, uso dello script e una scelta sul PC03'],
+        ]} />
+        <Box type="info" title="Cosa non è successo">Nessun piano annunciato, nessun errore sui dati (l'unica correzione riguarda gli accenti) e nessun ricalcolo a mano. Il comando fermato non ha bloccato il lavoro: l'agente ha cambiato strada.</Box>
+      </div>
+    ),
+    notes: "Elenco delle mosse dalla traccia della prova del 25/11/2026 (Claude Code 2.1.332, Claude Opus 5.5, lanciato in modo non interattivo con modifiche accettate in automatico e con un elenco di comandi ammessi: python, node, ls; nessuna rete). Sono otto turni in tutto. Il primo comando, scritto per PowerShell, è stato fermato perché non ammesso; l'agente ha ripetuto lo stesso comando con Bash e ha funzionato. Nessun piano annunciato, nessun errore nei dati. Non ha ricalcolato a mano: i giorni li conta lo script. Una prova sola: un'altra esecuzione può andare diversamente. Dal vivo si ripete con Claude Code o OpenCode."
+  },
+  {
+    block: B + 'La prova vera · lo script',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 25/11/2026</Tag>
+        <h2>Lo script e la consegna</h2>
+        <div className="cols">
+          <div>
+            <p className="legend">Estratto di controlla_pc.py (scritto dall'agente)</p>
+            <pre>{`vecchi = sorted(
+    ((x, (args.data_rif - x["data"]).days) for x in pc
+     if (args.data_rif - x["data"]).days > args.giorni),
+    key=lambda t: -t[1])
+
+per_ip = defaultdict(list)
+for x in pc:
+    per_ip[x["ip"]].append(x["nome"])
+doppi = {ip: nomi for ip, nomi in per_ip.items()
+         if len(nomi) > 1}`}</pre>
+          </div>
+          <div>
+            <p className="legend">Esito del comando (righe accorciate)</p>
+            <pre>{`PC non aggiornati da più di 90 giorni: 2
+  - LAB1-PC08  192.0.2.18  (170 giorni fa)
+  - LAB1-PC02  192.0.2.12  (95 giorni fa)
+Indirizzi IP duplicati: 1
+  - 192.0.2.12  usato da: LAB1-PC02, LAB1-PC05`}</pre>
+          </div>
+        </div>
+        <Box type="warn" title="Una scelta da leggere">Il confronto <code>&gt; args.giorni</code> è il «più di 90»: il PC03, a 90 giorni esatti, non è segnalato. L'agente lo ha scritto nella consegna e ha indicato <code>--giorni 89</code> per contarlo. Se è giusto lo decide chi guida.</Box>
+      </div>
+    ),
+    notes: "Estratto da controlla_pc.py, scritto da Claude Code nella prova del 25/11/2026: il resto del file legge il CSV, gestisce righe vuote e date non valide, e stampa gli avvisi. L'esito è quello del comando, con i dati inventati. Il confronto con «più di 90»: la condizione è maggiore stretto, quindi il PC03 (90 giorni esatti) non compare; la consegna lo dice. Si legge il codice insieme: è l'abitudine da portarsi dietro. Se l'agente dal vivo sceglie un altro linguaggio o un'altra soglia, vale ciò che si vede."
+  },
+  {
+    block: B + 'Due modi, stesso lavoro',
+    content: () => (
+      <div className="pad">
+        <Tag>Chatbot e agente</Tag>
+        <h2>Due modi di fare lo stesso lavoro</h2>
+        <div className="grid">
+          <Card title="Chatbot" kind="i"><ul>
+            <li>Veloce per un compito piccolo e chiuso</li>
+            <li>Il lavoro passa da te a ogni giro: dati, esecuzione, errori</li>
+            <li>Conviene per pochi file e per azioni nelle proprie app</li>
+          </ul></Card>
+          <Card title="Agente"><ul>
+            <li>Va a prendere i file, prova, corregge sul proprio errore</li>
+            <li>Dichiara le scelte fatte (qui, il PC03); i comandi non ammessi li ferma il permesso</li>
+            <li>Conviene per molti file, lavori da ripetere, da ricontrollare</li>
+          </ul></Card>
+          <Card title="Resta alla persona" kind="w"><ul>
+            <li>Dare i dati giusti</li>
+            <li>Leggere ciò che è stato scritto e provato</li>
+            <li>Decidere i casi dubbi (qui, il PC03)</li>
+          </ul></Card>
+        </div>
+        <Box type="tip" title="Una conclusione prudente">Sulle stesse pratiche scolastiche, nel corso collegato, un chatbot con i file allegati e un agente hanno trovato gli stessi problemi (prova del 23/11/2026). Non c'è un modo giusto e uno sbagliato. Sul compito dei PC l'agente è stato provato il 25/11/2026; il confronto con il chatbot si fa a schermo.</Box>
+      </div>
+    ),
+    notes: "Sintesi di una prova reale del corso collegato (23/11/2026, account della scuola): un chatbot con i due PDF allegati e un agente (OpenCode con Claude Sonnet) hanno trovato tutto giusto, in due modi diversi. Il chatbot è stato rapido e ha creato le bozze nelle app collegate; l'agente ha dato una tabella motivata, un elenco di ciò che non ha potuto verificare e ha chiesto prima di salvare file. Nessuno dei due ha inventato gli indirizzi. Non c'è un vincitore: la tendenza (chatbot per pochi file e azioni nelle proprie app, agente per molti file, lavori da ripetere e da ricontrollare) è da verificare a schermo sul compito dei PC. Sul compito dei PC l'agente è stato provato il 25/11/2026 con Claude Code (slide «La prova vera»): ha consegnato script, esito e la scelta sul PC03. In ogni caso restano alla persona i dati giusti, la lettura e le decisioni sui casi dubbi."
+  },
+  {
+    block: B + 'Cosa vede l\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>La scrivania dell'agente</h2>
+        <div className="cols">
+          <Card title="Vede">
+            <ul>
+              <li>I file che legge o che gli indichi</li>
+              <li>L'output dei comandi che esegue</li>
+              <li>Le istruzioni di progetto (<code>CLAUDE.md</code>, oppure <code>AGENTS.md</code>)</li>
+              <li>La conversazione e lo stato di git</li>
+            </ul>
+          </Card>
+          <Card title="Non vede" kind="w">
+            <ul>
+              <li>I file che non ha letto</li>
+              <li>Ciò che hai in mente e non hai scritto</li>
+              <li>Le sessioni precedenti: ognuna parte da zero</li>
+              <li>Ciò che sta fuori dal terminale</li>
+            </ul>
+          </Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>La scrivania si riempie a ogni lettura e a ogni comando: come tenerla in ordine e quanto costa, nell'argomento 11.</p>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Stessa scrivania della prima prova, ma più grande: l'agente la riempie da solo, leggendo file e lanciando comandi. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 5. La gestione del contesto (comandi per vederlo, compattarlo, svuotarlo) e i costi sono nell'argomento 11."
+  },
+  {
+    block: B + 'Il contesto può mentire',
+    content: () => (
+      <div className="pad">
+        <Tag>Contesto</Tag>
+        <h2>Un'istruzione sbagliata diventa un fatto</h2>
+        <div className="cols">
+          <Card title="Cosa succede" kind="w">
+            <p>Un file di istruzioni dice di lanciare <code>npm run test:all</code>, ma lo script non esiste. L'agente si fida: tenta, legge l'errore, improvvisa. A volte inventa lo script.</p>
+          </Card>
+          <Card title="Cosa fai tu">
+            <ul>
+              <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>Get-Content</code></li>
+              <li>Tieni le istruzioni corte e vere (argomento 5)</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="warn" title="Regola">Per l'agente il testo che legge è un fatto, finché qualcosa non lo smentisce. La verifica è di chi guida.</Box>
+      </div>
+    ),
+    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nella prima esercitazione i partecipanti controllano a mano ciò che l'agente dice di aver capito, e il file di istruzioni della palestra nomina un file dei dati che nella cartella non c'è: è la stessa abitudine, applicata."
+  },
+  {
+    block: B + 'Domanda 1',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Una domanda per voi</h2>
+        <Quiz domanda="L'agente conclude: «Ho eseguito i test, passano tutti». Che cosa lo dimostra davvero?" opzioni={[
+          { t: 'La frase stessa, scritta con sicurezza', ok: false, perche: 'È un racconto del modello, non una prova.' },
+          { t: 'Nella traccia, una chiamata che esegue i test con il loro output', ok: true, perche: 'La traccia delle chiamate agli strumenti è ciò che è accaduto davvero. Si legge, o si rilancia il comando.' },
+          { t: 'Il fatto che il codice sembri corretto', ok: false, perche: 'Un codice può sembrare giusto ed essere sbagliato: l\'impressione non sostituisce la prova.' },
+        ]} />
+      </div>
+    ),
+    notes: "Richiama l'esempio dei dieci agenti: la differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nelle differenze (argomento 3); nella prima esercitazione, senza Git, si confrontano la traccia, i file, i numeri dei test e l'impronta del file dei dati."
+  },
+  {
+    block: B + 'Tu sei nel ciclo',
+    content: () => (
+      <div className="pad">
+        <Tag>Controllo</Tag>
+        <h2>Il piano, e tu dentro il ciclo</h2>
+        <div role="group" aria-label="Modalità piano: esplora, propone, tu decidi, poi esegue">
+          <Flow nodes={[
+            ['1 Esplora', 'legge, non modifica'],
+            ['2 Propone', 'scrive il piano'],
+            ['3 Decidi tu', 'approvi, correggi o rifiuti', 'w'],
+            ['4 Esegue', 'solo dopo il tuo sì', 'i'],
+          ]} />
+        </div>
+        <ul>
+          <li>Si entra in modalità piano con <code>Shift+Tab</code> o con <code>/plan</code>. Un piano si legge come un diff: quali file tocca, che cosa non tocca, come verifica.</li>
+          <li><code>Esc</code> ferma l'agente in ogni momento; <code>Esc</code> due volte riporta i file a uno stato precedente. I checkpoint non sostituiscono Git (argomento 3).</li>
+          <li>In aula l'agente parte in Manual: ogni azione che cambia qualcosa chiede il tuo sì, e va letta per intero prima di rispondere.</li>
+        </ul>
+        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
+      </div>
+    ),
+    notes: "Un accenno, non il tema dell'argomento. Il piano mette la decisione prima del lavoro: secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Esc ferma, Esc due volte torna indietro (checkpoint: solo i file, non rete né rilasci). Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite. Le modalità di permesso, il «non chiedere più», come si legge una richiesta di permesso e le prime richieste vere si vedono quando si installa l'agente (argomento 2) e nella prima esercitazione; il piano torna nell'argomento 4."
   },
   {
     block: B + 'Google AI Studio',
@@ -587,7 +922,7 @@ const slides = [
         <p className="legend">Funzioni dei chatbot descritte come nella ricerca del corso collegato (settembre 2026): nomi e disponibilità cambiano per prodotto, da riverificare.</p>
       </div>
     ),
-    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
+    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, appena visto nella simulazione, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
   },
   {
     block: B + 'La scala',
@@ -606,24 +941,6 @@ const slides = [
     notes: "Tre domande per ogni gradino: chi agisce, dove, chi controlla. Per il gradino 2 un esempio visto nel corso collegato (prova del 23/11/2026): un chatbot con le app collegate ha creato bozze direttamente in Gmail e ha chiesto «Vuoi inviarlo subito?»: la risposta spetta a chi usa lo strumento. Per il gradino 3, nella demo il controllo era il piano letto prima e il risultato provato dopo. Per il gradino 4 il controllo è nelle mani di chi guida: si impara negli argomenti 2, 3 e 6 (permessi, Git, test). La tabella è una semplificazione: i prodotti reali mescolano i gradini."
   },
   {
-    block: B + 'Due modi di fare lo stesso lavoro',
-    content: () => (
-      <div className="pad">
-        <Tag>Chatbot e agente</Tag>
-        <h2>Lo stesso lavoro, in due modi</h2>
-        <p>«Controlla i cinque file di inventario dei laboratori e dimmi quali PC sono da aggiornare o hanno lo stesso indirizzo.»</p>
-        <DT cols={['', 'Chatbot', 'Agente']} rows={[
-          ['I file', 'Li porti tu: incolli o allegi', 'Li cerca e li apre nella cartella'],
-          ['Lo script', 'Lo scrive; lo esegui e lo correggi tu', 'Lo scrive, chiede il permesso, lo esegue e legge l\'esito'],
-          ['Cosa consegna', 'Testo da leggere e da provare', 'File, esito dei comandi, elenco di ciò che non ha verificato'],
-          ['Chi decide', 'Tu', 'Tu: permessi, traccia, prova finale'],
-        ]} />
-        <Box type="tip" title="Una conclusione prudente">Sulle stesse pratiche scolastiche, nel corso collegato, un chatbot con i file allegati e un agente hanno trovato gli stessi problemi (prova del 23/11/2026). Non c'è un modo giusto e uno sbagliato. Sul compito dei PC è da verificare a schermo.</Box>
-      </div>
-    ),
-    notes: "Il caso è tecnico e inventato: cinque file di inventario, uno per laboratorio. La tabella descrive come lavorano i due strumenti, non chi vince. La prova reale del corso collegato (23/11/2026) ha smentito la tesi «il chatbot sbaglia, l'agente si corregge»: i due risultati erano entrambi corretti, in modi diversi. Quindi qui non si afferma che un modo sia migliore. Tendenza da verificare a schermo sul vostro compito: il chatbot conviene per pochi file e azioni nelle proprie app; l'agente per molti file, lavori da ripetere, da ricontrollare. Il confronto vero con i PC del laboratorio si fa in aula, e va annotato."
-  },
-  {
     block: B + 'Dal lavoro di Thomas',
     content: () => (
       <div className="pad">
@@ -638,160 +955,6 @@ const slides = [
       </div>
     ),
     notes: "Quattro esempi tangibili, solo da fonti documentate; ciascuno ha il suo argomento di approfondimento. Prenota Risorse: stato confermato da Thomas (online e in uso; Portale FSL e Portale Viaggi in fase di test, finché il codice non passa su un server con infrastruttura di rete certificata). Il primo messaggio del Portale Viaggi: orari dal registro della sessione del 5 luglio 2026 (18:49 il messaggio, 20:00 la consegna, 49 test, nove commit); era completo in locale, non in produzione. Il caso dei dieci agenti: nel file di istruzioni dei due agenti principali c'era una barra rovesciata davanti ai tre trattini e gli altri non avevano l'intestazione: per mesi i subagenti non sono stati caricati, e nulla di visibile andava storto. Lezione ripresa più avanti: il racconto di un agente non è la prova, la traccia sì. Memoteca: repository pubblico, versione 0.4.1 del 5/11/2026. Non si citano altri episodi in questo argomento."
-  },
-  {
-    block: B + 'Che cos\'è un agente',
-    content: () => (
-      <div className="pad">
-        <Tag>Il ciclo</Tag>
-        <h2>Modello + strumenti + ciclo + permessi</h2>
-        <div className="grid">
-          <Card title="Il modello"><p>Ragiona sul compito e decide la mossa successiva. Da solo può solo rispondere con del testo.</p></Card>
-          <Card title="Gli strumenti" kind="i">
-            <ul>
-              <li>File: leggere, modificare, creare</li>
-              <li>Ricerca e web</li>
-              <li>Esecuzione: comandi, test, git</li>
-            </ul>
-          </Card>
-          <Card title="Il ciclo" kind="i"><p>Ogni risultato di uno strumento rientra nel ciclo e guida la mossa dopo.</p></Card>
-          <Card title="I permessi" kind="w"><p>Ciò che cambia qualcosa chiede il tuo sì. Le prime richieste le vedrete nell'argomento 2.</p></Card>
-        </div>
-        <Box type="info" title="Il programma intorno">Claude Code fornisce gli strumenti e gestisce ciò che il modello vede (nel gergo, l'<em>harness</em>). In aula il modello è un Claude scelto dalla configurazione del laboratorio: il metodo vale con qualunque modello.</Box>
-        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
-      </div>
-    ),
-    notes: "Un agente come somma di quattro pezzi: un modello che ragiona, strumenti che agiscono, un ciclo che li collega, permessi che decidono cosa può fare senza chiedere. Senza strumenti c'è solo testo. La documentazione ufficiale (novembre 2026) divide gli strumenti in file, ricerca, esecuzione, web e intelligenza del codice (quest'ultima richiede plugin, non la usiamo). Harness: sigla da spiegare la prima volta. I permessi in dettaglio, le modalità e la partenza in Manual si vedono quando si installa l'agente (argomento 2); la finestra di contesto e i costi sono nell'argomento 11."
-  },
-  {
-    block: B + 'Il ciclo',
-    content: () => (
-      <div className="pad">
-        <Tag>Il ciclo</Tag>
-        <h2>Il ciclo dell'agente</h2>
-        <div role="group" aria-label="Il ciclo: osserva, pianifica, agisce, verifica, poi si ripete">
-          <Flow nodes={[
-            ['1 Osserva', 'legge file, cerca, guarda l\'output dei comandi'],
-            ['2 Pianifica', 'decide la mossa successiva'],
-            ['3 Agisce', 'modifica un file o esegue un comando', 'w'],
-            ['4 Verifica', 'lancia i test, legge gli errori', 'i'],
-          ]} />
-          <p className="join" aria-hidden="true">&#8634; se qualcosa non torna, si riparte dal punto 1</p>
-        </div>
-        <p className="muted">La documentazione ufficiale lo racconta in tre fasi (raccogliere contesto, agire, verificare); qui separiamo il piano per vederlo meglio. Puoi interromperlo in ogni punto con <code>Esc</code>.</p>
-        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
-      </div>
-    ),
-    notes: "Il ciclo è il cuore dell'argomento. Esempio dalla documentazione: «correggi i test che falliscono» diventa eseguire i test, leggere l'errore, cercare i file, leggerli, modificare, rieseguire. Ogni passo informa il successivo. Quello che distingue un agente da uno script è che la mossa dopo dipende da ciò che è appena successo. La persona è nel ciclo: può fermare con Esc e correggere la rotta."
-  },
-  {
-    block: B + 'Simulazione',
-    content: () => (
-      <div className="pad">
-        <Tag>Simulazione</Tag>
-        <h2>Indovina la mossa dell'agente</h2>
-        <p>Il compito della prima esercitazione, passo per passo: aggiungere un filtro per laboratorio alla palestra. Prima di ogni mossa scegli tra tre opzioni, poi leggi cosa è successo nella traccia.</p>
-        <ul>
-          <li>Dove si ferma e aspetta una persona</li>
-          <li>Quali azioni chiedono un permesso</li>
-          <li>Che cosa prova con un comando vero e con i test</li>
-        </ul>
-        <SimLink />
-        <p className="muted" style={{ marginTop: 10 }}>Sequenza didattica con dati inventati: non è l'output di un modello vero.</p>
-      </div>
-    ),
-    notes: "Si può fare in plenaria: la classe sceglie, poi si legge la traccia. Le mosse da indovinare sono dieci: attesa del sì al piano, lettura del codice invece di fidarsi del file di istruzioni, test prima di modificare, permesso prima di modificare, solo i file annunciati, la scelta che il piano non faceva lasciata a chi decide, test aggiunto, controllo con un comando vero, limiti dichiarati, consegna. È una sequenza scritta a tavolino, non una registrazione: un agente vero può cambiare ordine e parole. Vale la regola di sempre: conta ciò che si legge nella traccia."
-  },
-  {
-    block: B + 'Cosa vede l\'agente',
-    content: () => (
-      <div className="pad">
-        <Tag>Contesto</Tag>
-        <h2>La scrivania dell'agente</h2>
-        <div className="cols">
-          <Card title="Vede">
-            <ul>
-              <li>I file che legge o che gli indichi</li>
-              <li>L'output dei comandi che esegue</li>
-              <li>Le istruzioni di progetto (<code>CLAUDE.md</code>, oppure <code>AGENTS.md</code>)</li>
-              <li>La conversazione e lo stato di git</li>
-            </ul>
-          </Card>
-          <Card title="Non vede" kind="w">
-            <ul>
-              <li>I file che non ha letto</li>
-              <li>Ciò che hai in mente e non hai scritto</li>
-              <li>Le sessioni precedenti: ognuna parte da zero</li>
-              <li>Ciò che sta fuori dal terminale</li>
-            </ul>
-          </Card>
-        </div>
-        <p className="muted" style={{ marginTop: 10 }}>La scrivania si riempie a ogni lettura e a ogni comando: come tenerla in ordine e quanto costa, nell'argomento 11.</p>
-        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
-      </div>
-    ),
-    notes: "Stessa scrivania della prima prova, ma più grande: l'agente la riempie da solo, leggendo file e lanciando comandi. Secondo la documentazione (novembre 2026) Claude Code accede ai file del progetto, al terminale, allo stato di git e alle istruzioni di progetto; i file fuori dalla cartella solo con permesso. Le sessioni sono indipendenti: ciò che deve valere sempre va nelle istruzioni di progetto, tema dell'argomento 5. La gestione del contesto (comandi per vederlo, compattarlo, svuotarlo) e i costi sono nell'argomento 11."
-  },
-  {
-    block: B + 'Il contesto può mentire',
-    content: () => (
-      <div className="pad">
-        <Tag>Contesto</Tag>
-        <h2>Un'istruzione sbagliata diventa un fatto</h2>
-        <div className="cols">
-          <Card title="Cosa succede" kind="w">
-            <p>Un file di istruzioni dice di lanciare <code>npm run test:all</code>, ma lo script non esiste. L'agente si fida: tenta, legge l'errore, improvvisa. A volte inventa lo script.</p>
-          </Card>
-          <Card title="Cosa fai tu">
-            <ul>
-              <li>Controlli le sue affermazioni con un comando: <code>ls</code>, <code>cat</code>, <code>Get-Content</code></li>
-              <li>Tieni le istruzioni corte e vere (argomento 5)</li>
-            </ul>
-          </Card>
-        </div>
-        <Box type="warn" title="Regola">Per l'agente il testo che legge è un fatto, finché qualcosa non lo smentisce. La verifica è di chi guida.</Box>
-      </div>
-    ),
-    notes: "Esempio inventato apposta, non preso da un progetto vero. Il punto è che l'agente non ha un modo indipendente di sapere se un file di istruzioni è aggiornato. Nella prima esercitazione i partecipanti controllano a mano ciò che l'agente dice di aver capito, e il file di istruzioni della palestra nomina un file dei dati che nella cartella non c'è: è la stessa abitudine, applicata."
-  },
-  {
-    block: B + 'Domanda 1',
-    content: () => (
-      <div className="pad">
-        <Tag>Quiz</Tag>
-        <h2>Una domanda per voi</h2>
-        <Quiz domanda="L'agente conclude: «Ho eseguito i test, passano tutti». Che cosa lo dimostra davvero?" opzioni={[
-          { t: 'La frase stessa, scritta con sicurezza', ok: false, perche: 'È un racconto del modello, non una prova.' },
-          { t: 'Nella traccia, una chiamata che esegue i test con il loro output', ok: true, perche: 'La traccia delle chiamate agli strumenti è ciò che è accaduto davvero. Si legge, o si rilancia il comando.' },
-          { t: 'Il fatto che il codice sembri corretto', ok: false, perche: 'Un codice può sembrare giusto ed essere sbagliato: l\'impressione non sostituisce la prova.' },
-        ]} />
-      </div>
-    ),
-    notes: "Richiama l'esempio dei dieci agenti: la differenza tra ciò che l'agente dice e ciò che ha fatto si controlla nella traccia. Quando il lavoro è su Git si controlla anche nelle differenze (argomento 3); nella prima esercitazione, senza Git, si confrontano la traccia, i file, i numeri dei test e l'impronta del file dei dati."
-  },
-  {
-    block: B + 'Tu sei nel ciclo',
-    content: () => (
-      <div className="pad">
-        <Tag>Controllo</Tag>
-        <h2>Il piano, e tu dentro il ciclo</h2>
-        <div role="group" aria-label="Modalità piano: esplora, propone, tu decidi, poi esegue">
-          <Flow nodes={[
-            ['1 Esplora', 'legge, non modifica'],
-            ['2 Propone', 'scrive il piano'],
-            ['3 Decidi tu', 'approvi, correggi o rifiuti', 'w'],
-            ['4 Esegue', 'solo dopo il tuo sì', 'i'],
-          ]} />
-        </div>
-        <ul>
-          <li>Si entra in modalità piano con <code>Shift+Tab</code> o con <code>/plan</code>. Un piano si legge come un diff: quali file tocca, che cosa non tocca, come verifica.</li>
-          <li><code>Esc</code> ferma l'agente in ogni momento; <code>Esc</code> due volte riporta i file a uno stato precedente. I checkpoint non sostituiscono Git (argomento 3).</li>
-          <li>In aula l'agente parte in Manual: ogni azione che cambia qualcosa chiede il tuo sì, e va letta per intero prima di rispondere.</li>
-        </ul>
-        <Fonte href="https://code.claude.com/docs/en/permission-modes">code.claude.com/docs/en/permission-modes</Fonte>
-      </div>
-    ),
-    notes: "Un accenno, non il tema dell'argomento. Il piano mette la decisione prima del lavoro: secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Esc ferma, Esc due volte torna indietro (checkpoint: solo i file, non rete né rilasci). Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite. Le modalità di permesso, il «non chiedere più», come si legge una richiesta di permesso e le prime richieste vere si vedono quando si installa l'agente (argomento 2) e nella prima esercitazione; il piano torna nell'argomento 4."
   },
   {
     block: B + 'Il filo',
@@ -829,11 +992,12 @@ const slides = [
           <li><time>5</time>Si guardano i permessi che chiede e si controllano a mano il filtro, i test e il file dei dati.</li>
         </ol>
         <Box type="tip" title="Copia usa e getta">Si lavora su una cartella estratta da uno zip, senza Git: se qualcosa va storto si estrae di nuovo. Git come rete di sicurezza è un altro argomento.</Box>
+        <SimLink />
         <ActivityBadge n="1" file="prima-esercitazione.html" label="Prima esercitazione: l'agente legge un piano e aggiunge un filtro alla palestra" />
         <ActivityBadge n="1" file="palestra-prima-prova.zip" label="La palestra, copia usa e getta (zip)" />
       </div>
     ),
-    notes: "Ponte verso l'installazione (argomento 2) e la prima esercitazione. L'esercitazione parte dal piano visto nelle prove con AI Studio: stesso gesto, ora con l'agente installato sul PC e su un'app vera. Gli effetti sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se si accorge che il file di istruzioni nomina un file dei dati che non c'è) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio. Per chi finisce prima c'è un'esercitazione di riserva, senza codice, nella pagina dei materiali."
+    notes: "Ponte verso l'installazione (argomento 2) e la prima esercitazione. L'esercitazione parte dal piano visto nelle prove con AI Studio: stesso gesto, ora con l'agente installato sul PC e su un'app vera. Gli effetti sul comportamento dell'agente (come presenta il piano, quali permessi chiede, se si accorge che il file di istruzioni nomina un file dei dati che non c'è) vanno verificati a schermo sulla versione installata: nelle schede sono descritti come da verificare. Il modello lo sceglie la configurazione del laboratorio. La simulazione sulla palestra (stessi passi, sul filtro per laboratorio) si può fare prima o dopo, da soli o in plenaria; è scritta a tavolino, non registrata. Per chi finisce prima c'è un'esercitazione di riserva, senza codice, nella pagina dei materiali."
   },
   {
     block: B + 'Chiusura',
@@ -841,15 +1005,15 @@ const slides = [
       <Chiusura
         punti={[
           'La stessa richiesta dà risposte diverse: il modello scrive testo, e vede solo ciò che sta sulla sua scrivania.',
+          'Chatbot e agente fanno lo stesso lavoro in due modi: nessuno dei due ti toglie il controllo.',
+          'Un agente è un modello con strumenti dentro un ciclo, con permessi che decidono cosa fa senza chiedere.',
           'Piano o niente piano: un compito piccolo si rifà, uno più grande si decide prima. Il prototipo si butta, il piano si tiene.',
           'La scala: chatbot, chatbot con canvas e app, costruttore di app, agente nella cartella. Per ognuno: chi agisce, dove, chi controlla.',
-          'Un agente è un modello con strumenti dentro un ciclo, con permessi che decidono cosa fa senza chiedere.',
-          'Chatbot e agente fanno lo stesso lavoro in due modi: nessuno dei due ti toglie il controllo.',
           'Il riassunto di un agente non è la prova: lo è la traccia.',
         ]}
         dopo="Argomento 2: installare l'agente, poi la prima esercitazione sulla palestra. Argomento 3: Git come rete di sicurezza, per leggere cosa ha cambiato l'agente. Argomento 4: dalla richiesta vaga ai requisiti, con la modalità piano. Argomento 11: contesto e costi." />
     ),
-    notes: "Ripartire dalla scala e dal filo: dalla prova con il chatbot all'agente nella cartella, passando per il piano. Poi l'installazione (argomento 2) e la prima esercitazione. Le funzioni di Claude Code e di AI Studio citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs e aistudio.google.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
+    notes: "Ripartire dalla stessa richiesta fatta al chatbot e poi a un agente, poi dal piano, dalla scala e dal filo. Poi l'installazione (argomento 2) e la prima esercitazione. Le funzioni di Claude Code e di AI Studio citate sono quelle della documentazione di novembre 2026 (code.claude.com/docs e aistudio.google.com/docs): prima di ogni uso conviene ricontrollare nomi e comandi."
   },
 ];
 
