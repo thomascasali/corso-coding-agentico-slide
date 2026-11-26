@@ -402,6 +402,26 @@ const SimLink = () => (
 const RICHIESTA_AGENTE = RICHIESTA_PC.split(' I dati sono questi:')[0] + ' I dati sono nel file elenco-pc.csv di questa cartella.';
 const ELENCO_CSV = RICHIESTA_PC.split('\n\n')[1];
 
+/* Terzo giro e richiesta con i casi: testi delle prove del 26/11/2026 (Claude Code 2.1.332, Opus 5.5), dati inventati. */
+const RICHIESTA_ESITO = String.raw`Ho provato lo script su elenco-pc-date-sbagliate.csv, dove una data è scritta come 28/08/2026 invece di 2026-08-28. Questo è l'esito:
+
+Data di riferimento: 2026-12-01 - soglia: più di 90 giorni
+PC letti: 5
+
+PC non aggiornati da più di 90 giorni: 0
+
+Indirizzi IP duplicati: 0
+
+Avvisi sui dati: 1
+  - riga 3 (LAB2-PC02): data non valida '28/08/2026'
+
+A me non torna. Sistemalo e riprova.`;
+const CASI_DA_PROVARE = String.raw`Prima di dirmi che è finito, prova lo script su questi casi e per ciascuno dimmi che cosa hai visto:
+- il file non esiste;
+- il file è vuoto, o ha solo l'intestazione;
+- una data è scritta male, per esempio 28/08/2026 invece di 2026-08-28: il PC non deve sparire dai controlli senza che io lo sappia;
+- un PC è fermo a 90 giorni esatti: non va segnalato.`;
+
 /* Simulazione guidata: l'agente sul compito dei PC. Le mosse sono tratte dalla prova reale del 25/11/2026 (Claude Code 2.1.332, Opus 5.5), riassunte e con le opzioni sbagliate scritte a tavolino. */
 const SIM_COMPITO = 'Controlla elenco-pc.csv: segnala i PC non aggiornati da più di 90 giorni (riferimento 2026-12-01) e quelli con lo stesso indirizzo IP.';
 const SIM_PASSI = [
@@ -612,65 +632,102 @@ const slides = [
         <p>Cartella vuota con dentro solo l'elenco; si avvia Claude Code (o OpenCode) da lì, in Manual, e si incolla la richiesta.</p>
         <CommandBox kind="text" tall cmd={ELENCO_CSV} label="Contenuto di elenco-pc.csv (dati inventati)" />
         <CommandBox kind="text" tall cmd={RICHIESTA_AGENTE} label="Richiesta all'agente" />
-        <p className="muted">Si confronta con la simulazione: che cosa ha guardato, quando ha chiesto il permesso, che errori ha letto, che cosa ha deciso da solo.</p>
+        <p className="muted">Si confronta con la simulazione: che cosa ha guardato, quando ha chiesto il permesso, che errori ha letto, che cosa ha deciso da solo. Poi si prova un file con una data scritta male (slide seguenti).</p>
       </div>
     ),
-notes: "Prova dal vivo, fatta da chi parla con Claude Code o OpenCode, in modalità Manual. Prima si salva il file con l'elenco in una cartella vuota, poi si avvia l'agente da lì e si incolla la richiesta: è la stessa della prima prova, tranne l'ultima frase, che indica il file invece di incollare i dati. Mentre l'agente lavora si legge a voce la traccia: quali strumenti usa, quando si ferma a chiedere un sì, che cosa esegue, che cosa dichiara. Poi si mette il risultato accanto alla prova del 25/11/2026 (slide seguenti): se l'agente fa qualcosa di diverso, vale la prova di quel momento. Da verificare a schermo in Manual: quando chiede il permesso per salvare lo script. Piano B: la traccia registrata del 25/11/2026."
+notes: "Prova dal vivo, fatta da chi parla con Claude Code o OpenCode, in modalità Manual. Prima si salva il file con l'elenco in una cartella vuota, poi si avvia l'agente da lì e si incolla la richiesta: è la stessa della prima prova, tranne l'ultima frase, che indica il file invece di incollare i dati. Mentre l'agente lavora si legge a voce la traccia: quali strumenti usa, quando si ferma a chiedere un sì, che cosa esegue, che cosa dichiara. Quando l'agente consegna si ferma e si prova un secondo file, con una data scritta male, che si copia nella cartella solo dopo la consegna: l'agente non l'ha visto. Si riporta l'esito nella stessa sessione, come nelle slide seguenti (prova del 26/11/2026): se l'agente fa qualcosa di diverso, vale la prova di quel momento. Da verificare a schermo in Manual: quando chiede il permesso per salvare lo script. Piano B: la traccia registrata della prova del 26/11/2026."
   },
   {
-    block: B + 'La prova vera · le mosse',
+    block: B + 'La prova vera · la consegna',
     content: () => (
       <div className="pad">
-        <Tag>Prova del 25/11/2026</Tag>
-        <h2>Cosa ha fatto davvero l'agente</h2>
-        <p>Claude Code 2.1.332, modello Claude Opus 5.5, avviato da una cartella con il solo <code>elenco-pc.csv</code>. Stessa richiesta della prima prova, con i dati nel file. Modifiche ai file accettate in automatico; comandi limitati a un elenco (python, node, ls).</p>
+        <Tag>Prova del 26/11/2026 · primo giro</Tag>
+        <h2>L'agente consegna, e dice che funziona</h2>
+        <p>Claude Code 2.1.332, modello Claude Opus 5.5, avviato da una cartella con il solo <code>elenco-pc.csv</code>. Stessa richiesta della prima prova, con i dati nel file.</p>
         <DT cols={['Mossa', 'Strumento', 'Cosa è successo']} rows={[
-          ['1', 'Glob', 'Elenca la cartella: trova solo elenco-pc.csv'],
-          ['2', 'Read', 'Legge il file: intestazione e otto righe'],
-          ['3', 'Write', 'Crea controlla_pc.py (Python), senza chiedere: modifiche accettate in automatico'],
-          ['4', 'PowerShell', 'Prova a lanciarlo: il comando è fermato, non è tra quelli ammessi'],
-          ['5', 'Bash', 'Lo rilancia con python: nessun errore, otto PC letti, il risultato è quello dei dati'],
-          ['6', 'Edit, Bash', 'Sistema gli accenti nel terminale di Windows e rilancia per controllare'],
-          ['7', 'Risposta', 'Consegna esito, uso dello script e una scelta sul PC03'],
+          ['1', 'Read', 'Legge il file: intestazione e otto righe'],
+          ['2', 'Write, Edit', 'Crea controlla_pc.py (Python) e ne ritocca l\'ordinamento'],
+          ['3', 'PowerShell, Bash', 'Quattro lanci fermati: comandi composti, non ammessi dall\'elenco'],
+          ['4', 'Bash', 'Lancia python da solo: due PC non aggiornati (PC08 a 170 giorni, PC02 a 95), indirizzo 192.0.2.12 doppio'],
+          ['5', 'Edit, Bash', 'Sistema gli accenti nel terminale di Windows e rilancia'],
+          ['6', 'Risposta', '«L\'ho provato su elenco-pc.csv». PC03 a 90 giorni esatti: non segnalato. «Le date sbagliate sono avvisi e non bloccano il controllo»'],
         ]} />
-        <Box type="info" title="Cosa non è successo">Nessun piano annunciato, nessun errore sui dati (l'unica correzione riguarda gli accenti) e nessun ricalcolo a mano. Il comando fermato non ha bloccato il lavoro: l'agente ha cambiato strada.</Box>
+        <Box type="warn" title="Che cosa è stato provato">Un file solo: quello d'esempio. La frase sulle date sbagliate riguarda un caso che nessuno ha ancora visto girare.</Box>
       </div>
     ),
-    notes: "Elenco delle mosse dalla traccia della prova del 25/11/2026 (Claude Code 2.1.332, Claude Opus 5.5, lanciato in modo non interattivo con modifiche accettate in automatico e con un elenco di comandi ammessi: python, node, ls; nessuna rete). Sono otto turni in tutto. Il primo comando, scritto per PowerShell, è stato fermato perché non ammesso; l'agente ha ripetuto lo stesso comando con Bash e ha funzionato. Nessun piano annunciato, nessun errore nei dati. Non ha ricalcolato a mano: i giorni li conta lo script. Una prova sola: un'altra esecuzione può andare diversamente. Dal vivo si ripete con Claude Code o OpenCode."
+    notes: "Primo giro della prova del 26/11/2026, ripetuta con Claude Code 2.1.332 e modello Claude Opus 5.5, lanciato in modo non interattivo con modifiche accettate in automatico e un elenco di comandi ammessi (python, ls); nessuna rete. In quella eseguita fino in fondo l'agente scrive lo script, prova più forme di comando (quelle composte, con un secondo comando dopo il punto e virgola, sono fermate dall'elenco dei permessi), poi lancia python da solo e legge l'esito. Consegna con l'esito, la scelta sul PC03 e una frase sulle date sbagliate. Si fa notare che ha provato solo il file d'esempio. In due delle tre corse identiche l'agente non è riuscito a eseguire lo script e lo ha dichiarato: i risultati erano calcolati a mano. È un comportamento onesto, e un buon esempio di cosa guardare nella consegna: che cosa dice di aver provato. Una prova per corsa: dal vivo può andare diversamente, e vale ciò che si vede."
   },
   {
-    block: B + 'La prova vera · lo script',
+    block: B + 'La prova vera · la data scritta male',
     content: () => (
       <div className="pad">
-        <Tag>Prova del 25/11/2026</Tag>
-        <h2>Lo script e la consegna</h2>
-        <div className="cols">
-          <div>
-            <p className="legend">Estratto di controlla_pc.py (scritto dall'agente)</p>
-            <pre>{`vecchi = sorted(
-    ((x, (args.data_rif - x["data"]).days) for x in pc
-     if (args.data_rif - x["data"]).days > args.giorni),
-    key=lambda t: -t[1])
+        <Tag>Prova del 26/11/2026 · secondo giro</Tag>
+        <h2>Provi un file con una data scritta male</h2>
+        <p>Nel file la data di LAB2-PC02 è <code>28/08/2026</code> invece di <code>2026-08-28</code>. Lanci lo script tu, nella cartella:</p>
+        <CommandBox cmd="python controlla_pc.py elenco-pc-date-sbagliate.csv" label="Comando (file inventato)" />
+        <pre>{`Data di riferimento: 2026-12-01 - soglia: più di 90 giorni
+PC letti: 5
 
-per_ip = defaultdict(list)
-for x in pc:
-    per_ip[x["ip"]].append(x["nome"])
-doppi = {ip: nomi for ip, nomi in per_ip.items()
-         if len(nomi) > 1}`}</pre>
-          </div>
-          <div>
-            <p className="legend">Esito del comando (righe accorciate)</p>
-            <pre>{`PC non aggiornati da più di 90 giorni: 2
-  - LAB1-PC08  192.0.2.18  (170 giorni fa)
-  - LAB1-PC02  192.0.2.12  (95 giorni fa)
-Indirizzi IP duplicati: 1
-  - 192.0.2.12  usato da: LAB1-PC02, LAB1-PC05`}</pre>
-          </div>
-        </div>
-        <Box type="warn" title="Una scelta da leggere">Il confronto <code>&gt; args.giorni</code> è il «più di 90»: il PC03, a 90 giorni esatti, non è segnalato. L'agente lo ha scritto nella consegna e ha indicato <code>--giorni 89</code> per contarlo. Se è giusto lo decide chi guida.</Box>
+PC non aggiornati da più di 90 giorni: 0
+
+Indirizzi IP duplicati: 0
+
+Avvisi sui dati: 1
+  - riga 3 (LAB2-PC02): data non valida '28/08/2026'`}</pre>
+        <Box type="warn" title="Non si rompe, ma non torna">Nessun errore a schermo. Però i PC letti sono 5 su 6, nessun PC risulta da aggiornare e l'avviso sta in fondo. Il PC02, che con la data giusta è fermo da 95 giorni, è fuori da tutti i controlli. Il codice di uscita è 0, come se fosse andato tutto bene.</Box>
       </div>
     ),
-    notes: "Estratto da controlla_pc.py, scritto da Claude Code nella prova del 25/11/2026: il resto del file legge il CSV, gestisce righe vuote e date non valide, e stampa gli avvisi. L'esito è quello del comando, con i dati inventati. Il confronto con «più di 90»: la condizione è maggiore stretto, quindi il PC03 (90 giorni esatti) non compare; la consegna lo dice. Si legge il codice insieme: è l'abitudine da portarsi dietro. Se l'agente dal vivo sceglie un altro linguaggio o un'altra soglia, vale ciò che si vede."
+    notes: "Secondo giro: lo fa la persona, non l'agente. Si lancia lo script sul file con una data scritta in formato italiano. Nella prova del 26/11/2026 non c'è stato nessun errore a schermo: la riga è stata scartata e segnalata in fondo, e il risultato in alto dice «nessuno» due volte. Il PC02 manca anche dal controllo degli indirizzi. Il codice di uscita, nella corsa riportata, è 0. Nelle altre due corse la riga era scartata allo stesso modo, con testi diversi: in tre su tre lo stesso difetto, e in nessuna una rottura. Lo scopo del giro è questo: il risultato in alto sembra a posto, e la differenza sta in una riga letta con attenzione. Si legge a voce «PC letti: 5» e si chiede quanti ne avevamo nel file. Dal vivo si usa il file preparato e vale ciò che si vede."
+  },
+  {
+    block: B + 'La prova vera · l\'errore torna all\'agente',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 26/11/2026 · terzo giro</Tag>
+        <h2>L'esito torna all'agente</h2>
+        <CommandBox kind="text" tall cmd={RICHIESTA_ESITO} label="Richiesta nella stessa sessione (dati inventati)" />
+        <div className="cols">
+          <Card title="Prima" kind="w"><p>PC letti: 5. Nessun PC non aggiornato. LAB2-PC02 fuori dai controlli, con un avviso in fondo.</p></Card>
+          <Card title="Dopo la correzione" kind="i"><p>PC letti: 6. LAB2-PC02 segnalato a 95 giorni, con un avviso che dice come è stata letta la data.</p></Card>
+        </div>
+      </div>
+    ),
+    notes: "Terzo giro, nella stessa sessione: la persona incolla l'esito e dice solo che non torna. L'agente rilegge file e script, riscrive lo script, lo rilancia sui due file e su un file di casi limite creato da sé (data impossibile, data vuota, indirizzo non valido), poi consegna. Nomina i due difetti: il formato delle date e il PC tolto da tutti i controlli. Segnala un limite che nessuno gli aveva chiesto: una data con le barre è letta come giorno e mese, non mese e giorno, e la soluzione sicura è scrivere sempre AAAA-MM-GG. Da notare: la correzione è arrivata perché c'era un caso concreto da portargli. Senza il secondo giro nessuno avrebbe saputo. Nelle altre due corse la correzione è arrivata allo stesso modo; in una l'agente, senza il permesso di eseguire, ha dato l'esito atteso calcolato a mano e lo ha dichiarato. Una prova sola per corsa: un'altra esecuzione può andare diversamente."
+  },
+  {
+    block: B + 'La prova vera · le mosse della correzione',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 26/11/2026 · terzo giro</Tag>
+        <h2>Che cosa fa l'agente per correggere</h2>
+        <DT cols={['Mossa', 'Strumento', 'Cosa è successo']} rows={[
+          ['1-2', 'Read', 'Rilegge il file con la data scritta male e lo script'],
+          ['3', 'Write', 'Riscrive lo script: legge anche GG/MM/AAAA, e un PC con dato sbagliato resta negli altri controlli'],
+          ['4-7', 'Write, Bash', 'Prova il file sbagliato (ora LAB2-PC02 è a 95 giorni, con un avviso), quello di partenza (identico) e un file nuovo di casi limite'],
+          ['8', 'Risposta', '«Avevi ragione: c\'erano due errori». Avvisa che 03/04/2026 viene letta come 3 aprile'],
+        ]} />
+        <Box type="tip" title="«Fatto» non è la fine">Il ciclo si è chiuso perché una persona ha provato un caso e riportato l'esito. Alla prossima consegna conviene chiedere: che cosa hai provato, e che cosa no?</Box>
+      </div>
+    ),
+    notes: "Le mosse del terzo giro dalla traccia della prova del 26/11/2026: rilegge, riscrive, prova il caso che ha fallito, ripete la prova di partenza per verificare che non si sia rotto altro, e aggiunge un file di casi limite creato da sé. Nelle altre due corse la correzione è andata allo stesso modo; in una l'agente, senza il permesso di eseguire, ha dato un esito atteso calcolato a mano e lo ha dichiarato. Si chiude con la domanda da portarsi dietro: che cosa hai provato, e che cosa no? Una prova sola per corsa."
+  },
+  {
+    block: B + 'La stessa richiesta, fatta bene',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 26/11/2026 · la richiesta con i casi</Tag>
+        <h2>Gli stessi casi, chiesti prima</h2>
+        <p>Stessa richiesta, con in più i casi da provare prima di dire «finito»:</p>
+        <CommandBox kind="text" tall cmd={CASI_DA_PROVARE} label="Parte aggiunta alla richiesta" />
+        <DT cols={['Caso', 'Cosa ha visto l\'agente']} rows={[
+          ['File mancante, file vuoto, solo l\'intestazione', 'Un messaggio chiaro per ciascuno e codice di uscita 2, senza traceback'],
+          ['Data scritta male', 'Il PC compare in un blocco «ATTENZIONE» a parte e il controllo degli indirizzi lo include comunque'],
+          ['90 giorni esatti', 'Non segnalato; a 91 giorni sì'],
+        ]} />
+        <p className="muted" style={{ marginTop: 10 }}>I casi li scrivi tu, prima. Come si scrivono si vede negli argomenti 4 (criteri di accettazione) e 6 (test e debugging).</p>
+      </div>
+    ),
+    notes: "Stessa richiesta del primo giro, con quattro casi elencati in fondo: file che non esiste, file vuoto o con la sola intestazione, una data scritta male (con la precisazione che il PC non deve sparire senza che si sappia), un PC a 90 giorni esatti. Nella prova del 26/11/2026 l'agente ha scritto lo script, ha creato i file di prova per ogni caso, li ha lanciati uno per uno e ha riportato che cosa ha visto, caso per caso, con il significato dei codici di uscita. Il PC con la data scritta male non è controllato per l'aggiornamento ma è segnalato, e resta nel controllo degli indirizzi. Qui non si insegna a scrivere i criteri: è l'argomento 4, e la verifica con i test è l'argomento 6. La slide serve a far vedere che cosa cambia nella consegna quando i casi sono nella richiesta. Una prova sola: dal vivo può andare diversamente."
   },
   {
     block: B + 'Due modi, stesso lavoro',
@@ -918,11 +975,12 @@ Indirizzi IP duplicati: 1
             ['4 Agente nella tua cartella', 'Claude Code, OpenCode', 'i'],
           ]} />
         </div>
+        <p style={{ marginTop: 12 }}>Al gradino 2 stanno anche le <strong>skill di Gemini</strong>: istruzioni riusabili che richiami con <code>@</code> in qualsiasi chat e che Gemini può attivare anche da solo (per gli account Education dal 13/10/2026; i Gem creati nell'app migrano in automatico dal 1/6/2027 o dopo).</p>
         <p className="muted" style={{ marginTop: 12 }}>Non è un confine netto: è una scala che si sale un gradino alla volta, e i prodotti reali stanno a cavallo.</p>
         <p className="legend">Funzioni dei chatbot descritte come nella ricerca del corso collegato (settembre 2026): nomi e disponibilità cambiano per prodotto, da riverificare.</p>
       </div>
     ),
-    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, appena visto nella simulazione, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
+    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Qui stanno anche le skill di Gemini: istruzioni riusabili richiamate con @ in ogni chat, che Gemini può attivare da solo; per gli account Education dal 13/10/2026, e i Gem creati nell'app migrano in automatico dal 1/6/2027 o dopo (fonte: guida Google «Gemini Gems and Skills Transition Guide», 2026, https://services.google.com/fh/files/misc/gemini_gems_skills_transition_guide.pdf, consultata il 26/11/2026; date da riverificare). Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, appena visto nella simulazione, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
   },
   {
     block: B + 'La scala',

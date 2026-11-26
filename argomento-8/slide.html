@@ -523,6 +523,27 @@ const slides = [
     notes: `Esempio inventato. Notare: la descrizione dice che cosa fa e quando; ogni passo è un'azione controllabile; c'è un confine dichiarato. Si può chiedere alla sala quale passo l'agente potrebbe saltare senza che nessuno se ne accorga, e come si farebbe accorgersene (il file NOTE-RILASCIO.md ha le tre sezioni? ci sono hash?). Una skill che si lancia a mano con /note-di-rilascio è più prevedibile di una scelta dal modello.`
   },
   {
+    block: B + 'La stessa idea nel chatbot',
+    content: () => (
+      <div className="pad">
+        <Tag>Gemini</Tag>
+        <h2>La stessa idea anche nel chatbot</h2>
+        <p>In Gemini i Gem diventano <strong>skill</strong>: si richiamano con <code className="nw">@</code> in ogni chat e Gemini può attivarle da sé.</p>
+        <DT cols={['Regola di Google per le skill in Gemini', 'Il corrispondente in SKILL.md']} rows={[
+          ['Nome in minuscolo, con parole d\'azione (es. build-lab-rubric)', <><code className="nw">name</code> è il comando <code className="nw">/nome</code>: stesso criterio</>],
+          ['«Use when…» nella descrizione, con esempi concreti', <><code className="nw">description</code> e <code className="nw">when_to_use</code>: che cosa fa e quando usarla</>],
+          ['Gemini decide solo da nome e descrizione', 'l\'agente vede sempre nome e descrizione; il corpo entra quando serve'],
+          ['Dire che cosa NON fare, con i guardrail', 'nel corpo, un confine dichiarato («non toccare altro»)'],
+          ['Fermarsi a chiedere i dati mancanti invece di indovinare', 'un passo nel corpo: «se manca X, chiedi prima di procedere»'],
+        ]} />
+        <Box type="tip" title="Il concetto">Vale per tutti gli strumenti: nome e descrizione decidono quando la procedura entra in gioco.</Box>
+        <p className="muted" style={{ marginTop: 8 }}>Education, secondo la guida: skill dal 13/10/2026; Gem migrati in automatico dal 1/6/2027 o dopo.</p>
+        <Box type="info" title="Da verificare a schermo">Il file skill.md caricato in Gemini ha il formato di SKILL.md? La guida non lo mostra.</Box>
+      </div>
+    ),
+    notes: `Fonte: guida Google «Gemini Gems and Skills Transition Guide» (2026), consultata il 26/11/2026, https://services.google.com/fh/files/misc/gemini_gems_skills_transition_guide.pdf. Le regole della prima colonna sono quelle che la guida dà per scrivere una skill in Gemini: nome in minuscolo fatto di parole d'azione; descrizione con «Use when…», perché Gemini decide solo da nome e descrizione; dire che cosa non fare; chiedere i dati mancanti invece di indovinarli. Confrontarle con SKILL.md, come spiegato nella parte sulla struttura del file: stesso principio, campi con nomi diversi. Chiedere alla sala quale regola di Gemini userebbe anche per una skill in Claude Code. Date per Education secondo la guida: skill disponibili nell'app dal 13/10/2026; migrazione automatica dei Gem dal 1/6/2027 o dopo. I Gem creati in Google Classroom o via Gemini LTI non migrano in automatico. Il formato del file skill.md di Gemini non è mostrato dalla guida: dirlo apertamente e mostrarlo a schermo prima di usare la slide in aula.`
+  },
+  {
     block: B + 'I subagenti',
     content: () => (
       <div className="pad">
