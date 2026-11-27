@@ -849,6 +849,186 @@ Avvisi sui dati: 1
     notes: "Un accenno, non il tema dell'argomento. Il piano mette la decisione prima del lavoro: secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Esc ferma, Esc due volte torna indietro (checkpoint: solo i file, non rete né rilasci). Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite. Le modalità di permesso, il «non chiedere più», come si legge una richiesta di permesso e le prime richieste vere si vedono quando si installa l'agente (argomento 2) e nella prima esercitazione; il piano torna nell'argomento 4."
   },
   {
+    block: B + 'L\'harness · la parola',
+    content: () => (
+      <div className="pad">
+        <Tag>Il programma intorno al modello</Tag>
+        <h2>Una parola nuova: harness</h2>
+        <p>In inglese <em>harness</em> sono i finimenti: ciò che si mette al cavallo perché la sua forza tiri il carro nella direzione giusta.</p>
+        <div className="cols">
+          <Card title="Il modello" kind="i"><p>Claude, GPT, Gemini. È la forza: ragiona e decide. <em>Nella prova: Claude Opus 5.5.</em></p></Card>
+          <Card title="L'harness"><p>Il programma che sta attorno al modello e lo fa lavorare. <em>Nella prova: Claude Code. In aula anche OpenCode.</em></p></Card>
+        </div>
+        <Box type="info" title="Perché serve la parola">Quando si dice «l'agente», si parla della coppia. Per capire che cosa succede, e di chi è un errore, conviene tenerli separati.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Lo schema di questa parte (le quattro parole, la stanza senza finestre) viene da un video di Luca Cazzaniga: <a className="text-link" href="https://www.youtube.com/watch?v=2BuZOTAZk_o" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>«Che cos'è un harness»</a>, YouTube, 25/11/2026. Gli esempi sono quelli del corso.</p>
+      </div>
+    ),
+    notes: "Si apre la parte sull'harness: il riquadro «Il programma intorno» l'ha già nominato, qui diventa il centro. La parola si spiega con l'immagine dei finimenti: la forza è del cavallo, la direzione la danno i finimenti. Si torna subito alla prova: il modello era Claude Opus 5.5, l'harness Claude Code. Quando si dice «l'agente» si intende la coppia. Schema e immagini (finimenti, stanza senza finestre, motore e macchina, quattro parole) vengono dal video citato in fondo alla slide: si dice a voce da dove vengono. Il video si può consigliare a chi vuole rivederlo da sé."
+  },
+  {
+    block: B + 'L\'harness · la stanza senza finestre',
+    content: () => (
+      <div className="pad">
+        <Tag>Il modello, da solo</Tag>
+        <h2>Una persona brava in una stanza senza finestre</h2>
+        <p>Ragiona bene e sa molte cose. Ma non vede il tuo PC, non apre file, non lancia comandi. Riceve testo da sotto la porta e risponde con altro testo.</p>
+        <div className="cols">
+          <Card title="Che cosa entra" kind="i">
+            <ul>
+              <li>La tua richiesta</li>
+              <li>Il contenuto dei file che qualcuno gli passa</li>
+              <li>L'esito dei comandi che qualcuno ha lanciato</li>
+            </ul>
+          </Card>
+          <Card title="Che cosa esce">
+            <ul>
+              <li>Una risposta per te</li>
+              <li>Oppure una richiesta: «leggi <code>elenco-pc.csv</code>», «lancia questo comando»</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="tip" title="È il chatbot della prima prova">Se il chatbot non esegue codice, salvarlo, lanciarlo e riportare l'errore tocca a te: le mani sei tu.</Box>
+      </div>
+    ),
+    notes: "Immagine della stanza senza finestre, dal video citato. Il punto tecnico: il modello produce solo testo. Quando «usa uno strumento», in realtà scrive una richiesta strutturata (nome dello strumento e argomenti); a eseguirla è il programma intorno, che poi gli rimanda l'esito come altro testo. Si collega alla prima prova con il chatbot: lì le mani erano quelle di chi usava la chat. Con un agente le mani sono dell'harness."
+  },
+  {
+    block: B + 'L\'harness · cervello e mani',
+    content: () => (
+      <div className="pad">
+        <Tag>Fuori dalla stanza</Tag>
+        <h2>Il modello decide, l'harness fa</h2>
+        <div className="grid">
+          <Card title="Passa" kind="i"><p>Porta al modello la richiesta, i file letti, l'esito dei comandi: decide che cosa il modello vede a ogni giro.</p></Card>
+          <Card title="Esegue"><p>Legge e scrive file, lancia comandi, cerca sul web, si collega ad altri servizi (molti con MCP, argomento 9). Le azioni le fa lui, non il modello.</p></Card>
+          <Card title="Controlla" kind="w"><p>Prima di agire guarda le regole: se l'azione è ammessa procede, se no si ferma o chiede a te.</p></Card>
+          <Card title="Ricorda" kind="i"><p>Il modello non ricorda: all'avvio l'harness carica le tue istruzioni (<code>CLAUDE.md</code>, <code>AGENTS.md</code>) e riassume quando il contesto si riempie.</p></Card>
+        </div>
+        <Box type="info" title="Il motore e la macchina">Il modello è il motore. L'harness è il resto della macchina: telaio, volante, freni. Senza il resto, il motore gira a vuoto.</Box>
+        <Fonte href="https://code.claude.com/docs/en/how-claude-code-works">code.claude.com/docs/en/how-claude-code-works</Fonte>
+      </div>
+    ),
+    notes: "Quattro lavori dell'harness, ognuno con un argomento del corso: passa (il contesto, argomento 11), esegue (gli strumenti, argomenti 8 e 9), controlla (permessi e modalità, argomento 2; hook, argomento 9), ricorda (istruzioni persistenti, argomento 5; compattazione, argomento 11). La slide «Che cosa abbiamo visto» divideva l'agente in pezzi; questa dice chi fa che cosa. Il paragone del motore è del video citato. MCP, Model Context Protocol: protocollo aperto per collegare un agente a strumenti e dati esterni (argomento 9). Ogni attrezzo in più è una cosa in più da regolare con i permessi (argomento 7). Un riassunto del contesto perde dettagli: ciò che conta va scritto nelle istruzioni."
+  },
+  {
+    block: B + 'L\'harness · il ciclo visto da dietro',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova del 26/11/2026, vista da dietro</Tag>
+        <h2>Chi ha fatto che cosa</h2>
+        <DT cols={['Il modello scrive', 'L\'harness', 'Torna al modello']} rows={[
+          ['«Leggi elenco-pc.csv»', 'Apre il file', 'Intestazione e otto righe'],
+          ['«Crea controlla_pc.py con questo testo»', 'Salva il file (in quella prova senza chiedere: modifiche accettate in automatico)', 'File creato'],
+          ['«Lancia questo comando», quattro volte, in forma composta', 'Lo ferma: non è tra i comandi ammessi', 'Il rifiuto'],
+          ['«Lancia python controlla_pc.py elenco-pc.csv»', 'Lo esegue', 'L\'output: PC08 a 170 giorni, PC02 a 95, un indirizzo doppio'],
+          ['«Ho finito: ecco lo script e l\'esito»', 'Lo mostra a te', '—'],
+        ]} />
+        <p className="muted">Si va avanti così, un giro dopo l'altro, finché il modello non scrive che ha finito.</p>
+      </div>
+    ),
+    notes: "La stessa traccia della prova vera, divisa tra i due. Fatti dalla prova del 26/11/2026 (Claude Code 2.1.332, Claude Opus 5.5, modalità non interattiva, modifiche accettate in automatico, comandi ammessi: python e ls). I quattro lanci fermati erano comandi composti, con un secondo comando dopo il punto e virgola: l'elenco ammetteva python da solo. Il modello ha letto il rifiuto e ha cambiato forma. La colonna di sinistra è una parafrasi: il modello scrive richieste strutturate, non frasi. La riga sulle modifiche accettate in automatico conta: in aula si parte in Manual e il salvataggio chiederebbe un sì. Da verificare a schermo che cosa mostra la richiesta in Manual."
+  },
+  {
+    block: B + 'L\'harness · domanda',
+    content: () => (
+      <div className="pad">
+        <Tag>Quiz</Tag>
+        <h2>Chi ha fermato i quattro comandi?</h2>
+        <Quiz domanda="Nella prova, quattro comandi composti sono stati fermati prima di partire. Chi li ha fermati?" opzioni={[
+          { t: 'Il modello, che ci ha ripensato', ok: false, perche: 'Il modello li aveva chiesti. Ha cambiato strada solo dopo aver letto il rifiuto.' },
+          { t: 'L\'harness, perché non erano tra i comandi ammessi', ok: true, perche: 'Le regole sui permessi le applica il programma intorno al modello, prima di eseguire. La richiesta di permesso in Manual si vede a schermo nell\'argomento 2.' },
+          { t: 'Windows, perché il comando era sbagliato', ok: false, perche: 'Non sono mai arrivati al sistema operativo: sono stati fermati prima.' },
+        ]} />
+      </div>
+    ),
+    notes: "Domanda veloce in plenaria. La conseguenza pratica: i permessi non dipendono dalla buona volontà del modello, sono regole del programma. Per questo si leggono e si impostano (argomento 2), e in laboratorio la partenza in Manual è imposta da un file di impostazioni gestite, che il modello non può cambiare."
+  },
+  {
+    block: B + 'L\'harness · tre porte',
+    content: () => (
+      <div className="pad">
+        <Tag>Le porte</Tag>
+        <h2>Tre porte, lo stesso assistente</h2>
+        <DT cols={['Porta', 'Come ci entri', 'Claude Code, per esempio']} rows={[
+          ['Web', 'Apri il browser e accedi', 'claude.ai/code: il lavoro gira su macchine cloud di Anthropic'],
+          ['App desktop', 'La installi e la apri', 'Claude Desktop, scheda Code'],
+          ['Terminale', 'Scrivi un comando', 'claude, dalla cartella del lavoro'],
+        ]} />
+        <Box type="info" title="L'app non è l'harness">Claude Desktop è l'edificio: dentro ci sono la chat, Cowork (per il lavoro d'ufficio) e la scheda Code, dove lavora lo stesso Claude Code del terminale. Cambia il modo di entrare, non chi lavora.</Box>
+        <Fonte href="https://code.claude.com/docs/en/overview">code.claude.com/docs/en/overview</Fonte>
+      </div>
+    ),
+    notes: "Fatti dalla documentazione di Claude Code (overview e how-claude-code-works) e dalla pagina di Cowork (claude.com/docs/cowork/overview), riletti il 27/11/2026. La finestra con i pulsanti serve alla persona per vedere che cosa succede; il lavoro lo fa l'harness, che la finestra ci sia o no. Con la porta web il computer cambia: i file stanno su una macchina cloud, non sul PC. In aula si usa la porta del terminale, perché passa dal proxy del corso."
+  },
+  {
+    block: B + 'L\'harness · la mappa',
+    content: () => (
+      <div className="pad">
+        <Tag>I nomi veri</Tag>
+        <h2>I nomi, novembre 2026</h2>
+        <DT cols={['Chi', 'Harness', 'Porte', 'Modello di casa']} rows={[
+          ['Anthropic', 'Claude Code', 'web, app desktop, terminale (claude)', 'Claude: Opus, Sonnet, Haiku'],
+          ['OpenAI', 'Codex', 'cloud, app Codex, terminale (codex), editor', 'GPT'],
+          ['Google', 'Antigravity', 'app desktop, editor, terminale (agy)', 'Gemini, ma anche Claude'],
+          ['Open source', 'OpenCode, Cline, Goose, OpenHands', 'terminale, editor, app (varia)', 'quello che scegli'],
+        ]} />
+        <Box type="warn" title="Open source non vuol dire gratis">Il programma è libero, il modello si paga a parte, di solito a consumo. In aula lo paga il corso, con un budget per ogni chiave.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Fonti, rilette il 27/11/2026: <a className="text-link" href="https://code.claude.com/docs/en/overview" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Claude Code</a>, <a className="text-link" href="https://openai.com/index/introducing-the-codex-app/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Codex</a>, <a className="text-link" href="https://www.antigravity.google/blog/introducing-google-antigravity-2" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Antigravity 2.0</a>, <a className="text-link" href="https://antigravity.google/docs/models.md" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>modelli di Antigravity</a>.</p>
+      </div>
+    ),
+    notes: "Fonti rilette il 27/11/2026. Claude Code: code.claude.com/docs/en/overview e model-config. Codex: openai.com/index/introducing-upgrades-to-codex e introducing-the-codex-app (app desktop separata da ChatGPT). Antigravity 2.0: annuncio del 19/5/2026 su antigravity.google/blog, comando agy da antigravity.google/docs/cli/install, elenco modelli (Gemini, Claude, GPT-OSS) da antigravity.google/docs/models.md: l'elenco cambia, controllarlo prima di dirlo. Antigravity nel corso non si usa: è qui solo per la mappa. Open source: repository pubblici di OpenCode (licenza MIT), Cline (Apache 2.0), Goose (Apache 2.0, oggi sotto la Agentic AI Foundation), OpenHands (MIT), tutti usabili con modelli di fornitori diversi. Che il modello si paghi a parte è una conseguenza: il programma porta il modello che gli dai. I nomi cambiano in fretta: la data nel titolo è voluta."
+  },
+  {
+    block: B + 'L\'harness · stesso modello',
+    content: () => (
+      <div className="pad">
+        <Tag>Perché ti interessa</Tag>
+        <h2>Stesso modello, harness diversi, risultati diversi</h2>
+        <div className="cols">
+          <Card title="Lo stesso motore su due macchine" kind="i"><p>Il modello è lo stesso, ma cambiano gli strumenti, le regole, ciò che gli viene passato a ogni giro. Il lavoro può uscire diverso.</p></Card>
+          <Card title="Costruiti insieme"><p>I fornitori preparano il loro modello per il loro harness. Google lo scrive per Gemini e Antigravity, OpenAI per i modelli Codex.</p></Card>
+        </div>
+        <Box type="info" title="Le classifiche misurano la coppia">Terminal-Bench mette alla prova gli agenti su compiti veri al terminale: ogni riga è un modello dentro un harness. Le posizioni cambiano spesso.</Box>
+        <p className="muted">In aula ci sono due harness sullo stesso modello Claude: Claude Code e OpenCode. Il confronto si può provare.</p>
+        <p className="legend" style={{ marginTop: 8 }}>Fonti, rilette il 27/11/2026: <a className="text-link" href="https://www.antigravity.google/blog/introducing-google-antigravity-2" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Antigravity 2.0</a>, <a className="text-link" href="https://openai.com/index/introducing-upgrades-to-codex/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Codex</a>, <a className="text-link" href="https://www.tbench.ai/leaderboard" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Terminal-Bench</a>.</p>
+      </div>
+    ),
+    notes: "Fonti rilette il 27/11/2026. Google, annuncio di Antigravity 2.0: prodotto, harness e modello «co-optimized and co-developed», con l'harness usato nell'addestramento e nella valutazione di Gemini. OpenAI, introducing-upgrades-to-codex: GPT-5-Codex ottimizzato per il lavoro agentico dentro Codex. Classifica: tbench.ai/leaderboard, con colonne separate per modello e agente; la versione della classifica cambia, controllarla prima di nominarla. Il confronto tra Claude Code e OpenCode sullo stesso modello si può fare dopo l'installazione (argomento 2) e nell'approfondimento su OpenCode (argomento 10): vale ciò che si vede quel giorno."
+  },
+  {
+    block: B + 'L\'harness · nel laboratorio',
+    content: () => (
+      <div className="pad">
+        <Tag>Quattro parole per leggere qualunque agente</Tag>
+        <h2>Porta, assistente, cervello, computer: nel nostro laboratorio</h2>
+        <p className="muted">Davanti a un programma nuovo: quale porta, quale harness, quale modello, e su quale computer finiscono i file?</p>
+        <div className="grid">
+          <Card title="Porta"><p>Il terminale: si scrive <code>claude</code> o <code>opencode</code> dalla cartella del lavoro.</p></Card>
+          <Card title="Assistente (harness)" kind="i"><p>Claude Code, lo strumento principale, oppure OpenCode, open source.</p></Card>
+          <Card title="Cervello (modello)" kind="i"><p>Un modello Claude, raggiunto attraverso il proxy del corso con la tua chiave personale.</p></Card>
+          <Card title="Computer" kind="w"><p>Il PC del laboratorio: la cartella da cui avvii l'agente e ciò che i permessi gli lasciano fare.</p></Card>
+        </div>
+        <Box type="info" title="E AI Studio?">Stesso schema, altri pezzi: la porta è il browser, l'assistente è quello di Google, il cervello è Gemini, e il lavoro sta nel cloud di Google, non in una cartella del PC.</Box>
+      </div>
+    ),
+    notes: "Le quattro caselle si riempiono dal vivo prima di mostrarle. Che cosa sia il proxy e come si usa la chiave si vede quando si installa l'agente (argomento 2); OpenCode è approfondito nell'argomento 10. Il riquadro su AI Studio introduce le slide seguenti: si guarda quale porta, quale assistente e dove finisce il lavoro."
+  },
+  {
+    block: B + 'L\'harness · tre abitudini',
+    content: () => (
+      <div className="pad">
+        <Tag>Da portare via</Tag>
+        <h2>Tre abitudini</h2>
+        <ol>
+          <li><strong>Riconosci i pezzi prima di fidarti.</strong> Porta, harness, modello, computer.</li>
+          <li><strong>Guarda i permessi.</strong> Sono le regole dell'harness: decidono che cosa può fare sul tuo computer senza chiederti niente.</li>
+          <li><strong>Se un lavoro non viene, non dare subito la colpa al modello.</strong> A volte il problema sono le mani: istruzioni, strumenti, contesto. Prova lo stesso compito con un altro harness, o con istruzioni migliori.</li>
+        </ol>
+      </div>
+    ),
+    notes: "Chiude la parte sull'harness. Le tre abitudini riprendono quelle proposte nel video citato all'inizio di questa parte, adattate all'aula. La terza è il ponte verso il resto del corso: istruzioni (argomento 5), strumenti (argomenti 8 e 9), contesto (argomento 11) sono tutte cose dell'harness, e si possono migliorare senza cambiare modello."
+  },
+  {
     block: B + 'Google AI Studio',
     content: () => (
       <div className="pad">
