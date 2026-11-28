@@ -377,13 +377,35 @@ const PROVA_1 = String.raw`curl.exe -i -X POST http://<indirizzo del server>/v1/
 
 const PROVA_2 = String.raw`curl.exe -X POST http://<indirizzo del server>/v1/messages -H "Authorization: Bearer <la tua chiave>" -H "content-type: application/json" -H "anthropic-version: 2023-06-01" -d '{"model":"claude-opus-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}'`;
 
+const AGENTE_REVISORE = String.raw`# .opencode/agents/revisore.md
+---
+description: Rivede una funzione rispetto alla sua
+  specifica, eseguendo controlli. Usalo prima di
+  darla per finita. Non modifica il codice.
+mode: subagent
+permission:
+  edit: deny
+  task: deny
+  bash:
+    "*": ask
+    "node --test*": allow
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica esegui un controllo
+e riporta comando ed esito. Non modificare i file.`;
+
+const CMD_OC = {
+  elenco: String.raw`opencode agent list | Select-String "subagent"`,
+  richiesta: 'Controlla che prenotaSettimanale rispetti la specifica, prima di darla per buona.',
+};
+
 const slides = [
   {
     block: B + 'Apertura',
     content: () => (
       <Apertura n="10" titolo="OpenCode e LiteLLM" sottotitolo="Gli stessi concetti in un secondo strumento, e il proxy che collega gli agenti ai modelli."
         caso="Da dove nasce: un assistente ha consumato quasi 80 milioni di token perché una riserva a pagamento scattava in silenzio."
-        prima="argomenti 1 e 5, e l'argomento 2 (installazione dei due agenti e collegamento al proxy)." />
+        prima="argomenti 1 e 5, l'argomento 2 (installazione dei due agenti e collegamento al proxy) e l'argomento 8 (subagenti revisori)." />
     ),
     notes: `Apertura. Vedere due strumenti aiuta a separare il metodo dallo strumento: contesto, permessi, agenti e controlli automatici ci sono in tutti e due, con nomi e default diversi. Il secondo tema è il proxy, cioè il programma che sta fra gli agenti e il fornitore dei modelli: nel laboratorio è LiteLLM, su un PC dedicato, e dà a tutti la stessa configurazione senza mettere la vera chiave del fornitore sui PC dei partecipanti. L'episodio di apertura è l'incidente dei costi di Argo Briefing, che riprendiamo a metà argomento e nell'argomento 11. L'installazione dei due agenti e il collegamento al proxy si fanno nell'argomento 2: qui non si ripetono i passi, si approfondiscono i motivi, i default e i rischi. Funzioni lette sulla documentazione ufficiale tra il 9 e l'11 novembre 2026: nomi, comandi e valori predefiniti cambiano in fretta, quindi si riverificano sulla versione che si usa.`
   },
@@ -420,7 +442,7 @@ const slides = [
         <p className="muted">Un file Markdown per agente: l'intestazione dà modalità e permessi, il testo è il prompt.</p>
       </div>
     ),
-    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il subagente revisore dell'argomento 8, scritto in questo formato. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che con Claude Code gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno mappati nel file di configurazione del proxy.`
+    notes: `Fonte: opencode.ai/docs/agents, 9/11/2026. Gli agenti personalizzati stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/. Nell'esempio il revisore non può modificare nulla e può lanciare solo git diff senza chiedere: è il tipo di revisore dell'argomento 8, scritto in questo formato; l'attività sul revisore in OpenCode lo riprende. Nota: Plan nega le modifiche ai file del progetto ma non limita da solo i comandi di shell, che seguono la configurazione dei permessi; la documentazione lo dice e suggerisce di impostare bash su ask per Plan. Avvertire che con Claude Code gli alias dei modelli dei subagenti (haiku, sonnet, opus) vanno mappati nel file di configurazione del proxy.`
   },
   {
     block: B + 'Plugin al posto degli hook',
@@ -686,6 +708,65 @@ const slides = [
     notes: `Scheda con una configurazione inventata di OpenCode e di un proxy LiteLLM, con più righe sbagliate: permessi aperti, condivisione attiva, plugin non fissato, chiave scritta nel file, tutti i modelli ammessi, ripiego verso un modello più caro, testi delle richieste nei registri, una sola chiave per tutti senza tetto, interfaccia di amministrazione lasciata accesa. Una delle righe non produce nessun errore, ed è la più difficile da vedere. Le risposte attese sono del docente. Per chi finisce prima: scrivere i quattro controlli, in ordine, da fare sul proprio PC prima di cominciare.`
   },
   {
+    block: B + 'Il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Un revisore scritto per OpenCode</h2>
+        <div className="cols">
+          <pre aria-label="Esempio di file di un subagente revisore per OpenCode">{AGENTE_REVISORE}</pre>
+          <ul>
+            <li>Cartella <code className="nw">.opencode/agents/</code>. Il <strong>nome del file</strong> è il nome dell'agente.</li>
+            <li><code className="nw">description</code> è obbligatoria: è ciò che l'agente principale legge per scegliere.</li>
+            <li><code className="nw">mode: subagent</code>. Senza, vale <code className="nw">all</code>.</li>
+            <li>Niente <code className="nw">tools</code>: i limiti stanno in <code className="nw">permission</code>. L'ultima regola che corrisponde vince.</li>
+            <li>Niente <code className="nw">skills</code>: la procedura sta nel testo.</li>
+          </ul>
+        </div>
+        <p className="muted">Si chiama con <code className="nw">@revisore</code>, oppure lo sceglie l'agente principale.</p>
+      </div>
+    ),
+    notes: `Fonte: opencode.ai/docs/agents, pagina della serie 1 al tag v1.19.5 (packages/web/src/content/docs/agents.mdx), letta il 25/11/2026. Gli agenti in Markdown stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/; il nome del file diventa il nome dell'agente; description è obbligatoria; mode vale all se manca; tools è deprecato in favore di permission; i subagenti usano il modello dell'agente che li chiama se model non è indicato. Con permission.bash l'ultima regola che corrisponde vince, quindi il "*" va per primo. Nella configurazione del laboratorio lo strumento che lancia i subagenti (task) chiede conferma: la delega parte solo dopo un sì. Rispetto al file di Claude Code: stessa idea (descrizione, strumenti limitati, istruzioni nel testo), campi diversi. Lo scheletro da completare è nel foglio «Modello: subagente revisore per OpenCode». Provato su OpenCode 1.19.5 il 25/11/2026: il file viene letto e l'elenco degli agenti lo mostra come subagente; non provato con il modello del corso. Da verificare a schermo: la chiamata con @ e l'ingresso nella sessione del subagente.`
+  },
+  {
+    block: B + 'OpenCode: è stato letto?',
+    content: () => (
+      <div className="pad">
+        <Tag>OpenCode</Tag>
+        <h2>Un errore nel file non sempre si sente</h2>
+        <DT cols={['Che cosa scrivi', 'Che cosa succede']} rows={[
+          [<><code className="nw">permision:</code> al posto di <code className="nw">permission:</code></>, <>Nessun errore. Il campo finisce tra le opzioni del modello e <code className="nw">edit</code> resta permesso.</>],
+          ['Una riga vuota prima del primo ---', 'Nessun errore. Il frontmatter non vale: l\'agente compare come «all» e senza description.'],
+          [<><code className="nw">name:</code> diverso dal nome del file</>, 'Nessun errore. L\'agente prende il nome di name.'],
+          [<><code className="nw">tools: Read, Grep</code> come in Claude Code</>, <>Errore: «Configuration is invalid». Nessun agente viene elencato.</>],
+        ]} />
+        <CommandBox cmd={CMD_OC.elenco} label="Controllo: l'agente è nell'elenco come subagent?" />
+        <p className="muted" style={{ marginTop: 8 }}>Con <code className="nw">opencode debug agent revisore</code> vedi description, modalità e permessi come li ha letti OpenCode.</p>
+      </div>
+    ),
+    notes: `Prove fatte il 25/11/2026 su OpenCode 1.19.5 con file di agenti scritti apposta: un permesso scritto male viene passato come opzione del modello (il comando debug agent lo mostra tra le options) e il permesso di scrittura non c'è; con una riga vuota prima del primo --- l'agente compare come all e senza description; un campo name nel frontmatter rinomina l'agente (comportamento osservato, non descritto nella pagina agents); un campo tools con un elenco in stile Claude Code (Read, Grep) rende invalida l'intera configurazione e il comando che elenca gli agenti stampa solo l'errore. Stesso principio dell'episodio dei dieci agenti fantasma: un file sbagliato non sempre fa rumore, si smaschera guardando che cosa è stato caricato. Il comando per l'elenco è opencode agent list; filtrato con Select-String in PowerShell mostra solo i subagenti. Le versioni di OpenCode cambiano in fretta: riprovare sulla versione installata.`
+  },
+  {
+    block: B + 'Attività: il revisore in OpenCode',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività</Tag>
+        <h2>Un subagente revisore per OpenCode</h2>
+        <ol className="timeline">
+          <li><time>1</time>Dal punto <code className="nw">partenza-a8</code> (la palestra serve in quello stato): la tua lettura di <code className="nw">prenotaSettimanale</code>, a mano.</li>
+          <li><time>2</time>Scrivi <code className="nw">.opencode/agents/revisore.md</code> dal modello e controlla che sia stato letto.</li>
+          <li><time>3</time>Chiamalo con <code className="nw">@revisore</code> e leggi che cosa ha eseguito.</li>
+          <li><time>4</time>Confronta il suo rapporto con la tua lettura.</li>
+          <li><time>5</time>Chiedi la revisione senza nominarlo: riscrivi la description finché l'agente principale lo sceglie.</li>
+        </ol>
+        <CommandBox cmd={CMD_OC.richiesta} label="Richiesta del passo 5, senza nominare il revisore" kind="text" />
+        <ActivityBadge n="10" file="scheda-subagente-opencode.html" label="Scheda: subagente revisore per OpenCode" />
+        <p className="muted" style={{ marginTop: 8 }}>Modello da completare: <a className="text-link" href="../materiali/argomento-10/modello-subagente-opencode.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente per OpenCode</a>. Se OpenCode non parte, la stessa cosa con Claude Code, come nell'argomento 8.</p>
+      </div>
+    ),
+    notes: `Attività a coppie sulla palestra. Si parte dal punto partenza-a8, anche se l'argomento è il 10 (git switch -c lavoro-a8-opencode partenza-a8): serve lo stato con la funzione prenotaSettimanale; chi ha già fatto la lettura a mano nell'argomento 8 riprende quella tabella. Non dire se e dove ci siano problemi. Il confronto è fra la lettura a mano e il rapporto del revisore: che cosa ha eseguito, che cosa ha riportato, che cosa si riproduce. Nell'ultimo passo la richiesta non nomina il revisore: nella configurazione del laboratorio l'agente principale chiede il permesso prima di lanciare un subagente, ed è quella richiesta che dice che la delega è partita; se invece rivede da solo o delega a un altro agente, la description va riscritta. Se OpenCode non parte, il piano B è Claude Code con .claude/agents, come nell'argomento 8. Da verificare a schermo, perché non provato con il modello del corso: la chiamata con @ da testo incollato (in caso scegliere il nome dall'elenco che si apre scrivendo @), i tasti per entrare nella sessione del subagente (documentazione della serie 1: session_child_first, di norma Leader più Giù), se la modifica della description si vede senza riaprire OpenCode, e quale shell usa lo strumento bash su Windows. Fonte: opencode.ai/docs/agents, serie 1 al tag v1.19.5, 25/11/2026.`
+  },
+  {
     block: B + 'Domanda di verifica',
     content: () => (
       <div className="pad">
@@ -709,10 +790,11 @@ const slides = [
           'OpenCode parte permissivo: permessi, condivisione, aggiornamenti e fornitori si configurano a mano, sulla versione fissata.',
           'Il proxy dà una configurazione sola e tiene la chiave vera lontana dai PC, ma va configurato: master key, interfaccia, registri, nessun ripiego, chiavi con budget e scadenza.',
           'Ogni collegamento esterno ha un conto. Anche con modelli Claude, il gateway va provato: alias, campi inoltrati, cache.',
+          'Un subagente si scrive anche per OpenCode: permission al posto di tools, il nome è quello del file, e un campo scritto male può non fare rumore. Si controlla che sia stato letto.',
         ]}
         dopo="Argomento 11 (costi e contesto: l'incidente di Argo Briefing in dettaglio, con i listini)." />
     ),
-    notes: `Riprendere i quattro punti. Collegare con l'argomento 11: lì si vede cosa succede ai token quando il contesto si riempie e come si stima il costo di una sessione. Lasciare spazio alle domande.`
+    notes: `Riprendere i cinque punti. Il quinto chiude l'attività sul revisore: l'errore che non fa rumore si trova guardando ciò che è stato caricato. Collegare con l'argomento 11: lì si vede cosa succede ai token quando il contesto si riempie e come si stima il costo di una sessione. Lasciare spazio alle domande.`
   },
 ];
 

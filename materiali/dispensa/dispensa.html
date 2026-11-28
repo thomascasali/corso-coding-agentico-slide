@@ -570,6 +570,8 @@ Poi fermati e aspetta.
 <p>Prima di questo argomento: argomento 5.</p>
 <p><strong>L'idea.</strong> Quattro strumenti, quattro momenti in cui entrano nel contesto: <code>CLAUDE.md</code> sempre; una skill con la descrizione sempre e il resto quando serve; un subagente quando l'agente gli delega un compito; un hook a ogni evento previsto (argomento 9). Segnale per scrivere una skill: la stessa procedura in più passi, con comandi precisi, spiegata per la terza volta.</p>
 <p>Una skill è una cartella con un <code>SKILL.md</code>: un frontmatter tra <code>---</code> che comincia alla prima riga, e istruzioni in Markdown. <code>name</code> è il comando <code>/nome</code>, <code>description</code> dice che cosa fa e quando usarla ed è l'unico punto di contatto: se è vaga la skill non viene scelta. Oltre i 1.536 caratteri il testo della descrizione viene tagliato. Gli script della cartella si eseguono, non si leggono come testo.</p>
+<p>Una skill scritta da altri si valuta prima di installarla, con sei domande: chi c'è dietro e da quando (le stelle non sono una valutazione), che licenza ha (il file <code>LICENSE</code>, non l'etichetta), che cosa installa e che cosa manda fuori, se fa una cosa che hai già, per quale lavoro ti serve, che cosa decidi e che cosa ti farebbe cambiare idea. La decisione si scrive. Un plugin installato può eseguire codice con i tuoi permessi.</p>
+<p>Una skill nostra vale la pena quando il lavoro si rifà almeno tre volte all'anno, ha già dato problemi che conosci, ha passi stabili, un «quando non usarla» chiaro e un risultato che si può controllare. Nasce dagli appunti su ciò che è andato storto, la scrive l'agente, e si prova: in una sessione nuova deve partire quando serve e tacere quando non serve. I fatti che cambiano restano in <code>CLAUDE.md</code> o in una guida. Per condividerla basta il repository del progetto (<code>.claude/skills/</code>, letta anche da OpenCode); per molte macchine e progetti c'è un plugin in un marketplace.</p>
 <p>Un subagente ha contesto, strumenti e modello suoi; riceve solo il messaggio di delega e restituisce un riassunto. Un revisore utile non ha scritto il codice, ha strumenti di lettura e di esecuzione ma non di scrittura, riceve specifica e codice, e riporta comandi ed esiti. Due agenti d'accordo non dimostrano nulla: vale un controllo eseguito che poteva fallire. Il rapporto ha tre elenchi: confermato con la prova, da verificare, non controllato.</p>
 <p><strong>Comandi e file.</strong> Struttura di una cartella di skill e dei subagenti:</p>
 <pre><code class="language-text">.claude/
@@ -608,28 +610,6 @@ Non hai scritto il codice che ti viene passato.
 Per ogni punto della specifica, esegui un controllo
 e riporta comando ed esito. Non modificare i file.
 </code></pre>
-<p>La stessa idea per OpenCode (cartella <code>.opencode/agents/</code>, il nome del file è il nome dell'agente; nessun campo <code>tools</code>, i limiti stanno in <code>permission</code>; con <code>permission.bash</code> l'ultima regola che corrisponde vince, quindi <code>"*"</code> va per primo):</p>
-<pre><code class="language-text">---
-description: Rivede una funzione rispetto alla sua
-  specifica, eseguendo controlli. Usalo prima di
-  darla per finita. Non modifica il codice.
-mode: subagent
-permission:
-  edit: deny
-  task: deny
-  bash:
-    &quot;*&quot;: ask
-    &quot;node --test*&quot;: allow
----
-Non hai scritto il codice che ti viene passato.
-Per ogni punto della specifica esegui un controllo
-e riporta comando ed esito. Non modificare i file.
-</code></pre>
-<p>Per controllare che OpenCode lo abbia letto come subagente:</p>
-<pre><code class="language-powershell">opencode agent list | Select-String &quot;subagent&quot;
-</code></pre>
-<pre><code class="language-powershell">opencode debug agent revisore
-</code></pre>
 <p>In Claude Code: <code>/skills</code> le elenca, <code>/context</code> mostra quanto contesto occupano, <code>/nome</code> le invoca a mano, <code>@agent-nome</code> chiama un subagente, <code>claude --debug</code> mostra un frontmatter non valido. Posizioni: personale <code>~/.claude/skills/nome/SKILL.md</code>, progetto <code>.claude/skills/nome/SKILL.md</code>. Punto di partenza della palestra: <code class="cmd">git switch -c lavoro-a8 partenza-a8</code>.</p>
 <p><strong>Errori frequenti.</strong></p>
 <ul>
@@ -637,14 +617,11 @@ e riporta comando ed esito. Non modificare i file.
 <li>Con un proxy davanti, gli alias dei modelli dei subagenti (<code>sonnet</code>, <code>opus</code>, <code>haiku</code>) vanno mappati sui nomi del proxy; <code>model: inherit</code> evita il problema.</li>
 <li>Un revisore con istruzioni ambigue ("se i test passano e il codice sembra corretto, APPROVATO") ha una via facile. Si collauda dandogli un pezzo con un difetto noto e ripetendo la richiesta.</li>
 <li>Passare al revisore un riassunto del compito invece dei file originali: rivede il riassunto.</li>
-<li>In OpenCode: <code>permision</code> scritto male non dà errore e <code>edit</code> resta permesso; una riga vuota prima del primo <code>---</code> invalida il frontmatter; <code>tools: Read, Grep</code> come in Claude Code rende invalida l'intera configurazione.</li>
-<li>Da verificare a schermo (non provato con il modello del corso): la chiamata con <code>@</code> da testo incollato in OpenCode, i tasti per entrare nella sessione del subagente, se la modifica della description si vede senza riaprire OpenCode, quale shell usa lo strumento bash su Windows. Provato su OpenCode 1.19.5 il 25/11/2026 solo per la lettura del file e l'elenco degli agenti.</li>
 </ul>
 <p><strong>Materiali e documentazione.</strong></p>
 <ul>
-<li><a href="../../argomento-8/slide.html">Slide</a> · <a href="../argomento-8/index.html">fogli dell'argomento</a> (schede di revisione e modelli di skill e subagenti, per Claude Code e per OpenCode)</li>
+<li><a href="../../argomento-8/slide.html">Slide</a> · <a href="../argomento-8/index.html">fogli dell'argomento</a> (schede di revisione e modelli di skill e subagenti)</li>
 <li>Skill: <a href="https://code.claude.com/docs/en/skills">https://code.claude.com/docs/en/skills</a> · Subagenti: <a href="https://code.claude.com/docs/en/sub-agents">https://code.claude.com/docs/en/sub-agents</a> (9/11/2026)</li>
-<li>Agenti di OpenCode: <a href="https://opencode.ai/docs/agents">https://opencode.ai/docs/agents</a> (serie 1, tag v1.19.5, 25/11/2026)</li>
 <li>Memoteca, una squadra di agenti da leggere come esempio: <a href="https://thomascasali.github.io/presentazione-memoteca/">https://thomascasali.github.io/presentazione-memoteca/</a> e <a href="https://github.com/thomascasali/memoteca">https://github.com/thomascasali/memoteca</a> (25/11/2026)</li>
 </ul>
 <hr />
@@ -738,7 +715,7 @@ if (r.status !== 0) {
 </ul>
 <hr />
 <h2 id="argomento-10-opencode-e-litellm">Argomento 10: OpenCode e LiteLLM</h2>
-<p>Prima di questo argomento: argomenti 1 e 5, e l'argomento 2 (installazione e collegamento al proxy).</p>
+<p>Prima di questo argomento: argomenti 1 e 5, l'argomento 2 (installazione e collegamento al proxy) e l'argomento 8 (subagenti revisori).</p>
 <p><strong>L'idea.</strong> Gli stessi concetti in un secondo strumento: cambiano nomi, sintassi e soprattutto i default.</p>
 <div class="table-scroll"><table>
 <thead>
@@ -795,7 +772,7 @@ if (r.status !== 0) {
   } }
 }
 </code></pre>
-<p>Un plugin che blocca la lettura dei file <code>.env</code> (fa il lavoro di un hook; il subagente revisore in OpenCode è nell'argomento 8):</p>
+<p>Un plugin che blocca la lettura dei file <code>.env</code> (fa il lavoro di un hook; il subagente revisore in OpenCode è più avanti, in questo argomento):</p>
 <pre><code class="language-text">// .opencode/plugins/proteggi-env.js
 export const ProteggiEnv = async () =&gt; {
   return {
@@ -807,6 +784,29 @@ export const ProteggiEnv = async () =&gt; {
     },
   }
 }
+</code></pre>
+<p><strong>Il revisore in OpenCode.</strong> Si parte dal punto <code>partenza-a8</code>, anche se l'argomento è il 10: la palestra serve in quello stato (<code class="cmd">git switch -c lavoro-a8-opencode partenza-a8</code>).</p>
+<p>Lo stesso revisore dell'argomento 8, scritto per OpenCode (cartella <code>.opencode/agents/</code>, il nome del file è il nome dell'agente; nessun campo <code>tools</code>, i limiti stanno in <code>permission</code>; con <code>permission.bash</code> l'ultima regola che corrisponde vince, quindi <code>"*"</code> va per primo):</p>
+<pre><code class="language-text">---
+description: Rivede una funzione rispetto alla sua
+  specifica, eseguendo controlli. Usalo prima di
+  darla per finita. Non modifica il codice.
+mode: subagent
+permission:
+  edit: deny
+  task: deny
+  bash:
+    &quot;*&quot;: ask
+    &quot;node --test*&quot;: allow
+---
+Non hai scritto il codice che ti viene passato.
+Per ogni punto della specifica esegui un controllo
+e riporta comando ed esito. Non modificare i file.
+</code></pre>
+<p>Per controllare che OpenCode lo abbia letto come subagente:</p>
+<pre><code class="language-powershell">opencode agent list | Select-String &quot;subagent&quot;
+</code></pre>
+<pre><code class="language-powershell">opencode debug agent revisore
 </code></pre>
 <p>Controlli sul proxy (uno per volta). Senza chiave, su una rotta che fa inferenza, deve rispondere 401:</p>
 <pre><code class="language-powershell">curl.exe -i -X POST http://&lt;indirizzo del server&gt;/v1/messages -H &quot;content-type: application/json&quot; -H &quot;anthropic-version: 2023-06-01&quot; -d '{&quot;model&quot;:&quot;claude-haiku-5-5&quot;,&quot;max_tokens&quot;:1,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;.&quot;}]}'
@@ -822,12 +822,15 @@ export const ProteggiEnv = async () =&gt; {
 <li>Plan in OpenCode nega le modifiche ai file del progetto ma non limita da solo i comandi di shell.</li>
 <li>Lato proxy: master key sui PC dei partecipanti, interfaccia di amministrazione accesa, documentazione API pubblica, testi delle richieste nei registri, ripieghi (<code>fallbacks</code>), chiavi senza modelli, budget o scadenza. Il budget conta solo se il listino del proxy conosce il prezzo del modello.</li>
 <li>Anche con modelli Claude il gateway va provato: campi sperimentali non inoltrati (errori 400), alias dei modelli non mappati, cache non inoltrata (token più costosi). Anthropic non sostiene né verifica i gateway di terzi, ma documenta come collegarli.</li>
+<li>In OpenCode: <code>permision</code> scritto male non dà errore e <code>edit</code> resta permesso; una riga vuota prima del primo <code>---</code> invalida il frontmatter; <code>tools: Read, Grep</code> come in Claude Code rende invalida l'intera configurazione.</li>
+<li>Da verificare a schermo (non provato con il modello del corso): la chiamata con <code>@</code> da testo incollato in OpenCode, i tasti per entrare nella sessione del subagente, se la modifica della description si vede senza riaprire OpenCode, quale shell usa lo strumento bash su Windows. Provato su OpenCode 1.19.5 il 25/11/2026 solo per la lettura del file e l'elenco degli agenti.</li>
 <li>Un plugin è codice che esegue: si installa solo ciò che si è letto, con la versione fissata.</li>
 <li>Sulla condivisione la pagina dedicata non era raggiungibile durante la verifica: la descrizione si basa sullo schema e va riverificata sulla versione fissata.</li>
 </ul>
 <p><strong>Materiali e documentazione.</strong></p>
 <ul>
-<li><a href="../../argomento-10/slide.html">Slide</a> · <a href="../argomento-10/index.html">fogli dell'argomento</a> (confronto tra i due strumenti, trova l'errore nella configurazione)</li>
+<li><a href="../../argomento-10/slide.html">Slide</a> · <a href="../argomento-10/index.html">fogli dell'argomento</a> (confronto tra i due strumenti, trova l'errore nella configurazione, subagente revisore per OpenCode)</li>
+<li>Agenti di OpenCode: <a href="https://opencode.ai/docs/agents">https://opencode.ai/docs/agents</a> (serie 1, tag v1.19.5, 25/11/2026)</li>
 <li>OpenCode: <a href="https://opencode.ai/docs">https://opencode.ai/docs</a> (9/11/2026), plugin <a href="https://opencode.ai/docs/plugins">https://opencode.ai/docs/plugins</a>, fornitori <a href="https://opencode.ai/docs/providers">https://opencode.ai/docs/providers</a> (11/11/2026)</li>
 <li>LiteLLM, chiavi virtuali: <a href="https://docs.litellm.ai/docs/proxy/virtual_keys">https://docs.litellm.ai/docs/proxy/virtual_keys</a>; formato Anthropic: <a href="https://docs.litellm.ai/docs/anthropic_unified">https://docs.litellm.ai/docs/anthropic_unified</a> (11/11/2026)</li>
 <li>Claude Code con un gateway: <a href="https://code.claude.com/docs/en/llm-gateway">https://code.claude.com/docs/en/llm-gateway</a> (11/11/2026)</li>

@@ -333,6 +333,24 @@ function CommandBox({ cmd, label, tall, kind }) {
 /* Intestazione di ogni slide: "Argomento N — nome · sezione" (compare in alto e nel titolo della scheda). */
 const B = 'Argomento 8 — Skill e subagenti · ';
 
+const SKILL_DEBUG = `---
+name: debugging-sistematico
+description: Risolvi un bug [...] trovando
+  la causa radice prima di proporre fix.
+  Da usare quando [...]. NON da usare per
+  nuove feature o refactoring.
+---
+# Debugging sistematico
+- Comando rosso obbligatorio: nessuna
+  ipotesi finché un comando non riproduce
+  il bug e fallisce. [...]
+Idee adattate da mattpocock/skills@59db609
+(MIT, © 2026 Matt Pocock).`;
+
+const PROMPT_SKILL = 'Leggi appunti-verifiche-passate.md e la verifica in verifiche/. Scrivi una skill in .claude/skills/prepara-verifica/SKILL.md per preparare le verifiche di questa cartella. Nella description scrivi che cosa fa, quando usarla e quando non usarla. Nel corpo metti i passi e le regole che vengono dagli appunti. Non scrivere ancora nessuna verifica.';
+const DECISIONE = 'Strumento: ...\nDecisione: adottare / provare in modo circoscritto / tenere presente / no\nPerché: ...\nRiesame se: ...';
+
+
 const ALBERO = String.raw`.claude/
   skills/
     note-di-rilascio/
@@ -376,28 +394,6 @@ Guarda il codice che ti passo. Se i test passano e il
 codice sembra corretto, rispondi APPROVATO.
 Se trovi dei problemi, elencali.`;
 
-const AGENTEOC = String.raw`# .opencode/agents/revisore.md
----
-description: Rivede una funzione rispetto alla sua
-  specifica, eseguendo controlli. Usalo prima di
-  darla per finita. Non modifica il codice.
-mode: subagent
-permission:
-  edit: deny
-  task: deny
-  bash:
-    "*": ask
-    "node --test*": allow
----
-Non hai scritto il codice che ti viene passato.
-Per ogni punto della specifica esegui un controllo
-e riporta comando ed esito. Non modificare i file.`;
-
-const CMD_OC = {
-  elenco: String.raw`opencode agent list | Select-String "subagent"`,
-  richiesta: 'Controlla che prenotaSettimanale rispetti la specifica, prima di darla per buona.',
-};
-
 /* Link a pagine esterne, con l'aspetto del pulsante delle attività. */
 const ApriSlide = ({ href, kicker, label }) => (
   <a className="activity" href={href} target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>
@@ -411,7 +407,7 @@ const slides = [
   {
     block: B + 'Apertura',
     content: () => (
-      <Apertura n="8" titolo="Skill e subagenti" sottotitolo="Procedure che l'agente legge solo quando servono, e collaboratori con un contesto tutto loro: come scriverli, e come accorgersi che non stanno facendo ciò che credi."
+      <Apertura n="8" titolo="Skill e subagenti" sottotitolo="Procedure che l'agente legge solo quando servono, e collaboratori con un contesto tutto loro: come scriverli, come valutare quelli degli altri, e come accorgersi che non stanno facendo ciò che credi."
         caso="Da dove nasce: dieci subagenti scritti con un frontmatter sbagliato, mai caricati per mesi."
         prima="argomento 5." />
     ),
@@ -544,6 +540,194 @@ const slides = [
       </div>
     ),
     notes: `Fonte: guida Google «Gemini Gems and Skills Transition Guide» (2026), consultata il 26/11/2026, https://services.google.com/fh/files/misc/gemini_gems_skills_transition_guide.pdf. Le regole della prima colonna sono quelle che la guida dà per scrivere una skill in Gemini: nome in minuscolo fatto di parole d'azione; descrizione con «Use when…», perché Gemini decide solo da nome e descrizione; dire che cosa non fare; chiedere i dati mancanti invece di indovinarli. Confrontarle con SKILL.md, come spiegato nella parte sulla struttura del file: stesso principio, campi con nomi diversi. Chiedere alla sala quale regola di Gemini userebbe anche per una skill in Claude Code. Date per Education secondo la guida: skill disponibili nell'app dal 13/10/2026; migrazione automatica dei Gem dal 1/6/2027 o dopo. I Gem creati in Google Classroom o via Gemini LTI non migrano in automatico. Il formato del file skill.md di Gemini non è mostrato dalla guida: dirlo apertamente e mostrarlo a schermo prima di usare la slide in aula.`
+  },
+  {
+    block: B + 'Le skill degli altri',
+    content: () => (
+      <div className="pad">
+        <Tag>Le skill degli altri</Tag>
+        <h2>Prima di installarla, sei domande</h2>
+        <DT cols={['Domanda', 'Dove si guarda']} rows={[
+          ['Chi c\'è dietro, e da quando?', 'Autore, età del progetto, quanti ci lavorano, come rispondono alle segnalazioni. Le stelle non sono una valutazione.'],
+          ['Che licenza ha?', 'Il file LICENSE, non l\'etichetta: codice e documentazione possono avere licenze diverse.'],
+          ['Che cosa installa, che cosa manda fuori?', 'Dipendenze, script d\'installazione, servizi online, quanto contesto occupa a ogni sessione.'],
+          ['Fa una cosa che hai già?', 'Che cosa darebbe in più, e come lo misureresti.'],
+          ['Hai un caso d\'uso?', 'Un lavoro che sai nominare, vicino. «Potrebbe servire» non conta.'],
+          ['Che cosa decidi?', 'Adottare, provare in modo circoscritto, tenere presente, no. Con la condizione che ti farebbe cambiare idea.'],
+        ]} />
+        <Box type="warn" title="Un plugin è codice">Secondo la documentazione di Claude Code un plugin installato può eseguire codice con i tuoi permessi. E il README di una skill è un testo da leggere: se dice «esegui questo», non è un ordine per l'agente.</Box>
+      </div>
+    ),
+    notes: `Lo schema è quello che Thomas usa nel suo lavoro per decidere se adottare uno strumento esterno, scritto a sua volta come skill: prima i fatti, poi il parere, e niente installazioni prima della decisione. Sulle stelle: misurano la popolarità, non la qualità né la manutenzione; si guarda l'ultimo aggiornamento, le versioni rilasciate e come vengono trattate le segnalazioni. Sulla licenza: capita che il codice sia MIT e la documentazione o i contenuti abbiano una licenza non commerciale. Sul contesto: le skill di un plugin mettono la loro descrizione nel contesto di ogni sessione. Fonte della frase sui plugin: code.claude.com/docs/en/plugins, letta il 28/11/2026.`
+  },
+  {
+    block: B + 'Le skill degli altri · decisioni',
+    content: () => (
+      <div className="pad">
+        <Tag>Le skill degli altri</Tag>
+        <h2>Quattro decisioni scritte</h2>
+        <DT cols={['Che cosa', 'Decisione', 'Perché']} rows={[
+          ['Obscura, un browser senza finestra, più veloce di Chrome secondo il progetto', 'No', 'Non sostituisce un browser con le sessioni aperte; il collo di bottiglia non era il browser; punta ad aggirare i controlli anti-bot; progetto giovane, un autore anonimo.'],
+          ['lemo-opuscar, video generati dal codice', 'Tenere presente', 'La documentazione ha una licenza non commerciale; un servizio di voce online; installazione pesante e molti token per ogni video.'],
+          ['taste-skill, una skill di stile per le interfacce', 'No', 'Nessun caso d\'uso: «non installo niente se non siamo convinti».'],
+          ['MarkItDown, documenti convertiti in testo', 'Tenere presente', 'Utile solo dove legge meglio di quanto l\'agente faccia da solo: da provare quando c\'è un caso vero.'],
+        ]} />
+        <Box type="info" title="Perché scriverle">Ogni riga del registro ha anche la condizione che farebbe cambiare il parere. Quando lo strumento ripassa, si legge la riga invece di rifare la valutazione.</Box>
+      </div>
+    ),
+    notes: `Quattro righe dal registro delle valutazioni di Thomas, tra il 13 e il 28/11/2026. Obscura (26/11): browser headless scritto in Rust; scartato perché i lavori di Thomas usano un browser con le sessioni già aperte, perché il tempo non si perdeva nel browser, per l'accento sull'anti-detect e sui proxy «no KYC», per l'autore anonimo con un solo contributore principale. lemo-opuscar (28/11): la documentazione ha licenza CC BY-NC, i film prodotti sono liberi; userebbe un servizio di sintesi vocale online da escludere; molti token per ogni film. taste-skill (13/11): nessun caso d'uso. MarkItDown (metà novembre): utile solo se migliore della lettura dei PDF dell'agente; sui PDF a griglia non cambia nulla. Nel corso MarkItDown è nel kit minimo e si usa con uvx, senza installare niente. Le stelle non compaiono nella tabella apposta.`
+  },
+  {
+    block: B + 'Le skill degli altri · presa e adattata',
+    content: () => (
+      <div className="pad">
+        <Tag>Le skill degli altri</Tag>
+        <h2>Una skill presa da fuori e fatta nostra</h2>
+        <div className="cols">
+          <pre aria-label="Estratto della skill debugging-sistematico">{SKILL_DEBUG}</pre>
+          <ul>
+            <li>Viene da una raccolta pubblica con licenza MIT: si può adattare, conservando l'avviso.</li>
+            <li>Tradotta e ridotta, con le regole scritte come controlli: niente ipotesi finché un comando non riproduce il bug, come nell'originale.</li>
+            <li>La description dice anche quando <strong>non</strong> usarla.</li>
+            <li>L'ultima riga dice da dove viene, con la versione: chi la legge sa che cosa confrontare.</li>
+          </ul>
+        </div>
+        <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href="https://github.com/mattpocock/skills" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>mattpocock/skills</a>, letta il 28/11/2026.</p>
+      </div>
+    ),
+    notes: `Skill reale del lavoro di Thomas, in uso da prima del corso: debugging-sistematico, settantuno righe. Estratto; le parti tagliate sono segnate con [...]. Viene dalla raccolta mattpocock/skills (licenza MIT, file LICENSE letto il 28/11/2026), che al 28/11/2026 si installava anche come plugin dal marketplace ufficiale di Claude Code. Thomas ha scelto di adattarla invece di installarla: tiene solo ciò che gli serve, nella sua lingua, con le sue regole. Il prezzo: gli aggiornamenti della raccolta non arrivano da soli, e il riferimento alla versione serve a confrontarli. Collega con l'argomento 6 (test e debugging): la regola del comando che fallisce è la stessa del test che fallisce prima della correzione.`
+  },
+  {
+    block: B + 'Le skill degli altri · dal vivo',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal vivo</Tag>
+        <h2>Valutiamola insieme, senza installare niente</h2>
+        <p>Dalla pagina GitHub della raccolta da cui viene la skill, le sei domande una per una.</p>
+        <ul>
+          <li><strong>Chi</strong>: il profilo dell'autore, i contributori, le segnalazioni aperte e le risposte.</li>
+          <li><strong>Licenza</strong>: il file LICENSE.</li>
+          <li><strong>Che cosa installa</strong>: le istruzioni d'installazione, gli script, i servizi che chiama.</li>
+          <li><strong>Doppioni e caso d'uso</strong>: che cosa abbiamo già nel laboratorio, e per quale lavoro ci servirebbe.</li>
+        </ul>
+        <CommandBox kind="text" cmd={DECISIONE} label="La decisione, in quattro righe" />
+      </div>
+    ),
+    notes: `Demo di chi parla, nel browser: la pagina della raccolta (github.com/mattpocock/skills, riletta il 28/11/2026: licenza MIT, una trentina di skill, installabile come plugin dal marketplace ufficiale). Si legge, non si installa. Sui PC del laboratorio il comando gh non c'è: tutto ciò che serve si vede dalla pagina. La sala compila la decisione. L'esito atteso non è fissato: per il laboratorio può essere «tenere presente», perché il caso d'uso è dei singoli docenti e non della scuola. Conta che la riga abbia il motivo e la condizione di riesame.`
+  },
+  {
+    block: B + 'Le nostre skill · quando',
+    content: () => (
+      <div className="pad">
+        <Tag>Le nostre skill</Tag>
+        <h2>Quando una skill vale la pena</h2>
+        <DT cols={['Domanda', 'Se la risposta è no']} rows={[
+          ['Lo rifai almeno tre volte all\'anno?', 'Una richiesta scritta bene basta.'],
+          ['Ti è già andato storto qualcosa, e sai che cosa?', 'Aspetta: la skill nasce dalle insidie che conosci.'],
+          ['I passi sono sempre gli stessi?', 'Se cambiano ogni volta, la skill invecchia subito.'],
+          ['Sai dire quando non deve partire?', 'Partirà anche quando non serve.'],
+          ['Il risultato si controlla?', 'Ti accorgerai tardi che ha saltato un passo.'],
+        ]} />
+        <Box type="tip" title="Dove va il resto">Un fatto che cambia, come un orario o un indirizzo, sta in CLAUDE.md o in una guida, e la skill lo legge da lì.</Box>
+      </div>
+    ),
+    notes: `È il segnale della slide «Una procedura che spieghi sempre uguale», diviso in cinque domande. Quattro o cinque sì: vale una skill. Il principio del lavoro di Thomas: la skill contiene la procedura e le regole dure, e punta ai fatti invece di ricopiarli; i fatti copiati in due posti prima o poi non coincidono più. La quinta domanda è quella che si dimentica: senza un controllo, la skill sembra funzionare, che è il filo di tutto l'argomento.`
+  },
+  {
+    block: B + 'Le nostre skill · come nasce',
+    content: () => (
+      <div className="pad">
+        <Tag>Le nostre skill</Tag>
+        <h2>Come nasce una skill, dal lavoro rifatto al commit</h2>
+        <Flow nodes={[
+          ['1 Il lavoro rifatto', 'con le insidie già pagate'],
+          ['2 Che cosa entra', 'passi e regole; i fatti restano nelle guide'],
+          ['3 La scrive l\'agente', 'dagli appunti, non da zero', 'i'],
+          ['4 Parte quando deve?', 'e tace quando non deve?', 'w'],
+          ['5 Prova sul campo', 'i comandi scritti nella skill girano?', 'w'],
+          ['6 Revisione e commit', 'un revisore, poi il repository', 'i'],
+        ]} />
+        <p className="muted" style={{ marginTop: 12 }}>Il passo che si salta è il 5. Un percorso o una soglia scritti nella skill e mai lanciati restano lì finché non servono.</p>
+      </div>
+    ),
+    notes: `Il processo che Thomas segue per le sue skill. Il passo 3 si può affidare a un subagente, anche più d'uno in parallelo se le skill sono diverse. Il passo 5 è quello che si salta: un comando scritto nella skill sembra giusto finché nessuno lo lancia. Il revisore del passo 6 è quello che si scrive più avanti in questo argomento. Anche il commit ha le sue regole: un repository può rifiutare un messaggio scritto nel formato sbagliato, e va bene così.`
+  },
+  {
+    block: B + 'Le nostre skill · dal vivo',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal vivo</Tag>
+        <h2>Una skill per preparare le verifiche</h2>
+        <p>La cartella di un docente inventato: il programma con gli obiettivi, una verifica già fatta, e gli appunti su ciò che è andato storto le volte scorse.</p>
+        <ul>
+          <li>Il totale faceva 11 punti.</li>
+          <li>Le risposte erano rimaste nel file stampato.</li>
+          <li>Un indirizzo IP copiato dalla rete del laboratorio.</li>
+          <li>La versione B era più facile della A.</li>
+        </ul>
+        <CommandBox kind="text" tall cmd={PROMPT_SKILL} label="Richiesta all'agente" />
+      </div>
+    ),
+    notes: `Demo di chi parla, con la cartella dello zip prepara-verifica (dati inventati). L'agente scrive la skill partendo dagli appunti: si legge insieme prima di accettarla. Domande da fare alla sala: la description dice quando non usarla? Ogni insidia degli appunti è diventata una regola controllabile? C'è un fatto ricopiato che starebbe meglio in un file? Poi si chiude la sessione e se ne apre una nuova (slide seguente). Comportamento attraverso il proxy del corso da verificare a schermo prima della lezione, con Claude Code e con OpenCode. Piano B: schermate della prova.`
+  },
+  {
+    block: B + 'Le nostre skill · parte da sola?',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal vivo</Tag>
+        <h2>Parte da sola? Tre richieste</h2>
+        <DT cols={['Richiesta, in una sessione nuova', 'Atteso']} rows={[
+          ['Mi prepari la verifica sull\'indirizzamento IPv4 per la 3A, versione A e B?', 'la skill parte'],
+          ['Serve un recupero sulla UdA 2: due versioni, stessi argomenti.', 'la skill parte'],
+          ['Riassumi in tre righe gli obiettivi della UdA 1.', 'la skill non parte'],
+        ]} />
+        <ul style={{ marginTop: 10 }}>
+          <li>Nella traccia: in Claude Code lo strumento Skill con il nome; in OpenCode lo strumento <code className="nw">skill</code>.</li>
+          <li>OpenCode legge anche <code className="nw">.claude/skills</code>: la stessa cartella vale per tutti e due.</li>
+          <li>Poi il controllo: <code className="nw">uv run controlla-verifica.py</code> sulle due versioni.</li>
+        </ul>
+        <Box type="info" title="Da verificare a schermo">Che la skill parta da sola attraverso il proxy del corso, con i due strumenti.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Fonte: <a className="text-link" href="https://opencode.ai/docs/skills/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>skill in OpenCode</a>, letta il 28/11/2026.</p>
+      </div>
+    ),
+    notes: `Le tre richieste non nominano la skill: è la description a doverla far scegliere. Se la seconda non la fa partire, la description non contiene le parole che un collega userebbe («recupero», «compito in classe»): si corregge e si riprova. La terza riguarda la stessa cartella ma non chiede una verifica: se la skill parte, la description è troppo larga. Lo script controlla-verifica.py è nello zip e usa solo la libreria standard di Python: con uv run parte anche dove Python non è installato a parte e controlla le regole degli appunti; se trova un errore si corregge la skill, non la verifica. OpenCode, documentazione delle skill riletta il 28/11/2026: cerca in .opencode/skills, .claude/skills e .agents/skills; carica una skill con lo strumento skill; i permessi per le skill si regolano con allow, ask o deny.`
+  },
+  {
+    block: B + 'Le nostre skill · ai colleghi',
+    content: () => (
+      <div className="pad">
+        <Tag>Le nostre skill</Tag>
+        <h2>Come una skill arriva ai colleghi</h2>
+        <DT cols={['Come', 'Che cosa si fa', 'Chi la riceve']} rows={[
+          ['Nel repository del progetto', <><code className="nw">.claude/skills/</code> con un commit: Git porta anche le versioni</>, 'chi lavora su quel progetto, con Claude Code o OpenCode'],
+          ['In un plugin', <>un repository con <code className="nw">.claude-plugin/marketplace.json</code>; chi lo usa scrive <code className="nw">claude plugin marketplace add</code> e poi <code className="nw">claude plugin install</code></>, 'chi aggiunge il marketplace, in ogni progetto'],
+          ['Come cartella', 'una cartella con SKILL.md segue un formato aperto, Agent Skills', 'anche altri strumenti che lo leggono'],
+        ]} />
+        <Box type="info" title="Dall'altra parte">Chi riceve la tua skill fa le sei domande, come per quella di chiunque altro. Thomas tiene le sue in un plugin privato su un repository suo: le stesse skill su ogni macchina, aggiornate con Git.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Fonti, lette il 28/11/2026: <a className="text-link" href="https://code.claude.com/docs/en/plugin-marketplaces" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>marketplace dei plugin</a>, <a className="text-link" href="https://agentskills.io/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Agent Skills</a>.</p>
+      </div>
+    ),
+    notes: `Dove stanno le skill di progetto e di plugin è nella slide «Dove vive una skill»; qui conta come arrivano agli altri. Comandi dalla documentazione dei marketplace di Claude Code (28/11/2026): claude plugin marketplace add owner/repo per un repository GitHub, claude plugin install nome@marketplace; in sessione c'è il pannello /plugin. Il file del marketplace è .claude-plugin/marketplace.json, quello del plugin .claude-plugin/plugin.json. Le skill di un plugin si chiamano con il prefisso del plugin (/plugin:skill). Agent Skills: formato aperto nato da Anthropic, una cartella con SKILL.md (agentskills.io). Per una scuola il modo più semplice è il primo: le skill stanno nel repository del progetto, e chi lo clona le ha. Il plugin conviene quando le stesse skill servono in molti progetti.`
+  },
+  {
+    block: B + 'Attività: una skill per un lavoro che rifai',
+    content: () => (
+      <div className="pad">
+        <Tag>Attività al PC</Tag>
+        <h2>Una skill per un lavoro che rifai</h2>
+        <ol>
+          <li>Tre lavori che rifai, e le cinque domande per ognuno.</li>
+          <li>L'agente scrive la skill partendo da ciò che è andato storto. La leggi prima di accettarla.</li>
+          <li>In una sessione nuova, tre richieste: due la devono far partire, una no.</li>
+          <li>Il controllo del risultato.</li>
+          <li>La stessa skill con l'altro strumento.</li>
+        </ol>
+        <p className="muted">Chi non ha ancora un lavoro suo usa la cartella delle verifiche.</p>
+        <ActivityBadge n="8" file="scheda-skill-lavoro-ripetuto.html" label="Una skill per un lavoro che rifai" />
+        <ActivityBadge n="8" file="prepara-verifica.zip" label="La cartella delle verifiche (zip)" />
+      </div>
+    ),
+    notes: `Esercizio per i colleghi, a coppie o da soli. Il criterio della scheda è quello della slide «Quando una skill vale la pena». Chi ha già un progetto personale lavora sul suo. Chi non ce l'ha usa lo zip prepara-verifica. La scheda chiude con le sei domande per valutare una skill scritta da altri, da usare quando un collega ne propone una.`
   },
   {
     block: B + 'I subagenti',
@@ -769,65 +953,6 @@ const slides = [
     notes: `Attività a coppie sulla palestra, dal punto di partenza partenza-a8 (git switch -c lavoro-a8 partenza-a8). I test sono tutti verdi: la funzione prenotaSettimanale ha un solo test. La specifica di prenotaSettimanale, in docs/specifica-ricorrenti.md, è quella nata nell'argomento 4 (settimane da 2 a 12, tutto o niente, errore con la data): chi lo ha seguito la riconosce, gli altri la leggono come una consegna. Non dire se e dove ci siano problemi: è parte dell'esercizio. La revisione a mano viene prima, così c'è un termine di confronto. Il passo 2 è volutamente fatto con le istruzioni ambigue. Alla fine ogni coppia confronta tre colonne: a mano, revisore del collega, il proprio revisore. Se il modello non usa la skill o il subagente: invocarli a mano, e annotarlo come risultato.`
   },
   {
-    block: B + 'Il revisore in OpenCode',
-    content: () => (
-      <div className="pad">
-        <Tag>OpenCode</Tag>
-        <h2>Lo stesso revisore, in un altro file</h2>
-        <div className="cols">
-          <pre aria-label="Esempio di file di un subagente revisore per OpenCode">{AGENTEOC}</pre>
-          <ul>
-            <li>Cartella <code className="nw">.opencode/agents/</code>. Il <strong>nome del file</strong> è il nome dell'agente.</li>
-            <li><code className="nw">description</code> è obbligatoria: è ciò che l'agente principale legge per scegliere.</li>
-            <li><code className="nw">mode: subagent</code>. Senza, vale <code className="nw">all</code>.</li>
-            <li>Niente <code className="nw">tools</code>: i limiti stanno in <code className="nw">permission</code>. L'ultima regola che corrisponde vince.</li>
-            <li>Niente <code className="nw">skills</code>: la procedura sta nel testo.</li>
-          </ul>
-        </div>
-        <p className="muted">Si chiama con <code className="nw">@revisore</code>, oppure lo sceglie l'agente principale.</p>
-      </div>
-    ),
-    notes: `Fonte: opencode.ai/docs/agents, pagina della serie 1 al tag v1.19.5 (packages/web/src/content/docs/agents.mdx), letta il 25/11/2026. Gli agenti in Markdown stanno in .opencode/agents/ nel progetto o in ~/.config/opencode/agents/; il nome del file diventa il nome dell'agente; description è obbligatoria; mode vale all se manca; tools è deprecato in favore di permission; i subagenti usano il modello dell'agente che li chiama se model non è indicato. Con permission.bash l'ultima regola che corrisponde vince, quindi il "*" va per primo. Nella configurazione del laboratorio lo strumento che lancia i subagenti (task) chiede conferma: la delega parte solo dopo un sì. Rispetto al file di Claude Code: stessa idea (descrizione, strumenti limitati, istruzioni nel testo), campi diversi. Lo scheletro da completare è nel foglio «Modello: subagente revisore per OpenCode». Provato su OpenCode 1.19.5 il 25/11/2026: il file viene letto e l'elenco degli agenti lo mostra come subagente; non provato con il modello del corso. Da verificare a schermo: la chiamata con @ e l'ingresso nella sessione del subagente.`
-  },
-  {
-    block: B + 'OpenCode: è stato letto?',
-    content: () => (
-      <div className="pad">
-        <Tag>OpenCode</Tag>
-        <h2>Un errore nel file non sempre si sente</h2>
-        <DT cols={['Che cosa scrivi', 'Che cosa succede']} rows={[
-          [<><code className="nw">permision:</code> al posto di <code className="nw">permission:</code></>, <>Nessun errore. Il campo finisce tra le opzioni del modello e <code className="nw">edit</code> resta permesso.</>],
-          ['Una riga vuota prima del primo ---', 'Nessun errore. Il frontmatter non vale: l\'agente compare come «all» e senza description.'],
-          [<><code className="nw">name:</code> diverso dal nome del file</>, 'Nessun errore. L\'agente prende il nome di name.'],
-          [<><code className="nw">tools: Read, Grep</code> come in Claude Code</>, <>Errore: «Configuration is invalid». Nessun agente viene elencato.</>],
-        ]} />
-        <CommandBox cmd={CMD_OC.elenco} label="Controllo: l'agente è nell'elenco come subagent?" />
-        <p className="muted" style={{ marginTop: 8 }}>Con <code className="nw">opencode debug agent revisore</code> vedi description, modalità e permessi come li ha letti OpenCode.</p>
-      </div>
-    ),
-    notes: `Prove fatte il 25/11/2026 su OpenCode 1.19.5 con file di agenti scritti apposta: un permesso scritto male viene passato come opzione del modello (il comando debug agent lo mostra tra le options) e il permesso di scrittura non c'è; con una riga vuota prima del primo --- l'agente compare come all e senza description; un campo name nel frontmatter rinomina l'agente (comportamento osservato, non descritto nella pagina agents); un campo tools con un elenco in stile Claude Code (Read, Grep) rende invalida l'intera configurazione e il comando che elenca gli agenti stampa solo l'errore. Stesso principio dell'episodio dei dieci agenti fantasma: un file sbagliato non sempre fa rumore, si smaschera guardando che cosa è stato caricato. Il comando per l'elenco è opencode agent list; filtrato con Select-String in PowerShell mostra solo i subagenti. Le versioni di OpenCode cambiano in fretta: riprovare sulla versione installata.`
-  },
-  {
-    block: B + 'Attività: il revisore in OpenCode',
-    content: () => (
-      <div className="pad">
-        <Tag>Attività</Tag>
-        <h2>Un subagente revisore per OpenCode</h2>
-        <ol className="timeline">
-          <li><time>1</time>Dal punto <code className="nw">partenza-a8</code>: la tua lettura di <code className="nw">prenotaSettimanale</code>, a mano.</li>
-          <li><time>2</time>Scrivi <code className="nw">.opencode/agents/revisore.md</code> dal modello e controlla che sia stato letto.</li>
-          <li><time>3</time>Chiamalo con <code className="nw">@revisore</code> e leggi che cosa ha eseguito.</li>
-          <li><time>4</time>Confronta il suo rapporto con la tua lettura.</li>
-          <li><time>5</time>Chiedi la revisione senza nominarlo: riscrivi la description finché l'agente principale lo sceglie.</li>
-        </ol>
-        <CommandBox cmd={CMD_OC.richiesta} label="Richiesta del passo 5, senza nominare il revisore" kind="text" />
-        <ActivityBadge n="8" file="scheda-subagente-opencode.html" label="Scheda: subagente revisore per OpenCode" />
-        <p className="muted" style={{ marginTop: 8 }}>Modello da completare: <a className="text-link" href="../materiali/argomento-8/modello-subagente-opencode.html" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>subagente per OpenCode</a>. Se OpenCode non parte, la stessa cosa con Claude Code come nell'attività precedente.</p>
-      </div>
-    ),
-    notes: `Attività a coppie, dallo stesso punto di partenza della precedente (git switch -c lavoro-a8-opencode partenza-a8); si usa la stessa funzione, quindi chi ha già fatto la lettura a mano riprende quella tabella. Non dire se e dove ci siano problemi. Il confronto è fra la lettura a mano e il rapporto del revisore: che cosa ha eseguito, che cosa ha riportato, che cosa si riproduce. Nell'ultimo passo la richiesta non nomina il revisore: nella configurazione del laboratorio l'agente principale chiede il permesso prima di lanciare un subagente, ed è quella richiesta che dice che la delega è partita; se invece rivede da solo o delega a un altro agente, la description va riscritta. Se OpenCode non parte, il piano B è Claude Code con .claude/agents, già visto in questo argomento. Da verificare a schermo, perché non provato con il modello del corso: la chiamata con @ da testo incollato (in caso scegliere il nome dall'elenco che si apre scrivendo @), i tasti per entrare nella sessione del subagente (documentazione della serie 1: session_child_first, di norma Leader più Giù), se la modifica della description si vede senza riaprire OpenCode, e quale shell usa lo strumento bash su Windows. Fonte: opencode.ai/docs/agents, serie 1 al tag v1.19.5, 25/11/2026.`
-  },
-  {
     block: B + 'Domanda di verifica',
     content: () => (
       <div className="pad">
@@ -848,15 +973,15 @@ const slides = [
       <Chiusura
         punti={[
           'Una skill è una procedura in una cartella: l\'agente vede sempre la descrizione, il resto lo legge quando serve. La descrizione decide se verrà scelta.',
+          'Una skill degli altri si valuta prima di installarla, con sei domande e una decisione scritta. Una nostra nasce da un lavoro rifatto e si prova: parte quando deve, tace quando non deve.',
           'Un subagente ha contesto e strumenti propri e restituisce un riassunto: si legge anche il lavoro, non solo il riassunto.',
           'Due agenti d\'accordo non dimostrano nulla. Vale il controllo eseguito che poteva fallire.',
           'Skill e subagenti si collaudano: caricati? usati? hanno eseguito qualcosa? Con un proxy in mezzo, e alias da mappare, non è scontato.',
-          'Lo stesso revisore si scrive anche per OpenCode: permission al posto di tools, il nome è quello del file, e un campo scritto male può non fare rumore.',
           'Una squadra di agenti, come Memoteca, è questo messo insieme: descrizioni che scelgono, permessi che limitano, un revisore con contesto pulito.',
         ]}
-        dopo="Argomento 9 (hook e MCP: controlli che non dipendono dal modello), argomento 10 (OpenCode, permessi e plugin) e argomento 12 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
+        dopo="Argomento 9 (hook e MCP: controlli che non dipendono dal modello), argomento 10 (OpenCode, permessi e plugin, con il revisore scritto per OpenCode) e argomento 12 (il rilascio mobile in autopilota, dove i revisori sono cancelli di verifica)." />
     ),
-    notes: `Riprendere i sei punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 9. Il quinto e il sesto punto riprendono la parte su OpenCode e le slide di Memoteca.`
+    notes: `Riprendere i sei punti. Il filo dell'argomento: sembrare di funzionare non basta. Ricordare che la scelta di cosa far fare a una skill, a un subagente o a un hook si basa su una domanda semplice: serve una procedura (skill), un compito separato (subagente), una garanzia (hook)? Anticipare l'argomento 9. L'ultimo punto riprende le slide di Memoteca.`
   },
 ];
 

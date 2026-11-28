@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23000c0a'/%3E%3Cpath d='M6 7l5 5-5 5' fill='none' stroke='%2374e9b4' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M13 17h5' stroke='%2374e9b4' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Un subagente revisore per OpenCode — Materiali argomento 8</title>
+<title>Modello: subagente revisore per OpenCode — Materiali argomento 10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -113,117 +113,64 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border
 </head>
 <body>
 <div class="topbar no-print">
-  <a class="back" href="index.html">&larr; Materiali dell'argomento 8</a>
-  <a class="dl-btn" href="scheda-subagente-opencode.pdf" download>Scarica il PDF &darr;</a>
+  <a class="back" href="index.html">&larr; Materiali dell'argomento 10</a>
+  <a class="dl-btn" href="modello-subagente-opencode.pdf" download>Scarica il PDF &darr;</a>
 </div>
 <main class="wrap">
-<h1 id="scheda-un-subagente-revisore-per-opencode">Scheda: un subagente revisore per OpenCode</h1>
-<p>Si lavora in coppia, sul PC del laboratorio, nella palestra (prenotazione dei laboratori, dati inventati).</p>
-<p>Stessa funzione dell'altra scheda, <code>prenotaSettimanale</code>, stesso obiettivo: un revisore che rilegga il codice
-eseguendo controlli e dica che cosa è provato. Qui lo scrivi per OpenCode, lo chiami a mano, confronti il suo
-rapporto con la tua lettura, e poi lavori sulla <code>description</code> finché l'agente principale lo chiama da solo.</p>
-<h2 id="prima-di-partire">Prima di partire</h2>
-<p>Incolla i comandi uno alla volta, dalla cartella della palestra:</p>
-<pre><code class="language-powershell">git status
+<h1 id="modello-subagente-revisore-per-opencode">Modello: subagente revisore per OpenCode</h1>
+<p>Un modello da copiare in <code>.opencode/agents/revisore.md</code> e completare. Le parti tra <code>&lt;...&gt;</code> le scrivi tu.
+Il nome dell'agente è il nome del file: <code>revisore.md</code> crea l'agente <code>revisore</code>. Il file deve cominciare con <code>---</code>
+alla prima riga, senza righe vuote prima.</p>
+<pre><code class="language-markdown">---
+description: &lt;Quando delegare a questo subagente, in una frase o due. Che cosa rivede, quando usarlo, che non corregge.&gt;
+mode: subagent
+model: anthropic/claude-sonnet-5-5
+permission:
+  edit: deny
+  task: deny
+  webfetch: deny
+  bash:
+    &quot;*&quot;: ask
+    &quot;npm test&quot;: allow
+    &quot;node --test*&quot;: allow
+    &quot;git status*&quot;: allow
+    &quot;git diff*&quot;: allow
+    &quot;git log*&quot;: allow
+---
+
+Sei un revisore di codice. Non hai scritto il codice che ti viene passato.
+
+&lt;La procedura: pochi passi numerati. Che cosa leggi, come trasformi ogni punto della specifica in un controllo,
+che cosa esegui, che cosa annoti per ogni controllo.&gt;
+
+Non modifichi nessun file del progetto. &lt;Come fai le prove senza creare file.&gt;
+
+Riferisci con tre elenchi: &lt;che cosa metti in ciascuno&gt;. Verdetto: &lt;quali parole usi, e quando sono ammesse&gt;.
 </code></pre>
-<pre><code class="language-powershell">git switch -c lavoro-a8-opencode partenza-a8
-</code></pre>
-<pre><code class="language-powershell">npm test
-</code></pre>
-<p>Se nella cartella c'è un <code>.claude</code> dell'altra scheda, lascialo: OpenCode ne legge le skill, ma non gli agenti.
-Annota che c'è.</p>
-<p>Leggi <code>docs/specifica-ricorrenti.md</code>. Non aprire ancora <code>src/logica.js</code> con l'agente.</p>
-<h2 id="1-la-tua-lettura">1. La tua lettura</h2>
-<p>Se hai già fatto la revisione a mano dell'altra scheda, usa quella tabella. Altrimenti leggi <code>prenotaSettimanale</code>
-in <code>src/logica.js</code> accanto alla specifica e scrivi, per ogni punto: rispettato, non rispettato, non so. Non
-modificare la funzione. Questa è la colonna «a mano» del confronto.</p>
-<h2 id="2-scrivi-il-subagente">2. Scrivi il subagente</h2>
-<p>Crea la cartella e il file:</p>
-<pre><code class="language-powershell">New-Item -ItemType Directory -Force .opencode\agents
-</code></pre>
-<pre><code class="language-powershell">notepad .opencode\agents\revisore.md
-</code></pre>
-<p>Parti dalla pagina «Modello: subagente revisore per OpenCode». Salva con il nome <code>revisore.md</code>, scegliendo «Tutti
-i file», così non diventa <code>revisore.md.txt</code>. I permessi del modello sono già scritti: tu completi la <code>description</code>,
-la procedura e il formato del rapporto. La procedura non deve nominare i difetti di questa funzione: deve servire
-anche per la prossima.</p>
-<h2 id="3-controlla-che-sia-stato-letto">3. Controlla che sia stato letto</h2>
+<h2 id="che-cosa-significa-ogni-riga-del-frontmatter">Che cosa significa ogni riga del frontmatter</h2>
+<ul>
+<li><code>description</code>: è obbligatoria. È ciò che l'agente principale legge per decidere quando delegare. Come nella skill: prima che cosa fa, poi quando usarlo, con le parole che userebbe un collega.</li>
+<li><code>mode: subagent</code>: il revisore si chiama con <code>@revisore</code> o lo sceglie l'agente principale. Senza <code>mode</code> vale <code>all</code>: compare anche tra gli agenti primari.</li>
+<li><code>model</code>: il modello del corso, nel formato <code>fornitore/modello</code>. Se lo togli, il subagente usa il modello dell'agente che lo chiama. <code>opencode models</code> elenca quelli disponibili.</li>
+<li><code>permission</code>: qui non esiste <code>tools</code>. Ogni chiave decide se un'azione è permessa (<code>allow</code>), chiede conferma (<code>ask</code>) o è vietata (<code>deny</code>). <code>edit: deny</code> vieta scrivere, modificare e applicare patch. <code>task: deny</code> gli impedisce di delegare a sua volta.</li>
+<li><code>bash</code>: l'ultima regola che corrisponde vince, quindi il <code>"*": ask</code> sta per primo e le eccezioni dopo. Quello che non è nell'elenco chiede conferma: leggi il comando prima di accettare.</li>
+<li>Nessun campo <code>name</code>: il nome viene dal file. Nessun campo <code>skills</code>: la procedura sta nel testo del file.</li>
+</ul>
+<p><code>edit: deny</code> non ferma una riga di shell che scrive un file. Per questo la regola «non modifichi nessun file» sta anche nel testo, e i comandi che non conosci chiedono conferma.</p>
+<h2 id="prima-di-fidarti-del-risultato">Prima di fidarti del risultato</h2>
+<p>Incolla i comandi uno alla volta, dalla cartella del progetto:</p>
 <pre><code class="language-powershell">opencode agent list | Select-String &quot;subagent&quot;
 </code></pre>
 <pre><code class="language-powershell">opencode debug agent revisore | Select-String '&quot;name&quot;|&quot;mode&quot;|&quot;description&quot;'
 </code></pre>
 <pre><code class="language-powershell">opencode debug agent revisore | Select-String -Context 0,2 '&quot;permission&quot;: &quot;edit&quot;'
 </code></pre>
-<p><code>revisore (subagent)</code> è nell'elenco, la tua <code>description</code> è intera, e l'ultima riga di <code>edit</code> dice <code>deny</code>? Se no,
-correggi il file prima di andare avanti.</p>
-<h2 id="4-chiamalo-a-mano">4. Chiamalo a mano</h2>
-<p>Avvia OpenCode nella cartella della palestra:</p>
-<pre><code class="language-powershell">opencode
-</code></pre>
-<p>Scrivi <code>@rev</code> e scegli <code>revisore</code> dall'elenco che si apre, poi incolla il resto della richiesta:</p>
-<pre><code class="language-text">rivedi la funzione prenotaSettimanale in src/logica.js rispetto a docs/specifica-ricorrenti.md
-</code></pre>
-<p>Quando OpenCode chiede il permesso di eseguire un comando, leggilo prima di rispondere. Annota: comandi eseguiti,
-file letti, e se il rapporto ha i tre elenchi.</p>
-<p>Per leggere il lavoro intero del subagente, entra nella sua sessione (di norma <code>Leader</code> poi <code>Giù</code>; per tornare
-indietro, <code>Su</code>). Se non trovi i tasti, guarda l'elenco dei comandi di OpenCode.</p>
-<h2 id="5-il-confronto">5. Il confronto</h2>
-<p>Riempi la tabella. La colonna «a mano» viene dal passo 1.</p>
-<div class="table-scroll"><table>
-<thead>
-<tr>
-<th>Punto della specifica o problema</th>
-<th>A mano</th>
-<th>Rapporto del revisore</th>
-<th>Riprodotto da te?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table></div>
-<p>Per ogni riga in cui le colonne non concordano: chi ha ragione, e come lo hai verificato (non vale «perché lo dice
-l'agente»). Per ogni problema trovato dal revisore ma non da te: prova a riprodurlo.</p>
-<h2 id="6-fallo-scegliere-allagente-principale">6. Fallo scegliere all'agente principale</h2>
-<p>Esci dalla sessione del subagente e, nella conversazione principale, non nominare il revisore:</p>
-<pre><code class="language-text">Controlla che prenotaSettimanale rispetti la specifica, prima di darla per buona.
-</code></pre>
-<p>Che cosa succede?</p>
 <ul>
-<li>L'agente principale chiede il permesso di lanciare il subagente <code>revisore</code>: la delega è partita da sola.</li>
-<li>Rivede lui stesso senza delegare, o delega a <code>general</code>: la <code>description</code> non ha convinto.</li>
+<li><code>revisore (subagent)</code> compare nell'elenco? Se manca, o compare come <code>(all)</code>, il file non è stato letto come credevi.</li>
+<li>La <code>description</code> stampata è la tua, intera? Se è vuota, il frontmatter non è stato letto.</li>
+<li>Un campo scritto male (per esempio <code>permision</code>) non dà errore: finisce tra le opzioni del modello e il permesso non c'è. Controlla <code>edit</code> nei permessi stampati dal secondo comando.</li>
+<li>Nel riassunto compaiono i comandi eseguiti? Se no, entra nella sessione del subagente e leggi il lavoro intero.</li>
 </ul>
-<p>Se non è partita, cambia la <code>description</code> e riprova con la stessa richiesta. Parti da queste domande: dice che cosa
-fa e quando usarlo? Il caso principale è all'inizio? Usa le parole che userebbe un collega nella richiesta?
-Se OpenCode non vede la modifica, chiudilo e riaprilo. Annota la versione della <code>description</code> che ha funzionato
-e quante prove sono servite.</p>
-<p>Per chi ha finito: sostituisci la <code>description</code> con «Aiuta con il codice» e ripeti la richiesta. Che cosa cambia?</p>
-<h2 id="se-opencode-non-funziona">Se OpenCode non funziona</h2>
-<p>Fai la stessa cosa con Claude Code, come nell'altra scheda: <code>.claude/agents/revisore.md</code>, un campo <code>tools</code> e un
-<code>disallowedTools</code>, <code>@agent-revisore</code> per chiamarlo.</p>
 <footer>Materiale del corso "Coding agentico" — ITTS "Belluzzi-Da Vinci".</footer>
 </main>
 <script>
