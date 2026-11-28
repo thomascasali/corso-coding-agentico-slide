@@ -969,7 +969,7 @@ Avvisi sui dati: 1
         <DT cols={['Chi', 'Harness', 'Porte', 'Modello di casa']} rows={[
           ['Anthropic', 'Claude Code', 'web, app desktop, terminale (claude)', 'Claude: Opus, Sonnet, Haiku'],
           ['OpenAI', 'Codex', 'cloud, app Codex, terminale (codex), editor', 'GPT'],
-          ['Google', 'Antigravity', 'app desktop, editor, terminale (agy)', 'Gemini, ma anche Claude'],
+          ['Google', 'Antigravity', 'app desktop, estensioni per editor, terminale (agy)', 'Gemini, ma anche Claude'],
           ['Open source', 'OpenCode, Cline, Goose, OpenHands', 'terminale, editor, app (varia)', 'quello che scegli'],
         ]} />
         <Box type="warn" title="Open source non vuol dire gratis">Il programma è libero, il modello si paga a parte, di solito a consumo. In aula lo paga il corso, con un budget per ogni chiave.</Box>
@@ -1008,7 +1008,7 @@ Avvisi sui dati: 1
           <Card title="Cervello (modello)" kind="i"><p>Un modello Claude, raggiunto attraverso il proxy del corso con la tua chiave personale.</p></Card>
           <Card title="Computer" kind="w"><p>Il PC del laboratorio: la cartella da cui avvii l'agente e ciò che i permessi gli lasciano fare.</p></Card>
         </div>
-        <Box type="info" title="E AI Studio?">Stesso schema, altri pezzi: la porta è il browser, l'assistente è quello di Google, il cervello è Gemini, e il lavoro sta nel cloud di Google, non in una cartella del PC.</Box>
+        <Box type="info" title="E AI Studio?">Stesso schema, altri pezzi: la porta è il browser, l'assistente è quello di Google, il cervello è Gemini, e il lavoro sta nel cloud di Google, finché non lo scarichi o lo mandi su GitHub.</Box>
       </div>
     ),
     notes: "Le quattro caselle si riempiono dal vivo prima di mostrarle. Che cosa sia il proxy e come si usa la chiave si vede quando si installa l'agente (argomento 2); OpenCode è approfondito nell'argomento 10. Il riquadro su AI Studio introduce le slide seguenti: si guarda quale porta, quale assistente e dove finisce il lavoro."
@@ -1140,6 +1140,24 @@ Avvisi sui dati: 1
       </div>
     ),
     notes: "Chi parla richiama le due prove con le sue parole: un gioco chiesto in una riga, una dashboard chiesta con un piano da leggere. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. Il prototipo non si tiene; il piano si salva in un file, e dopo l'installazione dell'agente (argomento 2) lo si ritrova nella palestra, l'app vera. Il piano torna nell'argomento 4, dove si impara a leggerlo e a trasformarlo in una specifica."
+  },
+  {
+    block: B + 'AI Studio e Antigravity',
+    content: () => (
+      <div className="pad">
+        <Tag>Due strumenti Google, due momenti</Tag>
+        <h2>Che differenza c'è tra AI Studio e Antigravity</h2>
+        <DT cols={['', 'Google AI Studio', 'Google Antigravity']} rows={[
+          ['Dove gira', 'Nel browser', 'Sul tuo PC: app desktop, terminale (agy), estensioni per gli editor'],
+          ['A che cosa serve', 'Prototipi rapidi da un prompt (Build mode), da scaricare in ZIP o mandare su GitHub', 'Lavorare su un progetto vero: cartelle, terminale, Git, modifiche su più file; anche agenti remoti'],
+          ['Modelli', 'Modelli di Google (Gemini)', 'Gemini, e anche altri (per esempio Claude)'],
+          ['Come si paga', 'Gratis nel browser, con limiti; oltre, a consumo con la fatturazione Google Cloud', 'Piani Free, Plus, Pro, Ultra con quote, più crediti extra; oppure a consumo con un progetto Google Cloud. Niente chiave propria'],
+        ]} />
+        <Box type="info" title="Il passaggio">Il consiglio del corso: si parte in AI Studio per provare un'idea; quando il progetto cresce, il codice esce (ZIP o GitHub) e passa a un agente che lavora in una cartella del PC. Build mode usa i componenti dell'agente di Antigravity. In aula il secondo passo si fa con Claude Code o OpenCode.</Box>
+        <p className="legend" style={{ marginTop: 8 }}>Fonti Google, rilette il 27/11/2026: <a className="text-link" href="https://aistudio.google.com/docs/aistudio-build-mode" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Build mode</a>, <a className="text-link" href="https://aistudio.google.com/docs/pricing" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>prezzi di AI Studio</a>, <a className="text-link" href="https://antigravity.google/docs/overview" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>panoramica di Antigravity</a>, <a className="text-link" href="https://antigravity.google/docs/plans" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>piani</a>, <a className="text-link" href="https://antigravity.google/docs/workspace/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>account Workspace</a>.</p>
+      </div>
+    ),
+    notes: "Si mette dopo le due prove con AI Studio perché risponde alla domanda che di solito arriva: e Google, per il lavoro vero, che cosa usa? Fatti dalla documentazione Google riletta il 27/11/2026. AI Studio: la pagina dei prezzi elenca solo modelli Gemini; gratis nel browser in tutte le regioni disponibili; il livello gratuito ha limiti di frequenza e i contenuti sono usati per migliorare i prodotti, il livello a pagamento no (pagina dei prezzi); a pagamento si collega un account Cloud Billing. Build mode esporta in ZIP o sincronizza con GitHub, e la pagina dice che i componenti dell'agente di Antigravity ne sono il motore. Antigravity: app, CLI agy, estensioni per gli editor e SDK; lavora su progetti locali e ha anche agenti remoti. Piani Free, Plus, Pro, Ultra con quote; i crediti AI sono extra; non supporta una chiave propria (bring your own key); esiste anche una modalità a consumo con un progetto Google Cloud. Account Workspace: quota iniziale limitata, senza piani né crediti; per gli account Education non è chiaro: da verificare prima di proporlo ai colleghi. L'elenco dei modelli di Antigravity cambia spesso: per questo si citano le famiglie. Che convenga partire da AI Studio e poi passare a un agente in locale è il consiglio del corso, non di Google. Antigravity nel corso non si usa: il passaggio dal prototipo al progetto si fa con la palestra e Claude Code o OpenCode."
   },
   {
     block: B + 'La scala',
