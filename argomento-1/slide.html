@@ -672,7 +672,7 @@ const slides = [
         sottotitolo="Dalla stessa richiesta fatta a un chatbot a un agente che lavora nella tua cartella: chi agisce, dove, e chi controlla."
         caso="Si comincia provando, prima di qualunque spiegazione." />
     ),
-    notes: "Si parte da una prova, non da una definizione. Prima tutti fanno la stessa richiesta tecnica a un chatbot e confrontano le risposte; poi la stessa situazione vista con un agente (due colonne, ciclo, simulazione «indovina la mossa»); poi la parte sull'harness, il programma intorno al modello, con le porte per entrarci (terminale, app desktop, cellulare); poi la prova dal vivo, nella porta del laboratorio; poi due prove con Google AI Studio (un gioco senza piano, una dashboard con piano); poi la scala che va dal chatbot all'agente, con qualche esempio dal lavoro di Thomas; infine la prima esercitazione con l'agente installato. Ogni affermazione sulle funzioni degli strumenti riporta la data (novembre 2026) e, dove c'è, il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente in aula è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale con qualunque modello."
+    notes: "Si parte da una prova, non da una definizione. Prima tutti fanno la stessa richiesta tecnica a un chatbot e confrontano le risposte; poi la stessa situazione vista con un agente (due colonne, ciclo, simulazione «indovina la mossa»); poi la parte sull'harness, il programma intorno al modello, con le porte per entrarci (terminale, app desktop, cellulare); poi un costruttore di app agentico, Google AI Studio, con due prove (un gioco senza piano, una dashboard con piano) e il passaggio dal browser al PC; poi la prova dal vivo con un agente in locale, nella porta del laboratorio; poi la scala che va dal chatbot all'agente, con qualche esempio dal lavoro di Thomas; infine la prima esercitazione con l'agente installato. Ogni affermazione sulle funzioni degli strumenti riporta la data (novembre 2026) e, dove c'è, il link alla documentazione ufficiale: nomi e comandi cambiano in fretta. Il modello dietro l'agente in aula è un Claude, scelto dalla configurazione del proxy del laboratorio: il metodo vale con qualunque modello."
   },
   {
     block: B + 'Prima provate',
@@ -953,7 +953,7 @@ const slides = [
         <Box type="info" title="E AI Studio?">Stesso schema, altri pezzi: la porta è il browser, l'assistente è quello di Google, il cervello è Gemini, e il lavoro sta nel cloud di Google, finché non lo scarichi o lo mandi su GitHub.</Box>
       </div>
     ),
-    notes: "Prima di commentare lo schema si chiede alla sala di dire i quattro pezzi. Che cosa sia il proxy e come si usa la chiave si vede quando si installa l'agente (argomento 2); OpenCode è approfondito nell'argomento 10. Il riquadro su AI Studio prepara la parte su AI Studio, che viene dopo la prova vera: lì si guarda quale porta, quale assistente e dove finisce il lavoro."
+    notes: "Prima di commentare lo schema si chiede alla sala di dire i quattro pezzi. Che cosa sia il proxy e come si usa la chiave si vede quando si installa l'agente (argomento 2); OpenCode è approfondito nell'argomento 10. Il riquadro su AI Studio prepara le slide seguenti: si guarda quale porta, quale assistente e dove finisce il lavoro."
   },
   {
     block: B + 'L\'harness · tre abitudini',
@@ -971,11 +971,154 @@ const slides = [
     notes: "Chiude la parte sull'harness. Le tre abitudini riprendono quelle proposte nel video citato all'inizio di questa parte, adattate all'aula. La terza è il ponte verso il resto del corso: istruzioni (argomento 5), strumenti (argomenti 8 e 9), contesto (argomento 11) sono tutte cose dell'harness, e si possono migliorare senza cambiare modello."
   },
   {
+    block: B + 'Google AI Studio',
+    content: () => (
+      <div className="pad">
+        <Tag>Google AI Studio</Tag>
+        <h2>Un costruttore di app: Build mode</h2>
+        <div className="cols">
+          <Card title="Cosa fa">
+            <ul>
+              <li>Descrivi l'app in un prompt: viene generata, con un'anteprima da provare</li>
+              <li>Web app o app Android</li>
+              <li>Le app sono private di default</li>
+              <li>L'harness c'è, ma è di Google: gira nel cloud e non lo regoli tu</li>
+            </ul>
+          </Card>
+          <Card title="Cosa vedrete" kind="i">
+            <ul>
+              <li>Un gioco chiesto in una riga, senza piano</li>
+              <li>Una dashboard dei laboratori, chiesta con un piano da leggere prima</li>
+            </ul>
+          </Card>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Che tipo di codice generi Build mode (si dice React e TypeScript): da verificare a schermo.</p>
+        <FonteGoogle />
+      </div>
+    ),
+    notes: "Due prove dal vivo con lo stesso strumento, senza screenshot nelle slide: ciò che si vede lo si vede sul proiettore, dai dati inventati della palestra. Fonti: documentazione di Google AI Studio letta il 17/11/2026. La pagina dice che l'app viene generata da un prompt e che è privata di default. Che il codice generato sia React e TypeScript è riportato da fonti secondarie e non è stato verificato: si dice solo dopo averlo visto. Se Build mode non è disponibile per l'account, si passa alla registrazione preparata."
+  },
+  {
+    block: B + 'Google AI Studio',
+    content: () => (
+      <div className="pad">
+        <Tag>Prima le avvertenze</Tag>
+        <h2>Cosa non si fa con AI Studio</h2>
+        <div className="grid">
+          <Card title="Servizi gratuiti" kind="w"><p>I contenuti si usano per migliorare i prodotti e possono essere letti da revisori umani. I termini dicono di non inviare informazioni sensibili o personali. Qui i dati sono inventati.</p></Card>
+          <Card title="Publish" kind="d"><p>Crea un indirizzo pubblico, aperto a chiunque lo abbia, e l'app usa la chiave dell'autore. In aula non si preme.</p></Card>
+          <Card title="Account scolastico" kind="w"><p>Quali condizioni valgano per un account Education non è chiaro nella documentazione: da verificare. Lo Starter Tier non è disponibile con Workspace, Education compresi.</p></Card>
+        </div>
+        <FonteGoogle />
+      </div>
+    ),
+    notes: "Si dicono a voce prima di cominciare. Servizi gratuiti: contenuti usati per migliorare i prodotti e leggibili da revisori umani, dati scollegati dall'account; i termini dicono di non inviare informazioni sensibili, riservate o personali. Publish: indirizzo pubblico per chiunque; dopo la pubblicazione l'app usa la chiave dell'autore per tutti gli utenti; condividere non è la stessa cosa, ma chi riceve vede il codice e può farne copie. Account Education: la documentazione non nomina Education per Build mode; l'accesso di default c'è in tutte le edizioni Workspace, ma non per gli utenti sotto i 18 anni con Workspace for Education. Starter Tier: non per Workspace, Education compresi, servirebbe un account di fatturazione. Tutto riletto il 17/11/2026: ricontrollare prima di dirlo."
+  },
+  {
+    block: B + 'Il gioco, senza piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 1 · senza piano</Tag>
+        <h2>Un gioco, chiesto in una riga</h2>
+        <CommandBox kind="text" tall cmd={RICHIESTA_GIOCO} label="Richiesta da incollare in Build mode" />
+        <ul>
+          <li>Nessun piano: si lascia partire e si prova subito.</li>
+          <li>Se c'è un difetto, si chiede la correzione in una riga. Se non va, si butta e si rifà.</li>
+        </ul>
+      </div>
+    ),
+    notes: "Chi parla incolla la richiesta e lascia partire, senza chiedere un piano. Mentre lo strumento lavora legge a voce alta ciò che scrive di sé: file creati, passi fatti. Poi prova il gioco davanti alla sala. Se c'è un difetto (un inseguitore che attraversa i muri) è materiale buono: una correzione in una riga. Frase chiave: qui andare veloci costa poco, se non va si butta e si rifà. Il codice non si legge. Se lo strumento non risponde, si passa alla registrazione di riserva."
+  },
+  {
+    block: B + 'La dashboard, con piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 2 · con piano</Tag>
+        <h2>La dashboard dei laboratori</h2>
+        <p>Dati inventati, gli stessi della palestra. L'ultimo capoverso chiede un piano e poi di aspettare.</p>
+        <CommandBox kind="text" tall cmd={RICHIESTA_DASHBOARD} label="Richiesta 1: da incollare in Build mode" />
+      </div>
+    ),
+    notes: "La richiesta contiene i dati, la vista voluta e la regola che conta: non costruire ancora niente, scrivere prima un piano (viste, regole, annullate, cosa non farà, domande) e aspettare. I dati sono quelli del file dei dati della palestra: laboratori, docenti, classi, prenotazioni, giorni di chiusura. Da verificare a schermo: che Build mode scriva il piano senza costruire; se costruisce subito, si ripete la richiesta con «Non costruire ancora niente, scrivi solo il piano», ed è già una lezione. Nessuno screenshot dell'account nelle slide."
+  },
+  {
+    block: B + 'La dashboard, con piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Prova 2 · con piano</Tag>
+        <h2>Si legge il piano e lo si corregge</h2>
+        <ol className="steps">
+          <li><b>Si legge insieme.</b> Quali viste? Che regola ha scelto per le sovrapposizioni? Che cosa fa delle annullate? Che cosa non farà? Quali regole ha inventato?</li>
+          <li><b>Si corregge il piano, non il codice.</b></li>
+        </ol>
+        <CommandBox kind="text" cmd={CORREZIONE_PIANO} label="La correzione" />
+        <CommandBox kind="text" cmd={VIA_DASHBOARD} label="Poi il via" />
+      </div>
+    ),
+    notes: "Il piano scritto dallo strumento cambia da una prova all'altra: si legge davanti alla sala e si adatta la correzione. Le tre regole sono quelle della palestra e il modello le sbaglia spesso, soprattutto sulle sovrapposizioni (estremi che si toccano) e sulle annullate. A lavoro finito si guarda: la classe 4A-INF (25 studenti) non entra in nessun laboratorio, la dashboard lo dice? La prenotazione annullata è barrata? Le due prenotazioni che si toccano alle 11:00 non sono segnalate come conflitto? Se il prototipo ne sbaglia una è materiale buono: nel prototipo nessuno lo controlla, nell'app vera lo controlla un test. Da verificare a schermo: che la pagina non chiami il modello per «analizzare» le prenotazioni."
+  },
+  {
+    block: B + 'Con piano, senza piano',
+    content: () => (
+      <div className="pad">
+        <Tag>Dalle due prove</Tag>
+        <h2>Con piano, senza piano</h2>
+        <div className="cols">
+          <Card title="Senza piano" kind="w">
+            <ul>
+              <li>Una richiesta, e il lavoro parte subito</li>
+              <li>Le scelte le fa lo strumento e le scopri a lavoro fatto</li>
+              <li>Correggere vuol dire rifare</li>
+            </ul>
+          </Card>
+          <Card title="Con piano" kind="i">
+            <ul>
+              <li>Le scelte stanno scritte prima</li>
+              <li>Le correggi con una frase, prima che costino</li>
+              <li>L'esecuzione parte dopo il tuo sì</li>
+            </ul>
+          </Card>
+        </div>
+        <Box type="info" title="Il prototipo e il piano">Il prototipo dice che cosa vogliamo e si può buttare. Il piano, corretto in aula, si conserva: è l'idea da cui parte il lavoro vero.</Box>
+      </div>
+    ),
+    notes: "Chi parla richiama le due prove con le sue parole: un gioco chiesto in una riga, una dashboard chiesta con un piano da leggere. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. Il prototipo non si tiene; il piano si salva in un file, e dopo l'installazione dell'agente (argomento 2) lo si ritrova nella palestra, l'app vera. Il piano torna nell'argomento 4, dove si impara a leggerlo e a trasformarlo in una specifica."
+  },
+  {
+    block: B + 'AI Studio e Antigravity',
+    content: () => (
+      <div className="pad">
+        <Tag>Due strumenti Google, due momenti</Tag>
+        <h2>Che differenza c'è tra AI Studio e Antigravity</h2>
+        <DT cols={['', 'Google AI Studio', 'Google Antigravity']} rows={[
+          ['Dove gira', 'Nel browser', 'Sul tuo PC: app desktop, terminale (agy), estensioni per gli editor'],
+          ['A che cosa serve', 'Prototipi rapidi da un prompt (Build mode), da scaricare in ZIP o mandare su GitHub', 'Lavorare su un progetto vero: cartelle, terminale, Git, modifiche su più file; anche agenti remoti'],
+          ['Modelli', 'Modelli di Google (Gemini)', 'Gemini, e anche altri (per esempio Claude)'],
+          ['Come si paga', 'Gratis nel browser, con limiti; oltre, a consumo con la fatturazione Google Cloud', 'Piani Free, Plus, Pro, Ultra con quote, più crediti extra; oppure a consumo con un progetto Google Cloud. Niente chiave propria'],
+        ]} />
+        <p className="legend" style={{ marginTop: 8 }}>Fonti Google, rilette il 27/11/2026: <a className="text-link" href="https://aistudio.google.com/docs/aistudio-build-mode" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Build mode</a>, <a className="text-link" href="https://aistudio.google.com/docs/pricing" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>prezzi di AI Studio</a>, <a className="text-link" href="https://antigravity.google/docs/overview" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>panoramica di Antigravity</a>, <a className="text-link" href="https://antigravity.google/docs/plans" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>piani</a>, <a className="text-link" href="https://antigravity.google/docs/workspace/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>account Workspace</a>.</p>
+      </div>
+    ),
+    notes: "Si mette dopo le due prove con AI Studio perché risponde alla domanda che di solito arriva: e Google, per il lavoro vero, che cosa usa? Fatti dalla documentazione Google riletta il 27/11/2026. AI Studio: la pagina dei prezzi elenca solo modelli Gemini; gratis nel browser in tutte le regioni disponibili; il livello gratuito ha limiti di frequenza e i contenuti sono usati per migliorare i prodotti, il livello a pagamento no (pagina dei prezzi); a pagamento si collega un account Cloud Billing. Build mode esporta in ZIP o sincronizza con GitHub, e la pagina dice che i componenti dell'agente di Antigravity ne sono il motore. Antigravity: app, CLI agy, estensioni per gli editor e SDK; lavora su progetti locali e ha anche agenti remoti. Piani Free, Plus, Pro, Ultra con quote; i crediti AI sono extra; non supporta una chiave propria (bring your own key); esiste anche una modalità a consumo con un progetto Google Cloud. Account Workspace: quota iniziale limitata, senza piani né crediti; per gli account Education non è chiaro: da verificare prima di proporlo ai colleghi. L'elenco dei modelli di Antigravity cambia spesso: per questo si citano le famiglie. Il passaggio dal prototipo al progetto è nella slide seguente."
+  },
+  {
+    block: B + 'AI Studio e Antigravity · il passaggio',
+    content: () => (
+      <div className="pad">
+        <Tag>Dal prototipo al progetto</Tag>
+        <h2>Il passaggio: dal browser al PC</h2>
+        <SchemaPassaggio />
+        <Box type="info" title="Il consiglio del corso">Si parte in AI Studio per provare un'idea; quando il progetto cresce, il codice esce (ZIP o GitHub) e passa a un agente che lavora in una cartella del PC. Build mode usa i componenti dell'agente di Antigravity. In aula il secondo passo si fa con Claude Code o OpenCode.</Box>
+      </div>
+    ),
+    notes: "Che convenga partire da AI Studio e poi passare a un agente in locale è il consiglio del corso, non di Google. Fatti dalla documentazione Google riletta il 27/11/2026 (fonti nella slide precedente): Build mode esporta in ZIP o sincronizza con GitHub, e la pagina dice che i componenti dell'agente di Antigravity ne sono il motore. Antigravity nel corso non si usa: il passaggio dal prototipo al progetto si fa con la palestra e Claude Code o OpenCode. Lo schema è disegnato per il corso."
+  },
+  {
     block: B + 'Ora con un agente vero',
     content: () => (
       <div className="pad">
         <Tag>Dal vivo · porta: il terminale</Tag>
-        <h2>Ora la stessa richiesta, a un agente vero</h2>
+        <h2>Ora la richiesta dei PC, a un agente vero</h2>
         <p>Cartella vuota con dentro solo l'elenco; si avvia Claude Code (o OpenCode) da lì, in Manual, e si incolla la richiesta.</p>
         <CommandBox kind="text" tall cmd={ELENCO_CSV} label="Contenuto di elenco-pc.csv (dati inventati)" />
         <CommandBox kind="text" tall cmd={RICHIESTA_AGENTE} label="Richiesta all'agente" />
@@ -1196,148 +1339,6 @@ Avvisi sui dati: 1
     notes: "Un accenno, non il tema dell'argomento. Il piano mette la decisione prima del lavoro: secondo la documentazione (novembre 2026) in modalità piano l'agente legge e propone, e le modifiche restano bloccate finché non si approva. Esc ferma, Esc due volte torna indietro (checkpoint: solo i file, non rete né rilasci). Sul PC del laboratorio la partenza in Manual è imposta da un file di impostazioni gestite. Le modalità di permesso, il «non chiedere più», come si legge una richiesta di permesso e le prime richieste vere si vedono quando si installa l'agente (argomento 2) e nella prima esercitazione; il piano torna nell'argomento 4."
   },
   {
-    block: B + 'Google AI Studio',
-    content: () => (
-      <div className="pad">
-        <Tag>Google AI Studio</Tag>
-        <h2>Un costruttore di app: Build mode</h2>
-        <div className="cols">
-          <Card title="Cosa fa">
-            <ul>
-              <li>Descrivi l'app in un prompt: viene generata, con un'anteprima da provare</li>
-              <li>Web app o app Android</li>
-              <li>Le app sono private di default</li>
-            </ul>
-          </Card>
-          <Card title="Cosa vedrete" kind="i">
-            <ul>
-              <li>Un gioco chiesto in una riga, senza piano</li>
-              <li>Una dashboard dei laboratori, chiesta con un piano da leggere prima</li>
-            </ul>
-          </Card>
-        </div>
-        <p className="muted" style={{ marginTop: 10 }}>Che tipo di codice generi Build mode (si dice React e TypeScript): da verificare a schermo.</p>
-        <FonteGoogle />
-      </div>
-    ),
-    notes: "Due prove dal vivo con lo stesso strumento, senza screenshot nelle slide: ciò che si vede lo si vede sul proiettore, dai dati inventati della palestra. Fonti: documentazione di Google AI Studio letta il 17/11/2026. La pagina dice che l'app viene generata da un prompt e che è privata di default. Che il codice generato sia React e TypeScript è riportato da fonti secondarie e non è stato verificato: si dice solo dopo averlo visto. Se Build mode non è disponibile per l'account, si passa alla registrazione preparata."
-  },
-  {
-    block: B + 'Google AI Studio',
-    content: () => (
-      <div className="pad">
-        <Tag>Prima le avvertenze</Tag>
-        <h2>Cosa non si fa con AI Studio</h2>
-        <div className="grid">
-          <Card title="Servizi gratuiti" kind="w"><p>I contenuti si usano per migliorare i prodotti e possono essere letti da revisori umani. I termini dicono di non inviare informazioni sensibili o personali. Qui i dati sono inventati.</p></Card>
-          <Card title="Publish" kind="d"><p>Crea un indirizzo pubblico, aperto a chiunque lo abbia, e l'app usa la chiave dell'autore. In aula non si preme.</p></Card>
-          <Card title="Account scolastico" kind="w"><p>Quali condizioni valgano per un account Education non è chiaro nella documentazione: da verificare. Lo Starter Tier non è disponibile con Workspace, Education compresi.</p></Card>
-        </div>
-        <FonteGoogle />
-      </div>
-    ),
-    notes: "Si dicono a voce prima di cominciare. Servizi gratuiti: contenuti usati per migliorare i prodotti e leggibili da revisori umani, dati scollegati dall'account; i termini dicono di non inviare informazioni sensibili, riservate o personali. Publish: indirizzo pubblico per chiunque; dopo la pubblicazione l'app usa la chiave dell'autore per tutti gli utenti; condividere non è la stessa cosa, ma chi riceve vede il codice e può farne copie. Account Education: la documentazione non nomina Education per Build mode; l'accesso di default c'è in tutte le edizioni Workspace, ma non per gli utenti sotto i 18 anni con Workspace for Education. Starter Tier: non per Workspace, Education compresi, servirebbe un account di fatturazione. Tutto riletto il 17/11/2026: ricontrollare prima di dirlo."
-  },
-  {
-    block: B + 'Il gioco, senza piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Prova 1 · senza piano</Tag>
-        <h2>Un gioco, chiesto in una riga</h2>
-        <CommandBox kind="text" tall cmd={RICHIESTA_GIOCO} label="Richiesta da incollare in Build mode" />
-        <ul>
-          <li>Nessun piano: si lascia partire e si prova subito.</li>
-          <li>Se c'è un difetto, si chiede la correzione in una riga. Se non va, si butta e si rifà.</li>
-        </ul>
-      </div>
-    ),
-    notes: "Chi parla incolla la richiesta e lascia partire, senza chiedere un piano. Mentre lo strumento lavora legge a voce alta ciò che scrive di sé: file creati, passi fatti. Poi prova il gioco davanti alla sala. Se c'è un difetto (un inseguitore che attraversa i muri) è materiale buono: una correzione in una riga. Frase chiave: qui andare veloci costa poco, se non va si butta e si rifà. Il codice non si legge. Se lo strumento non risponde, si passa alla registrazione di riserva."
-  },
-  {
-    block: B + 'La dashboard, con piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Prova 2 · con piano</Tag>
-        <h2>La dashboard dei laboratori</h2>
-        <p>Dati inventati, gli stessi della palestra. L'ultimo capoverso chiede un piano e poi di aspettare.</p>
-        <CommandBox kind="text" tall cmd={RICHIESTA_DASHBOARD} label="Richiesta 1: da incollare in Build mode" />
-      </div>
-    ),
-    notes: "La richiesta contiene i dati, la vista voluta e la regola che conta: non costruire ancora niente, scrivere prima un piano (viste, regole, annullate, cosa non farà, domande) e aspettare. I dati sono quelli del file dei dati della palestra: laboratori, docenti, classi, prenotazioni, giorni di chiusura. Da verificare a schermo: che Build mode scriva il piano senza costruire; se costruisce subito, si ripete la richiesta con «Non costruire ancora niente, scrivi solo il piano», ed è già una lezione. Nessuno screenshot dell'account nelle slide."
-  },
-  {
-    block: B + 'La dashboard, con piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Prova 2 · con piano</Tag>
-        <h2>Si legge il piano e lo si corregge</h2>
-        <ol className="steps">
-          <li><b>Si legge insieme.</b> Quali viste? Che regola ha scelto per le sovrapposizioni? Che cosa fa delle annullate? Che cosa non farà? Quali regole ha inventato?</li>
-          <li><b>Si corregge il piano, non il codice.</b></li>
-        </ol>
-        <CommandBox kind="text" cmd={CORREZIONE_PIANO} label="La correzione" />
-        <CommandBox kind="text" cmd={VIA_DASHBOARD} label="Poi il via" />
-      </div>
-    ),
-    notes: "Il piano scritto dallo strumento cambia da una prova all'altra: si legge davanti alla sala e si adatta la correzione. Le tre regole sono quelle della palestra e il modello le sbaglia spesso, soprattutto sulle sovrapposizioni (estremi che si toccano) e sulle annullate. A lavoro finito si guarda: la classe 4A-INF (25 studenti) non entra in nessun laboratorio, la dashboard lo dice? La prenotazione annullata è barrata? Le due prenotazioni che si toccano alle 11:00 non sono segnalate come conflitto? Se il prototipo ne sbaglia una è materiale buono: nel prototipo nessuno lo controlla, nell'app vera lo controlla un test. Da verificare a schermo: che la pagina non chiami il modello per «analizzare» le prenotazioni."
-  },
-  {
-    block: B + 'Con piano, senza piano',
-    content: () => (
-      <div className="pad">
-        <Tag>Dalle due prove</Tag>
-        <h2>Con piano, senza piano</h2>
-        <div className="cols">
-          <Card title="Senza piano" kind="w">
-            <ul>
-              <li>Una richiesta, e il lavoro parte subito</li>
-              <li>Le scelte le fa lo strumento e le scopri a lavoro fatto</li>
-              <li>Correggere vuol dire rifare</li>
-            </ul>
-          </Card>
-          <Card title="Con piano" kind="i">
-            <ul>
-              <li>Le scelte stanno scritte prima</li>
-              <li>Le correggi con una frase, prima che costino</li>
-              <li>L'esecuzione parte dopo il tuo sì</li>
-            </ul>
-          </Card>
-        </div>
-        <Box type="info" title="Il prototipo e il piano">Il prototipo dice che cosa vogliamo e si può buttare. Il piano, corretto in aula, si conserva: è l'idea da cui parte il lavoro vero.</Box>
-      </div>
-    ),
-    notes: "Chi parla richiama le due prove con le sue parole: un gioco chiesto in una riga, una dashboard chiesta con un piano da leggere. Non serve rientrare nei dettagli di ciò che è successo a schermo: il punto è la differenza tra scoprire le scelte dopo e leggerle prima. Il prototipo non si tiene; il piano si salva in un file, e dopo l'installazione dell'agente (argomento 2) lo si ritrova nella palestra, l'app vera. Il piano torna nell'argomento 4, dove si impara a leggerlo e a trasformarlo in una specifica."
-  },
-  {
-    block: B + 'AI Studio e Antigravity',
-    content: () => (
-      <div className="pad">
-        <Tag>Due strumenti Google, due momenti</Tag>
-        <h2>Che differenza c'è tra AI Studio e Antigravity</h2>
-        <DT cols={['', 'Google AI Studio', 'Google Antigravity']} rows={[
-          ['Dove gira', 'Nel browser', 'Sul tuo PC: app desktop, terminale (agy), estensioni per gli editor'],
-          ['A che cosa serve', 'Prototipi rapidi da un prompt (Build mode), da scaricare in ZIP o mandare su GitHub', 'Lavorare su un progetto vero: cartelle, terminale, Git, modifiche su più file; anche agenti remoti'],
-          ['Modelli', 'Modelli di Google (Gemini)', 'Gemini, e anche altri (per esempio Claude)'],
-          ['Come si paga', 'Gratis nel browser, con limiti; oltre, a consumo con la fatturazione Google Cloud', 'Piani Free, Plus, Pro, Ultra con quote, più crediti extra; oppure a consumo con un progetto Google Cloud. Niente chiave propria'],
-        ]} />
-        <p className="legend" style={{ marginTop: 8 }}>Fonti Google, rilette il 27/11/2026: <a className="text-link" href="https://aistudio.google.com/docs/aistudio-build-mode" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Build mode</a>, <a className="text-link" href="https://aistudio.google.com/docs/pricing" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>prezzi di AI Studio</a>, <a className="text-link" href="https://antigravity.google/docs/overview" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>panoramica di Antigravity</a>, <a className="text-link" href="https://antigravity.google/docs/plans" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>piani</a>, <a className="text-link" href="https://antigravity.google/docs/workspace/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>account Workspace</a>.</p>
-      </div>
-    ),
-    notes: "Si mette dopo le due prove con AI Studio perché risponde alla domanda che di solito arriva: e Google, per il lavoro vero, che cosa usa? Fatti dalla documentazione Google riletta il 27/11/2026. AI Studio: la pagina dei prezzi elenca solo modelli Gemini; gratis nel browser in tutte le regioni disponibili; il livello gratuito ha limiti di frequenza e i contenuti sono usati per migliorare i prodotti, il livello a pagamento no (pagina dei prezzi); a pagamento si collega un account Cloud Billing. Build mode esporta in ZIP o sincronizza con GitHub, e la pagina dice che i componenti dell'agente di Antigravity ne sono il motore. Antigravity: app, CLI agy, estensioni per gli editor e SDK; lavora su progetti locali e ha anche agenti remoti. Piani Free, Plus, Pro, Ultra con quote; i crediti AI sono extra; non supporta una chiave propria (bring your own key); esiste anche una modalità a consumo con un progetto Google Cloud. Account Workspace: quota iniziale limitata, senza piani né crediti; per gli account Education non è chiaro: da verificare prima di proporlo ai colleghi. L'elenco dei modelli di Antigravity cambia spesso: per questo si citano le famiglie. Il passaggio dal prototipo al progetto è nella slide seguente."
-  },
-  {
-    block: B + 'AI Studio e Antigravity · il passaggio',
-    content: () => (
-      <div className="pad">
-        <Tag>Dal prototipo al progetto</Tag>
-        <h2>Il passaggio: dal browser al PC</h2>
-        <SchemaPassaggio />
-        <Box type="info" title="Il consiglio del corso">Si parte in AI Studio per provare un'idea; quando il progetto cresce, il codice esce (ZIP o GitHub) e passa a un agente che lavora in una cartella del PC. Build mode usa i componenti dell'agente di Antigravity. In aula il secondo passo si fa con Claude Code o OpenCode.</Box>
-      </div>
-    ),
-    notes: "Che convenga partire da AI Studio e poi passare a un agente in locale è il consiglio del corso, non di Google. Fatti dalla documentazione Google riletta il 27/11/2026 (fonti nella slide precedente): Build mode esporta in ZIP o sincronizza con GitHub, e la pagina dice che i componenti dell'agente di Antigravity ne sono il motore. Antigravity nel corso non si usa: il passaggio dal prototipo al progetto si fa con la palestra e Claude Code o OpenCode. Lo schema è disegnato per il corso."
-  },
-  {
     block: B + 'La scala',
     content: () => (
       <div className="pad">
@@ -1356,7 +1357,7 @@ Avvisi sui dati: 1
         <p className="legend">Funzioni dei chatbot descritte come nella ricerca del corso collegato (settembre 2026): nomi e disponibilità cambiano per prodotto, da riverificare.</p>
       </div>
     ),
-    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Qui stanno anche le skill di Gemini: istruzioni riusabili richiamate con @ in ogni chat, che Gemini può attivare da solo; per gli account Education dal 13/10/2026, e i Gem creati nell'app migrano in automatico dal 1/6/2027 o dopo (fonte: guida Google «Gemini Gems and Skills Transition Guide», 2026, https://services.google.com/fh/files/misc/gemini_gems_skills_transition_guide.pdf, consultata il 26/11/2026; date da riverificare). Gradino 3: AI Studio, appena visto. Gradino 4: l'agente nella cartella, appena visto nella simulazione, che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
+    notes: "Riprende la scala del corso collegato (dal chatbot all'agente), adattata. Gradino 1: la prova iniziale con il chatbot. Gradino 2: alcuni chatbot hanno un'area di lavoro accanto alla chat (canvas) e app collegate (posta, calendario, Drive): possono fare azioni fuori dalla chat. Qui stanno anche le skill di Gemini: istruzioni riusabili richiamate con @ in ogni chat, che Gemini può attivare da solo; per gli account Education dal 13/10/2026, e i Gem creati nell'app migrano in automatico dal 1/6/2027 o dopo (fonte: guida Google «Gemini Gems and Skills Transition Guide», 2026, https://services.google.com/fh/files/misc/gemini_gems_skills_transition_guide.pdf, consultata il 26/11/2026; date da riverificare). Gradino 3: AI Studio, visto nelle due prove. Gradino 4: l'agente nella cartella, appena visto dal vivo (e prima nella simulazione), che si installa nell'argomento 2. I nomi dei prodotti cambiano in fretta: la ricerca è di settembre 2026 e va riverificata prima di citarla. Il messaggio: più si sale, più cose si fanno senza chiedere ogni volta, e più contano permessi e controllo."
   },
   {
     block: B + 'La scala',
