@@ -815,10 +815,9 @@ const slides = [
           <Card title="L'harness"><p>Il programma che sta attorno al modello e lo fa lavorare. <em>Nella simulazione: Claude Code. In aula anche OpenCode.</em></p></Card>
         </div>
         <Box type="info" title="Perché serve la parola">Quando si dice «l'agente», si parla della coppia. Per capire che cosa succede, e di chi è un errore, conviene tenerli separati.</Box>
-        <p className="legend" style={{ marginTop: 8 }}>Lo schema di questa parte (le quattro parole, la stanza senza finestre) viene da un video di Luca Cazzaniga: <a className="text-link" href="https://www.youtube.com/watch?v=2BuZOTAZk_o" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>«Che cos'è un harness»</a>, YouTube, 25/11/2026. Gli esempi sono quelli del corso.</p>
       </div>
     ),
-    notes: "Si apre la parte sull'harness: il riquadro «Il programma intorno» l'ha già nominato, qui diventa il centro. La parola si spiega con l'immagine dei finimenti: la forza è del cavallo, la direzione la danno i finimenti. Si torna subito alla simulazione: il modello era Claude Opus 5.5, l'harness Claude Code. Quando si dice «l'agente» si intende la coppia. Schema e immagini (finimenti, stanza senza finestre, motore e macchina, quattro parole) vengono dal video citato in fondo alla slide: si dice a voce da dove vengono. I disegni delle slide seguenti sono del corso, non presi dal video. Il video si può consigliare a chi vuole rivederlo da sé."
+    notes: "Si apre la parte sull'harness: il riquadro «Il programma intorno» l'ha già nominato, qui diventa il centro. La parola si spiega con l'immagine dei finimenti: la forza è del cavallo, la direzione la danno i finimenti. Si torna subito alla simulazione: il modello era Claude Opus 5.5, l'harness Claude Code. Quando si dice «l'agente» si intende la coppia. Schema e immagini (finimenti, stanza senza finestre, motore e macchina, quattro parole) vengono dal video di Luca Cazzaniga «Che cos'è un harness» (YouTube, 25/11/2026, youtube.com/watch?v=2BuZOTAZk_o): si dice a voce da dove vengono. I disegni delle slide seguenti sono del corso, non presi dal video. Il video si può consigliare a chi vuole rivederlo da sé."
   },
   {
     block: B + 'L\'harness · la stanza senza finestre',
@@ -902,7 +901,7 @@ const slides = [
           <li><strong>App desktop.</strong> Scheda Code, stessa cartella: stessi strumenti e stesse regole, in una finestra con i pulsanti.</li>
           <li><strong>Cellulare.</strong> Nella sessione si scrive <code>/remote-control</code>; dall'app Claude sul telefono si segue il lavoro e si risponde. File e comandi restano sul PC.</li>
         </ol>
-        <Box type="warn" title="Il controllo remoto, non in laboratorio">Vuole un abbonamento claude.ai: non funziona con una chiave API né attraverso un proxy come quello del corso. Il testo della sessione è conservato sui server di Anthropic. In laboratorio si lavora dal terminale.</Box>
+        <Box type="warn" title="Il controllo remoto, non in laboratorio">Vuole un abbonamento claude.ai: non funziona con una chiave API né attraverso un proxy come quello del corso. Il testo della sessione è conservato sui server di Anthropic.</Box>
         <p className="legend" style={{ marginTop: 8 }}>Fonti, rilette il 28/11/2026: <a className="text-link" href="https://code.claude.com/docs/en/remote-control" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Remote Control</a>, <a className="text-link" href="https://code.claude.com/docs/en/desktop" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>app desktop</a>.</p>
       </div>
     ),
@@ -913,7 +912,7 @@ const slides = [
     content: () => (
       <div className="pad">
         <Tag>I nomi veri</Tag>
-        <h2>I nomi, novembre 2026</h2>
+        <h2>I nomi</h2>
         <DT cols={['Chi', 'Harness', 'Porte', 'Modello di casa']} rows={[
           ['Anthropic', 'Claude Code', 'web, app desktop, terminale (claude)', 'Claude: Opus, Sonnet, Haiku'],
           ['OpenAI', 'Codex', 'cloud, app Codex, terminale (codex), editor', 'GPT'],
@@ -924,7 +923,7 @@ const slides = [
         <p className="legend" style={{ marginTop: 8 }}>Fonti, rilette il 27/11/2026: <a className="text-link" href="https://code.claude.com/docs/en/overview" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Claude Code</a>, <a className="text-link" href="https://openai.com/index/introducing-the-codex-app/" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Codex</a>, <a className="text-link" href="https://www.antigravity.google/blog/introducing-google-antigravity-2" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>Antigravity 2.0</a>, <a className="text-link" href="https://antigravity.google/docs/models.md" target="_blank" rel="noopener" onClick={e => e.stopPropagation()}>modelli di Antigravity</a>.</p>
       </div>
     ),
-    notes: "Fonti rilette il 27/11/2026. Claude Code: code.claude.com/docs/en/overview e model-config. Codex: openai.com/index/introducing-upgrades-to-codex e introducing-the-codex-app (app desktop separata da ChatGPT). Antigravity 2.0: annuncio del 19/5/2026 su antigravity.google/blog, comando agy da antigravity.google/docs/cli/install, elenco modelli (Gemini, Claude, GPT-OSS) da antigravity.google/docs/models.md: l'elenco cambia, controllarlo prima di dirlo. Antigravity nel corso non si usa: è qui solo per la mappa. Open source: repository pubblici di OpenCode (licenza MIT), Cline (Apache 2.0), Goose (Apache 2.0, oggi sotto la Agentic AI Foundation), OpenHands (MIT), tutti usabili con modelli di fornitori diversi. Che il modello si paghi a parte è una conseguenza: il programma porta il modello che gli dai. I nomi cambiano in fretta: la data nel titolo è voluta."
+    notes: "Fonti rilette il 27/11/2026. Claude Code: code.claude.com/docs/en/overview e model-config. Codex: openai.com/index/introducing-upgrades-to-codex e introducing-the-codex-app (app desktop separata da ChatGPT). Antigravity 2.0: annuncio del 19/5/2026 su antigravity.google/blog, comando agy da antigravity.google/docs/cli/install, elenco modelli (Gemini, Claude, GPT-OSS) da antigravity.google/docs/models.md: l'elenco cambia, controllarlo prima di dirlo. Antigravity nel corso non si usa: è qui solo per la mappa. Open source: repository pubblici di OpenCode (licenza MIT), Cline (Apache 2.0), Goose (Apache 2.0, oggi sotto la Agentic AI Foundation), OpenHands (MIT), tutti usabili con modelli di fornitori diversi. Che il modello si paghi a parte è una conseguenza: il programma porta il modello che gli dai. I nomi cambiano in fretta: prima di nominarli si ricontrollano le fonti, che portano la data."
   },
   {
     block: B + 'L\'harness · stesso modello',
